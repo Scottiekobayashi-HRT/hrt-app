@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<!--
+ HAWAII REWARD TRAVEL: FREE TOOLS DASHBOARD
+ -----------------------------------------------------------
+ One app, one design system, one sidebar. Tools (each a "view"):
+   home, kamaaina, atmos (PRO teaser), lounges, transfers, values, welcome (soon), resy
+ Links and feeds: EDIT POINTS at the top of the "APP SHELL" script.
+ Kamaʻāina deal data: the single DEAL DATA line (replace only that array).
+ Deep links: add #resy, #transfers, #lounges, #values, #kamaaina to the page URL.
+-->
+<html lang="en"><head><script>try{if(localStorage.getItem('hrtToolsTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Tools | Hawaii Reward Travel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<link href="assets/app.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+</head>
+<body><div class="hrt-app"><aside class="hrt-sb"><a class="hrt-brand" href="#home" data-route="home"><span class="hrt-mark"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 15c5-1 8-9 18-12" stroke="#9fc1d4" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="0.4 4"/><circle cx="16.5" cy="5" r="2.1" fill="#e8824c"/><path d="M4 18h14" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span><span class="hrt-bn">HRT Free Tools<small>BY HAWAII REWARD TRAVEL</small></span></a>
+<nav class="hrt-nav" id="sideNav" aria-label="Free tools">
+ <span class="hrt-lbl">Home</span>
+ <a class="hrt-navi" href="#home" data-route="home"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="nm">Dashboard</span></a>
+ <a class="hrt-navi pro" id="navPro" href="#" target="_top"><span class="hic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg></span><span class="nm">Try HRT PRO</span><span class="cnt">&rarr;</span></a>
+
+ <span class="hrt-lbl">Hawaiʻi</span>
+ <a class="hrt-navi" href="#kamaaina" data-route="kamaaina"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="11" r="1.6"/></svg></span><span class="nm">Kamaʻāina Deals</span><span class="cnt tnum" id="navKama"></span></a>
+
+ <span class="hrt-lbl">Travel</span>
+ <a class="hrt-navi" href="#atmos" data-route="atmos"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="nm">Atmos Award Calendar</span><span class="cnt pro-b">PRO</span></a>
+ <a class="hrt-navi" href="#lounges" data-route="lounges"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 12a2 2 0 0 1 4 0v3h10v-3a2 2 0 0 1 4 0v5H3Z"/><path d="M6 17v3M18 17v3"/></svg></span><span class="nm">HNL Lounge Map</span><span class="cnt tnum" id="navLounge"></span></a>
+
+ <span class="hrt-lbl">Points &amp; Cards</span>
+ <a class="hrt-navi" href="#transfers" data-route="transfers"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></span><span class="nm">Transfer Bonuses</span><span class="cnt tnum" id="navTb"></span></a>
+ <a class="hrt-navi" href="#values" data-route="values"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="nm">Points Valuations</span></a>
+ <a class="hrt-navi" href="#welcome" data-route="welcome"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/></svg></span><span class="nm">Welcome Bonuses</span><span class="cnt soon-b">Soon</span></a>
+
+ <span class="hrt-lbl">Dining</span>
+ <a class="hrt-navi" href="#resy" data-route="resy"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 21V3c-2 1.5-3 4-3 7h3"/></svg></span><span class="nm">Resy Hawaiʻi Map</span><span class="cnt tnum" id="navResy"></span></a>
+
+ <span class="hrt-lbl">Hawaii Reward Travel</span>
+ <a class="hrt-navi" id="navHome" href="#" target="_top"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7M6 9.5V20h12V9.5"/></svg></span><span class="nm">Back to main site</span></a>
+</nav><div class="hrt-disc"><a id="navDisc" href="#" target="_top">&#9432; Advertiser Disclosure</a></div><div class="hrt-foot"><a class="hrt-acct" id="coachLink" href="#" target="_top"><span class="hrt-av"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 2.5 4 3.2c-1 .3-1.6 1.3-1.4 2.3C3.8 12 9 17.2 15.5 18.9c1 .2 2-.4 2.3-1.4l.7-2.6a1.6 1.6 0 0 0-.9-1.9l-3-1.2a1.6 1.6 0 0 0-1.8.5l-.7.9a12.5 12.5 0 0 1-4.6-4.6l.9-.7a1.6 1.6 0 0 0 .5-1.8l-1.2-3a1.6 1.6 0 0 0-1.8-.9Z"/></svg></span><span class="hrt-who">Free coaching<small>Get a strategy call &rarr;</small></span></a><button class="hrt-theme" id="hrtThemeBtn" type="button" title="Light / dark" aria-label="Toggle dark mode"></button></div></aside><main class="hrt-main" id="main">
+
+<div class="topbar"><div class="tbin"><span class="crumb" id="crumb">Dashboard</span><span class="spacer"></span>
+ <span class="ptshint" id="tbHint">Free tools for Hawaiʻi points travelers</span>
+ <a class="btn coral topro" id="topPro" href="#" target="_top"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg>Try HRT PRO</a>
+</div></div>
+
+
+<!-- ================= HOME ================= -->
+<section class="view" data-page="home" id="v-home">
+<div class="content">
+ <div class="toprow">
+  <div class="hero">
+   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+   <span class="plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>
+   <h1>Aloha, welcome to <span class="wave">HRT Free Tools</span></h1>
+   <p>The tools we use to plan points and miles trips from the islands, in one place and free for every Hawaiʻi traveler.</p>
+   <div class="cta-row"><a class="btn coral" href="#kamaaina" data-route="kamaaina">Find a staycation deal &rarr;</a><a class="btn ghost" href="#transfers" data-route="transfers">See transfer bonuses</a></div>
+   <div class="hstats">
+    <div class="hstat"><b class="tnum" id="hmKama">&ndash;</b><span><i style="background:#9fc1d4"></i>Kamaʻāina hotel deals</span></div>
+    <div class="hstat"><b class="tnum" id="hmTb">&ndash;</b><span><i style="background:#3fce7f"></i>Transfer bonuses live</span></div>
+    <div class="hstat"><b class="tnum" id="hmTbBest">&ndash;</b><span><i style="background:#e8c15e"></i>Best transfer bonus</span></div>
+    <div class="hstat"><b class="tnum" id="hmResy">&ndash;</b><span><i style="background:#f2726e"></i>Resy credit spots</span></div>
+   </div>
+  </div>
+  <div class="spot procard">
+   <div class="pro-head">
+    <span class="eyebrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/></svg> HRT PRO &middot; Members</span>
+    <h3>Atmos Award Calendar</h3>
+    <p>Every saver award date to and from Hawaiʻi, color coded by value, so you can book the good ones first.</p>
+   </div>
+   <div class="sb2">
+    <ul class="pro-list">
+     <li>Deal calendar for Hawaiʻi routes, updated daily</li>
+     <li>Points Explorer: see where your balance can take you</li>
+     <li>Deals Search with every open date rated</li>
+    </ul>
+    <a class="btn coral" id="homePro" href="#" target="_top">Try HRT PRO &rarr;</a>
+    <a class="pro-member" id="homeCal" href="#" target="_top">Already a member? Open the calendar &rarr;</a>
+   </div>
+  </div>
+ </div>
+
+ <div>
+  <div class="sec-h" style="padding-left:2px;padding-right:2px"><h2>Your free tools</h2><span class="note">Pick one to open it</span></div>
+  <div class="ttiles">
+   <a class="ttile c1" href="#kamaaina" data-route="kamaaina"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="11" r="1.6"/></svg></span><span class="tt"><b>Kamaʻāina Deals</b><small>Resident staycation rates by island, scored for value</small><em id="ttKama">&nbsp;</em></span></a>
+   <a class="ttile c2" href="#transfers" data-route="transfers"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></span><span class="tt"><b>Transfer Bonuses</b><small>Every live bank transfer bonus, plus a calculator</small><em id="ttTb">&nbsp;</em></span></a>
+   <a class="ttile c3" href="#values" data-route="values"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="tt"><b>Points Valuations</b><small>What your points are worth in 2026</small><em id="ttVal">&nbsp;</em></span></a>
+   <a class="ttile c4" href="#resy" data-route="resy"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 21V3c-2 1.5-3 4-3 7h3"/></svg></span><span class="tt"><b>Resy Hawaiʻi Map</b><small>Every Resy spot, with Amex Resy Credit status</small><em id="ttResy">&nbsp;</em></span></a>
+   <a class="ttile c5" href="#lounges" data-route="lounges"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 12a2 2 0 0 1 4 0v3h10v-3a2 2 0 0 1 4 0v5H3Z"/></svg></span><span class="tt"><b>HNL Lounge Map</b><small>Every lounge at HNL and how to get in</small><em id="ttLounge">&nbsp;</em></span></a>
+   <a class="ttile c6" href="#atmos" data-route="atmos"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="tt"><b>Atmos Award Calendar <span class="pro-b">PRO</span></b><small>Saver award dates for Hawaiʻi routes</small><em>Included with HRT PRO</em></span></a>
+  </div>
+ </div>
+
+ <div class="homegrid">
+  <div class="card">
+   <div class="sec-h"><h2>Transfer bonuses <span class="hl">ending soonest</span></h2><div class="right"><a class="chipf" href="#transfers" data-route="transfers">All bonuses &rarr;</a></div></div>
+   <div class="mini" id="hmTbList"><div class="mini-empty">Loading live bonuses&hellip;</div></div>
+  </div>
+  <div class="card">
+   <div class="sec-h"><h2>Top staycations <span class="hl">right now</span></h2><div class="right"><a class="chipf" href="#kamaaina" data-route="kamaaina">All deals &rarr;</a></div></div>
+   <div class="mini" id="hmKamaList"></div>
+  </div>
+  <div class="card">
+   <div class="sec-h"><h2>What points are worth</h2><span class="note" id="hmValNote"></span><div class="right"><a class="chipf" href="#values" data-route="values">All valuations &rarr;</a></div></div>
+   <div class="bars" id="hmValBars"></div>
+  </div>
+  <div class="card">
+   <div class="sec-h"><h2>HNL lounges <span class="hl">worth knowing</span></h2><div class="right"><a class="chipf" href="#lounges" data-route="lounges">Lounge map &rarr;</a></div></div>
+   <div class="mini" id="hmLounge"></div>
+  </div>
+ </div>
+
+ <div class="card srcnote">
+  <p><b>Advertiser disclosure.</b> Hawaii Reward Travel may receive compensation from card issuers and affiliate networks when you click a link, apply, or are approved. Opinions are our own and have not been reviewed or approved by any issuer. This is not financial advice.</p>
+  <p style="margin:0">Hawaii Reward Travel, Yumi Consulting LLC d/b/a Hawaii Reward Travel, Waipahu, HI.</p>
+ </div>
+ <div class="foot">HAWAIIREWARDTRAVEL.COM &middot; FREE TOOLS</div>
+</div>
+</section>
+
+<!-- ================= TRANSFER BONUSES ================= -->
+<section class="view" data-page="transfers" id="v-transfers">
+<div class="content">
+ <div class="hero slim">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+  <div class="hs-text">
+   <h1>Transfer Bonus <span class="wave">Tracker</span></h1>
+   <p>Every current transfer bonus from Amex, Bilt, Capital One, Chase, Citi and Rove, checked daily.</p>
+  </div>
+  <div class="hstats">
+   <div class="hstat"><b class="tnum" id="tbS1">&ndash;</b><span><i style="background:#9fc1d4"></i>Active bonuses</span></div>
+   <div class="hstat"><b class="tnum" id="tbS2">&ndash;</b><span><i style="background:#f2726e"></i>Ending in 7 days</span></div>
+   <div class="hstat"><b class="tnum" id="tbS3">&ndash;</b><span><i style="background:#3fce7f"></i>Best bonus</span></div>
+   <div class="hstat"><b class="tnum">6</b><span><i style="background:#e8c15e"></i>Banks tracked</span></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="sec-h"><h2>Active bonuses</h2><span class="note"><span class="fdot"></span><span id="tbUpdated">Checking for the latest bonuses&hellip;</span></span>
+   <div class="right" id="tbType">
+    <button type="button" class="chipf" data-t-type="all" aria-pressed="true">All</button>
+    <button type="button" class="chipf plain" data-t-type="airline" aria-pressed="false">Airlines</button>
+    <button type="button" class="chipf plain" data-t-type="hotel" aria-pressed="false">Hotels</button>
+   </div>
+  </div>
+  <div class="qrow"><div class="fchips" id="tbBanks"></div></div>
+  <div id="tbBody" class="tb-body"></div>
+  <div id="tbExpired"></div>
+ </div>
+
+ <div class="card" id="tbCalc">
+  <div class="sec-h"><h2>Transfer calculator</h2><span class="note">Pick a program, enter points, add any bonus</span></div>
+  <div class="calc-in">
+   <label><span>Points program</span><select id="tcProg"><option value="">Choose a program</option><option value="amex">Amex Membership Rewards</option><option value="bilt">Bilt Rewards</option><option value="capital-one">Capital One Miles</option><option value="chase">Chase Ultimate Rewards</option><option value="citi">Citi ThankYou Points</option></select></label>
+   <label><span>Points to transfer</span><input id="tcPts" type="text" inputmode="numeric" placeholder="50,000" autocomplete="off"></label>
+   <label><span>Transfer bonus %</span><input id="tcBonus" type="number" min="0" max="200" value="0" autocomplete="off"></label>
+  </div>
+  <div class="sec-h" style="padding-top:8px">
+   <div class="right" style="margin-left:0">
+    <button type="button" class="chipf" data-t-cf="all" aria-pressed="true">All</button>
+    <button type="button" class="chipf plain" data-t-cf="airline" aria-pressed="false">Airlines</button>
+    <button type="button" class="chipf plain" data-t-cf="hotel" aria-pressed="false">Hotels</button>
+   </div>
+   <span class="note" id="tcCount">Select a program above</span>
+   <div class="right"><select class="chipf" id="tcSort" aria-label="Sort partners"><option value="most">Most miles</option><option value="alpha">A to Z</option><option value="cat">By type</option></select></div>
+  </div>
+  <div class="calc-grid" id="tcResults"></div>
+  <p class="calc-note">Transfer ratios come from each program's official terms as of September 2026, including the new Citi and Capital One partnerships with Japan Airlines. Citi ratios shown are for annual fee cards. Most programs transfer 1:1. Notable exceptions: Amex to Hilton is 1:2, Amex to JetBlue is 250:200, and Capital One to Accor is 2:1. Transfers are almost always final, so confirm with the program before you move points. Hawaiʻi-friendly programs are tagged.</p>
+ </div>
+
+ <div class="card srcnote">
+  <p><b>How this data works.</b> Our automated check searches each bank separately every day. Bonuses marked "Verified by HRT" were confirmed by our team; the rest are published automatically. Always confirm the current offer with the transfer partner before moving points. Hawaii Reward Travel may be compensated by card issuers and affiliate partners.</p>
+ </div>
+</div>
+</section>
+
+<!-- ================= VALUATIONS ================= -->
+<section class="view" data-page="values" id="v-values">
+<div class="content">
+ <div class="hero slim">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+  <div class="hs-text">
+   <h1>Points &amp; Miles <span class="wave">Valuations</span></h1>
+   <p>What your points are worth in 2026, and which currencies matter most for flying from Hawaiʻi.</p>
+  </div>
+  <div class="hstats">
+   <div class="hstat"><b class="tnum">2.2¢</b><span><i style="background:#9fc1d4"></i>Top card currency</span></div>
+   <div class="hstat"><b class="tnum">1.6¢</b><span><i style="background:#e8824c"></i>Top airline</span></div>
+   <div class="hstat"><b class="tnum">1.7¢</b><span><i style="background:#3fce7f"></i>Top hotel</span></div>
+   <div class="hstat"><b class="tnum" id="valUpd">&ndash;</b><span><i style="background:#e8c15e"></i>Last updated</span></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="sec-h"><h2>What are your points worth <span class="hl">right now?</span></h2><span class="note">Estimated cash value using our benchmark valuations</span></div>
+  <div class="vc-rows" id="vcRows"></div>
+  <div class="vc-actions"><button type="button" class="chipf plain" id="vcAdd">+ Add another program</button></div>
+  <div class="vc-total"><span>Estimated total value</span><b id="vcTotal">$0</b></div>
+  <p class="calc-note">Estimates only. Real value depends on how and when you redeem. Premium cabin awards from Hawaiʻi often beat these benchmarks, and poor redemptions fall below them.</p>
+ </div>
+
+ <div class="tips vtop">
+  <div class="tool t1"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg></div><h3>Top card currency</h3><p><b class="vbig">2.2¢</b> Bilt Rewards, the highest value flexible currency in 2026.</p></div>
+  <div class="tool t2"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div><h3>Top airline currency</h3><p><b class="vbig">1.6¢</b> American Airlines AAdvantage, the top airline program.</p></div>
+  <div class="tool t3"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-6h4v6"/></svg></div><h3>Top hotel currency</h3><p><b class="vbig">1.7¢</b> World of Hyatt, worth about four times Hilton Honors.</p></div>
+  <div class="tool t4"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg></div><h3>Built for Hawaiʻi</h3><p>Island-friendly picks are below, based on routes from HNL, OGG and KOA.</p></div>
+ </div>
+
+ <div class="card">
+  <div class="sec-h"><h2>All 2026 valuations</h2><span class="note">The numbers behind the calculator</span>
+   <div class="right" id="vlCats">
+    <button type="button" class="chipf" data-v-cat="all" aria-pressed="true">All</button>
+    <button type="button" class="chipf plain" data-v-cat="cc" aria-pressed="false">Cards</button>
+    <button type="button" class="chipf plain" data-v-cat="airline" aria-pressed="false">Airlines</button>
+    <button type="button" class="chipf plain" data-v-cat="hotel" aria-pressed="false">Hotels</button>
+   </div>
+  </div>
+  <div class="vlist" id="vList"></div>
+ </div>
+
+ <div class="navycard">
+  <div class="hrt-eyebrow">Built for Hawaiʻi travelers</div>
+  <h3>Best programs for flying <span>from the islands</span></h3>
+  <p>These programs stand out for HNL, OGG, KOA and interisland travel, based on transpacific routes, transfer partners and award space.</p>
+  <div class="hpicks" id="vPicks"></div>
+ </div>
+</div>
+</section>
+
+<!-- ================= RESY MAP ================= -->
+<section class="view" data-page="resy" id="v-resy">
+<div class="content">
+ <div class="hero slim">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+  <div class="hs-text">
+   <h1>The Resy <span class="wave">Hawaiʻi Map</span></h1>
+   <p>Every Hawaiʻi restaurant on Resy, mapped, with current Amex Resy Credit status on each one.</p>
+  </div>
+  <div class="hstats">
+   <div class="hstat"><b class="tnum" id="rsS1">&ndash;</b><span><i style="background:#9fc1d4"></i>Venues</span></div>
+   <div class="hstat"><b class="tnum" id="rsS2">&ndash;</b><span><i style="background:#3fce7f"></i>Credit eligible</span></div>
+   <div class="hstat"><b class="tnum" id="rsS3">&ndash;</b><span><i style="background:#e8c15e"></i>Not yet eligible</span></div>
+   <div class="hstat"><b class="tnum" id="rsS4">&ndash;</b><span><i style="background:#f2726e"></i>Unconfirmed</span></div>
+  </div>
+ </div>
+
+ <div class="card mapcard rs-mapcard">
+  <div class="maphead">
+   <h2>Restaurant map</h2>
+   <div class="mapkinds rs-legend"><span class="mk"><i style="background:#1F7A55"></i>Credit eligible</span><span class="mk"><i style="background:#C8871A"></i>Not yet</span><span class="mk"><i style="background:#6B7684"></i>Unconfirmed</span></div>
+  </div>
+  <div class="mapisl" id="rsJump">
+   <button type="button" data-r-fly="oahu" aria-pressed="true">Oʻahu</button>
+   <button type="button" data-r-fly="maui" aria-pressed="false">Maui</button>
+   <button type="button" data-r-fly="hawaii" aria-pressed="false">Hawaiʻi Island</button>
+   <button type="button" data-r-fly="kauai" aria-pressed="false">Kauaʻi</button>
+   <button type="button" data-r-fly="all" aria-pressed="false">All islands</button>
+  </div>
+  <div class="mapwrap"><div id="resyMap" aria-label="Map of Resy restaurants in Hawaiʻi"></div><div class="mapmsg" id="resyMsg">Loading the map&hellip;</div></div>
+ </div>
+
+ <div class="card">
+  <div class="rs-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" id="rsQ" placeholder="Search a restaurant, town or cuisine" autocomplete="off"></div>
+  <div class="qrow"><span class="flab">Island</span><div class="fchips" id="rsIsl"></div></div>
+  <div class="qrow"><span class="flab">Resy credit</span><div class="fchips" id="rsStat"></div></div>
+  <div class="sec-h"><h2 id="rsCount"></h2></div>
+  <div class="rs-grid" id="rsGrid"></div>
+  <div class="more-row"><button type="button" class="chipf plain" id="rsMore" hidden>Show all</button></div>
+  <p class="calc-note" style="padding:0 20px 18px">Eligibility is set by American Express and judged at the time of purchase. Always confirm the "Qualifies for Resy Credit" box on the venue's own Resy page before you pay, then screenshot it. Venues marked not yet eligible arrived through the Tock merger on August 11, 2026. Amex has said select U.S. Tock venues become eligible starting September 15, 2026.</p>
+ </div>
+
+ <div class="navycard">
+  <div class="hrt-eyebrow">Cards we like</div>
+  <h3>Some cards come with a <span>Resy dining credit</span></h3>
+  <p>A handful of eligible premium travel cards include a dining credit you can use at participating Resy restaurants, which is what makes a map like this worth having. Terms, credit amounts and enrollment requirements vary by card.</p>
+  <a class="btn coral" href="https://www.cardratings.com/bestcards/featured-credit-cards?src=694152&amp;shnq=4028089,4028085,4048149,4048101,4028101,4048102,5048397" target="_blank" rel="noopener sponsored">Compare eligible cards &rarr;</a>
+  <p class="disc-small"><b>Advertiser disclosure:</b> Hawaii Reward Travel may receive compensation from card issuers and affiliate networks when a customer clicks a link, when an application is approved, or when an account is opened. Opinions are the author's alone and have not been reviewed, endorsed or approved by any bank or card issuer. This is not financial advice. Always review the issuer's current terms before applying.</p>
+ </div>
+</div>
+</section>
+
+<!-- ================= HNL LOUNGES ================= -->
+<section class="view" data-page="lounges" id="v-lounges">
+<div class="content">
+ <div class="hero slim">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+  <div class="hs-text">
+   <h1>The HNL <span class="wave">Lounge Map</span></h1>
+   <p>Every lounge at Daniel K. Inouye International Airport on the real airport map. Tap one to see where it is and what it takes to get in.</p>
+  </div>
+  <div class="hstats">
+   <div class="hstat"><b class="tnum" id="lgS1">&ndash;</b><span><i style="background:#9fc1d4"></i>Open lounges</span></div>
+   <div class="hstat"><b class="tnum" id="lgS2">&ndash;</b><span><i style="background:#e8824c"></i>Priority Pass</span></div>
+   <div class="hstat"><b class="tnum" id="lgS3">&ndash;</b><span><i style="background:#e8c15e"></i>Coming soon</span></div>
+   <div class="hstat"><b class="tnum" id="lgS4">&ndash;</b><span><i style="background:#3fce7f"></i>Top rating</span></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="qrow" style="padding-top:14px"><div class="fchips" id="lgFilters"></div></div>
+  <div class="lg-grid">
+   <div class="lg-mapcol">
+    <div class="lg-frame">
+     <div class="lg-imgwrap">
+      <img class="lg-img" decoding="async" src="https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a4154ba-97b5-4754-8e5c-00b8fe039db4/Daniel-K.-Inouye-International-Airport-Map-1.webp?content-type=image%2Fwebp" alt="Daniel K. Inouye International Airport floor 2 map with terminals and gates">
+      <div class="lg-markers" id="lgMarkers"></div>
+      <div class="lg-pop" id="lgPop" hidden></div>
+     </div>
+    </div>
+    <div class="lg-cap"><b>Floor 2 &middot; Daniel K. Inouye International Airport</b><span>Tap any marker</span></div>
+   </div>
+   <div class="lg-listcol">
+    <div class="lg-listhead"><b id="lgCount"></b><span>Tap to locate</span></div>
+    <div class="lg-list" id="lgList"></div>
+   </div>
+  </div>
+ </div>
+
+ <div class="navycard">
+  <div class="hrt-eyebrow">Scottie's top card picks</div>
+  <h3>The right travel cards <span>unlock more lounges</span></h3>
+  <p>Priority Pass opens 1,500+ airport lounges worldwide, including two here at HNL. Other eligible premium travel cards unlock direct access to lounges like Delta Sky Club and United Club.</p>
+  <a class="btn coral" href="https://www.cardratings.com/bestcards/featured-credit-cards?src=694152&amp;shnq=4028089,4048084,4048272,5048396,5048391,4048149,3004054,4048196,5048345,4048211" target="_blank" rel="sponsored noopener noreferrer">Top cards with Priority Pass access &rarr;</a>
+  <p class="disc-small"><b>Advertiser disclosure:</b> Hawaii Reward Travel may be compensated when you apply through our links. Opinions are our own.</p>
+ </div>
+</div>
+</section>
+
+<!-- ================= ATMOS (PRO) ================= -->
+<section class="view" data-page="atmos" id="v-atmos">
+<div class="content">
+ <div class="hero slim">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+  <div class="hs-text">
+   <h1>Atmos Award <span class="wave">Calendar</span> <span class="pro-b big">PRO</span></h1>
+   <p>Saver award space to and from Hawaiʻi, color coded by value. Included with HRT PRO.</p>
+  </div>
+  <div class="cta-row" style="margin-top:0"><a class="btn coral" id="atmosPro" href="#" target="_top">Try HRT PRO &rarr;</a><a class="btn ghost" id="atmosCal" href="#" target="_top">I'm a member</a></div>
+ </div>
+ <div class="tips">
+  <div class="tool t1"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><h3>Deals Calendar</h3><p>Saver award space by date for Hawaiʻi routes, color coded so the best days jump out.</p></div>
+  <div class="tool t2"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><h3>Deals Search</h3><p>Pick a route and see every open date rated great, decent or high at a glance.</p></div>
+  <div class="tool t3"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/></svg></div><h3>Points Explorer</h3><p>Enter your balance and see where you can fly, plotted on the map.</p></div>
+  <div class="tool t4"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div><h3>Updated daily</h3><p>Fresh award space every morning, so you see openings before they are gone.</p></div>
+ </div>
+</div>
+</section>
+
+<!-- ================= WELCOME BONUSES (coming soon) ================= -->
+<section class="view" data-page="welcome" id="v-welcome">
+<div class="content">
+ <div class="hero slim">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+  <div class="hs-text">
+   <h1>Welcome Bonus <span class="wave">Tracker</span> <span class="soon-b big">Soon</span></h1>
+   <p>We are rebuilding this tool so every welcome offer is checked against the issuer's own page before it shows up here.</p>
+  </div>
+ </div>
+ <div class="tips">
+  <div class="tool t1"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div><h3>Verified offers</h3><p>Each offer shows the date we last confirmed it with the issuer.</p></div>
+  <div class="tool t2"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div><h3>Change alerts</h3><p>When an issuer changes an offer, we review it before the tracker updates.</p></div>
+  <div class="tool t3"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg></div><h3>Every major issuer</h3><p>Chase, American Express, Capital One, Citi, Bank of America, Wells Fargo and more.</p></div>
+  <div class="tool t4"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 2.5 4 3.2c-1 .3-1.6 1.3-1.4 2.3C3.8 12 9 17.2 15.5 18.9c1 .2 2-.4 2.3-1.4l.7-2.6a1.6 1.6 0 0 0-.9-1.9l-3-1.2a1.6 1.6 0 0 0-1.8.5l-.7.9a12.5 12.5 0 0 1-4.6-4.6l.9-.7a1.6 1.6 0 0 0 .5-1.8l-1.2-3a1.6 1.6 0 0 0-1.8-.9Z"/></svg></div><h3>Need a card plan now?</h3><p>Book a free strategy call and we will map the right cards to your trips.</p></div>
+ </div>
+ <div class="cta-center"><a class="btn coral" id="welcomeCoach" href="#" target="_top">Get a free strategy call &rarr;</a></div>
+</div>
+</section>
+
+<section class="view" data-page="kamaaina" id="v-kamaaina">
+<div class="content">
+  <div class="kama-search"><label class="pts" for="q"><span class="lead"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 18 18"/></svg></span><span class="stack"><span style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase">Search kamaʻāina offers</span><input id="q" type="search" placeholder="Try Waikīkī or breakfast" autocomplete="off"></span></label></div>
+
+
+ <!-- ===== TITLE BANNER ===== -->
+ <div class="hero slim">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
+  <div class="hs-text">
+   <h1>Kamaʻāina Deals <span class="wave">Tracker</span></h1>
+   <p>Every kamaʻāina staycation rate across the islands, scored and sorted so the best hotel deals come first.</p>
+  </div>
+  <div class="hstats">
+   <div class="hstat"><b class="tnum" id="kHotels">0</b><span><i style="background:#9fc1d4"></i>Hotel deals</span></div>
+   <div class="hstat"><b class="tnum" id="kTop">0</b><span><i style="background:#3fce7f"></i>Top-rated hotels</span></div>
+   <div class="hstat"><b class="tnum" id="kSoon">0</b><span><i style="background:#f2726e"></i>Ending soon</span></div>
+   <div class="hstat"><b class="tnum" id="kActs">0</b><span><i style="background:#e8c15e"></i>Activities &amp; dining</span></div>
+  </div>
+ </div>
+
+ <!-- ===== DEALS MAP + TOP STAYCATION ===== -->
+ <div class="toprow">
+  <div class="mapcard card" id="mapcard">
+   <div class="maphead">
+    <h2>Deals map</h2>
+    <div class="mapkinds">
+     <button type="button" class="mk stay" data-kind-toggle="stay" aria-pressed="true"><i></i>Hotels</button>
+     <button type="button" class="mk act" data-kind-toggle="act" aria-pressed="true"><i></i>Activities &amp; dining</button>
+    </div>
+   </div>
+   <div class="mapisl" role="group" aria-label="Jump to island">
+    <button type="button" data-mapisl="all" aria-pressed="true">All islands</button>
+    <button type="button" data-mapisl="oahu" aria-pressed="false">Oʻahu</button>
+    <button type="button" data-mapisl="maui" aria-pressed="false">Maui</button>
+    <button type="button" data-mapisl="hawaii" aria-pressed="false">Hawaiʻi Island</button>
+    <button type="button" data-mapisl="kauai" aria-pressed="false">Kauaʻi</button>
+    <button type="button" data-mapisl="lm" aria-pressed="false">Lānaʻi</button>
+   </div>
+   <div class="mapwrap"><div id="dealMap" aria-label="Map of kamaʻāina deals"></div><div class="mapmsg" id="mapMsg">Loading the map&hellip;</div></div>
+  </div>
+  <div class="spot" id="spot">
+   <div class="sph" id="spotImg"><span class="eyebrow"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 9.3l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.9L2 9.3l7.1-.4z"/></svg> Top staycation &middot; highest score</span><span class="sphisl" id="spotIsl"></span></div>
+   <div class="sb2">
+    <div class="route" id="spotName">&nbsp;</div>
+    <div class="price"><b class="tnum" id="spotHead"></b><small id="spotSub"></small><span class="cabtag" id="spotType"></span></div>
+    <div class="dmeta" id="spotMeta"></div>
+    <div class="chips" id="spotChips"></div>
+    <button class="btn coral" id="spotBtn" type="button">See offer details &rarr;</button>
+   </div>
+  </div>
+ </div>
+
+ <!-- ===== STAYCATION HOTELS (main event) ===== -->
+ <div class="card hotels" id="hotels">
+  <div class="sec-h big"><h2>Staycation hotels <span class="hl">by island</span></h2>
+   <span class="note"><b id="hN">0</b> <span id="hL">hotel deals</span></span>
+   <div class="right">
+    <div class="vt" role="group" aria-label="View"><button type="button" data-view="tiles" aria-pressed="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tiles</button><button type="button" data-view="list" aria-pressed="false"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>List</button></div>
+    <select class="chipf" id="hSort" aria-label="Sort hotels">
+     <option value="score">Best value first</option>
+     <option value="pct">Biggest discount</option>
+     <option value="price">Lowest starting rate</option>
+     <option value="soon">Ending soonest</option>
+     <option value="az">Name A to Z</option>
+    </select>
+   </div>
+  </div>
+  <div class="itabs" id="itabs" role="tablist" aria-label="Choose an island"></div>
+  <div class="mfbar">
+   <button type="button" class="chipf plain" id="mfBtn" aria-expanded="false" aria-controls="hQuick"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters<span class="mfn" id="mfN" hidden></span></button>
+   <span class="mfsum" id="mfSum"></span>
+   <button type="button" class="mfclear" id="mfClear" hidden>Clear</button>
+  </div>
+  <div class="qrow mf">
+   <span class="flab">Must have</span>
+   <div class="fchips" id="hQuick"></div>
+  </div>
+  <div class="qrow mf" id="areaRow" hidden>
+   <span class="flab">Area</span>
+   <div class="fchips" id="hAreas"></div>
+  </div>
+  <div id="hotelBody"></div>
+  <div class="empty" id="hEmpty" hidden><b>No hotels match that yet.</b>Try another island or clear a filter.</div>
+ </div>
+
+ <!-- ===== ENDING SOON ===== -->
+ <div class="card" id="soon">
+  <div class="sec-h"><h2>Ending soon</h2>
+   <span class="note"><span class="fdot red"></span>Published end date within <b>60 days</b>. Confirm dates with the business before you plan around one.</span>
+  </div>
+  <div id="soonGrid"></div>
+ </div>
+
+ <!-- ===== ACTIVITIES, DINING AND MORE (secondary) ===== -->
+ <div class="card acts" id="acts">
+  <div class="sec-h"><h2>Activities, dining &amp; more</h2>
+   <span class="note"><b id="aN">0</b> <span id="aL">offers</span></span>
+   <div class="right">
+    <select class="chipf" id="aIsl" aria-label="Island for activities">
+     <option value="all">All islands</option>
+     <option value="oahu">Oʻahu</option>
+     <option value="maui">Maui</option>
+     <option value="hawaii">Hawaiʻi Island</option>
+     <option value="kauai">Kauaʻi</option>
+     <option value="lm">Lānaʻi &amp; Molokaʻi</option>
+    </select>
+   </div>
+  </div>
+  <div class="qrow"><div class="fchips" id="aCats"></div></div>
+  <div class="agrid" id="actGrid"></div>
+  <div class="more-row"><button class="chipf plain" id="aMore" type="button" hidden>Show all</button></div>
+  <div class="empty" id="aEmpty" hidden><b>Nothing here yet.</b>Try another island or category.</div>
+ </div>
+
+ <!-- ===== HOW WE WOULD PAY ===== -->
+ <div>
+  <div class="sec-h" style="padding-left:2px;padding-right:2px"><h2>How we would pay for these</h2><span class="note">The points and miles angle on resident rates</span></div>
+  <div class="tips">
+   <div class="tool t1"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg></div><h3>Kamaʻāina rates are cash rates</h3><p>That is good news for us. You earn on the spend instead of burning points, and a 30 percent resident rate often beats the same night booked with points.</p></div>
+   <div class="tool t2"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-6h4v6"/></svg></div><h3>Book direct with the property</h3><p>Third party sites usually will not give you points or elite night credit, and most kamaʻāina rates require you to book on the hotel's own site anyway.</p></div>
+   <div class="tool t3"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div><h3>Confirm earning before you pay</h3><p>Some discounted resident rates are excluded from loyalty earning and elite credit. Ask at booking rather than after checkout.</p></div>
+   <div class="tool t4"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.2"/><path d="M6 16c.8-1.4 1.8-2 3-2s2.2.6 3 2M15 10h3M15 13h3"/></svg></div><h3>Bring your Hawaiʻi ID</h3><p>Nearly every offer here requires proof of residency at check in or at the door. A driver license or state ID is the standard.</p></div>
+  </div>
+ </div>
+
+ <!-- ===== HOW SCORING WORKS ===== -->
+ <details class="card how">
+  <summary>How the value score works <span class="pm" aria-hidden="true"></span></summary>
+  <p>The score is ours. We read each offer and weight four things: the size of the discount on the main rate or ticket, any fees that get waived or cut such as parking and resort fees, the extras thrown in such as breakfast, upgrades or late check out, and the dollar value the business states for those extras. An offer that says "up to" a number is discounted slightly, because in practice you rarely get the top of that range.</p>
+  <p>A high score means the offer is generous relative to the others on this board. It does not mean the rate itself is cheap, and it cannot tell you what the property will actually quote you on your dates. Use it to decide what is worth a look, then check the real numbers.</p>
+  <div class="legend"><span class="band top">Top pick</span><span class="band strong">Strong</span><span class="band solid">Solid</span><span class="band look">Worth a look</span></div>
+ </details>
+
+ <!-- ===== DISCLOSURE ===== -->
+ <div class="card srcnote">
+  <p><b>About these offers.</b> Offers are published by each participating business for Hawaiʻi residents. <span id="snapLine"></span> Hawaii Reward Travel is not affiliated with these businesses unless noted.</p>
+  <p>Rates, dates, blackout periods and residency requirements are set by each business and change without notice. Confirm everything directly with the business before you book or travel. Nothing here is a guarantee of availability or price.</p>
+  <p style="margin:0">Hawaii Reward Travel, Yumi Consulting LLC d/b/a Hawaii Reward Travel, Waipahu, HI.</p>
+ </div>
+
+ <div class="foot">HAWAIIREWARDTRAVEL.COM &middot; KAMAʻĀINA DEALS TRACKER
+  <span class="pw" id="footSnap"></span>
+ </div>
+</div>
+
+</section>
+
+<dialog id="dlg" aria-label="Offer details"></dialog>
+
+<!-- ==========================================================
+     DEAL DATA. Snapshot of current kamaʻāina offers.
+     To refresh, replace ONLY the array on the line below.
+     ========================================================== -->
+<script src="data/kamaaina-deals.js"></script>
+
+<script src="assets/kamaaina.js"></script>
+<script src="assets/app.js"></script>
+
+</main></div>
+<script src="assets/theme.js"></script></body></html>
