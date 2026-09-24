@@ -43,48 +43,84 @@ html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
 .atmos-frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
 .atmos-frame.crop iframe{left:-248px;width:calc(100% + 248px)}
 html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none}
+/* SANDBOX: PRO mode (navy base + gold/orange premium accents) */
+html:not(.ms-pro) .pro-only{display:none!important}
+html.ms-pro .free-only{display:none!important}
+html.ms-pro .atmos-tabs{display:none}
+.pro-grad{background:linear-gradient(135deg,#f2b84b,#e8824c)}
+.pro-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;letter-spacing:.5px;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:6px 12px;white-space:nowrap;box-shadow:0 6px 18px rgba(232,130,76,.35)}
+.hrt-bn .pro-word{background:linear-gradient(135deg,#f5c75a,#e8824c);-webkit-background-clip:text;background-clip:text;color:transparent}
+html.ms-pro .hrt-sb{box-shadow:inset 0 3px 0 #f2b84b;border-right-color:rgba(242,184,75,.35)}
+html.ms-pro .hrt-mark{box-shadow:0 0 0 1.5px #f2b84b}
+.hrt-lbl.pro-lbl{color:#f2b84b}
+html.ms-pro .hrt-navi.protool .hic{color:#f2b84b;opacity:1}
+html.ms-pro .hrt-navi.protool.on{background:none;box-shadow:none;font-weight:inherit}
+html.ms-pro .hrt-navi.protool.on.calon{background:linear-gradient(135deg,rgba(232,130,76,.22),rgba(242,184,75,.10));color:#fff;font-weight:700;box-shadow:inset 3px 0 0 #f2b84b}
+html.ms-pro .hrt-navi.on{box-shadow:inset 3px 0 0 #f2b84b}
+.pro-member-chip{margin:8px 6px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(242,184,75,.45);background:linear-gradient(135deg,rgba(232,130,76,.16),rgba(242,184,75,.06));color:#fff;font-weight:700;font-size:13px;line-height:1.3}
+.pro-member-chip small{display:block;color:#f2b84b;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;font-weight:800}
+.pro-welcome{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:16px 20px;border-radius:var(--radius,16px);background:linear-gradient(120deg,#0e1b2c 0%,#16294a 70%,#2a2f3a 100%);color:#fff;border:1px solid rgba(242,184,75,.45);box-shadow:var(--shadow)}
+.pro-welcome h2{margin:0;font-size:20px}
+.pro-welcome p{margin:2px 0 0;color:#c7d4e2;font-size:13.5px}
+.pro-welcome .pw-text{flex:1;min-width:220px}
+.pro-welcome .pw-links{display:flex;flex-wrap:wrap;gap:8px}
+.pro-welcome .pw-links a{color:#fff;text-decoration:none;font-weight:700;font-size:13px;border:1px solid rgba(242,184,75,.55);border-radius:10px;padding:8px 12px}
+.pro-welcome .pw-links a:hover{background:rgba(242,184,75,.15)}
+.btn.gold{background:linear-gradient(135deg,#f5c75a,#e8824c);color:#1a1204;box-shadow:0 10px 26px rgba(232,130,76,.35)}
+html.ms-pro .procard{border-color:rgba(242,184,75,.55)}
 </style>
 </head>
-<body><div class="hrt-app"><aside class="hrt-sb"><a class="hrt-brand" href="#home" data-route="home"><span class="hrt-mark"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 15c5-1 8-9 18-12" stroke="#9fc1d4" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="0.4 4"/><circle cx="16.5" cy="5" r="2.1" fill="#e8824c"/><path d="M4 18h14" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span><span class="hrt-bn">HRT Free Tools<small>BY HAWAII REWARD TRAVEL</small></span></a>
+<body><div class="hrt-app"><aside class="hrt-sb"><a class="hrt-brand" href="#home" data-route="home"><span class="hrt-mark"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 15c5-1 8-9 18-12" stroke="#9fc1d4" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="0.4 4"/><circle cx="16.5" cy="5" r="2.1" fill="#e8824c"/><path d="M4 18h14" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span><span class="hrt-bn"><span class="free-only">HRT Free Tools</span><span class="pro-only">HRT <span class="pro-word">PRO</span></span><small>BY HAWAII REWARD TRAVEL</small></span></a>
 <nav class="hrt-nav" id="sideNav" aria-label="Free tools">
  <span class="hrt-lbl">Home</span>
  <a class="hrt-navi" href="#home" data-route="home"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="nm">Dashboard</span></a>
- <a class="hrt-navi pro" id="navPro" href="#" target="_top"><span class="hic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg></span><span class="nm">Try HRT PRO</span><span class="cnt">&rarr;</span></a>
+ <a class="hrt-navi pro free-only" id="navPro" href="#atmos" data-route="atmos"><span class="hic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg></span><span class="nm">Try HRT PRO</span><span class="cnt">&rarr;</span></a>
+
+ <span class="hrt-lbl pro-lbl pro-only">Atmos Rewards PRO Tools</span>
+ <a class="hrt-navi protool pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="nm">Deals Calendar</span></a>
+ <a class="hrt-navi protool pro-only" href="#atmos" data-route="atmos" data-cal="search.html"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span class="nm">Deals Search</span></a>
+ <a class="hrt-navi protool pro-only" href="#atmos" data-route="atmos" data-cal="explore.html"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/></svg></span><span class="nm">Points Explorer</span></a>
 
  <span class="hrt-lbl">Hawaiʻi</span>
  <a class="hrt-navi" href="#kamaaina" data-route="kamaaina"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="11" r="1.6"/></svg></span><span class="nm">Kamaʻāina Deals</span><span class="cnt tnum" id="navKama"></span></a>
 
  <span class="hrt-lbl">Travel</span>
- <a class="hrt-navi" href="#atmos" data-route="atmos"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="nm">Atmos Award Calendar</span><span class="cnt pro-b">PRO</span></a>
+ <a class="hrt-navi free-only" href="#atmos" data-route="atmos"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="nm">Atmos Award Calendar</span><span class="cnt pro-b">PRO</span></a>
  <a class="hrt-navi" href="#lounges" data-route="lounges"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 12a2 2 0 0 1 4 0v3h10v-3a2 2 0 0 1 4 0v5H3Z"/><path d="M6 17v3M18 17v3"/></svg></span><span class="nm">HNL Lounge Map</span><span class="cnt tnum" id="navLounge"></span></a>
 
  <span class="hrt-lbl">Points &amp; Cards</span>
  <a class="hrt-navi" href="#transfers" data-route="transfers"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></span><span class="nm">Transfer Bonuses</span><span class="cnt tnum" id="navTb"></span></a>
  <a class="hrt-navi" href="#values" data-route="values"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="nm">Points Valuations</span></a>
  <a class="hrt-navi" href="#welcome" data-route="welcome"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/></svg></span><span class="nm">Welcome Bonuses</span><span class="cnt soon-b">Soon</span></a>
+ <a class="hrt-navi" href="https://www.hawaiirewardtravel.com/best-credit-cards-hawaii" target="_top"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/><path d="m15.5 14.5 1.2 1.2 2.3-2.4"/></svg></span><span class="nm">Best Credit Cards</span></a>
 
  <span class="hrt-lbl">Dining</span>
  <a class="hrt-navi" href="#resy" data-route="resy"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 21V3c-2 1.5-3 4-3 7h3"/></svg></span><span class="nm">Resy Hawaiʻi Map</span><span class="cnt tnum" id="navResy"></span></a>
 
  <span class="hrt-lbl">Hawaii Reward Travel</span>
  <a class="hrt-navi" id="navHome" href="#" target="_top"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7M6 9.5V20h12V9.5"/></svg></span><span class="nm">Back to main site</span></a>
-</nav><div class="hrt-disc"><a id="navDisc" href="#" target="_top">&#9432; Advertiser Disclosure</a></div><div class="hrt-foot"><a class="hrt-acct" id="coachLink" href="#" target="_top"><span class="hrt-av"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 2.5 4 3.2c-1 .3-1.6 1.3-1.4 2.3C3.8 12 9 17.2 15.5 18.9c1 .2 2-.4 2.3-1.4l.7-2.6a1.6 1.6 0 0 0-.9-1.9l-3-1.2a1.6 1.6 0 0 0-1.8.5l-.7.9a12.5 12.5 0 0 1-4.6-4.6l.9-.7a1.6 1.6 0 0 0 .5-1.8l-1.2-3a1.6 1.6 0 0 0-1.8-.9Z"/></svg></span><span class="hrt-who">Free coaching<small>Get a strategy call &rarr;</small></span></a><button class="hrt-theme" id="hrtThemeBtn" type="button" title="Light / dark" aria-label="Toggle dark mode"></button></div></aside><main class="hrt-main" id="main">
+</nav><div class="pro-member-chip pro-only"><small>HRT PRO Member</small><span class="ms-first-name">Aloha!</span></div><div class="hrt-disc"><a id="navDisc" href="#" target="_top">&#9432; Advertiser Disclosure</a></div><div class="hrt-foot"><a class="hrt-acct" id="coachLink" href="#" target="_top"><span class="hrt-av"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 2.5 4 3.2c-1 .3-1.6 1.3-1.4 2.3C3.8 12 9 17.2 15.5 18.9c1 .2 2-.4 2.3-1.4l.7-2.6a1.6 1.6 0 0 0-.9-1.9l-3-1.2a1.6 1.6 0 0 0-1.8.5l-.7.9a12.5 12.5 0 0 1-4.6-4.6l.9-.7a1.6 1.6 0 0 0 .5-1.8l-1.2-3a1.6 1.6 0 0 0-1.8-.9Z"/></svg></span><span class="hrt-who">Free coaching<small>Get a strategy call &rarr;</small></span></a><button class="hrt-theme" id="hrtThemeBtn" type="button" title="Light / dark" aria-label="Toggle dark mode"></button></div></aside><main class="hrt-main" id="main">
 
 <div class="topbar"><div class="tbin"><span class="crumb" id="crumb">Dashboard</span><span class="spacer"></span>
  <span class="ptshint" id="tbHint">Free tools for Hawaiʻi points travelers</span>
  <span class="ms-auth"><button type="button" class="ms-btn" data-ms-content="!members" data-ms-modal="login">Log in</button><button type="button" class="ms-btn" data-ms-content="!members" data-ms-modal="signup" data-ms-plan:add="pln_free-member-09dc08yw">Sign up</button><button type="button" class="ms-btn" data-ms-action="logout">Log out</button></span>
- <a class="btn coral topro" id="topPro" href="#" target="_top"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg>Try HRT PRO</a>
+ <span class="pro-pill pro-only" title="Your HRT PRO membership is active">&#9733; PRO</span><button type="button" class="ms-btn pro-only" data-ms-action="customer-portal">Manage subscription</button><a class="btn coral topro free-only" id="topPro" href="#atmos" data-route="atmos"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg>Try HRT PRO</a>
 </div></div>
 
 
 <!-- ================= HOME ================= -->
 <section class="view" data-page="home" id="v-home">
 <div class="content">
+ <div class="pro-welcome pro-only">
+  <span class="pro-pill">&#9733; HRT PRO</span>
+  <div class="pw-text"><h2>Aloha, <span class="ms-first-name">PRO member</span></h2><p>Your PRO tools are unlocked. Fresh Atmos saver space lands every morning.</p></div>
+  <div class="pw-links"><a href="#atmos" data-route="atmos" data-cal="calendar.html">Deals Calendar</a><a href="#atmos" data-route="atmos" data-cal="search.html">Deals Search</a><a href="#atmos" data-route="atmos" data-cal="explore.html">Points Explorer</a></div>
+ </div>
  <div class="toprow">
   <div class="hero">
    <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
    <span class="plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>
-   <h1>Aloha, welcome to <span class="wave">HRT Free Tools</span></h1>
+   <h1><span class="free-only">Aloha, welcome to <span class="wave">HRT Free Tools</span></span><span class="pro-only">Your everyday <span class="wave">HRT tools</span></span></h1>
    <p>The tools we use to plan points and miles trips from the islands, in one place and free for every Hawaiʻi traveler.</p>
    <div class="cta-row"><a class="btn coral" href="#kamaaina" data-route="kamaaina">Find a staycation deal &rarr;</a><a class="btn ghost" href="#transfers" data-route="transfers">See transfer bonuses</a></div>
    <div class="hstats">
@@ -106,8 +142,8 @@ html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none
      <li>Points Explorer: see where your balance can take you</li>
      <li>Deals Search with every open date rated</li>
     </ul>
-    <a class="btn coral" id="homePro" href="#" target="_top">Try HRT PRO &rarr;</a>
-    <a class="pro-member" id="homeCal" href="#" target="_top">Already a member? Open the calendar &rarr;</a>
+    <a class="btn coral free-only" id="homePro" href="#atmos" data-route="atmos">Try HRT PRO &rarr;</a><a class="btn gold pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Open Deals Calendar &rarr;</a>
+    <a class="pro-member free-only" id="homeCal" href="#atmos" data-route="atmos">Already a member? Open the calendar &rarr;</a>
    </div>
   </div>
  </div>
@@ -120,7 +156,7 @@ html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none
    <a class="ttile c3" href="#values" data-route="values"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="tt"><b>Points Valuations</b><small>What your points are worth in 2026</small><em id="ttVal">&nbsp;</em></span></a>
    <a class="ttile c4" href="#resy" data-route="resy"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 21V3c-2 1.5-3 4-3 7h3"/></svg></span><span class="tt"><b>Resy Hawaiʻi Map</b><small>Every Resy spot, with Amex Resy Credit status</small><em id="ttResy">&nbsp;</em></span></a>
    <a class="ttile c5" href="#lounges" data-route="lounges"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 12a2 2 0 0 1 4 0v3h10v-3a2 2 0 0 1 4 0v5H3Z"/></svg></span><span class="tt"><b>HNL Lounge Map</b><small>Every lounge at HNL and how to get in</small><em id="ttLounge">&nbsp;</em></span></a>
-   <a class="ttile c6" href="#atmos" data-route="atmos"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="tt"><b>Atmos Award Calendar <span class="pro-b">PRO</span></b><small>Saver award dates for Hawaiʻi routes</small><em>Included with HRT PRO</em></span></a>
+   <a class="ttile c6" href="#atmos" data-route="atmos"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="tt"><b>Atmos Award Calendar <span class="pro-b">PRO</span></b><small>Saver award dates for Hawaiʻi routes</small><em class="free-only">HRT PRO &middot; $9.99/mo</em><em class="pro-only">Unlocked &middot; Open &rarr;</em></span></a>
   </div>
  </div>
 
@@ -366,7 +402,7 @@ html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
   <div class="hs-text">
    <h1>Atmos Award <span class="wave">Calendar</span> <span class="pro-b big">PRO</span></h1>
-   <p>Saver award space to and from Hawaiʻi, color coded by value. Included with HRT PRO.</p>
+   <p>Saver award space to and from Hawaiʻi, color coded by value. Part of HRT PRO, $9.99/mo.</p>
   </div>
   <div class="cta-row" style="margin-top:0"><button type="button" class="btn coral" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock Atmos Calendar &middot; $9.99/mo &rarr;</button></div>
  </div>
@@ -381,8 +417,8 @@ html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none
  </div>
  <div class="atmos-open" id="atmosOpen">
   <div class="atmos-tabs" role="tablist" aria-label="Atmos tools">
-   <button type="button" class="atmos-tab on" data-cal="index.html">Overview</button>
-   <button type="button" class="atmos-tab" data-cal="calendar.html">Deals Calendar</button>
+   <button type="button" class="atmos-tab" data-cal="index.html">Overview</button>
+   <button type="button" class="atmos-tab on" data-cal="calendar.html">Deals Calendar</button>
    <button type="button" class="atmos-tab" data-cal="search.html">Deals Search</button>
    <button type="button" class="atmos-tab" data-cal="explore.html">Points Explorer</button>
    <span class="atmos-sbx">Sandbox preview</span>
@@ -582,16 +618,26 @@ html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none
  function apply(m){
   var ok=!!(m&&(m.planConnections||[]).some(function(p){return UNLOCK.indexOf(p.planId)>-1&&String(p.status||"").toUpperCase()!=="CANCELED";}));
   document.documentElement.classList.toggle("ms-atmos",ok);
+  document.documentElement.classList.toggle("ms-pro",ok);
+  var nm=(m&&m.customFields&&(m.customFields["first-name"]||m.customFields.firstName))||"";
+  document.querySelectorAll(".ms-first-name").forEach(function(el){ if(nm) el.textContent=nm; });
+  /* after a checkout, land on the unlocked Atmos page */
+  try{ if(ok && localStorage.getItem("hrtGoAtmos")){ localStorage.removeItem("hrtGoAtmos"); location.hash="atmos"; } }catch(e){}
   var f=document.getElementById("atmosIframe");
-  if(ok && !f.getAttribute("src")) setCal("index.html");
+  if(ok && !f.getAttribute("src")) setCal("calendar.html");
   if(!ok && f.getAttribute("src")) f.removeAttribute("src");
  }
  var CAL="https://hrt-award-calendar.pages.dev/";
  function setCal(pg){
   document.getElementById("atmosIframe").src=CAL+pg;
   document.querySelectorAll(".atmos-tab").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-cal")===pg);});
+  document.querySelectorAll(".protool").forEach(function(b){b.classList.toggle("calon",b.getAttribute("data-cal")===pg);});
  }
- document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".atmos-tab"); if(b) setCal(b.getAttribute("data-cal"));});
+ document.addEventListener("click",function(e){
+  if(!e.target.closest) return;
+  var b=e.target.closest("[data-cal]"); if(b) setCal(b.getAttribute("data-cal"));
+  if(e.target.closest("[data-ms-price\\:add]")){ try{ localStorage.setItem("hrtGoAtmos","1"); }catch(x){} }
+ });
  /* hide the calendar's own sidebar when it is showing (iframe 920px+ wide); below that it uses a top bar */
  function crop(){var fr=document.getElementById("atmosFrame"); if(fr) fr.classList.toggle("crop", fr.clientWidth>=672);}
  window.addEventListener("resize",crop); if(window.ResizeObserver){ new ResizeObserver(crop).observe(document.getElementById("atmosFrame")); } crop();
