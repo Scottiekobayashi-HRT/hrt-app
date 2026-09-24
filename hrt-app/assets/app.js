@@ -35,7 +35,7 @@
  var ROUTES = {
   home:{ title:"Dashboard", hint:"Free tools for Hawaiʻi points travelers" },
   kamaaina:{ title:"Kamaʻāina Deals", hint:"Resident staycation rates by island" },
-  atmos:{ title:"Atmos Award Calendar", hint:"Included with HRT PRO" },
+  atmos:{ title:"Atmos Award Calendar", hint:"HRT PRO \u00b7 $9.99/mo" },
   lounges:{ title:"HNL Lounge Map", hint:"Every lounge at HNL" },
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
   values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
