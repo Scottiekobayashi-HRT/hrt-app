@@ -33,6 +33,16 @@
 .atmos-lock h3{margin:0;color:var(--text)}.atmos-lock p{margin:0;color:var(--muted);max-width:420px}
 .atmos-open{display:none;padding:28px;text-align:center;border:2px dashed #3fce7f;border-radius:var(--radius,16px);background:var(--surface);color:var(--text);font-weight:700;font-size:18px}
 html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
+/* SANDBOX: embedded Atmos calendar for paying members */
+.atmos-open{padding:0;border:0;background:none;text-align:left;font-weight:inherit;font-size:inherit}
+.atmos-tabs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.atmos-tab{font:inherit;font-weight:700;font-size:13px;border-radius:10px;padding:8px 13px;cursor:pointer;background:var(--surface);color:var(--text);border:1px solid var(--line)}
+.atmos-tab.on{background:#0e1b2c;color:#fff;border-color:#0e1b2c}
+.atmos-sbx{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.atmos-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);height:calc(100vh - 150px);min-height:640px}
+.atmos-frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+.atmos-frame.crop iframe{left:-248px;width:calc(100% + 248px)}
+html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none}
 </style>
 </head>
 <body><div class="hrt-app"><aside class="hrt-sb"><a class="hrt-brand" href="#home" data-route="home"><span class="hrt-mark"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 15c5-1 8-9 18-12" stroke="#9fc1d4" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="0.4 4"/><circle cx="16.5" cy="5" r="2.1" fill="#e8824c"/><path d="M4 18h14" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span><span class="hrt-bn">HRT Free Tools<small>BY HAWAII REWARD TRAVEL</small></span></a>
@@ -369,7 +379,16 @@ html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
    <button type="button" class="btn coral" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock for $9.99/mo &rarr;</button>
   </div>
  </div>
- <div class="atmos-open" id="atmosOpen">Atmos Calendar unlocked (sandbox)</div>
+ <div class="atmos-open" id="atmosOpen">
+  <div class="atmos-tabs" role="tablist" aria-label="Atmos tools">
+   <button type="button" class="atmos-tab on" data-cal="index.html">Overview</button>
+   <button type="button" class="atmos-tab" data-cal="calendar.html">Deals Calendar</button>
+   <button type="button" class="atmos-tab" data-cal="search.html">Deals Search</button>
+   <button type="button" class="atmos-tab" data-cal="explore.html">Points Explorer</button>
+   <span class="atmos-sbx">Sandbox preview</span>
+  </div>
+  <div class="atmos-frame" id="atmosFrame"><iframe id="atmosIframe" title="Atmos Award Calendar" loading="lazy"></iframe></div>
+ </div>
  <div class="tips">
   <div class="tool t1"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><h3>Deals Calendar</h3><p>Saver award space by date for Hawaiʻi routes, color coded so the best days jump out.</p></div>
   <div class="tool t2"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><h3>Deals Search</h3><p>Pick a route and see every open date rated great, decent or high at a glance.</p></div>
@@ -563,7 +582,19 @@ html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
  function apply(m){
   var ok=!!(m&&(m.planConnections||[]).some(function(p){return UNLOCK.indexOf(p.planId)>-1&&String(p.status||"").toUpperCase()!=="CANCELED";}));
   document.documentElement.classList.toggle("ms-atmos",ok);
+  var f=document.getElementById("atmosIframe");
+  if(ok && !f.getAttribute("src")) setCal("index.html");
+  if(!ok && f.getAttribute("src")) f.removeAttribute("src");
  }
+ var CAL="https://hrt-award-calendar.pages.dev/";
+ function setCal(pg){
+  document.getElementById("atmosIframe").src=CAL+pg;
+  document.querySelectorAll(".atmos-tab").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-cal")===pg);});
+ }
+ document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".atmos-tab"); if(b) setCal(b.getAttribute("data-cal"));});
+ /* hide the calendar's own sidebar when it is showing (iframe 920px+ wide); below that it uses a top bar */
+ function crop(){var fr=document.getElementById("atmosFrame"); if(fr) fr.classList.toggle("crop", fr.clientWidth>=672);}
+ window.addEventListener("resize",crop); if(window.ResizeObserver){ new ResizeObserver(crop).observe(document.getElementById("atmosFrame")); } crop();
  function start(){
   var ms=window.$memberstackDom; if(!ms){return setTimeout(start,200);}
   ms.getCurrentMember().then(function(r){apply(r&&r.data);}).catch(function(){});
