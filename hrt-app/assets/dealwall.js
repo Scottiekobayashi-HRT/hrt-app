@@ -46,7 +46,8 @@
     ".dw-rail::-webkit-scrollbar{height:8px}",
     ".dw-rail::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}",
     ".dw-rail::-webkit-scrollbar-track{background:transparent}",
-    ".dw-card{flex:0 0 218px;scroll-snap-align:start;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column}",
+    ".dw-card{appearance:none;font:inherit;text-align:left;cursor:pointer;padding:0;color:inherit;"+
+      "flex:0 0 218px;scroll-snap-align:start;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column}",
     ".dw-ph{position:relative;height:104px;background:#d9e5ee center/cover no-repeat}",
     ".dw-ph:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,27,44,0) 35%,rgba(14,27,44,.72))}",
     ".dw-city{position:absolute;left:12px;bottom:9px;z-index:1;color:#fff;font-weight:800;font-size:14.5px;text-shadow:0 1px 3px rgba(0,0,0,.45)}",
@@ -71,7 +72,34 @@
     ".dw-lock .dw-lc span{font-size:11px;color:#e3ebf4;font-weight:600}",
     ".dw-cta{margin-top:11px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}",
     ".dw-note{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.45;padding:0 2px}",
-    "@media (max-width:640px){.dw-nav{display:none}.dw-card{flex-basis:78vw;max-width:260px}.dw-lock{flex-basis:62vw;max-width:220px}}"
+    "@media (max-width:640px){.dw-nav{display:none}.dw-card{flex-basis:78vw;max-width:260px}.dw-lock{flex-basis:62vw;max-width:220px}}",
+    /* a card is a button now: say so, and show which one is open */
+    ".dw-card:hover{border-color:var(--coral)}",
+    ".dw-card:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
+    ".dw-card.on{border-color:var(--coral);box-shadow:0 0 0 1px var(--coral) inset,var(--shadow)}",
+    ".dw-more{display:block;padding:0 12px 11px;font-size:11px;font-weight:800;color:var(--coral)}",
+    ".dw-more:after{content:' \\2192'}",
+    ".dw-card.on .dw-more{visibility:hidden}",
+    /* the panel a card opens */
+    ".dw-exp{display:none}",
+    ".dw-exp.on{display:block;border:1px solid var(--coral);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);padding:14px 16px 15px;margin:2px 0 4px}",
+    ".dw-exph{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}",
+    ".dw-exph b{display:block;font-size:15px;color:var(--text)}",
+    ".dw-exph span{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}",
+    ".dw-x{margin-left:auto;flex:0 0 auto;width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-size:17px;line-height:1;cursor:pointer}",
+    ".dw-x:hover{border-color:var(--coral);color:var(--coral)}",
+    ".dw-dates{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}",
+    ".dw-date{border:1px solid var(--line);border-radius:10px;padding:8px 9px;background:var(--surface-2,#f7f9fb)}",
+    ".dw-date.low{border-color:color-mix(in srgb,#f2726e 45%,var(--line));background:color-mix(in srgb,#f2726e 8%,var(--surface))}",
+    ".dw-date b{display:block;font-size:12.5px;color:var(--text)}",
+    ".dw-dpts{display:block;font-size:14px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.2;margin-top:1px}",
+    ".dw-dtags{display:flex;flex-wrap:wrap;gap:4px 7px;margin-top:3px}",
+    ".dw-dtags span{font-size:10px;font-weight:700;color:var(--muted)}",
+    ".dw-dtags .dw-ns{color:var(--coral)}",
+    ".dw-expf{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}",
+    ".dw-expf>span{font-size:11.5px;color:var(--muted);font-weight:600}",
+    ".dw-unlock{margin-left:auto;font-size:12.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:8px 15px;text-decoration:none;white-space:nowrap}",
+    "@media (max-width:520px){.dw-unlock{margin-left:0}}"
   ].join("");
   document.head.appendChild(css);
 
@@ -135,8 +163,23 @@
 
     /* economy: real numbers, scrolling rail */
     var rail = el("div", "dw-rail");
+    var exp = el("div", "dw-exp");   /* the panel a card opens, under the rail */
+    var openKey = null;
     (feed.economy || []).forEach(function (d) {
-      var card = el("div", "dw-card");
+      var card = el("button", "dw-card");
+      card.type = "button";
+      card.setAttribute("aria-expanded", "false");
+      card.addEventListener("click", function () {
+        var key = (d.dest || d.city);
+        if (openKey === key) { closeExp(); return; }
+        openKey = key;
+        rail.querySelectorAll(".dw-card").forEach(function (c) {
+          var on = c === card;
+          c.classList.toggle("on", on);
+          c.setAttribute("aria-expanded", on ? "true" : "false");
+        });
+        fillExp(d);
+      });
       var ph = el("div", "dw-ph");
       if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
       ph.appendChild(el("span", "dw-rt", (d.origin || "") + "–" + (d.dest || "")));
@@ -155,9 +198,61 @@
       body.appendChild(meta);
 
       card.appendChild(body);
+      card.appendChild(el("span", "dw-more", "See the open dates"));
       rail.appendChild(card);
     });
     wrap.appendChild(rail);
+
+    /* ---- the expanded panel ---- */
+    function closeExp() {
+      openKey = null;
+      exp.innerHTML = "";
+      exp.classList.remove("on");
+      rail.querySelectorAll(".dw-card").forEach(function (c) {
+        c.classList.remove("on"); c.setAttribute("aria-expanded", "false");
+      });
+    }
+    function fillExp(d) {
+      exp.innerHTML = "";
+      exp.classList.add("on");
+
+      var h = el("div", "dw-exph");
+      var ht = el("div");
+      ht.appendChild(el("b", null, (d.origin || "HNL") + " to " + (d.city || d.dest)));
+      var n = (d.dates || []).length;
+      ht.appendChild(el("span", null, n + (n === 1 ? " date" : " dates") + " open in the next " + win +
+        " days, from " + num(d.miles) + " points one way"));
+      h.appendChild(ht);
+      var x = el("button", "dw-x", "\u00d7");
+      x.type = "button"; x.setAttribute("aria-label", "Close");
+      x.addEventListener("click", closeExp);
+      h.appendChild(x);
+      exp.appendChild(h);
+
+      var grid = el("div", "dw-dates");
+      (d.dates || []).forEach(function (t) {
+        var c = el("div", "dw-date" + (t.seats > 0 && t.seats <= 2 ? " low" : ""));
+        c.appendChild(el("b", null, shortDate(t.date)));
+        c.appendChild(el("span", "dw-dpts", num(t.miles)));
+        var tags = el("span", "dw-dtags");
+        /* seats.aero caps its seat count at 9, so 9 means "9 or more". */
+        if (t.seats) tags.appendChild(el("span", null, t.seats >= 9 ? "9+ seats" : (t.seats + (t.seats === 1 ? " seat" : " seats"))));
+        if (t.nonstop) tags.appendChild(el("span", "dw-ns", "nonstop"));
+        c.appendChild(tags);
+        grid.appendChild(c);
+      });
+      exp.appendChild(grid);
+
+      var foot = el("div", "dw-expf");
+      foot.appendChild(el("span", null, "These are the next " + win + " days only. HRT PRO opens the full calendar."));
+      var a = el("a", "dw-unlock", "Unlock the full calendar \u2192");
+      a.href = "#atmos"; a.setAttribute("data-route", "atmos");
+      foot.appendChild(a);
+      exp.appendChild(foot);
+
+      exp.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+    wrap.appendChild(exp);
     attachNav(rail, nav);
 
     /* business class: locked, and genuinely empty behind the blur */

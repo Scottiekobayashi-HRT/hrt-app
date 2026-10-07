@@ -437,7 +437,8 @@
   $("hmKama").textContent = hotels.length; $("navKama").textContent = D.length; $("ttKama").textContent = hotels.length + " hotel deals, " + (D.length - hotels.length) + " activities";
   var seen = {}, top = hotels.slice().sort(function(a,b){ return b.s - a.s; }).filter(function(d){ if(seen[d.b]) return false; seen[d.b] = 1; return true; }).slice(0,5);
   var isl = { oahu:"Oʻahu", maui:"Maui", hawaii:"Hawaiʻi Island", kauai:"Kauaʻi", lanai:"Lānaʻi", molokai:"Molokaʻi" };
-  $("hmKamaList").innerHTML = top.map(function(d){
+  var kl = $("hmKamaList"); if(!kl) return;
+  kl.innerHTML = top.map(function(d){
    var head = d.p ? d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate");
    return '<button type="button" class="mrow" data-kopen="'+D.indexOf(d)+'"><span class="mi">'+d.s+'</span><span class="mt"><b>'+esc(d.b)+'</b><span>'+esc(d.i.length === 1 ? isl[d.i[0]] : "Several islands")+(d.h ? ", " + esc(d.h) : "")+'</span></span><span class="mv">'+esc(head)+'<small>'+esc(d.r)+'</small></span></button>';
   }).join("");
@@ -445,7 +446,8 @@
  function homeVals(){
   var top = VALS.filter(function(v){ return v[1] === "cc"; }).sort(function(a,b){ return b[2] - a[2]; });
   var max = 2.4;
-  $("hmValBars").innerHTML = top.map(function(v){ return '<div class="bar"><span>'+esc(v[0])+'</span><div class="bartrack"><i style="width:'+(v[2]/max*100).toFixed(1)+'%"></i></div><b>'+v[2].toFixed(2)+'¢</b></div>'; }).join("")
+  var vb = $("hmValBars"); if(!vb){ $("ttVal").textContent = "Top: Bilt Rewards at 2.2¢"; return; }
+  vb.innerHTML = top.map(function(v){ return '<div class="bar"><span>'+esc(v[0])+'</span><div class="bartrack"><i style="width:'+(v[2]/max*100).toFixed(1)+'%"></i></div><b>'+v[2].toFixed(2)+'¢</b></div>'; }).join("")
    + '<div class="bar"><span>World of Hyatt</span><div class="bartrack"><i class="hotel" style="width:'+(1.7/max*100)+'%"></i></div><b>1.70¢</b></div>'
    + '<div class="bar"><span>American AAdvantage</span><div class="bartrack"><i class="air" style="width:'+(1.6/max*100)+'%"></i></div><b>1.60¢</b></div>';
   $("hmValNote").textContent = "Cents per point, " + VALUATIONS_UPDATED;
@@ -453,7 +455,8 @@
  }
  function homeLounges(){
   var picks = ["ana","iass","premier","united","deltanew"];
-  $("hmLounge").innerHTML = picks.map(function(id){ var l = LOUNGES.filter(function(x){ return x.id === id; })[0]; if(!l) return "";
+  var hl = $("hmLounge"); if(!hl) return;
+  hl.innerHTML = picks.map(function(id){ var l = LOUNGES.filter(function(x){ return x.id === id; })[0]; if(!l) return "";
    var tag = l.soon ? "Coming soon" : (l.tags.indexOf("priority-pass") > -1 ? "Priority Pass" : (l.r ? "★ " + l.r.toFixed(1) : ""));
    return '<button type="button" class="mrow" data-hlounge="'+l.id+'"><span class="mi">'+lgNum(l)+'</span><span class="mt"><b>'+esc(l.name)+'</b><span>'+esc(l.gate)+'</span></span><span class="mv" style="font-size:12px">'+esc(tag)+'</span></button>';
   }).join("");
