@@ -1,402 +1,469 @@
 /* ---------------------------------------------------------------------------
    atmos-status.js - HRT Atmos Status Planner (free tool)
 
-   Atmos Rewards lets members pick ONE way to earn flight points for the year:
-   by distance, by price, or by segment. The choice can only be changed once a
-   calendar year. Selections opened 1 Oct 2026 and apply to flights from
-   1 Jan 2027. Members who do nothing stay on distance.
+   Atmos Rewards lets members pick ONE way to earn flight points per calendar
+   year: distance, price, or segments. Selections opened 1 Oct 2026 for flights
+   from 1 Jan 2027, and the choice can only be changed once a year. Members who
+   do nothing stay on distance.
 
-   For Hawaii residents that default is usually the wrong one. An HNL-OGG hop is
-   about 100 miles each way, so distance pays 200 points for a round trip while
-   segments pay 1,000. This tool shows all three side by side and names the
-   winner for how YOU actually fly.
+   For Hawaii residents that default is usually wrong. An HNL-OGG hop is about
+   100 miles each way, so a round trip earns 200 points by distance and 1,000
+   by segment.
+
+   DESIGN NOTE: built for someone who has never heard of status points. Pick a
+   traveller type, move two sliders, read one big answer. No jargon on the
+   default view; miles, fares and segments live behind "Adjust the details".
 
    Program rules used (verified Oct 2026):
-     tiers        Silver 20,000 / Gold 40,000 / Platinum 80,000 / Titanium 135,000
-     distance     1 status point per mile flown
-     price        5 status points per dollar of fare, excluding taxes and fees
-     segment      500 status points per segment
-     elite bonus  Silver 25%, Gold 50%, Platinum 100%, Titanium 150%, on flights only
-     cards        Ascent 1 point per $3, Summit 1 per $2 plus a 10,000 anniversary
-                  bonus. Card earning is NOT affected by the earning choice.
-
-   Chart colours are validated for colour-blind separation and contrast in both
-   light and dark mode. Do not swap them without re-validating.
+     tiers    Silver 20,000 / Gold 40,000 / Platinum 80,000 / Titanium 135,000
+     distance 1 status point per mile flown
+     price    5 status points per dollar of fare, excluding taxes and fees
+     segment  500 status points per segment
+     bonus    Silver 25%, Gold 50%, Platinum 100%, Titanium 150%, flights only
+     cards    Ascent 1 per $3, Summit 1 per $2 plus a 10,000 anniversary bonus.
+              Card earning is NOT affected by the earning choice.
 
    Exposes window.HRT_ATMOS; app.js calls .show() from onShow.status.
 --------------------------------------------------------------------------- */
 (function () {
   "use strict";
 
-  /* ---------- program constants ---------- */
   var TIERS = [
     { key: "silver",   name: "Silver",   pts: 20000,  bonus: 0.25 },
     { key: "gold",     name: "Gold",     pts: 40000,  bonus: 0.50 },
     { key: "platinum", name: "Platinum", pts: 80000,  bonus: 1.00 },
     { key: "titanium", name: "Titanium", pts: 135000, bonus: 1.50 }
   ];
-  var PTS_PER_MILE = 1;
-  var PTS_PER_DOLLAR = 5;
-  var PTS_PER_SEGMENT = 500;
+  var PER_MILE = 1, PER_DOLLAR = 5, PER_SEGMENT = 500;
   var CARDS = {
-    none:   { label: "No Atmos card",      per: 0, anniversary: 0 },
-    ascent: { label: "Atmos Ascent / Business", per: 3, anniversary: 0 },
-    summit: { label: "Atmos Summit",       per: 2, anniversary: 10000 }
+    none:   { label: "None",   per: 0, anniversary: 0 },
+    ascent: { label: "Ascent", per: 3, anniversary: 0 },
+    summit: { label: "Summit", per: 2, anniversary: 10000 }
   };
 
-  /* Trip rows. Miles and fares are editable; these are starting points, not
-     promises. Segments default to 2 for a nonstop round trip. */
-  var DEFAULT_TRIPS = [
-    { id: "island",  label: "Inter-island",        hint: "HNL to OGG, KOA, LIH, ITO", trips: 6, miles: 110,  fare: 160,  segs: 2 },
-    { id: "west",    label: "West Coast",          hint: "HNL to LAX, SFO, SEA, LAS", trips: 2, miles: 2550, fare: 420,  segs: 2 },
-    { id: "japan",   label: "Japan or long haul",  hint: "HNL to HND, KIX, SYD",      trips: 1, miles: 3850, fare: 700,  segs: 2 }
+  /* A leg type: typical one-way miles, typical round-trip fare, segments per
+     round trip. Editable under "Adjust the details". */
+  var LEGS = {
+    island: { label: "Inter-island",  miles: 110,  fare: 160, segs: 2 },
+    west:   { label: "West Coast",    miles: 2550, fare: 420, segs: 2 },
+    far:    { label: "Japan or Australia", miles: 3850, fare: 700, segs: 2 }
+  };
+
+  /* Traveller presets. share = how the year's round trips split across legs. */
+  var PRESETS = [
+    { key: "island", name: "Island hopper",  blurb: "Mostly OGG, KOA, LIH, ITO",
+      trips: 14, mix: { island: 1 } },
+    { key: "mainland", name: "Mainland a few times", blurb: "LAX, SFO, SEA, LAS",
+      trips: 4, mix: { west: 1 } },
+    { key: "far", name: "Japan or Australia", blurb: "HND, KIX, SYD",
+      trips: 3, mix: { far: 1 } },
+    { key: "mix", name: "A bit of everything", blurb: "Islands plus the mainland",
+      trips: 10, mix: { island: 0.6, west: 0.3, far: 0.1 } }
   ];
+
+  var ICONS = {
+    island: '<path d="M12 21c-4 0-7-1.5-7-1.5M12 21V11M12 11c-3 0-5 1-6 2.5M12 11c3 0 5 1 6 2.5M12 11c-1-2-3-3-5-3M12 11c1-2 3-3 5-3"/>',
+    mainland: '<path d="M2 20h20M4 16l5-7 4 3 7-8"/><circle cx="20" cy="4" r="1.6"/>',
+    far: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>',
+    mix: '<path d="M4 7h6l4 10h6M4 17h6M18 4l3 3-3 3M18 14l3 3-3 3"/>'
+  };
 
   var PALETTE = { fly: "#d4722f", card: "#0b7fc0" };
 
-  /* ---------- state ---------- */
   var state = {
-    trips: DEFAULT_TRIPS.map(function (t) { return Object.assign({}, t); }),
+    preset: "island",
+    trips: 14,
     card: "ascent",
-    spend: 1500,        // per month
-    current: "none",    // current elite tier, drives the flight bonus
-    table: false
+    spend: 1500,
+    current: "none",
+    advanced: false,
+    legs: JSON.parse(JSON.stringify(LEGS))
   };
 
   /* ---------- helpers ---------- */
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+  function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
+  function svg(path, size) {
+    var s = '<svg width="' + (size || 22) + '" height="' + (size || 22) + '" viewBox="0 0 24 24" fill="none" ' +
+            'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
+    var w = document.createElement("span"); w.className = "ap-ic"; w.innerHTML = s; return w;
   }
   function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
-  function bonusFor(key) {
-    for (var i = 0; i < TIERS.length; i++) if (TIERS[i].key === key) return TIERS[i].bonus;
-    return 0;
-  }
-  function tierFor(pts) {
-    var reached = null;
-    for (var i = 0; i < TIERS.length; i++) if (pts >= TIERS[i].pts) reached = TIERS[i];
-    return reached;
-  }
-  function nextTier(pts) {
-    for (var i = 0; i < TIERS.length; i++) if (pts < TIERS[i].pts) return TIERS[i];
-    return null;
-  }
+  function presetFor(k) { for (var i = 0; i < PRESETS.length; i++) if (PRESETS[i].key === k) return PRESETS[i]; return PRESETS[0]; }
+  function bonusFor(k) { for (var i = 0; i < TIERS.length; i++) if (TIERS[i].key === k) return TIERS[i].bonus; return 0; }
+  function tierFor(p) { var r = null; for (var i = 0; i < TIERS.length; i++) if (p >= TIERS[i].pts) r = TIERS[i]; return r; }
+  function nextTier(p) { for (var i = 0; i < TIERS.length; i++) if (p < TIERS[i].pts) return TIERS[i]; return null; }
 
   /* ---------- the maths ---------- */
   function compute() {
+    var p = presetFor(state.preset);
     var b = 1 + bonusFor(state.current);
+    var total = Math.max(0, +state.trips || 0);
     var miles = 0, dollars = 0, segments = 0;
-    state.trips.forEach(function (t) {
-      var n = Math.max(0, +t.trips || 0);
-      miles    += n * (Math.max(0, +t.miles || 0) * 2);   // round trip
-      dollars  += n * Math.max(0, +t.fare || 0);
-      segments += n * Math.max(0, +t.segs || 0);
+    Object.keys(p.mix).forEach(function (k) {
+      var n = total * p.mix[k];
+      var L = state.legs[k];
+      miles    += n * (Math.max(0, +L.miles || 0) * 2);
+      dollars  += n * Math.max(0, +L.fare || 0);
+      segments += n * Math.max(0, +L.segs || 0);
     });
-
-    var card = CARDS[state.card] || CARDS.none;
-    var cardPts = card.per ? (Math.max(0, +state.spend || 0) * 12) / card.per : 0;
-    cardPts += card.anniversary;
+    var c = CARDS[state.card] || CARDS.none;
+    var cardPts = (c.per ? (Math.max(0, +state.spend || 0) * 12) / c.per : 0) + c.anniversary;
 
     var methods = [
-      { key: "distance", name: "By distance", sub: "1 point per mile",        fly: miles * PTS_PER_MILE * b,        detail: fmt(miles) + " miles flown" },
-      { key: "price",    name: "By price",    sub: "5 points per dollar",     fly: dollars * PTS_PER_DOLLAR * b,    detail: "$" + fmt(dollars) + " in fares" },
-      { key: "segment",  name: "By segment",  sub: "500 points per segment",  fly: segments * PTS_PER_SEGMENT * b,  detail: fmt(segments) + " segments" }
+      { key: "distance", name: "Distance", verb: "by distance", rule: "1 point per mile",      fly: miles * PER_MILE * b },
+      { key: "price",    name: "Price",    verb: "by price",    rule: "5 points per dollar",   fly: dollars * PER_DOLLAR * b },
+      { key: "segment",  name: "Segments", verb: "by segment",  rule: "500 points per flight", fly: segments * PER_SEGMENT * b }
     ];
     methods.forEach(function (m) { m.total = m.fly + cardPts; });
-
-    var best = methods.slice().sort(function (a, c) { return c.total - a.total; })[0];
-    return { methods: methods, cardPts: cardPts, best: best, bonus: b - 1,
-             totals: { miles: miles, dollars: dollars, segments: segments } };
+    var sorted = methods.slice().sort(function (a, z) { return z.total - a.total; });
+    return { methods: methods, sorted: sorted, best: sorted[0], runnerUp: sorted[1],
+             cardPts: cardPts, bonus: b - 1, miles: miles, dollars: dollars, segments: segments };
   }
 
-  /* ---------- rendering ---------- */
-  var host = null;
+  /* ---------- pieces ---------- */
+  function presetCards() {
+    var wrap = el("div", "ap-card");
+    wrap.appendChild(el("h3", "ap-q", "1. Which sounds most like you?"));
+    var grid = el("div", "ap-presets");
+    PRESETS.forEach(function (p) {
+      var b = el("button", "ap-p" + (p.key === state.preset ? " on" : ""));
+      b.type = "button";
+      b.appendChild(svg(ICONS[p.key], 26));
+      b.appendChild(el("b", null, p.name));
+      b.appendChild(el("span", null, p.blurb));
+      b.addEventListener("click", function () {
+        state.preset = p.key; state.trips = p.trips; redraw();
+      });
+      grid.appendChild(b);
+    });
+    wrap.appendChild(grid);
+    return wrap;
+  }
 
-  function field(label, node, hint) {
-    var w = el("label", "as-f");
-    w.appendChild(el("span", "as-fl", label));
-    w.appendChild(node);
-    if (hint) w.appendChild(el("span", "as-fh", hint));
+  function slider(label, value, min, max, step, suffix, onInput) {
+    var w = el("div", "ap-sl");
+    var head = el("div", "ap-slh");
+    head.appendChild(el("span", "ap-sll", label));
+    var val = el("b", "ap-slv", suffix(value));
+    head.appendChild(val);
+    w.appendChild(head);
+    var i = document.createElement("input");
+    i.type = "range"; i.min = min; i.max = max; i.step = step; i.value = value;
+    i.className = "ap-range";
+    i.addEventListener("input", function () { val.textContent = suffix(i.value); onInput(i.value); });
+    w.appendChild(i);
     return w;
   }
-  function numInput(value, onChange, min, step) {
-    var i = document.createElement("input");
-    i.type = "number"; i.value = value; i.min = (min == null ? 0 : min); i.step = step || 1;
-    i.className = "as-in";
-    i.addEventListener("input", function () { onChange(i.value); });
-    return i;
-  }
 
-  function renderInputs(wrap) {
-    var card = el("div", "as-card");
-    card.appendChild(el("h3", "as-h", "How do you fly in a year?"));
-    card.appendChild(el("p", "as-sub", "Round trips, not one way. Change the miles and fares to match your own trips."));
+  function inputsCard() {
+    var wrap = el("div", "ap-card");
+    wrap.appendChild(el("h3", "ap-q", "2. A couple of quick numbers"));
 
-    var grid = el("div", "as-trips");
-    state.trips.forEach(function (t) {
-      var row = el("div", "as-trip");
-      var head = el("div", "as-trip-h");
-      head.appendChild(el("b", null, t.label));
-      head.appendChild(el("span", "as-fh", t.hint));
-      row.appendChild(head);
+    wrap.appendChild(slider("Round trips a year", state.trips, 0, 40, 1,
+      function (v) { return v + (+v === 1 ? " trip" : " trips"); },
+      function (v) { state.trips = v; softRedraw(); }));
 
-      var ins = el("div", "as-trip-in");
-      ins.appendChild(field("Round trips", numInput(t.trips, function (v) { t.trips = v; redraw(); })));
-      ins.appendChild(field("Miles each way", numInput(t.miles, function (v) { t.miles = v; redraw(); })));
-      ins.appendChild(field("Fare per trip", numInput(t.fare, function (v) { t.fare = v; redraw(); }), "$, no taxes"));
-      ins.appendChild(field("Segments", numInput(t.segs, function (v) { t.segs = v; redraw(); }), "2 if nonstop"));
-      row.appendChild(ins);
-      grid.appendChild(row);
-    });
-    card.appendChild(grid);
-
-    var more = el("div", "as-more");
-
-    var cardSel = document.createElement("select");
-    cardSel.className = "as-in";
+    var cw = el("div", "ap-cardsel");
+    cw.appendChild(el("span", "ap-sll", "Atmos credit card"));
+    var row = el("div", "ap-seg3");
     Object.keys(CARDS).forEach(function (k) {
-      var o = document.createElement("option");
-      o.value = k; o.textContent = CARDS[k].label;
-      if (k === state.card) o.selected = true;
-      cardSel.appendChild(o);
+      var b = el("button", "ap-segb" + (k === state.card ? " on" : ""), CARDS[k].label);
+      b.type = "button";
+      b.addEventListener("click", function () { state.card = k; redraw(); });
+      row.appendChild(b);
     });
-    cardSel.addEventListener("change", function () { state.card = cardSel.value; redraw(); });
-    more.appendChild(field("Atmos credit card", cardSel));
-    more.appendChild(field("Card spend per month", numInput(state.spend, function (v) { state.spend = v; redraw(); }, 0, 50), "$"));
+    cw.appendChild(row);
+    wrap.appendChild(cw);
 
-    var tierSel = document.createElement("select");
-    tierSel.className = "as-in";
-    var none = document.createElement("option");
-    none.value = "none"; none.textContent = "No status yet";
-    tierSel.appendChild(none);
-    TIERS.forEach(function (t) {
-      var o = document.createElement("option");
-      o.value = t.key; o.textContent = t.name + " (+" + Math.round(t.bonus * 100) + "% on flights)";
-      if (t.key === state.current) o.selected = true;
-      tierSel.appendChild(o);
-    });
-    tierSel.addEventListener("change", function () { state.current = tierSel.value; redraw(); });
-    more.appendChild(field("Your status right now", tierSel));
+    if (state.card !== "none") {
+      wrap.appendChild(slider("Card spend a month", state.spend, 0, 10000, 250,
+        function (v) { return "$" + (+v).toLocaleString("en-US"); },
+        function (v) { state.spend = v; softRedraw(); }));
+    }
 
-    card.appendChild(more);
-    wrap.appendChild(card);
+    var adv = el("button", "ap-adv", (state.advanced ? "Hide the details" : "Adjust the details"));
+    adv.type = "button";
+    adv.addEventListener("click", function () { state.advanced = !state.advanced; redraw(); });
+    wrap.appendChild(adv);
+
+    if (state.advanced) {
+      var p = presetFor(state.preset);
+      var det = el("div", "ap-det");
+      det.appendChild(el("p", "ap-note", "Typical numbers for your trips. Change them if yours are different."));
+      Object.keys(p.mix).forEach(function (k) {
+        var L = state.legs[k];
+        var r = el("div", "ap-detrow");
+        r.appendChild(el("b", null, L.label));
+        var g = el("div", "ap-detg");
+        [["Miles each way", "miles"], ["Fare per round trip", "fare"], ["Flights per round trip", "segs"]].forEach(function (f) {
+          var lab = el("label", "ap-f");
+          lab.appendChild(el("span", "ap-fl", f[0]));
+          var inp = document.createElement("input");
+          inp.type = "number"; inp.min = 0; inp.value = L[f[1]]; inp.className = "ap-in";
+          inp.addEventListener("input", function () { L[f[1]] = inp.value; softRedraw(); });
+          lab.appendChild(inp);
+          g.appendChild(lab);
+        });
+        r.appendChild(g);
+        det.appendChild(r);
+      });
+      var st = el("label", "ap-f");
+      st.appendChild(el("span", "ap-fl", "Status you already hold"));
+      var sel = document.createElement("select"); sel.className = "ap-in";
+      var o0 = document.createElement("option"); o0.value = "none"; o0.textContent = "None yet"; sel.appendChild(o0);
+      TIERS.forEach(function (t) {
+        var o = document.createElement("option"); o.value = t.key;
+        o.textContent = t.name + " (+" + Math.round(t.bonus * 100) + "% on flights)";
+        if (t.key === state.current) o.selected = true; sel.appendChild(o);
+      });
+      sel.addEventListener("change", function () { state.current = sel.value; redraw(); });
+      st.appendChild(sel);
+      det.appendChild(st);
+      wrap.appendChild(det);
+    }
+    return wrap;
   }
 
-  function renderResult(wrap, r) {
-    var max = Math.max.apply(null, r.methods.map(function (m) { return m.total; })) || 1;
+  function answerCard(r) {
+    var wrap = el("div", "ap-card ap-answer");
+    wrap.appendChild(el("span", "ap-pill", "Your answer"));
+    wrap.appendChild(el("h2", "ap-big", "Earn " + r.best.verb));
+    wrap.appendChild(el("p", "ap-bigsub", r.best.rule + ", which gets you " + fmt(r.best.total) + " status points a year."));
 
-    /* headline */
-    var head = el("div", "as-card as-hero");
-    var win = el("div", "as-win");
-    win.appendChild(el("span", "as-pill", "Best for how you fly"));
-    win.appendChild(el("h3", "as-wint", r.best.name));
-    win.appendChild(el("p", "as-wins", r.best.sub + ". " + fmt(r.best.total) + " status points a year."));
-    head.appendChild(win);
+    var gap = r.best.total - r.runnerUp.total;
+    var dflt = r.methods[0]; // distance is the do-nothing default
+    if (r.best.key !== "distance" && r.best.total > dflt.total) {
+      wrap.appendChild(el("p", "ap-cost",
+        "Doing nothing leaves you on distance and costs you " + fmt(r.best.total - dflt.total) + " points a year."));
+    } else if (gap > 0) {
+      wrap.appendChild(el("p", "ap-cost", "That is " + fmt(gap) + " more than the next best option."));
+    }
 
-    var reached = tierFor(r.best.total);
-    var nxt = nextTier(r.best.total);
-    var tierBox = el("div", "as-tier");
-    tierBox.appendChild(el("b", "as-tiername", reached ? reached.name : "No status yet"));
-    tierBox.appendChild(el("span", "as-tiersub",
-      nxt ? fmt(nxt.pts - r.best.total) + " more for " + nxt.name : "Top tier reached"));
-    head.appendChild(tierBox);
-    wrap.appendChild(head);
-
-    /* comparison chart */
-    var chart = el("div", "as-card");
-    chart.appendChild(el("h3", "as-h", "All three ways, side by side"));
-
-    var legend = el("div", "as-legend");
-    [["fly", "Flying"], ["card", "Card spend"]].forEach(function (p) {
-      var i = el("span", "as-lg");
-      var sw = el("i", "as-sw"); sw.style.background = PALETTE[p[0]];
-      i.appendChild(sw); i.appendChild(el("span", null, p[1]));
-      legend.appendChild(i);
+    var reached = tierFor(r.best.total), nxt = nextTier(r.best.total);
+    var lad = el("div", "ap-ladder");
+    TIERS.forEach(function (t) {
+      var hit = r.best.total >= t.pts;
+      var b = el("div", "ap-badge" + (hit ? " hit" : ""));
+      b.appendChild(el("i", "ap-bdot", hit ? "✓" : ""));
+      b.appendChild(el("b", null, t.name));
+      b.appendChild(el("span", null, fmt(t.pts)));
+      lad.appendChild(b);
     });
-    chart.appendChild(legend);
+    wrap.appendChild(lad);
+    wrap.appendChild(el("p", "ap-tierline", reached
+      ? "That reaches " + reached.name + (nxt ? ", and you are " + fmt(nxt.pts - r.best.total) + " points short of " + nxt.name + "." : ", the top tier.")
+      : "That is " + fmt(TIERS[0].pts - r.best.total) + " points short of Silver, the first tier."));
+    return wrap;
+  }
 
-    var rows = el("div", "as-bars");
+  function compareCard(r) {
+    var wrap = el("div", "ap-card");
+    wrap.appendChild(el("h3", "ap-q", "How the three compare"));
+    var max = Math.max.apply(null, r.methods.map(function (m) { return m.total; })) || 1;
+    var legend = el("div", "ap-legend");
+    [["fly", "From flying"], ["card", "From card spend"]].forEach(function (p) {
+      var i = el("span", "ap-lg"); var sw = el("i", "ap-sw"); sw.style.background = PALETTE[p[0]];
+      i.appendChild(sw); i.appendChild(el("span", null, p[1])); legend.appendChild(i);
+    });
+    wrap.appendChild(legend);
+    var rows = el("div", "ap-bars");
     r.methods.forEach(function (m) {
-      var row = el("div", "as-bar" + (m.key === r.best.key ? " best" : ""));
-      var lab = el("div", "as-barl");
-      lab.appendChild(el("b", null, m.name));
-      lab.appendChild(el("span", "as-fh", m.detail));
-      row.appendChild(lab);
-
-      var track = el("div", "as-track");
-      var flyW = (m.fly / max) * 100, cardW = (r.cardPts / max) * 100;
-      var sFly = el("i", "as-seg fly"); sFly.style.width = flyW + "%";
-      sFly.title = "Flying: " + fmt(m.fly) + " status points";
-      var sCard = el("i", "as-seg card"); sCard.style.width = cardW + "%";
-      sCard.title = "Card spend: " + fmt(r.cardPts) + " status points";
-      track.appendChild(sFly); track.appendChild(sCard);
-      row.appendChild(track);
-
-      row.appendChild(el("div", "as-barv", fmt(m.total)));
+      var row = el("div", "ap-bar" + (m.key === r.best.key ? " best" : ""));
+      row.appendChild(el("div", "ap-barl", m.name));
+      var tr = el("div", "ap-track");
+      var f = el("i", "ap-seg fly"); f.style.width = (m.fly / max * 100) + "%";
+      f.title = "From flying: " + fmt(m.fly) + " points";
+      var c = el("i", "ap-seg card"); c.style.width = (r.cardPts / max * 100) + "%";
+      c.title = "From card spend: " + fmt(r.cardPts) + " points";
+      tr.appendChild(f); tr.appendChild(c); row.appendChild(tr);
+      row.appendChild(el("div", "ap-barv", fmt(m.total)));
       rows.appendChild(row);
     });
-    chart.appendChild(rows);
-
-    /* tier ladder, drawn against the best method */
-    var ladder = el("div", "as-ladder");
-    var top = TIERS[TIERS.length - 1].pts;
-    var scale = Math.max(top, r.best.total);
-    var fill = el("i", "as-lfill");
-    fill.style.width = Math.min(100, (r.best.total / scale) * 100) + "%";
-    ladder.appendChild(fill);
-    TIERS.forEach(function (t) {
-      var m = el("span", "as-mark" + (r.best.total >= t.pts ? " hit" : ""));
-      m.style.left = (t.pts / scale) * 100 + "%";
-      m.appendChild(el("i", "as-dot"));
-      m.appendChild(el("span", "as-mt", t.name));
-      m.appendChild(el("span", "as-mp", fmt(t.pts)));
-      ladder.appendChild(m);
-    });
-    chart.appendChild(ladder);
-
-    var tbtn = el("button", "as-tbtn", state.table ? "Hide the numbers" : "Show the numbers");
-    tbtn.type = "button";
-    tbtn.addEventListener("click", function () { state.table = !state.table; redraw(); });
-    chart.appendChild(tbtn);
-
-    if (state.table) {
-      var tbl = document.createElement("table");
-      tbl.className = "as-table";
-      tbl.innerHTML = "<thead><tr><th>Method</th><th>Flying</th><th>Card spend</th><th>Total</th><th>Tier</th></tr></thead>";
-      var tb = document.createElement("tbody");
-      r.methods.forEach(function (m) {
-        var t = tierFor(m.total);
-        var tr = document.createElement("tr");
-        [m.name, fmt(m.fly), fmt(r.cardPts), fmt(m.total), t ? t.name : "None"].forEach(function (v, i) {
-          var td = document.createElement(i === 0 ? "th" : "td");
-          td.textContent = v; tr.appendChild(td);
-        });
-        tb.appendChild(tr);
-      });
-      tbl.appendChild(tb);
-      chart.appendChild(tbl);
-    }
-    wrap.appendChild(chart);
-
-    /* the why */
-    var why = el("div", "as-card as-why");
-    why.appendChild(el("h3", "as-h", "What this means for you"));
-    var ul = el("ul", "as-list");
-    var d = r.methods[0], p = r.methods[1], s = r.methods[2];
-    if (r.best.key === "segment") {
-      ul.appendChild(el("li", null, "Short hops are why segments win. Every flight pays a flat 500 points no matter how far it goes, so inter-island travel counts the same as a mainland leg."));
-      ul.appendChild(el("li", null, "Staying on the distance default would cost you " + fmt(s.total - d.total) + " status points a year."));
-    } else if (r.best.key === "distance") {
-      ul.appendChild(el("li", null, "Long flights are why distance wins for you. Segments would pay " + fmt(s.total) + " and price would pay " + fmt(p.total) + "."));
-    } else {
-      ul.appendChild(el("li", null, "Your fares are high enough that price earning wins. Distance would pay " + fmt(d.total) + " and segments " + fmt(s.total) + "."));
-    }
-    if (r.cardPts > 0) {
-      ul.appendChild(el("li", null, "Your card adds " + fmt(r.cardPts) + " status points, and that is the same whichever earning method you choose."));
-    }
-    if (r.bonus > 0) {
-      ul.appendChild(el("li", null, "Your current status adds a " + Math.round(r.bonus * 100) + "% bonus on flight earning, already included above."));
-    }
-    ul.appendChild(el("li", null, "You can change your earning choice once per calendar year. Members who do nothing stay on distance."));
-    why.appendChild(ul);
-    why.appendChild(el("p", "as-note", "Estimates only, for planning. Based on published Atmos Rewards earning rates as of October 2026. Taxes and fees do not earn on the price method. Confirm current rules with Alaska before making decisions."));
-    wrap.appendChild(why);
+    wrap.appendChild(rows);
+    return wrap;
   }
 
-  function redraw() {
-    if (!host) return;
-    host.innerHTML = "";
+  /* The teaching graphic: why a flat 500 changes everything on short hops. */
+  function explainCard() {
+    var wrap = el("div", "ap-card ap-explain");
+    wrap.appendChild(el("h3", "ap-q", "Why the choice matters"));
+    wrap.appendChild(el("p", "ap-note", "Segments pay the same 500 points whether you fly 20 minutes or 9 hours. That is what makes short island hops so valuable."));
+    var ex = [
+      { name: "HNL to OGG", sub: "about 100 miles", miles: 100, fare: 80 },
+      { name: "HNL to Tokyo", sub: "about 3,850 miles", miles: 3850, fare: 350 }
+    ];
+    var g = el("div", "ap-ex");
+    ex.forEach(function (f) {
+      var vals = [
+        { k: "Distance", v: f.miles * PER_MILE },
+        { k: "Price",    v: f.fare * PER_DOLLAR },
+        { k: "Segments", v: PER_SEGMENT }
+      ];
+      var top = Math.max.apply(null, vals.map(function (v) { return v.v; }));
+      var cc = el("div", "ap-exc");
+      var h = el("div", "ap-exh");
+      h.appendChild(svg('<path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" fill="currentColor" stroke="none"/>', 16));
+      var ht = el("div");
+      ht.appendChild(el("b", null, f.name));
+      ht.appendChild(el("span", "ap-exs", f.sub + ", one way"));
+      h.appendChild(ht);
+      cc.appendChild(h);
+      vals.forEach(function (v) {
+        var r = el("div", "ap-exr");
+        r.appendChild(el("span", "ap-exk", v.k));
+        var t = el("div", "ap-extr");
+        var b = el("i"); b.style.width = (v.v / top * 100) + "%";
+        if (v.k === "Segments") b.className = "hi";
+        t.appendChild(b);
+        r.appendChild(t);
+        r.appendChild(el("span", "ap-exv", fmt(v.v)));
+        cc.appendChild(r);
+      });
+      g.appendChild(cc);
+    });
+    wrap.appendChild(g);
+    wrap.appendChild(el("p", "ap-note", "Points shown are for one flight, before any status bonus. A short hop earns 5 times more on segments than on distance."));
+    return wrap;
+  }
+
+  function footerCard(r) {
+    var wrap = el("div", "ap-card");
+    var ul = el("ul", "ap-list");
+    if (r.cardPts > 0) ul.appendChild(el("li", null, "Your card adds " + fmt(r.cardPts) + " points, and that part is the same whichever option you pick."));
+    if (r.bonus > 0) ul.appendChild(el("li", null, "Your current status adds " + Math.round(r.bonus * 100) + "% on flights, already counted above."));
+    ul.appendChild(el("li", null, "You can change your choice once per calendar year. Members who do nothing stay on distance."));
+    wrap.appendChild(ul);
+    wrap.appendChild(el("p", "ap-note", "Estimates for planning only, based on published Atmos Rewards rates as of October 2026. Taxes and fees do not earn on the price option. Confirm current rules with Alaska before deciding."));
+    return wrap;
+  }
+
+  /* ---------- render ---------- */
+  var host = null;
+  function paint() {
     var r = compute();
-    var grid = el("div", "as-grid");
-    var left = el("div"); renderInputs(left);
-    var right = el("div"); renderResult(right, r);
-    grid.appendChild(left); grid.appendChild(right);
+    host.innerHTML = "";
+    var grid = el("div", "ap-grid");
+    var L = el("div", "ap-col");
+    L.appendChild(presetCards());
+    L.appendChild(inputsCard());
+    var R = el("div", "ap-col");
+    R.appendChild(answerCard(r));
+    R.appendChild(compareCard(r));
+    R.appendChild(explainCard());
+    R.appendChild(footerCard(r));
+    grid.appendChild(L); grid.appendChild(R);
     host.appendChild(grid);
   }
+  function redraw() { if (host) paint(); }
+  /* Sliders must not lose focus mid-drag, so only the right column repaints. */
+  var softTimer = null;
+  function softRedraw() {
+    if (!host) return;
+    clearTimeout(softTimer);
+    softTimer = setTimeout(function () {
+      var r = compute();
+      var col = host.querySelectorAll(".ap-col")[1];
+      if (!col) return paint();
+      col.innerHTML = "";
+      col.appendChild(answerCard(r));
+      col.appendChild(compareCard(r));
+      col.appendChild(explainCard());
+      col.appendChild(footerCard(r));
+    }, 40);
+  }
 
-  /* ---------- styles ---------- */
   function styles() {
-    if (document.getElementById("as-css")) return;
-    var s = document.createElement("style");
-    s.id = "as-css";
+    if (document.getElementById("ap-css")) return;
+    var s = document.createElement("style"); s.id = "ap-css";
     s.textContent = [
-      ".as-grid{display:grid;grid-template-columns:minmax(290px,370px) 1fr;gap:16px;align-items:start}",
-      "@media (max-width:900px){.as-grid{grid-template-columns:1fr}}",
-      ".as-card{border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}",
-      ".as-h{margin:0 0 4px;font-size:15.5px;color:var(--text)}",
-      ".as-sub{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.45}",
-      ".as-trip{border:1px solid var(--line);border-radius:12px;padding:10px 11px;margin-bottom:9px;background:var(--surface-2,#f7f9fb)}",
-      ".as-trip-h{display:flex;flex-wrap:wrap;gap:7px;align-items:baseline;margin-bottom:8px}",
-      ".as-trip-h b{font-size:13.5px;color:var(--text)}",
-      ".as-trip-in{display:grid;grid-template-columns:1fr 1fr;gap:8px}",
-      ".as-f{display:flex;flex-direction:column;gap:3px}",
-      ".as-fl{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}",
-      ".as-fh{font-size:11px;color:var(--muted);font-weight:600}",
-      ".as-in{font:inherit;font-size:13.5px;font-weight:700;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 9px;width:100%;box-sizing:border-box}",
-      ".as-in:focus{outline:2px solid var(--coral);outline-offset:1px;border-color:var(--coral)}",
-      ".as-more{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}",
-      /* headline */
-      ".as-hero{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;background:linear-gradient(120deg,#0e1b2c 0%,#16294a 72%,#22304a 100%);border-color:rgba(242,184,75,.45)}",
-      ".as-win{min-width:220px;flex:1}",
-      ".as-pill{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:4px 10px}",
-      ".as-wint{margin:8px 0 2px;color:#fff;font-size:24px}",
-      ".as-wins{margin:0;color:#c7d4e2;font-size:13px}",
-      ".as-tier{text-align:right;min-width:150px}",
-      ".as-tiername{display:block;font-size:20px;font-weight:800;color:#f5c75a;line-height:1.15}",
-      ".as-tiersub{font-size:11.5px;font-weight:700;color:#c7d4e2}",
-      /* chart */
-      ".as-legend{display:flex;gap:14px;margin:2px 0 12px}",
-      ".as-lg{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--muted)}",
-      ".as-sw{width:11px;height:11px;border-radius:3px;display:inline-block}",
-      ".as-bars{display:flex;flex-direction:column;gap:11px}",
-      ".as-bar{display:grid;grid-template-columns:132px 1fr 76px;gap:11px;align-items:center}",
-      "@media (max-width:620px){.as-bar{grid-template-columns:1fr;gap:4px}.as-barv{text-align:left}}",
-      ".as-barl b{display:block;font-size:13px;color:var(--text)}",
-      ".as-track{display:flex;gap:2px;height:22px;align-items:stretch}",
-      ".as-seg{display:block;height:100%;border-radius:0 4px 4px 0;min-width:2px}",
-      ".as-seg:first-child{border-radius:4px 0 0 4px}",
-      ".as-seg.fly{background:" + PALETTE.fly + "}",
-      ".as-seg.card{background:" + PALETTE.card + "}",
-      ".as-barv{font-weight:800;font-size:15px;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}",
-      ".as-bar.best .as-barv{color:var(--text)}",
-      ".as-bar.best .as-barl b:after{content:'Best';margin-left:7px;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:2px 7px;vertical-align:middle}",
-      /* ladder */
-      ".as-ladder{position:relative;height:58px;margin:26px 0 4px;border-radius:999px;background:var(--surface-2,#f7f9fb);border:1px solid var(--line)}",
-      ".as-ladder>.as-lfill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(212,114,47,.22),rgba(212,114,47,.5))}",
-      ".as-mark{position:absolute;top:0;transform:translateX(-50%);text-align:center;width:74px}",
-      ".as-mark .as-dot{display:block;width:9px;height:9px;border-radius:50%;margin:-5px auto 3px;background:var(--line);border:2px solid var(--surface)}",
-      ".as-mark.hit .as-dot{background:" + PALETTE.fly + "}",
-      ".as-mt{display:block;font-size:11px;font-weight:800;color:var(--muted)}",
-      ".as-mark.hit .as-mt{color:var(--text)}",
-      ".as-mp{display:block;font-size:10px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}",
-      /* table + notes */
-      ".as-tbtn{margin-top:14px;font:inherit;font-size:12px;font-weight:700;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 11px;cursor:pointer}",
-      ".as-tbtn:hover{border-color:var(--coral)}",
-      ".as-table{width:100%;border-collapse:collapse;margin-top:11px;font-size:12.5px}",
-      ".as-table th,.as-table td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}",
-      ".as-table thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}",
-      ".as-table tbody th{text-align:left;font-weight:700;color:var(--text)}",
-      ".as-list{margin:0;padding-left:18px;color:var(--text);font-size:13px;line-height:1.55}",
-      ".as-list li{margin-bottom:7px}",
-      ".as-note{margin:12px 0 0;font-size:11px;color:var(--muted);line-height:1.45}"
+      ".ap-grid{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:16px;align-items:start}",
+      "@media (max-width:920px){.ap-grid{grid-template-columns:1fr}}",
+      ".ap-card{border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}",
+      ".ap-q{margin:0 0 11px;font-size:15px;color:var(--text)}",
+      ".ap-note{margin:0 0 10px;font-size:11.5px;color:var(--muted);line-height:1.5}",
+      ".ap-ic{display:inline-flex;color:var(--coral)}",
+      /* presets */
+      ".ap-presets{display:grid;grid-template-columns:1fr 1fr;gap:9px}",
+      ".ap-p{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;font:inherit;cursor:pointer;padding:12px 11px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface-2,#f7f9fb);color:var(--text)}",
+      ".ap-p b{font-size:13px;line-height:1.25}",
+      ".ap-p span{font-size:10.5px;color:var(--muted);font-weight:600;line-height:1.3}",
+      ".ap-p:hover{border-color:var(--coral)}",
+      ".ap-p.on{border-color:var(--coral);background:color-mix(in srgb,var(--coral) 10%,var(--surface));box-shadow:0 0 0 1px var(--coral) inset}",
+      /* sliders */
+      ".ap-sl{margin-bottom:14px}",
+      ".ap-slh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}",
+      ".ap-sll{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}",
+      ".ap-slv{font-size:15px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}",
+      ".ap-range{width:100%;accent-color:var(--coral);height:22px}",
+      ".ap-cardsel{margin-bottom:14px}",
+      ".ap-seg3{display:flex;gap:6px;margin-top:5px}",
+      ".ap-segb{flex:1;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:8px 6px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--text)}",
+      ".ap-segb.on{border-color:var(--coral);background:color-mix(in srgb,var(--coral) 12%,var(--surface))}",
+      ".ap-adv{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline}",
+      ".ap-adv:hover{color:var(--coral)}",
+      ".ap-det{margin-top:10px;padding-top:11px;border-top:1px solid var(--line)}",
+      ".ap-detrow{margin-bottom:11px}",
+      ".ap-detrow>b{display:block;font-size:12.5px;margin-bottom:5px;color:var(--text)}",
+      ".ap-detg{display:grid;grid-template-columns:1fr 1fr;gap:7px}",
+      ".ap-f{display:flex;flex-direction:column;gap:3px}",
+      ".ap-fl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}",
+      ".ap-in{font:inherit;font-size:13px;font-weight:700;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%;box-sizing:border-box}",
+      /* the answer */
+      ".ap-answer{background:linear-gradient(130deg,#0e1b2c 0%,#16294a 70%,#22304a 100%);border-color:rgba(242,184,75,.45)}",
+      ".ap-answer .ap-pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:4px 10px}",
+      ".ap-answer .ap-big{margin:10px 0 4px;color:#fff;font-size:30px;line-height:1.1}",
+      "@media (max-width:560px){.ap-answer .ap-big{font-size:24px}}",
+      ".ap-answer .ap-bigsub{margin:0;color:#dce6f1;font-size:14px}",
+      ".ap-answer .ap-cost{margin:11px 0 0;color:#f5c75a;font-size:13.5px;font-weight:700}",
+      ".ap-answer .ap-tierline{margin:12px 0 0;color:#c7d4e2;font-size:12.5px}",
+      ".ap-ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}",
+      ".ap-badge{text-align:center;padding:9px 4px;border-radius:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05)}",
+      ".ap-badge b{display:block;font-size:11.5px;color:#9fb2c7;margin-top:3px}",
+      ".ap-badge span{display:block;font-size:10px;color:#7c8ea3;font-variant-numeric:tabular-nums}",
+      ".ap-bdot{display:block;width:17px;height:17px;line-height:17px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,.1);color:transparent;font-size:10px;font-style:normal;font-weight:800}",
+      ".ap-badge.hit{border-color:rgba(242,184,75,.55);background:rgba(242,184,75,.12)}",
+      ".ap-badge.hit .ap-bdot{background:linear-gradient(135deg,#f5c75a,#e8824c);color:#1a1204}",
+      ".ap-badge.hit b{color:#fff}",
+      ".ap-badge.hit span{color:#f5c75a}",
+      /* compare */
+      ".ap-legend{display:flex;gap:14px;margin:-2px 0 11px}",
+      ".ap-lg{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted)}",
+      ".ap-sw{width:10px;height:10px;border-radius:3px;display:inline-block}",
+      ".ap-bars{display:flex;flex-direction:column;gap:9px}",
+      ".ap-bar{display:grid;grid-template-columns:104px 1fr 70px;gap:10px;align-items:center}",
+      ".ap-barl{font-size:12.5px;font-weight:700;color:var(--text)}",
+      ".ap-bar.best .ap-barl:after{content:'Best';display:inline-block;margin-left:6px;font-size:9px;font-weight:800;text-transform:uppercase;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:1px 6px}",
+      ".ap-track{display:flex;gap:2px;height:20px}",
+      ".ap-seg{display:block;height:100%;border-radius:0 4px 4px 0;min-width:2px}",
+      ".ap-seg:first-child{border-radius:4px 0 0 4px}",
+      ".ap-seg.fly{background:" + PALETTE.fly + "}",
+      ".ap-seg.card{background:" + PALETTE.card + "}",
+      ".ap-barv{text-align:right;font-weight:800;font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}",
+      /* explainer */
+      ".ap-ex{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 10px}",
+      "@media (max-width:620px){.ap-ex{grid-template-columns:1fr}.ap-bar{grid-template-columns:70px 1fr 62px}}",
+      ".ap-exc{border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--surface-2,#f7f9fb)}",
+      ".ap-exh{display:flex;gap:8px;align-items:flex-start;margin-bottom:9px}",
+      ".ap-exh b{display:block;font-size:12.5px;color:var(--text)}",
+      ".ap-exs{display:block;font-size:10.5px;color:var(--muted);font-weight:600}",
+      ".ap-exr{display:grid;grid-template-columns:58px 1fr 42px;gap:7px;align-items:center;margin-bottom:5px}",
+      ".ap-exk{font-size:10.5px;font-weight:700;color:var(--muted)}",
+      ".ap-extr{height:12px;background:var(--line);border-radius:4px;overflow:hidden}",
+      ".ap-extr i{display:block;height:100%;border-radius:4px;background:var(--muted);opacity:.55}",
+      ".ap-extr i.hi{background:" + PALETTE.fly + ";opacity:1}",
+      ".ap-exv{font-size:11px;font-weight:800;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}",
+      ".ap-list{margin:0 0 10px;padding-left:17px;font-size:12.5px;color:var(--text);line-height:1.55}",
+      ".ap-list li{margin-bottom:6px}"
     ].join("");
     document.head.appendChild(s);
   }
 
-  /* ---------- public ---------- */
   window.HRT_ATMOS = {
-    /* exposed so the numbers can be unit tested without a browser */
-    _test: { compute: compute, tierFor: tierFor, state: state },
+    _test: { compute: compute, tierFor: tierFor, state: state, PRESETS: PRESETS },
     show: function () {
       styles();
       host = document.getElementById("as-host");
-      if (host && !host.getAttribute("data-ready")) {
-        host.setAttribute("data-ready", "1");
-        redraw();
-      }
+      if (host && !host.getAttribute("data-ready")) { host.setAttribute("data-ready", "1"); paint(); }
     }
   };
 })();
