@@ -87,6 +87,7 @@ html.ms-pro .procard{border-color:rgba(242,184,75,.55)}
  <span class="hrt-lbl">Travel</span>
  <a class="hrt-navi free-only" href="#atmos" data-route="atmos"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="nm">Atmos Award Calendar</span><span class="cnt pro-b">PRO</span></a>
  <a class="hrt-navi" href="#lounges" data-route="lounges"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 12a2 2 0 0 1 4 0v3h10v-3a2 2 0 0 1 4 0v5H3Z"/><path d="M6 17v3M18 17v3"/></svg></span><span class="nm">HNL Lounge Map</span><span class="cnt tnum" id="navLounge"></span></a>
+<a class="hrt-navi" href="#status" data-route="status"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V9M10 20V4M16 20v-8M22 20H2"/><path d="m4.5 6.5 5-3 5 4 5-4"/></svg></span><span class="nm">Atmos Status Planner</span><span class="cnt">FREE</span></a>
 
  <span class="hrt-lbl">Points &amp; Cards</span>
  <a class="hrt-navi" href="#transfers" data-route="transfers"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></span><span class="nm">Transfer Bonuses</span><span class="cnt tnum" id="navTb"></span></a>
@@ -434,6 +435,14 @@ html.ms-pro .procard{border-color:rgba(242,184,75,.55)}
 </section>
 
 <!-- ================= WELCOME BONUSES (coming soon) ================= -->
+<!-- ================= ATMOS STATUS PLANNER (free) ================= -->
+<section class="view" data-page="status" id="v-status">
+<div class="content">
+ <div class="sec-h" style="padding-left:2px;padding-right:2px"><h2>Atmos Status Planner</h2><span class="note">Free tool from Hawaii Reward Travel</span></div>
+ <div id="as-host"></div>
+</div>
+</section>
+
 <section class="view" data-page="welcome" id="v-welcome">
 <div class="content">
  <div class="hero slim">
@@ -611,6 +620,7 @@ html.ms-pro .procard{border-color:rgba(242,184,75,.55)}
 <script src="assets/kamaaina.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/dealwall.js"></script>
+<script src="assets/atmos-status.js"></script>
 <script>
 /* SANDBOX: unlock Atmos placeholder for Atmos Calendar or All Access members */
 (function(){

@@ -40,7 +40,8 @@
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
   values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
-  resy:{ title:"Resy Hawaiʻi Map", hint:"Amex Resy Credit status" }
+  resy:{ title:"Resy Hawaiʻi Map", hint:"Amex Resy Credit status" },
+  status:{ title:"Atmos Status Planner", hint:"Pick the right way to earn" }
  };
  var shown = {}, current = null;
  var onShow = {};
@@ -464,6 +465,7 @@
   if(hl){ route("lounges"); LG.f = "all"; LG.active = null; lgSet(hl.getAttribute("data-hlounge")); return; }
  });
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
+ onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };
 
  /* ============================== BOOT ============================== */
  homeKama(); homeVals(); homeLounges(); tbLoad();
