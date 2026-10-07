@@ -15,11 +15,16 @@
    default view; miles, fares and segments live behind "Adjust the details".
 
    Program rules used (verified Oct 2026):
+     Source: alaskaair.com/content/earn-points/choose-how-you-earn, read 7 Oct 2026.
      tiers    Silver 20,000 / Gold 40,000 / Platinum 80,000 / Titanium 135,000
      distance 1 status point per mile flown
      price    5 status points per dollar of fare, excluding taxes and fees
      segment  500 status points per segment
-     bonus    Silver 25%, Gold 50%, Platinum 100%, Titanium 150%, flights only
+     bonus    Silver 25%, Gold 50%, Platinum 100%, Titanium 150%; Alaska states
+              these apply across all three earn choices
+     award    all three earn STATUS points on award travel: distance by miles,
+              segments at the full 500, price at 1 per 20 points redeemed
+     zero     Saver and Basic Economy fares earn nothing on any choice
      cards    Ascent 1 per $3, Summit 1 per $2 plus a 10,000 anniversary bonus.
               Card earning is NOT affected by the earning choice.
 
@@ -34,6 +39,7 @@
     { key: "platinum", name: "Platinum", pts: 80000,  bonus: 1.00 },
     { key: "titanium", name: "Titanium", pts: 135000, bonus: 1.50 }
   ];
+  var CARD_CAP = 10000; /* above this, monthly card spend stops being advice */
   var PER_MILE = 1, PER_DOLLAR = 5, PER_SEGMENT = 500;
   var CARDS = {
     none:   { label: "None",   per: 0, anniversary: 0 },
@@ -66,6 +72,34 @@
     mainland: '<path d="M2 20h20M4 16l5-7 4 3 7-8"/><circle cx="20" cy="4" r="1.6"/>',
     far: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>',
     mix: '<path d="M4 7h6l4 10h6M4 17h6M18 4l3 3-3 3M18 14l3 3-3 3"/>'
+  };
+
+
+  /* Copy for the three choices. Wording checked against Alaska's own
+     "Choose how you earn" page, 7 Oct 2026. Do not soften these: the award
+     travel and fine print lines are the parts people get wrong. */
+  var OPTIONS = {
+    distance: {
+      name: "By distance traveled",
+      rate: "1 mile flown = 1 point",
+      bestFor: "The classic way to earn. Best when most of your flying is long haul.",
+      award: "Award flights earn status points by distance too.",
+      watch: "From 1 January 2027 this drops cabin bonuses and the 500 point minimum on flights under 500 miles."
+    },
+    price: {
+      name: "By price paid",
+      rate: "$1 spent = 5 points",
+      bestFor: "Best when you mix trip lengths and cabins, or buy premium seats.",
+      award: "Earn 1 status point for every 20 points you redeem on award travel.",
+      watch: "Fare and carrier surcharges count. Taxes and fees do not."
+    },
+    segment: {
+      name: "By segments flown",
+      rate: "500 points per segment",
+      bestFor: "Great for short hop travelers. Alaska names Neighbor Island travel.",
+      award: "Award flights earn the full 500 status points per segment.",
+      watch: "Every flight pays the same, whether it is 20 minutes or 9 hours."
+    }
   };
 
   var PALETTE = { fly: "#d4722f", card: "#0b7fc0" };
@@ -224,19 +258,54 @@
     return wrap;
   }
 
-  function answerCard(r) {
-    var wrap = el("div", "ap-card ap-answer");
+  /* THE headline. Atmos's "choose how you earn" is the decision this tool
+     exists for, so the three options are the first thing on the page and the
+     winner is obvious without reading a word of body copy. */
+  function choiceCards(r) {
+    var wrap = el("div", "ap-card ap-answer ap-choice");
     wrap.appendChild(el("span", "ap-pill", "Your answer"));
     wrap.appendChild(el("h2", "ap-big", "Earn " + r.best.verb));
-    wrap.appendChild(el("p", "ap-bigsub", r.best.rule + ", which gets you " + fmt(r.best.total) + " status points a year."));
+    wrap.appendChild(el("p", "ap-bigsub", OPTIONS[r.best.key].rate + ", which gets you " +
+      fmt(r.best.total) + " status points a year."));
 
-    var gap = r.best.total - r.runnerUp.total;
-    var dflt = r.methods[0]; // distance is the do-nothing default
+    var max = Math.max.apply(null, r.methods.map(function (m) { return m.total; })) || 1;
+    var g = el("div", "ap-opts");
+    r.methods.forEach(function (m) {
+      var o = OPTIONS[m.key];
+      var win = m.key === r.best.key;
+      var c = el("div", "ap-opt" + (win ? " win" : ""));
+      c.appendChild(el("span", "ap-ribbon" + (win ? "" : " off"), win ? "Best for you" : ""));
+      c.appendChild(el("h4", "ap-optn", o.name));
+      c.appendChild(el("span", "ap-optr", o.rate));
+      c.appendChild(el("b", "ap-optv", fmt(m.total)));
+      c.appendChild(el("span", "ap-optu", win ? "status points a year"
+        : fmt(r.best.total - m.total) + " fewer a year"));
+
+      var tr = el("div", "ap-track");
+      var f = el("i", "ap-seg fly"); f.style.width = (m.fly / max * 100) + "%";
+      f.title = "From flying: " + fmt(m.fly) + " points";
+      var cd = el("i", "ap-seg card"); cd.style.width = (r.cardPts / max * 100) + "%";
+      cd.title = "From card spend: " + fmt(r.cardPts) + " points";
+      tr.appendChild(f); tr.appendChild(cd);
+      c.appendChild(tr);
+
+      c.appendChild(el("p", "ap-optb", o.bestFor));
+      c.appendChild(el("p", "ap-opta", o.award));
+      g.appendChild(c);
+    });
+    wrap.appendChild(g);
+
+    var legend = el("div", "ap-legend");
+    [["fly", "From flying"], ["card", "From card spend"]].forEach(function (pp) {
+      var i = el("span", "ap-lg"); var sw = el("i", "ap-sw"); sw.style.background = PALETTE[pp[0]];
+      i.appendChild(sw); i.appendChild(el("span", null, pp[1])); legend.appendChild(i);
+    });
+    wrap.appendChild(legend);
+
+    var dflt = r.methods[0]; /* distance is the do-nothing default */
     if (r.best.key !== "distance" && r.best.total > dflt.total) {
       wrap.appendChild(el("p", "ap-cost",
         "Doing nothing leaves you on distance and costs you " + fmt(r.best.total - dflt.total) + " points a year."));
-    } else if (gap > 0) {
-      wrap.appendChild(el("p", "ap-cost", "That is " + fmt(gap) + " more than the next best option."));
     }
 
     var reached = tierFor(r.best.total), nxt = nextTier(r.best.total);
@@ -244,7 +313,7 @@
     TIERS.forEach(function (t) {
       var hit = r.best.total >= t.pts;
       var b = el("div", "ap-badge" + (hit ? " hit" : ""));
-      b.appendChild(el("i", "ap-bdot", hit ? "✓" : ""));
+      b.appendChild(el("i", "ap-bdot", hit ? "\u2713" : ""));
       b.appendChild(el("b", null, t.name));
       b.appendChild(el("span", null, fmt(t.pts)));
       lad.appendChild(b);
@@ -256,31 +325,14 @@
     return wrap;
   }
 
-  function compareCard(r) {
-    var wrap = el("div", "ap-card");
-    wrap.appendChild(el("h3", "ap-q", "How the three compare"));
-    var max = Math.max.apply(null, r.methods.map(function (m) { return m.total; })) || 1;
-    var legend = el("div", "ap-legend");
-    [["fly", "From flying"], ["card", "From card spend"]].forEach(function (p) {
-      var i = el("span", "ap-lg"); var sw = el("i", "ap-sw"); sw.style.background = PALETTE[p[0]];
-      i.appendChild(sw); i.appendChild(el("span", null, p[1])); legend.appendChild(i);
-    });
-    wrap.appendChild(legend);
-    var rows = el("div", "ap-bars");
-    r.methods.forEach(function (m) {
-      var row = el("div", "ap-bar" + (m.key === r.best.key ? " best" : ""));
-      row.appendChild(el("div", "ap-barl", m.name));
-      var tr = el("div", "ap-track");
-      var f = el("i", "ap-seg fly"); f.style.width = (m.fly / max * 100) + "%";
-      f.title = "From flying: " + fmt(m.fly) + " points";
-      var c = el("i", "ap-seg card"); c.style.width = (r.cardPts / max * 100) + "%";
-      c.title = "From card spend: " + fmt(r.cardPts) + " points";
-      tr.appendChild(f); tr.appendChild(c); row.appendChild(tr);
-      row.appendChild(el("div", "ap-barv", fmt(m.total)));
-      rows.appendChild(row);
-    });
-    wrap.appendChild(rows);
-    return wrap;
+  /* Everything below the answer folds away, so the first screen is the choice. */
+  function section(title, node) {
+    var d = el("details", "ap-sec");
+    d.appendChild(el("summary", "ap-secs", title));
+    var body = el("div", "ap-secb");
+    body.appendChild(node);
+    d.appendChild(body);
+    return d;
   }
 
   /* The teaching graphic: why a flat 500 changes everything on short hops. */
@@ -326,6 +378,123 @@
     return wrap;
   }
 
+  /* How to reach each tier, worked out from THIS person's numbers rather than
+     a generic article. Collapsed by default so the page stays calm. */
+  function pathwaysCard(r) {
+    var wrap = el("div", "ap-card");
+    wrap.appendChild(el("h3", "ap-q", "How to reach each tier"));
+    wrap.appendChild(el("p", "ap-note", "Worked out from what you entered, using your best earning option (" + r.best.name.toLowerCase() + "). Open a tier to see what closes the gap."));
+
+    var trips = Math.max(0, +state.trips || 0);
+    var perTrip = trips > 0 ? r.best.fly / trips : 0;
+
+    TIERS.forEach(function (t) {
+      var hit = r.best.total >= t.pts;
+      var gap = Math.max(0, t.pts - r.best.total);
+
+      var row = el("details", "ap-path" + (hit ? " done" : ""));
+      var sum = el("summary", "ap-paths");
+      var left = el("span", "ap-pathn");
+      left.appendChild(el("b", null, t.name));
+      left.appendChild(el("span", "ap-pathp", fmt(t.pts) + " status points"));
+      sum.appendChild(left);
+      sum.appendChild(el("span", "ap-pathtag" + (hit ? " ok" : ""),
+        hit ? "Reached" : fmt(gap) + " to go"));
+      row.appendChild(sum);
+
+      var body = el("div", "ap-pathb");
+      if (hit) {
+        var spare = r.best.total - t.pts;
+        body.appendChild(el("p", null, "Your plan already gets you to " + t.name + " with " + fmt(r.best.total) + " points, " +
+          (spare > 0 ? fmt(spare) + " more than the " + fmt(t.pts) + " needed." : "which is exactly the number needed, with nothing to spare.")));
+      } else {
+        var ways = el("ul", "ap-ways");
+        var reachable = false, hardSoFar = false;
+        if (perTrip > 0) {
+          var more = Math.ceil(gap / perTrip);
+          if (more > 40) {
+            hardSoFar = true;
+            ways.appendChild(el("li", null, "Flying alone will not get you here. It would take about " + more + " more round trips a year on top of the " + trips + " you already fly."));
+          } else {
+            reachable = true;
+            ways.appendChild(el("li", null, "Fly " + more + " more round " + (more === 1 ? "trip" : "trips") + " like the ones you described, " + (trips + more) + " a year in total."));
+          }
+        }
+        var tooBig = [];
+        Object.keys(CARDS).forEach(function (k) {
+          var c = CARDS[k];
+          if (!c.per) return;
+          var held = state.card === k;
+          var need = Math.ceil(((gap - (held ? 0 : c.anniversary)) * c.per) / 12 / 50) * 50;
+          if (need <= 0) return;
+          var earns = "It earns 1 point per $" + c.per + (c.anniversary ? ", plus " + fmt(c.anniversary) + " on your card anniversary" : "") + ".";
+          if (need > CARD_CAP) {
+            tooBig.push({ label: c.label, need: need });
+          } else if (held) {
+            reachable = true;
+            ways.appendChild(el("li", "ap-cardway", "Put about $" + fmt(need) + " a month on your Atmos " + c.label +
+              " card, on top of what you already spend. " + earns));
+          } else {
+            reachable = true;
+            ways.appendChild(el("li", "ap-cardway", "Get the Atmos " + c.label + " card and put about $" + fmt(need) +
+              " a month on it. " + earns));
+          }
+        });
+        /* One honest line beats repeating "not realistic" once per card. */
+        if (tooBig.length && !ways.querySelector("li.ap-cardway")) {
+          tooBig.sort(function (a, b) { return a.need - b.need; });
+          var cheapest = tooBig[0];
+          var li = el("li", null, "Card spend alone will not get you here" + (hardSoFar ? " either" : "") +
+            ". Even the Atmos " + cheapest.label + " card would need about $" + fmt(cheapest.need) + " a month.");
+          ways.appendChild(li);
+          hardSoFar = true;
+        }
+        if (r.bonus === 0) {
+          ways.appendChild(el("li", null, "Reach a lower tier first. Status adds 25% to 150% to everything you earn on flights after that."));
+        }
+        body.appendChild(ways);
+        body.appendChild(el("p", "ap-note", reachable
+          ? "Any mix of these works too. The gap is " + fmt(gap) + " points."
+          : "The gap is " + fmt(gap) + " points. From where you are now this tier usually means a real change in how you travel, such as regular long haul trips, rather than more of the same flying."));
+      }
+      row.appendChild(body);
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  var FAQ = [
+    ["What is a status point?",
+     "It is the score that decides your elite tier. It is separate from the points you spend on award flights, and the two are earned at different rates."],
+    ["Where do I actually make the choice?",
+     "In your Atmos Rewards account, under Choose how you earn. Selections opened on 1 October 2026 and apply to flights on or after 1 January 2027."],
+    ["Can I change my mind later?",
+     "Once per calendar year, for future travel. That is why it is worth getting right the first time."],
+    ["What happens if I do nothing?",
+     "You keep earning by distance traveled. For a lot of Hawaii residents who fly short hops, that is the worst of the three."],
+    ["Do award flights earn status points?",
+     "Yes, on all three choices, and only status points. By distance you earn on the miles flown. By segments you earn the full 500 per segment. By price you earn 1 status point for every 20 points you redeem."],
+    ["Does credit card spend really count?",
+     "Yes, and it is the one part your earning choice does not change. The Ascent and business cards earn 1 status point per $3 spent, and the Summit card earns 1 per $2 plus a 10,000 point bonus on your card anniversary."],
+    ["Does having status help me earn faster?",
+     "Yes. Silver adds 25%, Gold 50%, Platinum 100% and Titanium 150%, and those bonuses apply across all three earning choices."],
+    ["Is there anything that earns nothing?",
+     "Saver and Basic Economy fares earn no points and no status points, whichever option you pick. That one catches people out."]
+  ];
+
+  function faqCard() {
+    var wrap = el("div", "ap-card");
+    wrap.appendChild(el("h3", "ap-q", "Common questions"));
+    FAQ.forEach(function (qa) {
+      var d = el("details", "ap-faq");
+      var sm = el("summary", null, qa[0]);
+      d.appendChild(sm);
+      d.appendChild(el("p", null, qa[1]));
+      wrap.appendChild(d);
+    });
+    return wrap;
+  }
+
   function footerCard(r) {
     var wrap = el("div", "ap-card");
     var ul = el("ul", "ap-list");
@@ -333,12 +502,34 @@
     if (r.bonus > 0) ul.appendChild(el("li", null, "Your current status adds " + Math.round(r.bonus * 100) + "% on flights, already counted above."));
     ul.appendChild(el("li", null, "You can change your choice once per calendar year. Members who do nothing stay on distance."));
     wrap.appendChild(ul);
-    wrap.appendChild(el("p", "ap-note", "Estimates for planning only, based on published Atmos Rewards rates as of October 2026. Taxes and fees do not earn on the price option. Confirm current rules with Alaska before deciding."));
+    var fine = el("ul", "ap-list");
+    fine.appendChild(el("li", null, "Saver and Basic Economy fares earn no points and no status points on any of the three choices."));
+    fine.appendChild(el("li", null, "Award flights earn status points only, not points you can spend."));
+    fine.appendChild(el("li", null, "From 1 January 2027 the distance option no longer includes class of service bonuses or the 500 point minimum on flights under 500 miles."));
+    fine.appendChild(el("li", null, "Earning by price excludes taxes and fees. It includes carrier imposed surcharges and eligible paid seats on Alaska and Hawaiian."));
+    fine.appendChild(el("li", null, "Booking a partner directly, other than American Airlines, earns at partner rates rather than 5 points per dollar."));
+    wrap.appendChild(fine);
+    wrap.appendChild(el("p", "ap-note", "Estimates for planning only, based on Atmos Rewards rates published as of October 2026. Confirm the current rules in your Atmos Rewards account before you make your choice."));
     return wrap;
   }
 
   /* ---------- render ---------- */
   var host = null;
+
+  /* The choice and the tier it reaches are always open. The teaching, the
+     tier pathways, the questions and the fine print fold away. */
+  function rightColumn(col, r) {
+    col.appendChild(choiceCards(r));
+    [["why", "Why the choice matters", explainCard()],
+     ["tiers", "How to reach each tier", pathwaysCard(r)],
+     ["faq", "Common questions", faqCard()],
+     ["fine", "The fine print", footerCard(r)]].forEach(function (x) {
+      var d = section(x[1], x[2]);
+      d.dataset.k = x[0];
+      col.appendChild(d);
+    });
+  }
+
   function paint() {
     var r = compute();
     host.innerHTML = "";
@@ -347,10 +538,7 @@
     L.appendChild(presetCards());
     L.appendChild(inputsCard());
     var R = el("div", "ap-col");
-    R.appendChild(answerCard(r));
-    R.appendChild(compareCard(r));
-    R.appendChild(explainCard());
-    R.appendChild(footerCard(r));
+    rightColumn(R, r);
     grid.appendChild(L); grid.appendChild(R);
     host.appendChild(grid);
   }
@@ -364,11 +552,11 @@
       var r = compute();
       var col = host.querySelectorAll(".ap-col")[1];
       if (!col) return paint();
+      var open = {};
+      col.querySelectorAll("details.ap-sec").forEach(function (d) { open[d.dataset.k] = d.open; });
       col.innerHTML = "";
-      col.appendChild(answerCard(r));
-      col.appendChild(compareCard(r));
-      col.appendChild(explainCard());
-      col.appendChild(footerCard(r));
+      rightColumn(col, r);
+      col.querySelectorAll("details.ap-sec").forEach(function (d) { if (open[d.dataset.k]) d.open = true; });
     }, 40);
   }
 
@@ -452,8 +640,57 @@
       ".ap-extr i{display:block;height:100%;border-radius:4px;background:var(--muted);opacity:.55}",
       ".ap-extr i.hi{background:" + PALETTE.fly + ";opacity:1}",
       ".ap-exv{font-size:11px;font-weight:800;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}",
+      /* tier pathways */
+      ".ap-path{border:1px solid var(--line);border-radius:12px;margin-bottom:7px;background:var(--surface-2,#f7f9fb);overflow:hidden}",
+      ".ap-path[open]{border-color:var(--coral)}",
+      ".ap-path.done{background:color-mix(in srgb,#3fce7f 7%,var(--surface))}",
+      ".ap-paths{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;cursor:pointer;list-style:none}",
+      ".ap-paths::-webkit-details-marker{display:none}",
+      ".ap-pathn b{font-size:13.5px;color:var(--text)}",
+      ".ap-pathp{display:block;font-size:10.5px;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}",
+      ".ap-pathtag{font-size:11px;font-weight:800;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap;font-variant-numeric:tabular-nums}",
+      ".ap-pathtag.ok{color:#1c6b40;background:color-mix(in srgb,#3fce7f 16%,var(--surface));border-color:color-mix(in srgb,#3fce7f 38%,var(--line))}",
+      /* in dark mode the mixed background goes dark, so the dark green text has to go light */
+      ":root[data-theme=\"dark\"] .ap-pathtag.ok{color:#7fe3ab}",
+      ".ap-pathb{padding:0 13px 12px;font-size:12.5px;color:var(--text);line-height:1.55}",
+      ".ap-ways{margin:0 0 7px;padding-left:17px}",
+      ".ap-ways li{margin-bottom:6px}",
+      /* faq */
+      ".ap-faq{border-bottom:1px solid var(--line);padding:9px 0}",
+      ".ap-faq:last-child{border-bottom:0;padding-bottom:0}",
+      ".ap-faq summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--text);list-style:none}",
+      ".ap-faq summary::-webkit-details-marker{display:none}",
+      ".ap-faq summary:before{content:'+';display:inline-block;width:15px;font-weight:800;color:var(--coral)}",
+      ".ap-faq[open] summary:before{content:'\\2212'}",
+      ".ap-faq p{margin:7px 0 2px 15px;font-size:12.5px;color:var(--muted);line-height:1.6}",
       ".ap-list{margin:0 0 10px;padding-left:17px;font-size:12.5px;color:var(--text);line-height:1.55}",
-      ".ap-list li{margin-bottom:6px}"
+      ".ap-list li{margin-bottom:6px}",
+      /* the three choices: the point of the whole tool */
+      ".ap-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0 0}",
+      "@media (max-width:760px){.ap-opts{grid-template-columns:1fr}.ap-answer .ap-opt.win{order:-1}.ap-answer .ap-ribbon.off{display:none}}",
+      ".ap-answer .ap-opt{display:flex;flex-direction:column;padding:12px 12px 13px;border-radius:13px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05)}",
+      ".ap-answer .ap-opt.win{border-color:rgba(242,184,75,.65);background:rgba(242,184,75,.1);box-shadow:0 0 0 1px rgba(242,184,75,.3) inset}",
+      ".ap-answer .ap-ribbon{display:block;min-height:15px;font-size:9.5px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;color:#f5c75a}",
+      ".ap-answer .ap-ribbon.off{visibility:hidden}",
+      ".ap-answer .ap-optn{margin:3px 0 1px;font-size:13.5px;font-weight:800;color:#fff;line-height:1.2}",
+      ".ap-answer .ap-optr{font-size:11px;font-weight:700;color:#9fb2c7}",
+      ".ap-answer .ap-optv{margin-top:9px;font-size:25px;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums}",
+      ".ap-answer .ap-opt.win .ap-optv{color:#f5c75a}",
+      ".ap-answer .ap-optu{font-size:10.5px;font-weight:700;color:#9fb2c7;margin-top:3px}",
+      ".ap-answer .ap-opt .ap-track{height:7px;margin:10px 0 0;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.08)}",
+      ".ap-answer .ap-optb{margin:10px 0 0;font-size:11.5px;line-height:1.5;color:#dce6f1}",
+      ".ap-answer .ap-opta{margin:6px 0 0;font-size:11px;line-height:1.5;color:#9fb2c7}",
+      ".ap-answer .ap-legend{margin:12px 0 0}",
+      ".ap-answer .ap-lg{color:#9fb2c7}",
+      /* collapsed detail sections */
+      ".ap-sec{border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);margin-bottom:10px}",
+      ".ap-secs{cursor:pointer;list-style:none;padding:14px 16px;font-size:13.5px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:9px}",
+      ".ap-secs::-webkit-details-marker{display:none}",
+      ".ap-secs:before{content:\'\';width:8px;height:8px;border-right:2px solid var(--coral);border-bottom:2px solid var(--coral);transform:rotate(-45deg);margin-left:2px;transition:transform .15s}",
+      ".ap-sec[open] .ap-secs:before{transform:rotate(45deg)}",
+      ".ap-secb{padding:0 16px 14px}",
+      ".ap-secb .ap-card{border:0;box-shadow:none;padding:0;margin:0;background:none}",
+      ".ap-secb .ap-q{display:none}",
     ].join("");
     document.head.appendChild(s);
   }

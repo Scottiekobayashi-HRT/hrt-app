@@ -1,0 +1,5 @@
+# Local working copies. git does NOT allow trailing comments on a pattern
+# line, so keep every comment on its own line.
+*.bak
+*.bak-*
+.DS_Store
