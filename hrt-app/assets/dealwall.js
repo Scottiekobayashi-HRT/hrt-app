@@ -148,6 +148,41 @@
   }
 
   /* ---------- build ---------- */
+  /* A rail of cards does not look scrollable until something moves. Slide it
+     out and back once on load, then never again: a carousel that keeps drifting
+     is harder to read and fights anyone mid-sentence. Skipped entirely when
+     everything already fits, when the viewer has asked for less motion, or if
+     they start scrolling it themselves first. */
+  function nudge(rail) {
+    var reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (reduce) return;
+    setTimeout(function () {
+      if (rail.scrollWidth <= rail.clientWidth + 4) return;  /* nothing to show */
+      /* The rail rests a couple of px in because of its own padding, so this
+         has to be a threshold, not > 0, or the nudge never fires. */
+      var at0 = rail.scrollLeft;
+      if (at0 > 8) return;                                   /* already moved it */
+      var touched = false;
+      function stop() { touched = true; }
+      rail.addEventListener("pointerdown", stop, { once: true, passive: true });
+      rail.addEventListener("wheel", stop, { once: true, passive: true });
+      /* The rail uses scroll-snap, which yanks a part-card offset straight
+         back to the nearest card and swallows the whole nudge. Turn snapping
+         off for the gesture and restore it afterwards. */
+      var snap = rail.style.scrollSnapType;
+      rail.style.scrollSnapType = "none";
+      function restore() { rail.style.scrollSnapType = snap; }
+      var out = Math.min(96, Math.round(rail.clientWidth * 0.12));
+      rail.scrollTo({ left: at0 + out, behavior: "smooth" });
+      setTimeout(function () {
+        if (touched) { restore(); return; }
+        rail.scrollTo({ left: at0, behavior: "smooth" });
+        setTimeout(restore, 600);
+      }, 620);
+    }, 420);
+  }
+
   function render(feed) {
     var wrap = el("div", "dw free-only");
     var win = feed.window_days || 30;
@@ -254,6 +289,7 @@
     }
     wrap.appendChild(exp);
     attachNav(rail, nav);
+    nudge(rail);
 
     /* business class: locked, and genuinely empty behind the blur */
     var teasers = feed.premium_teasers || [];
@@ -299,10 +335,14 @@
         stat("Atmos Rewards", "award space");
         pro.appendChild(scope);
 
-        var vs = el("p", "dw-note", "This free wall shows the next " + win +
-          " days. HRT PRO opens the full calendar: " +
+        /* Count what the free wall is actually showing rather than hard coding
+           it, so this line cannot drift when ECON_ROUTES changes. */
+        var freeDests = (feed.economy || []).length;
+        var vs = el("p", "dw-note", "This free wall shows " +
+          (freeDests ? freeDests + " destination" + (freeDests === 1 ? "" : "s") : "a sample") +
+          " for the next " + win + " days. HRT PRO opens the full calendar: " +
           (sc.pro_days ? sc.pro_days + "+ days ahead" : "the full booking window") +
-          " across " + (sc.pro_destinations || "all") + " destinations on Atmos Rewards, both directions.");
+          " across all " + (sc.pro_destinations || "15") + " destinations on Atmos Rewards, both directions.");
         vs.style.color = "#c7d4e2";
         vs.style.marginTop = "10px";
         pro.appendChild(vs);
