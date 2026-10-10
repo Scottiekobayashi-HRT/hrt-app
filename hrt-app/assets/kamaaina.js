@@ -595,7 +595,7 @@
   oahu:[[-158.30,21.24],[-157.64,21.73]], maui:[[-156.72,20.55],[-155.95,21.05]],
   hawaii:[[-156.10,18.90],[-154.80,20.30]], kauai:[[-159.80,21.85],[-159.28,22.25]], lm:[[-157.35,20.70],[-156.75,21.25]]
  };
- var map = null, mapReady = false, mapKinds = { stay:true, act:true };
+ var map = null, mapReady = false, mapKinds = { stay:true, act:false };  /* hotels lead; activities are one tap away */
 
  function locFor(d){
   if(LOC[d.b]) return LOC[d.b];

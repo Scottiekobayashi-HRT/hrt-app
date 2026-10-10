@@ -40,7 +40,7 @@
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
   values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
-  resy:{ title:"Resy Hawaiʻi Map", hint:"Amex Resy Credit status" },
+  resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex Platinum credit each quarter" },
   status:{ title:"Atmos Status Planner", hint:"Pick the right way to earn" }
  };
  var shown = {}, current = null;
@@ -356,6 +356,17 @@
   $("rsS1").textContent = V.length; $("rsS2").textContent = c.eligible; $("rsS3").textContent = c.pending; $("rsS4").textContent = c.unconfirmed;
   $("navResy").textContent = V.length; $("hmResy").textContent = c.eligible; $("ttResy").textContent = c.eligible + " credit eligible spots";
   rsChips(); rsRender(false);
+ })();
+ /* Live reminder of how long the current quarter's $100 has left. */
+ (function(){ var el = $("rsClock"); if(!el) return;
+  var now = new Date(), y = now.getFullYear(), q = Math.floor(now.getMonth() / 3);
+  var end = new Date(y, q * 3 + 3, 0);
+  var days = Math.max(0, Math.round((end - new Date(y, now.getMonth(), now.getDate())) / 86400000));
+  var MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  el.innerHTML = '<b style="color:#fff;font-weight:800">Q' + (q + 1) + ' ' + y + '</b>'
+   + '<span>Your $100 for this quarter expires in ' + days + ' day' + (days === 1 ? "" : "s") + ', on '
+   + MN[end.getMonth()] + ' ' + end.getDate() + '. It does not roll over.</span>';
+  el.style.display = "flex";
  })();
 
  /* ========================== HNL LOUNGES ========================== */
