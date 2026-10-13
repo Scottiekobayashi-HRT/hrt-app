@@ -443,8 +443,9 @@
     var tick = p ? '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
       '" data-key="' + esc(p.key) + '"' + (r.used ? " checked" : "") + (state.busy ? " disabled" : "") + "> " +
       (p.activateBy ? "Activated" : "Used") + "</label>" : "";
-    var foot = (b.note ? '<p class="wl-pk-note">' + esc(b.note) + "</p>" : "") +
-      (b.source ? '<a class="wl-src" href="' + esc(b.source) + '" target="_blank" rel="noopener">Source</a>' : "");
+    var src = b.source ? ' <a class="wl-src" href="' + esc(b.source) + '" target="_blank" rel="noopener">Source</a>' : "";
+    var foot = b.note ? '<p class="wl-pk-note wl-clamp" data-wl="clamp">' + esc(b.note) + src + "</p>" :
+      (src ? '<p class="wl-pk-note">' + src + "</p>" : "");
     return '<li class="wl-pk' + (r.used ? " done" : "") + '"><div class="wl-pk-main">' + head + when +
       '<div class="wl-tags">' + perkTags(b, p) + "</div>" + foot + "</div>" + tick + "</li>";
   }
@@ -466,7 +467,7 @@
       return '<li><span class="wl-rate' + (status ? " st" : "") + '">' + esc(rateText(e)) + "</span>" +
         '<span class="wl-earn-main"><b>' + esc(e.category) + "</b>" + (status ? " <span class=\"wl-dim\">(" + esc(e.currency) + ")</span>" : "") +
         (sub ? '<span class="wl-earn-sub">' + esc(sub) + "</span>" : "") +
-        (e.note && !status && e.groups.indexOf("everyday") < 0 && e.groups.indexOf("rotating") < 0 ? '<span class="wl-earn-sub wl-dim">' + esc(e.note) + "</span>" : "") +
+        (e.note && !status && e.groups.indexOf("everyday") < 0 && e.groups.indexOf("rotating") < 0 ? '<span class="wl-earn-sub wl-dim wl-clamp" data-wl="clamp">' + esc(e.note) + "</span>" : "") +
         (e.groups.indexOf("rotating") > -1 ? rotatingLine(cardId) : "") +
         (e.confidence === "assumed" ? '<span class="wl-tags">' + badge("Issuer does not state this clearly", "warn") + "</span>" : "") +
         "</span></li>";
@@ -534,7 +535,7 @@
         var b = r.perk, p = r.period;
         return '<li class="wl-pk"><div class="wl-pk-main"><div class="wl-pk-top"><b>' + esc(b.label) + "</b>" +
           '<span class="wl-pk-amt">' + esc(b.unit === "usd" ? money(b.amount) : perkAmount(b)) + "</span></div>" +
-          '<div class="wl-pk-when">' + esc(r.card.name) + (r.entry.nickname ? " (" + esc(r.entry.nickname) + ")" : "") + " &middot; " +
+          '<div class="wl-pk-when">' + esc(shortName(r.card.name)) + (r.entry.nickname ? " (" + esc(r.entry.nickname) + ")" : "") + " &middot; " +
           (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) + (p.approx ? " or earlier" : "") +
           ' <span class="wl-pk-days' + (p.days <= 14 ? " on" : "") + '">' + esc(daysLeft(p.days)) + "</span></div>" +
           (b.type === "activation" ? rotatingLine(b.card) : "") +
@@ -690,6 +691,7 @@
     if (!b || !((host && host.contains(b)) || (homeHost && homeHost.contains(b)))) return;
     var act = b.getAttribute("data-wl"), id = b.getAttribute("data-id");
     if (act === "use") return; /* handled on change */
+    if (act === "clamp") { if (ev.target.closest("a")) return; b.classList.toggle("full"); return; }
     if (act === "retry") return load();
     if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; location.hash = "wallet"; return; }
     if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
@@ -770,8 +772,12 @@
       ".wl-tag{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted)}",
       ".wl-tag.warn{border-color:rgba(232,130,76,.5);color:#b4580f}",
       "[data-theme=dark] .wl-tag.warn{color:#f2b84b}",
-      ".wl-tick{flex:0 0 auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--text);cursor:pointer;white-space:nowrap;padding-top:1px}",
-      ".wl-tick input{width:18px;height:18px;accent-color:#e8824c;cursor:pointer}",
+      ".wl-tick{flex:0 0 auto;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;user-select:none}",
+      ".wl-tick:active{transform:scale(.97)}",
+      ".wl-tick input{width:20px;height:20px;margin:0;accent-color:#2f855a;cursor:pointer}",
+      ".wl-tick:has(input:checked){border-color:rgba(47,133,90,.5);background:rgba(63,206,127,.14);color:#2f855a}",
+      "[data-theme=dark] .wl-tick:has(input:checked){color:#6fd39b}",
+      ".wl-clamp{cursor:pointer}",
       ".wl-soonbox{border-color:rgba(242,184,75,.55)}",
       ".wl-hm{margin:0 0 18px;border-color:rgba(242,184,75,.55)}",
       ".wl-hm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}",
@@ -818,7 +824,22 @@
       ".wl-risk{font-size:13px;font-weight:800;color:#b4580f;background:rgba(242,184,75,.22);border-radius:999px;padding:3px 11px}",
       "[data-theme=dark] .wl-risk{color:#f2b84b}",
       ".wl-sub2{margin:-4px 0 0;font-size:12.5px;color:var(--muted)}",
-      "@media (max-width:560px){.wl-rowtop{flex-direction:column;gap:8px}.wl-pk{flex-direction:column;gap:8px}.wl-side{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:8px 12px;align-items:center}.wl-rowacts{margin-left:auto}.wl-date{grid-template-columns:1fr 1fr}.wl-date select:first-child{grid-column:1/-1}}"
+      "@media (max-width:560px){" +
+        ".wl-card{padding:15px 14px;border-radius:14px}" +
+        ".wl-pk{padding:11px 11px 11px 12px;gap:10px}" +
+        ".wl-tick{min-height:44px;padding:0 12px}" +
+        ".wl-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}" +
+        ".wl-clamp.full{display:block;-webkit-line-clamp:unset;overflow:visible}" +
+        ".wl-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:14px -14px 0;padding:2px 14px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}" +
+        ".wl-tiles::-webkit-scrollbar{display:none}" +
+        ".wl-tile{flex:0 0 76%;scroll-snap-align:start;scroll-margin-left:14px}" +
+        ".wl-tl-pill{font-size:12px}" +
+        ".wl-earn li{gap:10px}.wl-rate{flex-basis:52px}" +
+        ".wl-btn{min-height:44px}" +
+        ".wl-perkbtn{min-height:40px;padding:8px 14px}" +
+        ".wl-form select,.wl-form input{min-height:44px;font-size:16px}" +
+      "}",
+      "@media (max-width:560px){.wl-rowtop{flex-direction:column;gap:8px}.wl-side{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:8px 12px;align-items:center}.wl-rowacts{margin-left:auto}.wl-date{grid-template-columns:1fr 1fr}.wl-date select:first-child{grid-column:1/-1}}"
     ].join("");
     document.head.appendChild(s);
   }
