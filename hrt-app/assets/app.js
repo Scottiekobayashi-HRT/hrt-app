@@ -220,6 +220,8 @@
   ["American AAdvantage","airline",1.6],["Avios (BA/Iberia/Aer Lingus)","airline",1.4],["Air Canada Aeroplan","airline",1.4],["Alaska Atmos Rewards","airline",1.4],["ANA Mileage Club","airline",1.4],["Avianca LifeMiles","airline",1.4],["JetBlue TrueBlue","airline",1.35],["United MileagePlus","airline",1.35],["Cathay Asia Miles","airline",1.3],["Flying Blue (AF/KLM)","airline",1.3],["Frontier Miles","airline",1.3],["Qantas Frequent Flyer","airline",1.3],["Singapore KrisFlyer","airline",1.3],["Virgin Atlantic Flying Club","airline",1.3],["Southwest Rapid Rewards","airline",1.25],["Delta SkyMiles","airline",1.2],["Emirates Skywards","airline",1.2],["Etihad Guest","airline",1.2],["Spirit Free Spirit","airline",1.1],["Turkish Miles&Smiles","airline",1.1],["Aeromexico Rewards","airline",0.8],
   ["World of Hyatt","hotel",1.7],["Accor Live Limitless","hotel",2.0],["Marriott Bonvoy","hotel",0.75],["Wyndham Rewards","hotel",0.65],["IHG One Rewards","hotel",0.6],["Best Western Rewards","hotel",0.6],["Choice Privileges","hotel",0.6],["Hilton Honors","hotel",0.4]
  ];
+ /* shared with My Wallet's "Which card should I use?" so both tools use the same values */
+ window.HRT_POINT_VALUES = { updated: VALUATIONS_UPDATED, list: VALS };
  var HPICKS = [
   ["Chase Ultimate Rewards","2.05¢","/ pt","Transfers to United, Hyatt and more. The best all around currency for Hawaiʻi families."],
   ["Amex Membership Rewards","2.0¢","/ pt","Transfers to ANA, JAL and 17+ partners. Ideal for premium cabins to Japan."],

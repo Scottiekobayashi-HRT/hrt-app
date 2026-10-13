@@ -226,6 +226,38 @@ ok('one credit about to go: named exactly', al[0].text === 'Venture X Capital On
 const done = { v: 1, points: [], cards: [{ id: 'u', cardId: 'chase-freedom-unlimited', opened: '2019-05-01', used: { doordash: { '2026-Q4': true } } }] };
 ok('nothing urgent: empty, so the strip hides', T.topAlerts(done, CAT, TODAY).length === 0, JSON.stringify(T.topAlerts(done, CAT, TODAY)));
 
+// ============ WHICH CARD SHOULD I USE ============
+const VALS = { 'Amex Membership Rewards': 2.0, 'Chase Ultimate Rewards': 2.05, 'Capital One Miles': 1.85, 'Alaska Atmos Rewards': 1.4 };
+const W = (ids, extra = {}) => ({ v: 1, points: [], cards: ids.map(([id, cardId, opened]) => ({ id, cardId, opened, ...(extra[id] || {}) })) });
+const seven = W([['g','amex-gold','2023-06-08'],['p','amex-platinum','2024-03-15'],['s','chase-sapphire-preferred','2021-11-20'],
+  ['f','chase-freedom-flex','2020-01'],['x','capone-venture-x','2022-11-02'],['m','atmos-summit','2025-08-20'],['a','atmos-ascent','2019-02']]);
+const wc = (w, k, d = TODAY) => T.whichCard(w, CAT, k, d, VALS);
+const top = (w, k, d) => { const w1 = wc(w, k, d); return w1[0] && w1[0].card.id; };
+let w1 = wc(seven, 'grocery');
+ok('groceries in Q4 with a Sapphire: Freedom Flex 5% wins', w1[0].card.id === 'chase-freedom-flex' && Math.abs(w1[0].value - 10.25) < 1e-9, w1.map(x => x.card.id + ' ' + x.value).join(', '));
+ok('...and says activate first by Dec 14', w1[0].notes.some(n => n === 'Activate first, by Dec 14'), JSON.stringify(w1[0].notes));
+ok('...Amex Gold 4x is second', w1[1].card.id === 'amex-gold' && w1[1].value === 8);
+ok('...Sapphire online grocery says it is online only', w1.find(x => x.card.id === 'chase-sapphire-preferred').notes.some(n => /^Online orders/.test(n)));
+const activated = W([['g','amex-gold','2023-06-08'],['s','chase-sapphire-preferred','2021-11-20'],['f','chase-freedom-flex','2020-01']], { f: { used: { rotating: { '2026-Q4': true } } } });
+ok('once activated, no activate note', !wc(activated, 'grocery')[0].notes.some(n => /Activate/.test(n)));
+const noSapphire = W([['g','amex-gold','2023-06-08'],['f','chase-freedom-flex','2020-01']]);
+w1 = wc(noSapphire, 'grocery');
+ok('without a Sapphire, Flex counts as 5% cash back and Gold wins', w1[0].card.id === 'amex-gold' && w1[1].value === 5, w1.map(x => x.card.id + ' ' + x.value).join(', '));
+ok('cash back note says 1 cent per point', w1[1].notes.includes('Cash back, 1 cent per point'));
+ok('Q1 2027 groceries still on Flex, but Q2 has no data so Gold wins', top(seven, 'grocery', day(2027, 2, 1)) === 'chase-freedom-flex' && top(seven, 'grocery', day(2027, 4, 2)) === 'amex-gold');
+ok('gas: Sapphire Preferred 3x', top(seven, 'gas') === 'chase-sapphire-preferred');
+w1 = wc(seven, 'hotels');
+ok('hotels: Venture X 10x through Capital One Travel', w1[0].card.id === 'capone-venture-x' && w1[0].rate === 10 && w1[0].notes.includes('Booked through Capital One Travel'), JSON.stringify(w1[0].notes));
+ok('everything else: Venture X 2x', top(seven, 'everyday') === 'capone-venture-x');
+ok('every card appears once', wc(seven, 'dining').length === 7);
+const twice = W([['g1','amex-gold','2023-06-08'],['g2','amex-gold','2020-01-01']]);
+ok('two of the same card listed once', wc(twice, 'dining').length === 1);
+ok('status and promo rows never win', !wc(seven, 'transit').some(x => x.row.groups.includes('status') || x.row.groups.includes('promo')));
+const biz = W([['b','amex-business-gold','2023-01-01']]);
+ok('Business Gold gas warns about top 2', wc(biz, 'gas')[0].notes.some(n => /top 2/.test(n)));
+ok('value text', T.valueText(10.25) === 'worth about 10.3% back' && T.valueText(8) === 'worth about 8% back');
+ok('every spend type answers for the sample wallet', T.SPEND.every(sp => wc(seven, sp.key).length === 7));
+
 // --- house style ---
 const src = fs.readFileSync('./assets/wallet.js', 'utf8') + fs.readFileSync('./data/wallet-catalog.js', 'utf8');
 ok('no em or en dashes in member-facing code', !/[–—]/.test(src.replace(/\\u201[34]/g, '')));

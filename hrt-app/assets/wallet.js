@@ -338,6 +338,97 @@
   var Q_NAMES = { 1: "Jan to Mar", 2: "Apr to Jun", 3: "Jul to Sep", 4: "Oct to Dec" };
   function quarterName(k) { return Q_NAMES[+String(k).slice(-1)] + " " + String(k).slice(0, 4); }
 
+  /* ======================= WHICH CARD SHOULD I USE =======================
+     For beginners. Pick what you are buying; see which of YOUR cards earns most.
+     Ranked by value, not raw multiplier, using the Points Valuations tool's
+     cents per point (window.HRT_POINT_VALUES, set by app.js), so 4x Amex
+     points and 3% cash back are compared fairly.
+     Rules:
+       - Chase "cash back" points are worth 1 cent each unless the member also
+         holds a Sapphire card (then they transfer and are worth full value).
+       - Freedom Flex 5% counts only if this quarter's categories cover it;
+         flagged "Activate first" until the member ticks Activated.
+       - Conditions (top 2 categories, online only, booking site) are shown.
+  ------------------------------------------------------------------- */
+  var SPEND = [
+    { key: "grocery", label: "Groceries", groups: ["grocery"], words: ["grocery"],
+      tip: "Costco, Sam's Club, Walmart and Target usually do not count as grocery stores." },
+    { key: "dining", label: "Dining", groups: ["dining"], words: ["dining", "restaurant"] },
+    { key: "gas", label: "Gas", groups: ["gas"], words: ["gas"],
+      tip: "Gas at Costco or a supermarket often does not count as a gas station." },
+    { key: "flights", label: "Flights", groups: ["flights", "travel"], words: [] },
+    { key: "hotels", label: "Hotels", groups: ["hotels", "travel"], words: [] },
+    { key: "transit", label: "Rideshare and bus", groups: ["transit"], words: ["transit"] },
+    { key: "streaming", label: "Streaming", groups: ["streaming"], words: ["streaming"] },
+    { key: "drugstores", label: "Drugstores", groups: ["drugstores"], words: ["drugstore"] },
+    { key: "ev", label: "EV charging", groups: ["ev"], words: ["ev charging"] },
+    { key: "foreign", label: "Shopping abroad", groups: ["foreign"], words: [] },
+    { key: "everyday", label: "Everything else", groups: ["everyday"], words: [] }
+  ];
+  var CPP_DEFAULT = { "Amex Membership Rewards": 2.0, "Chase Ultimate Rewards": 2.05, "Capital One Miles": 1.85, "Alaska Atmos Rewards": 1.4 };
+  function pointValues() {
+    var out = {}, src = window.HRT_POINT_VALUES && window.HRT_POINT_VALUES.list;
+    Object.keys(CPP_DEFAULT).forEach(function (k) { out[k] = CPP_DEFAULT[k]; });
+    (src || []).forEach(function (v) { if (out.hasOwnProperty(v[0]) && v[2] > 0) out[v[0]] = v[2]; });
+    return out;
+  }
+  /* cents of value per point for a currency, given the member's wallet */
+  function centsPer(currency, holdsSapphire, vals) {
+    var c = String(currency || "");
+    if (/status/i.test(c)) return 0;
+    if (/cash back/i.test(c)) return holdsSapphire ? vals["Chase Ultimate Rewards"] : 1;
+    if (/Ultimate Rewards/.test(c)) return vals["Chase Ultimate Rewards"];
+    if (/Membership Rewards/.test(c)) return vals["Amex Membership Rewards"];
+    if (/Capital One/.test(c)) return vals["Capital One Miles"];
+    if (/Atmos/.test(c)) return vals["Alaska Atmos Rewards"];
+    return 1;
+  }
+
+  function whichCard(wallet, catalog, spendKey, today, values) {
+    var sp = SPEND.filter(function (x) { return x.key === spendKey; })[0];
+    if (!sp || !wallet) return [];
+    var vals = values || pointValues(), cards = {}, seen = {};
+    (catalog.cards || []).forEach(function (c) { cards[c.id] = c; });
+    var held = wallet.cards.filter(function (e) { return cards[e.cardId]; });
+    var sapphire = held.some(function (e) { return /^chase-sapphire/.test(e.cardId); });
+    var perks = perkRows(wallet, catalog, today);
+    var out = [];
+    held.forEach(function (e) {
+      if (seen[e.cardId]) return; /* two of the same card earn the same */
+      seen[e.cardId] = 1;
+      var card = cards[e.cardId], rows = earningFor(catalog, e.cardId), best = null;
+      function consider(rate, row, extra) {
+        var cents = centsPer(row.currency, sapphire, vals), value = rate * cents;
+        var cand = { entry: e, card: card, row: row, rate: rate, value: value, rateText: rateText({ rate: rate, currency: row.currency }),
+          via: row.via, cap: row.cap, notes: extra || [] };
+        if (/top 2/i.test(row.cap)) cand.notes.push("Only if it is one of your top 2 spending categories that month");
+        if (row.via && row.groups.indexOf("rotating") < 0) cand.notes.push(row.via.charAt(0).toUpperCase() + row.via.slice(1));
+        if (/cash back/i.test(row.currency)) cand.notes.push(sapphire ? "Worth more because you also hold a Sapphire card" : "Cash back, 1 cent per point");
+        if (!best || value > best.value + 1e-9 || (Math.abs(value - best.value) < 1e-9 && best.via && !cand.via)) best = cand;
+      }
+      rows.forEach(function (r) {
+        if (r.groups.indexOf("status") > -1 || r.groups.indexOf("promo") > -1) return;
+        if (r.groups.some(function (g) { return sp.groups.indexOf(g) > -1; })) consider(r.rate, r);
+        if (r.groups.indexOf("rotating") > -1 && sp.words.length) {
+          var q = quartersFor(catalog, e.cardId, today).current;
+          if (q && sp.words.some(function (w) { return q.categories.toLowerCase().indexOf(w) > -1; })) {
+            var act = perks.filter(function (x) { return x.entry.id === e.id && x.perk.type === "activation"; })[0];
+            var extra = ["Up to $" + Number(q.cap || 1500).toLocaleString("en-US") + " of spending this quarter"];
+            if (act && !act.used) extra.push("Activate first, by " + dayText(act.period.end));
+            consider(r.rate, r, extra);
+          }
+        }
+      });
+      if (!best) {
+        var base = rows.filter(function (r) { return r.groups.indexOf("everyday") > -1; })[0];
+        if (base) consider(base.rate, base);
+      }
+      if (best) out.push(best);
+    });
+    return out.sort(function (a, b) { return b.value - a.value || a.card.name.localeCompare(b.card.name); });
+  }
+  function valueText(v) { var n = Math.round(v * 10) / 10; return "worth about " + (n % 1 ? n.toFixed(1) : n) + "% back"; }
+
   /* ============================== VIEW ============================== */
   var host, state = { wallet: null, error: null, editing: null, busy: false, msg: "", open: {}, showAllSoon: false };
   var SOON_PERK_DAYS = 31;
@@ -631,6 +722,7 @@
         (e.nickname ? '<span class="wl-tl-nick">' + esc(e.nickname) + "</span>" : "") + lines +
         (pills ? '<span class="wl-tl-pills">' + pills + "</span>" : "") + "</button>";
     }).join("") + "</div>";
+    html += whichHtml();
     if (soon.length) {
       html += '<h3 class="wl-h4 wl-hm-h4">Use these soon</h3><ul class="wl-pks wl-hm-list">' + soon.slice(0, 3).map(function (r) {
         var b = r.perk, p = r.period;
@@ -647,6 +739,39 @@
     }
     if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     homeHost.innerHTML = html + "</div>";
+  }
+
+  function whichHtml() {
+    var cards = state.wallet && state.wallet.cards.length;
+    if (!cards) return "";
+    var k = state.which || "";
+    var chips = SPEND.map(function (x) {
+      return '<button class="wl-chip' + (x.key === k ? " on" : "") + '" data-wl="which" data-key="' + x.key + '" aria-pressed="' + (x.key === k) + '">' + esc(x.label) + "</button>";
+    }).join("");
+    var res = "";
+    if (k) {
+      var sp = SPEND.filter(function (x) { return x.key === k; })[0];
+      var list = whichCard(state.wallet, catalog(), k);
+      if (list.length) {
+        var top = list[0];
+        res = '<div class="wl-wc-res" aria-live="polite"><div class="wl-wc-best"><span class="wl-wc-tag">Use this card</span>' +
+          '<b class="wl-wc-name">' + esc(shortName(top.card.name)) + (top.entry.nickname ? ' <span class="wl-dim">(' + esc(top.entry.nickname) + ")</span>" : "") + "</b>" +
+          '<span class="wl-wc-why"><b>' + esc(top.rateText) + "</b> on " + esc(top.row.groups.indexOf("everyday") > -1 ? "everything" :
+            top.row.groups.indexOf("rotating") > -1 ? sp.label.toLowerCase() + " this quarter" : top.row.category.charAt(0).toLowerCase() + top.row.category.slice(1)) +
+          ", " + esc(valueText(top.value)) + "</span>" +
+          (top.notes.length ? '<span class="wl-wc-notes">' + top.notes.map(esc).join(". ") + "</span>" : "") + "</div>" +
+          (list.length > 1 ? '<ol class="wl-wc-rest" start="2">' + list.slice(1, 4).map(function (c) {
+            return "<li><b>" + esc(shortName(c.card.name)) + "</b> " + esc(c.rateText) + ", " + esc(valueText(c.value)) +
+              (c.notes.length ? ' <span class="wl-dim">(' + esc(c.notes[0]) + ")</span>" : "") + "</li>";
+          }).join("") + "</ol>" : "") +
+          (sp.tip ? '<p class="wl-wc-tip">' + esc(sp.tip) + "</p>" : "") + "</div>";
+      }
+    }
+    var upd = window.HRT_POINT_VALUES && window.HRT_POINT_VALUES.updated;
+    return '<div class="wl-wc"><h3 class="wl-h4 wl-wc-h">Which card should I use?</h3>' +
+      '<div class="wl-chips" role="group" aria-label="What are you buying?">' + chips + "</div>" + res +
+      (k ? '<p class="wl-wc-foot">Ranked by value using HRT point values' + (upd ? " (" + esc(upd) + ")" : "") + '. <a href="#values" data-route="values">How we value points</a></p>' : '<p class="wl-wc-foot">Tap what you are buying.</p>') +
+      "</div>";
   }
 
   var alertHost;
@@ -686,7 +811,7 @@
         "<p>Add each card and the month you opened it. You will see every annual fee and every credit in one place, with the ones about to expire at the top, so none of them slip by.</p>" +
         '<button class="wl-btn wl-pri" data-wl="add">Add your first card</button></div>';
     } else if (s.count) {
-      if (!state.editing) html += soonHtml(perks);
+      if (!state.editing) html += soonHtml(perks) + '<div class="wl-card">' + whichHtml() + "</div>";
       html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Your cards</h3>' +
         (state.editing ? "" : '<button class="wl-btn wl-pri" data-wl="add">Add a card</button>') + "</div>" +
         (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
@@ -743,6 +868,7 @@
     if (act === "use") return; /* handled on change */
     if (act === "clamp") { if (ev.target.closest("a")) return; b.classList.toggle("full"); return; }
     if (act === "retry") return load();
+    if (act === "which") { var k = b.getAttribute("data-key"); state.which = state.which === k ? "" : k; paint(); return; }
     if (act === "go-wallet") { location.hash = "wallet"; return; }
     if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; location.hash = "wallet"; return; }
     if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
@@ -830,6 +956,24 @@
       "[data-theme=dark] .wl-tick:has(input:checked){color:#6fd39b}",
       ".wl-clamp{cursor:pointer}",
       ".wl-soonbox{border-color:rgba(242,184,75,.55)}",
+      ".wl-wc-h{margin-top:18px}.wl-card > .wl-wc .wl-wc-h{margin-top:0}",
+      ".wl-chips{display:flex;flex-wrap:wrap;gap:7px}",
+      ".wl-chip{all:unset;box-sizing:border-box;cursor:pointer;min-height:38px;padding:0 13px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;font-size:13.5px;font-weight:700;color:var(--text);background:var(--surface);-webkit-tap-highlight-color:transparent}",
+      ".wl-chip:hover{border-color:var(--coral)}.wl-chip:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
+      ".wl-chip.on{background:#1c3d5a;border-color:#1c3d5a;color:#fff}",
+      "[data-theme=dark] .wl-chip.on{background:#f2b84b;border-color:#f2b84b;color:#14202e}",
+      ".wl-wc-res{margin-top:12px;border:1px solid rgba(47,133,90,.35);background:rgba(63,206,127,.08);border-radius:12px;padding:12px 14px}",
+      ".wl-wc-best{display:flex;flex-direction:column;gap:3px}",
+      ".wl-wc-tag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#2f855a}",
+      "[data-theme=dark] .wl-wc-tag{color:#6fd39b}",
+      ".wl-wc-name{font-size:18px;font-weight:800;color:var(--text)}",
+      ".wl-wc-why{font-size:14px;color:var(--text)}",
+      ".wl-wc-notes{font-size:12.5px;line-height:1.45;color:var(--muted)}",
+      ".wl-wc-rest{margin:10px 0 0;padding:10px 0 0 20px;border-top:1px dashed var(--line);font-size:13px;line-height:1.6;color:var(--text)}",
+      ".wl-wc-tip{margin:8px 0 0;font-size:12.5px;color:#8a4a10}",
+      "[data-theme=dark] .wl-wc-tip{color:#f2b84b}",
+      ".wl-wc-foot{margin:8px 0 0;font-size:12px;color:var(--muted)}.wl-wc-foot a{color:inherit}",
+      "@media (max-width:560px){.wl-chips{flex-wrap:nowrap;overflow-x:auto;margin:0 -14px;padding:2px 14px 4px;scrollbar-width:none}.wl-chips::-webkit-scrollbar{display:none}.wl-chip{flex:0 0 auto;min-height:44px}}",
       ".wl-alerts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px;padding:10px 12px;border:1px solid rgba(242,184,75,.55);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}",
       ".wl-al-h{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#b4580f;margin-right:4px}",
       "[data-theme=dark] .wl-al-h{color:#f2b84b}",
@@ -911,6 +1055,7 @@
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
       shortName: shortName, cardBrief: cardBrief, topAlerts: topAlerts,
+      whichCard: whichCard, centsPer: centsPer, valueText: valueText, SPEND: SPEND,
       rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
     show: function () {
       styles();
