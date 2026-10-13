@@ -3,9 +3,12 @@
 Build hrt-app/data/wallet-catalog.js from the My Wallet card catalog sheet.
 
 Source of truth: the Google Sheet "HRT-My-Wallet-card-catalog".
-Download it as Excel (File > Download > Microsoft Excel), then run:
+Three ways to feed it the sheet:
 
     python3 tools/build_wallet_catalog.py ~/Downloads/HRT-My-Wallet-card-catalog.xlsx
+    python3 tools/build_wallet_catalog.py --csv-dir folder/   (Cards.csv, Benefits.csv, ...)
+    python3 tools/build_wallet_catalog.py --urls Cards=<url> Benefits=<url>
+        (the "Publish to web" CSV links; this is what the daily update uses)
 
 It refuses to write anything if the sheet has a problem, and says which row.
 
@@ -15,21 +18,20 @@ Rules it enforces (from the sheet's Read me tab):
   - benefits marked "unverified" never reach members, so they are dropped here
 No secrets live in the sheet or this script. Safe for the public repo.
 """
+import csv
+import io
 import json
 import re
 import sys
+import urllib.request
 from datetime import date
 from pathlib import Path
 
-try:
-    import openpyxl
-except ImportError:
-    sys.exit("Needs openpyxl:  pip3 install openpyxl")
 
 OUT = Path(__file__).resolve().parent.parent / "hrt-app" / "data" / "wallet-catalog.js"
 
-CADENCES = {"monthly", "quarterly", "semiannual", "annual", "every4years", "per event"}
-RESETS = {"calendar", "anniversary", "unclear", "application date"}
+CADENCES = {"monthly", "quarterly", "semiannual", "annual", "every4years", "per event", "per purchase"}
+RESETS = {"calendar", "anniversary", "unclear", "application date", "n/a"}
 CONFIDENCE = {"confirmed", "assumed", "unverified"}
 UNITS = {"usd", "points", "passes", "certificates"}
 FEE_BASIS = {"anniversary", "n/a"}
@@ -40,9 +42,10 @@ class SheetError(Exception):
     pass
 
 
-def rows(ws):
-    """Yield (row_number, dict) for each non-empty row under the header row."""
-    it = ws.iter_rows(values_only=True)
+def rows(table):
+    """Yield (row_number, dict) for each non-empty row under the header row.
+    table is a list of row tuples, header first."""
+    it = iter(table)
     header = [str(h).strip() if h is not None else "" for h in next(it)]
     for n, raw in enumerate(it, start=2):
         if all(v is None or str(v).strip() == "" for v in raw):
@@ -171,15 +174,48 @@ def no_em_dashes(obj):
         raise SheetError("A dash (em or en) is in the sheet text. House style says none in member-facing text.")
 
 
-def main(path):
+def tables_from_xlsx(path):
+    try:
+        import openpyxl
+    except ImportError:
+        sys.exit("Needs openpyxl:  pip3 install openpyxl")
     wb = openpyxl.load_workbook(path, data_only=True, read_only=True)
-    if "Cards" not in wb.sheetnames:
-        raise SheetError(f"No 'Cards' tab. Tabs found: {wb.sheetnames}")
-    cards = build_cards(wb["Cards"])
+    return {name: list(wb[name].iter_rows(values_only=True)) for name in wb.sheetnames}
+
+
+def tables_from_csv_text(texts):
+    return {name: list(csv.reader(io.StringIO(t))) for name, t in texts.items()}
+
+
+def tables_from_csv_dir(folder):
+    texts = {}
+    for f in Path(folder).glob("*.csv"):
+        texts[f.stem] = f.read_text(encoding="utf-8-sig")
+    return tables_from_csv_text(texts)
+
+
+def tables_from_urls(pairs):
+    texts = {}
+    for pair in pairs:
+        name, _, url = pair.partition("=")
+        if not url.startswith("https://"):
+            raise SheetError(f"'{pair}' should look like Cards=https://...")
+        with urllib.request.urlopen(url, timeout=60) as r:
+            body = r.read().decode("utf-8-sig")
+        if body.lstrip().lower().startswith("<!doctype") or "<html" in body[:500].lower():
+            raise SheetError(f"{name}: got a web page, not CSV. Is the tab published to the web as CSV?")
+        texts[name] = body
+    return tables_from_csv_text(texts)
+
+
+def main(tables):
+    if "Cards" not in tables:
+        raise SheetError(f"No 'Cards' tab. Tabs found: {sorted(tables)}")
+    cards = build_cards(tables["Cards"])
     ids = {c["id"] for c in cards}
     benefits, dropped = ([], 0)
-    if "Benefits" in wb.sheetnames:
-        benefits, dropped = build_benefits(wb["Benefits"], ids)
+    if "Benefits" in tables:
+        benefits, dropped = build_benefits(tables["Benefits"], ids)
     catalog = {"v": 1, "built": date.today().isoformat(), "cards": cards, "benefits": benefits}
     no_em_dashes(catalog)
     body = json.dumps(catalog, ensure_ascii=False, indent=1)
@@ -194,9 +230,16 @@ def main(path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit(__doc__)
+    a = sys.argv[1:]
     try:
-        main(sys.argv[1])
+        if len(a) == 2 and a[0] == "--csv-dir":
+            t = tables_from_csv_dir(a[1])
+        elif len(a) >= 2 and a[0] == "--urls":
+            t = tables_from_urls(a[1:])
+        elif len(a) == 1 and not a[0].startswith("--"):
+            t = tables_from_xlsx(a[0])
+        else:
+            sys.exit(__doc__)
+        main(t)
     except SheetError as e:
         sys.exit(f"Not written. {e}")

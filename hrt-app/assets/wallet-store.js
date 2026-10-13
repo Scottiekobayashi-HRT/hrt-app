@@ -17,7 +17,8 @@
 
    Wallet shape (v1):
      { v:1,
-       cards:  [ { id, cardId, opened:"2024-03-15" or "2024-03", nickname, ...future fields kept } ],
+       cards:  [ { id, cardId, opened:"2024-03-15" or "2024-03", nickname,
+                   used: { perkId: { periodKey: true or amount used } }, ...future fields kept } ],
        points: [ { program, balance, asOf } ] }
 
    Memberstack's docs say never gate access on Member JSON. Nothing here does.
@@ -67,6 +68,16 @@
       if (typeof c.cardId !== "string" || !c.cardId) throw fail("INVALID", "card " + i + " cardId");
       if (typeof c.opened !== "string" || !OPENED_RE.test(c.opened)) throw fail("INVALID", "card " + i + " opened date");
       if (c.nickname != null && (typeof c.nickname !== "string" || c.nickname.length > 40)) throw fail("INVALID", "card " + i + " nickname");
+      if (c.used != null) {
+        if (typeof c.used !== "object" || Array.isArray(c.used)) throw fail("INVALID", "card " + i + " used");
+        Object.keys(c.used).forEach(function (pid) {
+          var u = c.used[pid];
+          if (!u || typeof u !== "object" || Array.isArray(u)) throw fail("INVALID", "card " + i + " used." + pid);
+          Object.keys(u).forEach(function (k) {
+            if (!/^A?\d{4}(-(0[1-9]|1[0-2]|Q[1-4]|H[12]))?$/.test(k) || !(u[k] === true || (typeof u[k] === "number" && u[k] >= 0 && isFinite(u[k])))) throw fail("INVALID", "card " + i + " used." + pid + "." + k);
+          });
+        });
+      }
     });
     return w;
   }

@@ -81,6 +81,88 @@ ok('one renewal inside 45 days', s.soon === 1, s.soon);
 ok('a card missing from the catalog is kept, not crashed on', s.rows.find(x => x.entry.id === 'd').card === null);
 ok('empty wallet summary', T.summarize({ v: 1, cards: [], points: [] }, CAT, TODAY).yearly === 0);
 
+// ============ PERKS ============
+const P = (card, id) => CAT.benefits.find(b => b.card === card && b.id === id);
+const pp = (card, id, opened, today = TODAY) => T.perkPeriod(P(card, id), opened, today);
+const end = p => p ? `${p.end.y}-${p.end.m}-${p.end.d}` : 'null';
+ok('catalog has the 51 perks', CAT.benefits.length === 51, CAT.benefits.length);
+
+let p = pp('amex-platinum', 'uber', '2024-03-15');
+ok('monthly: Oct 2026, ends Oct 31, 18 days', p.key === '2026-10' && end(p) === '2026-10-31' && p.days === 18 && !p.assumed, p.key + ' ' + end(p) + ' ' + p.days);
+p = pp('amex-platinum', 'resy', '2024-03-15');
+ok('quarterly: Q4 ends Dec 31', p.key === '2026-Q4' && end(p) === '2026-12-31' && p.days === 79 && p.name === 'This quarter (Oct to Dec)', p.key + ' ' + p.name);
+p = pp('amex-gold', 'resy', '2024-03-15');
+ok('semiannual: Jul to Dec', p.key === '2026-H2' && end(p) === '2026-12-31');
+p = pp('amex-gold', 'resy', '2024-03-15', day(2026, 6, 30));
+ok('semiannual: Jun 30 is the last day of H1', p.key === '2026-H1' && p.days === 0);
+p = pp('amex-gold', 'dining', '2024-03-15');
+ok('unclear reset is flagged as assumed', p.assumed === true && p.key === '2026-10');
+p = pp('amex-platinum', 'equinox', '2024-03-15');
+ok('calendar annual: ends Dec 31', p.key === '2026' && end(p) === '2026-12-31');
+
+// anniversary-based credits
+p = pp('chase-sapphire-preferred', 'hotel', '2024-03-15');
+ok('CSP hotel: card year A2026 ends Mar 14 2027', p.key === 'A2026' && end(p) === '2027-3-14' && !p.approx, p.key + ' ' + end(p));
+p = pp('chase-sapphire-preferred', 'hotel', '2024-03-15', day(2027, 3, 14));
+ok('day before anniversary is the last day', p.key === 'A2026' && p.days === 0);
+p = pp('chase-sapphire-preferred', 'hotel', '2024-03-15', day(2027, 3, 15));
+ok('on the anniversary a new card year starts', p.key === 'A2027' && end(p) === '2028-3-14', p.key + ' ' + end(p));
+p = pp('capone-venture-x', 'travel', '2023-07');
+ok('month-only open date: safe deadline Jun 30, flagged approx', p.key === 'A2026' && end(p) === '2027-6-30' && p.approx, p.key + ' ' + end(p));
+p = pp('capone-venture-x', 'travel', '2026-05-01');
+ok('first card year runs to the first anniversary', p.key === 'A2026' && end(p) === '2027-4-30', p.key + ' ' + end(p));
+p = pp('chase-sapphire-preferred', 'hotel', '2024-02-29', day(2027, 1, 10));
+ok('Feb 29 opener: card year ends Feb 27 2027', end(p) === '2027-2-27', end(p));
+
+// Freedom Flex rotating: activation deadline is the 14th
+p = pp('chase-freedom-flex', 'rotating', '2020-01-01');
+ok('rotating 5%: activate by Dec 14', p.activateBy && end(p) === '2026-12-14' && p.days === 62, end(p) + ' ' + p.days);
+p = pp('chase-freedom-flex', 'rotating', '2020-01-01', day(2026, 12, 15));
+ok('rotating 5%: after the 14th the deadline has passed', p.days === -1);
+
+// year boundary
+p = pp('amex-platinum', 'resy', '2024-03-15', day(2027, 1, 1));
+ok('Jan 1 starts Q1 2027', p.key === '2027-Q1' && end(p) === '2027-3-31');
+
+// not tracked
+ok('Global Entry is info only', pp('amex-platinum', 'globalentry', '2024-03-15') === null);
+ok('per event is info only', pp('atmos-summit', 'delaycredit', '2024-03-15') === null);
+ok('per purchase is info only', pp('atmos-ascent', 'inflight', '2024-03-15') === null);
+ok('anniversary miles are not ticked', pp('capone-venture-x', 'annivmiles', '2024-03-15') === null);
+
+// wording
+ok('amount: $15 a month', T.perkAmount(P('amex-platinum', 'uber')) === '$15 a month');
+ok('amount: 2 passes a quarter', T.perkAmount(P('atmos-summit', 'lounge')) === '2 passes a quarter');
+ok('amount: 10,000 points a year', T.perkAmount(P('capone-venture-x', 'annivmiles')) === '10,000 points a year');
+ok('amount: none for 20% inflight', T.perkAmount(P('atmos-ascent', 'inflight')) === '');
+ok('amount: $12.95 a month', T.perkAmount(P('amex-platinum', 'walmart')) === '$12.95 a month');
+
+// rows, value, expiring soon
+const w2 = { v: 1, points: [], cards: [
+  { id: 'p', cardId: 'amex-platinum', opened: '2024-03-15', used: { uber: { '2026-10': true } } },
+  { id: 'x', cardId: 'capone-venture-x', opened: '2022-11-02' },
+  { id: 'f', cardId: 'chase-freedom-flex', opened: '2020-01-01' }
+]};
+const rows = T.perkRows(w2, CAT, TODAY);
+const plat = rows.filter(r => r.entry.id === 'p');
+const platUsd = plat.reduce((s, r) => s + T.perkYearUsd(r.perk), 0);
+ok('Platinum credits add to $3,004.40 a year', Math.abs(platUsd - 3004.4) < 0.001, platUsd);
+ok('ticked Uber shows as used this month', rows.find(r => r.entry.id === 'p' && r.perk.id === 'uber').used === true);
+const soon = T.expiringSoon(rows, 31);
+const ids = soon.map(r => r.entry.id + ':' + r.perk.id);
+ok('used Uber is not in expiring soon', !ids.includes('p:uber'), ids.join());
+ok('Venture X travel credit (ends Nov 1) is in expiring soon', ids.includes('x:travel'), ids.join());
+ok('monthly credits are in expiring soon', ids.includes('p:digital') && ids.includes('p:walmart'));
+ok('Q4 credits are not (79 days out)', !ids.includes('p:resy'));
+ok('soonest first: Oct 31 before Nov 1', soon[0].period.days === 18 && soon[soon.length - 1].perk.id === 'travel', soon.map(r=>r.period.days).join());
+const vx = rows.find(r => r.entry.id === 'x' && r.perk.id === 'annivmiles');
+ok('anniversary miles show the next date', vx.nextArrives && vx.nextArrives.y === 2026 && vx.nextArrives.m === 11 && vx.nextArrives.d === 2);
+
+// pruning
+const e = { used: { a: { '2024-03': true, '2025-12': true, '2026-Q4': true }, b: { A2024: true }, c: { A2025: true } } };
+T.pruneUsed(e, TODAY);
+ok('prune keeps this year and last', JSON.stringify(e.used) === JSON.stringify({ a: { '2025-12': true, '2026-Q4': true }, c: { A2025: true } }), JSON.stringify(e.used));
+
 // --- house style ---
 const src = fs.readFileSync('./assets/wallet.js', 'utf8') + fs.readFileSync('./data/wallet-catalog.js', 'utf8');
 ok('no em or en dashes in member-facing code', !/[–—]/.test(src.replace(/\\u201[34]/g, '')));

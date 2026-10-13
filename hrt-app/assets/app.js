@@ -42,7 +42,7 @@
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
   resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex Platinum credit each quarter" },
   status:{ title:"Atmos Status Planner", hint:"Pick the right way to earn" },
-  wallet:{ title:"My Wallet", hint:"Your cards and annual fees" }
+  wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" }
  };
  var shown = {}, current = null;
  var onShow = {};

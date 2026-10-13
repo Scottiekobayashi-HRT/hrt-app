@@ -92,6 +92,16 @@ ok('unknown card fields survive', f.stored.wallet.cards[0].used?.resy?.['2026-Q4
 ok('points survive a card save', f.stored.wallet.points[0].balance === 142000);
 ok('month-only opened date accepted', f.stored.wallet.cards[1].opened === '2023-07');
 
+// 11b. ticked-off perks are checked
+f = fakeMs({ wallet: { v: 1, cards: [card('a')], points: [] } });
+await S.update(d => { d.cards[0].used = { resy: { '2026-Q4': true }, travel: { A2026: true }, uber: { '2026-10': 15 } }; });
+ok('valid ticks and amounts save', f.stored.wallet.cards[0].used.travel.A2026 === true && f.stored.wallet.cards[0].used.uber['2026-10'] === 15);
+ok('bad period key refused', await code(S.update(d => { d.cards[0].used.resy['2026-Q5'] = true; })) === 'INVALID');
+ok('bad tick value refused', await code(S.update(d => { d.cards[0].used.resy['2026-Q3'] = 'yes'; })) === 'INVALID');
+ok('negative amount refused', await code(S.update(d => { d.cards[0].used.resy['2026-Q3'] = -5; })) === 'INVALID');
+ok('used as a list refused', await code(S.update(d => { d.cards[0].used = []; })) === 'INVALID');
+ok('refused ticks write nothing', f.writes === 1);
+
 // 12. size limit
 f = fakeMs({ big: 'x'.repeat(S._test.MAX_BYTES), wallet: { v: 1, cards: [], points: [] } });
 ok('over the size limit refused', await code(S.update(d => { d.cards.push(card('a')); })) === 'TOO_BIG' && f.writes === 0);
