@@ -205,6 +205,27 @@ ok('Venture X brief: renews in 20 days, $300 travel credit next', bf.renewSoon &
 bf = T.cardBrief(wb.cards[2], card('chase-freedom-flex'), rowsB, TODAY);
 ok('Freedom Flex brief: activation flagged separately, no fee', bf.activate && bf.activate.perk.id === 'rotating' && !bf.hasFee && bf.next.perk.id === 'doordash');
 
+// ============ NEEDS YOUR ATTENTION ============
+const wa = { v: 1, points: [], cards: [
+  { id: 'p', cardId: 'amex-platinum', opened: '2024-03-15' },
+  { id: 'x', cardId: 'capone-venture-x', opened: '2022-11-02' },
+  { id: 'f', cardId: 'chase-freedom-flex', opened: '2020-01-01' }
+]};
+let al = T.topAlerts(wa, CAT, TODAY);
+ok('Oct 13: nothing within 7 days, so renewal first', al[0].text === 'Venture X renews in 20 days, $395 fee' && al[0].id === 'x', JSON.stringify(al));
+ok('Oct 13: month total last', al[al.length - 1].level === 'info' && /in credits to use/.test(al[al.length - 1].text), JSON.stringify(al));
+ok('Oct 13: Freedom Flex activation is 62 days out, not shown', !al.some(a => /Activate/.test(a.text)));
+al = T.topAlerts(wa, CAT, day(2026, 10, 27));
+ok('Oct 27: credits expiring this week come first, summed', al[0].level === 'hot' && /^\$\d.* in credits expire within 5 days$/.test(al[0].text), al[0].text);
+ok('Oct 27: never more than 3', al.length <= 3);
+al = T.topAlerts(wa, CAT, day(2026, 11, 20));
+ok('Nov 20: activation due in 24 days is flagged', al.some(a => a.text === 'Activate Freedom Flex 5% by Dec 14'), JSON.stringify(al));
+const one = { v: 1, points: [], cards: [{ id: 'x', cardId: 'capone-venture-x', opened: '2022-11-02' }] };
+al = T.topAlerts(one, CAT, day(2026, 10, 30));
+ok('one credit about to go: named exactly', al[0].text === 'Venture X Capital One Travel Credit $300 expires in 2 days' && al[0].id === 'x', al[0].text);
+const done = { v: 1, points: [], cards: [{ id: 'u', cardId: 'chase-freedom-unlimited', opened: '2019-05-01', used: { doordash: { '2026-Q4': true } } }] };
+ok('nothing urgent: empty, so the strip hides', T.topAlerts(done, CAT, TODAY).length === 0, JSON.stringify(T.topAlerts(done, CAT, TODAY)));
+
 // --- house style ---
 const src = fs.readFileSync('./assets/wallet.js', 'utf8') + fs.readFileSync('./data/wallet-catalog.js', 'utf8');
 ok('no em or en dashes in member-facing code', !/[–—]/.test(src.replace(/\\u201[34]/g, '')));

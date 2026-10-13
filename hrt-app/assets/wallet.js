@@ -275,6 +275,43 @@
     };
   }
 
+  /* The few things a member most needs to know today, most urgent first. Pure.
+     Returns [{ level: "hot"|"warn"|"info", text, id (wallet entry or null) }]. */
+  function topAlerts(wallet, catalog, today, max) {
+    var t = today || todayParts(), out = [];
+    var s = summarize(wallet, catalog, t), perks = perkRows(wallet, catalog, t);
+    var open = perks.filter(function (r) { return r.period && !r.used && r.period.days >= 0; });
+    var credits = open.filter(function (r) { return r.perk.type !== "activation"; });
+    // 1. credits about to be lost (within 7 days)
+    var urgent = credits.filter(function (r) { return r.period.days <= 7; }).sort(function (a, b) { return a.period.days - b.period.days; });
+    if (urgent.length === 1) {
+      var u = urgent[0];
+      out.push({ level: "hot", id: u.entry.id, text: shortName(u.card.name) + " " + u.perk.label + shortAmount(u.perk) + " expires " +
+        (u.period.days === 0 ? "today" : u.period.days === 1 ? "tomorrow" : "in " + u.period.days + " days") });
+    } else if (urgent.length > 1) {
+      var usd = urgent.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
+      var d0 = urgent[0].period.days;
+      out.push({ level: "hot", id: null, text: (usd ? money(usd) + " in credits" : urgent.length + " credits") + " expire" +
+        (d0 === 0 ? " today" : d0 === 1 ? " by tomorrow" : " within " + urgent[urgent.length - 1].period.days + " days") });
+    }
+    // 2. annual fees coming due (30 days)
+    s.rows.filter(function (r) { return r.hasFee && r.renewal && r.renewal.days <= 30; }).forEach(function (r) {
+      out.push({ level: "warn", id: r.entry.id, text: shortName(r.card.name) + " renews " +
+        (r.renewal.days === 0 ? "today" : "in " + r.renewal.days + (r.renewal.days === 1 ? " day" : " days")) + ", " + money(r.card.fee) + " fee" });
+    });
+    // 3. activations due (30 days)
+    open.filter(function (r) { return r.perk.type === "activation" && r.period.days <= 30; }).forEach(function (r) {
+      out.push({ level: "warn", id: r.entry.id, text: "Activate " + shortName(r.card.name) + " 5% by " + dayText(r.period.end) });
+    });
+    // 4. otherwise, what is left to use this month
+    if (!urgent.length) {
+      var month = credits.filter(function (r) { return r.period.days <= 31; });
+      var mUsd = month.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
+      if (mUsd) out.push({ level: "info", id: null, text: money(mUsd) + " in credits to use in the next " + (month[month.length - 1] ? "31 days" : "month") });
+    }
+    return out.slice(0, max || 3);
+  }
+
   /* ============================= EARNING =============================
      catalog.earning: { card, category, groups[], rate, currency, cap, via, ... }
      catalog.quarterly: Freedom Flex style rotating categories by quarter.
@@ -547,7 +584,7 @@
       "</div>";
   }
 
-  function paint() { paintMain(); paintHome(); }
+  function paint() { paintMain(); paintHome(); paintAlerts(); }
 
   /* ----- Dashboard home panel: totals and the next credits to use ----- */
   var homeHost;
@@ -610,6 +647,19 @@
     }
     if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     homeHost.innerHTML = html + "</div>";
+  }
+
+  var alertHost;
+  function paintAlerts() {
+    if (!alertHost) return;
+    if (!state.wallet || state.error || !state.wallet.cards.length) { alertHost.innerHTML = ""; return; }
+    var list = topAlerts(state.wallet, catalog());
+    if (!list.length) { alertHost.innerHTML = ""; return; }
+    alertHost.innerHTML = '<div class="wl-alerts" role="region" aria-label="Needs your attention"><span class="wl-al-h">Needs your attention</span>' +
+      list.map(function (a) {
+        return '<button class="wl-al ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + ">" +
+          '<span class="wl-al-dot"></span>' + esc(a.text) + '<span class="wl-al-go" aria-hidden="true">&rsaquo;</span></button>';
+      }).join("") + "</div>";
   }
 
   function paintMain() {
@@ -688,11 +738,12 @@
 
   function onClick(ev) {
     var b = ev.target.closest && ev.target.closest("[data-wl]");
-    if (!b || !((host && host.contains(b)) || (homeHost && homeHost.contains(b)))) return;
+    if (!b || !((host && host.contains(b)) || (homeHost && homeHost.contains(b)) || (alertHost && alertHost.contains(b)))) return;
     var act = b.getAttribute("data-wl"), id = b.getAttribute("data-id");
     if (act === "use") return; /* handled on change */
     if (act === "clamp") { if (ev.target.closest("a")) return; b.classList.toggle("full"); return; }
     if (act === "retry") return load();
+    if (act === "go-wallet") { location.hash = "wallet"; return; }
     if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; location.hash = "wallet"; return; }
     if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
     if (act === "add") { state.editing = "new"; state.msg = ""; paint(); host.scrollIntoView({ block: "nearest" }); return; }
@@ -779,6 +830,16 @@
       "[data-theme=dark] .wl-tick:has(input:checked){color:#6fd39b}",
       ".wl-clamp{cursor:pointer}",
       ".wl-soonbox{border-color:rgba(242,184,75,.55)}",
+      ".wl-alerts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px;padding:10px 12px;border:1px solid rgba(242,184,75,.55);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}",
+      ".wl-al-h{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#b4580f;margin-right:4px}",
+      "[data-theme=dark] .wl-al-h{color:#f2b84b}",
+      ".wl-al{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--text);background:var(--surface-2,rgba(0,0,0,.04));border:1px solid var(--line);-webkit-tap-highlight-color:transparent}",
+      ".wl-al:hover{box-shadow:var(--shadow)}.wl-al:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
+      ".wl-al-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:#9fc1d4}",
+      ".wl-al.hot{border-color:rgba(192,57,43,.35);background:rgba(242,114,110,.12)}.wl-al.hot .wl-al-dot{background:#d9534f}",
+      ".wl-al.warn{border-color:rgba(242,184,75,.6);background:rgba(242,184,75,.16)}.wl-al.warn .wl-al-dot{background:#e8824c}",
+      ".wl-al-go{font-size:18px;line-height:1;color:var(--muted);margin-left:2px}",
+      "@media (max-width:560px){.wl-alerts{flex-direction:column;align-items:stretch;gap:6px;padding:10px}.wl-al-h{margin:0 0 2px 2px}.wl-al{min-height:46px;justify-content:flex-start;border-radius:12px}.wl-al-go{margin-left:auto}}",
       ".wl-hm{margin:0 0 18px;border-color:rgba(242,184,75,.55)}",
       ".wl-hm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}",
       ".wl-hm-head .wl-btn{flex:0 0 auto;text-decoration:none;white-space:nowrap}",
@@ -849,7 +910,7 @@
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
-      shortName: shortName, cardBrief: cardBrief,
+      shortName: shortName, cardBrief: cardBrief, topAlerts: topAlerts,
       rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
     show: function () {
       styles();
@@ -865,6 +926,11 @@
     home: function () {
       styles();
       homeHost = document.getElementById("wl-home");
+      alertHost = document.getElementById("wl-alerts");
+      if (alertHost && !alertHost.getAttribute("data-ready")) {
+        alertHost.setAttribute("data-ready", "1");
+        alertHost.addEventListener("click", onClick);
+      }
       if (homeHost && !homeHost.getAttribute("data-ready")) {
         homeHost.setAttribute("data-ready", "1");
         homeHost.addEventListener("click", onClick);
