@@ -308,11 +308,12 @@
   }
 
   function load() {
-    state.error = null; state.wallet = null; paint();
-    if (!store()) { state.error = { code: "NO_MEMBERSTACK" }; return paint(); }
+    if (state.loading) return;
+    state.loading = true; state.error = null; state.wallet = null; paint();
+    if (!store()) { state.loading = false; state.error = { code: "NO_MEMBERSTACK" }; return paint(); }
     whenMemberstack(function () {
-      store().load().then(function (w) { state.wallet = w; state.error = null; paint(); },
-        function (e) { state.wallet = null; state.error = e; paint(); });
+      store().load().then(function (w) { state.loading = false; state.wallet = w; state.error = null; paint(); },
+        function (e) { state.loading = false; state.wallet = null; state.error = e; paint(); });
     });
   }
 
@@ -512,7 +513,56 @@
       "</div>";
   }
 
-  function paint() {
+  function paint() { paintMain(); paintHome(); }
+
+  /* ----- Dashboard home panel: totals and the next credits to use ----- */
+  var homeHost;
+  function paintHome() {
+    if (!homeHost) return;
+    var head = '<div class="wl-hm-head"><div><span class="wl-hm-eye">My Wallet</span>';
+    if (state.error) {
+      homeHost.innerHTML = '<div class="wl-card wl-hm">' + head + "<p class=\"wl-hm-sub\">" + esc(errText(state.error)) + "</p></div>" +
+        (state.error.code === "READ_FAILED" ? '<button class="wl-btn" data-wl="retry">Try again</button>' : "") + "</div></div>";
+      return;
+    }
+    if (!state.wallet) { homeHost.innerHTML = '<div class="wl-card wl-hm">' + head + '<p class="wl-hm-sub">Loading your wallet</p></div></div></div>'; return; }
+    var s = summarize(state.wallet, catalog());
+    if (!s.count) {
+      homeHost.innerHTML = '<div class="wl-card wl-hm wl-hm-empty">' + head +
+        "<h2 class=\"wl-hm-h\">Every card, fee and credit in one place</h2>" +
+        '<p class="wl-hm-sub">Add the cards you hold. My Wallet shows what each one costs, what it gives back, and which credits are about to expire.</p></div>' +
+        '<button class="wl-btn wl-pri" data-wl="go-add">Add your cards &rarr;</button></div></div>';
+      return;
+    }
+    var perks = perkRows(state.wallet, catalog());
+    var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
+    var soon = expiringSoon(perks, SOON_PERK_DAYS);
+    var atRisk = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
+    var nx = s.next ? s.next.card.name + " renews " + renewalText(s.next.renewal) : "";
+    var html = '<div class="wl-card wl-hm">' + head +
+      '<h2 class="wl-hm-h">' + (soon.length ? esc(money(atRisk)) + " in credits to use soon" : "You are all caught up") + "</h2>" +
+      '<p class="wl-hm-sub">' + s.count + (s.count === 1 ? " card" : " cards") + " &middot; " + esc(money(s.yearly)) + " in annual fees &middot; up to " +
+      esc(money(credits)) + " a year in credits" + (nx ? " &middot; " + esc(nx) : "") + "</p></div>" +
+      '<a class="wl-btn wl-pri" href="#wallet" data-route="wallet">Open My Wallet &rarr;</a></div>';
+    if (soon.length) {
+      html += '<ul class="wl-pks wl-hm-list">' + soon.slice(0, 3).map(function (r) {
+        var b = r.perk, p = r.period;
+        return '<li class="wl-pk"><div class="wl-pk-main"><div class="wl-pk-top"><b>' + esc(b.label) + "</b>" +
+          '<span class="wl-pk-amt">' + esc(b.unit === "usd" ? money(b.amount) : perkAmount(b)) + "</span></div>" +
+          '<div class="wl-pk-when">' + esc(r.card.name) + " &middot; " + (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) +
+          ' <span class="wl-pk-days' + (p.days <= 14 ? " on" : "") + '">' + esc(daysLeft(p.days)) + "</span></div></div>" +
+          '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
+          '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
+      }).join("") + "</ul>";
+      if (soon.length > 3) html += '<a class="wl-hm-more" href="#wallet" data-route="wallet">' + (soon.length - 3) + " more expiring soon &rarr;</a>";
+    } else {
+      html += '<p class="wl-hm-ok">Nothing resets in the next ' + SOON_PERK_DAYS + " days that you have not already used.</p>";
+    }
+    if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
+    homeHost.innerHTML = html + "</div>";
+  }
+
+  function paintMain() {
     if (!host) return;
     if (state.error) {
       setStats(null);
@@ -583,10 +633,11 @@
 
   function onClick(ev) {
     var b = ev.target.closest && ev.target.closest("[data-wl]");
-    if (!b || !host.contains(b)) return;
+    if (!b || !((host && host.contains(b)) || (homeHost && homeHost.contains(b)))) return;
     var act = b.getAttribute("data-wl"), id = b.getAttribute("data-id");
     if (act === "use") return; /* handled on change */
     if (act === "retry") return load();
+    if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
     if (act === "add") { state.editing = "new"; state.msg = ""; paint(); host.scrollIntoView({ block: "nearest" }); return; }
     if (act === "cancel") { state.editing = null; paint(); return; }
     if (act === "edit") { state.editing = id; state.msg = ""; paint(); return; }
@@ -667,6 +718,18 @@
       ".wl-tick{flex:0 0 auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--text);cursor:pointer;white-space:nowrap;padding-top:1px}",
       ".wl-tick input{width:18px;height:18px;accent-color:#e8824c;cursor:pointer}",
       ".wl-soonbox{border-color:rgba(242,184,75,.55)}",
+      ".wl-hm{margin:0 0 18px;border-color:rgba(242,184,75,.55)}",
+      ".wl-hm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}",
+      ".wl-hm-head .wl-btn{flex:0 0 auto;text-decoration:none;white-space:nowrap}",
+      ".wl-hm-eye{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#b4580f;margin-bottom:4px}",
+      "[data-theme=dark] .wl-hm-eye{color:#f2b84b}",
+      ".wl-hm-h{margin:0;font-size:20px;line-height:1.25;font-weight:800;color:var(--text)}",
+      ".wl-hm-sub{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}",
+      ".wl-hm-list{margin-top:14px}",
+      ".wl-hm-more{display:inline-block;margin-top:10px;font-size:13px;font-weight:800;color:var(--coral);text-decoration:none}",
+      ".wl-hm-ok{margin:12px 0 0;font-size:13px;color:var(--muted)}",
+      ".wl-hm .wl-banner{margin:12px 0 0}",
+      "@media (max-width:560px){.wl-hm-head{flex-direction:column}.wl-hm-h{font-size:18px}}",
       ".wl-h4{margin:16px 0 8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}",
       ".wl-detail .wl-h4:first-child{margin-top:12px}",
       ".wl-earn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}",
@@ -692,7 +755,7 @@
     _test: { parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
-      perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked,
+      perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
       rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
     show: function () {
       styles();
@@ -701,8 +764,19 @@
         host.setAttribute("data-ready", "1");
         host.addEventListener("click", onClick);
         host.addEventListener("change", onChange);
-        load();
       }
+      if (!state.wallet && !state.loading) load(); else paint();
+    },
+    /* the Dashboard home panel; shares the same wallet and the same safe saves */
+    home: function () {
+      styles();
+      homeHost = document.getElementById("wl-home");
+      if (homeHost && !homeHost.getAttribute("data-ready")) {
+        homeHost.setAttribute("data-ready", "1");
+        homeHost.addEventListener("click", onClick);
+        homeHost.addEventListener("change", onChange);
+      }
+      if (!state.wallet && !state.loading) load(); else paint();
     }
   };
 })();

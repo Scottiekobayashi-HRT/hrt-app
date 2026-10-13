@@ -482,6 +482,8 @@
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
  onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };
  onShow.wallet = function(){ if(window.HRT_WALLET) window.HRT_WALLET.show(); };
+ /* My Wallet panel on the Dashboard home; wraps any existing home handler */
+ (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
 
  /* ============================== BOOT ============================== */
  homeKama(); homeVals(); homeLounges(); tbLoad();
