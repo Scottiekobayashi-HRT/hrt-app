@@ -242,6 +242,32 @@
       });
   }
 
+  /* ============================= EARNING =============================
+     catalog.earning: { card, category, groups[], rate, currency, cap, via, ... }
+     catalog.quarterly: Freedom Flex style rotating categories by quarter.
+  ------------------------------------------------------------------- */
+  function rateText(e) {
+    var cur = String(e.currency || "").toLowerCase(), r = e.rate;
+    if (cur.indexOf("status") > -1) return r < 1 ? "1 per $" + Math.round(1 / r) : r + " per $1";
+    var n = (Math.round(r * 10) / 10).toString();
+    return cur.indexOf("cash back") > -1 ? n + "%" : n + "x";
+  }
+  function earningFor(catalog, cardId) {
+    var rank = function (e) { return e.groups.indexOf("status") > -1 ? 2 : e.groups.indexOf("everyday") > -1 ? 1 : 0; };
+    return (catalog && catalog.earning || []).filter(function (e) { return e.card === cardId; })
+      .slice().sort(function (a, b) { return rank(a) - rank(b) || b.rate - a.rate; });
+  }
+  function quarterKey(y, q) { return y + "-Q" + q; }
+  function quartersFor(catalog, cardId, today) {
+    var t = today || todayParts(), q = Math.ceil(t.m / 3);
+    var nk = q === 4 ? quarterKey(t.y + 1, 1) : quarterKey(t.y, q + 1);
+    var mine = (catalog && catalog.quarterly || []).filter(function (x) { return x.card === cardId; });
+    var find = function (k) { return mine.filter(function (x) { return x.quarter === k; })[0] || null; };
+    return { current: find(quarterKey(t.y, q)), next: find(nk) };
+  }
+  var Q_NAMES = { 1: "Jan to Mar", 2: "Apr to Jun", 3: "Jul to Sep", 4: "Oct to Dec" };
+  function quarterName(k) { return Q_NAMES[+String(k).slice(-1)] + " " + String(k).slice(0, 4); }
+
   /* ============================== VIEW ============================== */
   var host, state = { wallet: null, error: null, editing: null, busy: false, msg: "", open: {}, showAllSoon: false };
   var SOON_PERK_DAYS = 31;
@@ -366,7 +392,8 @@
   /* One line of the card's perk panel */
   function perkHtml(r, today) {
     var b = r.perk, p = r.period, amt = perkAmount(b);
-    var head = '<div class="wl-pk-top"><b>' + esc(b.label) + "</b>" + (amt ? '<span class="wl-pk-amt">' + esc(amt) + "</span>" : "") + "</div>";
+    var head = '<div class="wl-pk-top"><b>' + esc(b.label) + "</b>" + (amt ? '<span class="wl-pk-amt">' + esc(amt) + "</span>" : "") + "</div>" +
+      (b.type === "activation" ? rotatingLine(b.card) : "");
     var when = "";
     if (p) {
       var dl = p.activateBy ? "Activate by " : "Use by ";
@@ -387,6 +414,31 @@
     return '<li class="wl-pk' + (r.used ? " done" : "") + '"><div class="wl-pk-main">' + head + when +
       '<div class="wl-tags">' + perkTags(b, p) + "</div>" + foot + "</div>" + tick + "</li>";
   }
+  function rotatingLine(cardId) {
+    var qs = quartersFor(catalog(), cardId), t = "";
+    if (qs.current) t += '<div class="wl-pk-rot"><b>' + esc(quarterName(qs.current.quarter)) + ":</b> " + esc(qs.current.categories) + "</div>";
+    if (qs.next) t += '<div class="wl-pk-rot wl-dim"><b>Next, ' + esc(quarterName(qs.next.quarter)) + ":</b> " + esc(qs.next.categories) +
+      (qs.next.deadline ? "" : " (activation deadline not announced yet)") + "</div>";
+    return t;
+  }
+
+  function earnHtml(cardId) {
+    var list = earningFor(catalog(), cardId);
+    if (!list.length) return "";
+    return '<h4 class="wl-h4">How it earns</h4><ul class="wl-earn">' + list.map(function (e) {
+      var cap1 = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
+      var sub = [e.cap, e.via].filter(Boolean).map(cap1).join(". ");
+      var status = e.groups.indexOf("status") > -1;
+      return '<li><span class="wl-rate' + (status ? " st" : "") + '">' + esc(rateText(e)) + "</span>" +
+        '<span class="wl-earn-main"><b>' + esc(e.category) + "</b>" + (status ? " <span class=\"wl-dim\">(" + esc(e.currency) + ")</span>" : "") +
+        (sub ? '<span class="wl-earn-sub">' + esc(sub) + "</span>" : "") +
+        (e.note && !status && e.groups.indexOf("everyday") < 0 && e.groups.indexOf("rotating") < 0 ? '<span class="wl-earn-sub wl-dim">' + esc(e.note) + "</span>" : "") +
+        (e.groups.indexOf("rotating") > -1 ? rotatingLine(cardId) : "") +
+        (e.confidence === "assumed" ? '<span class="wl-tags">' + badge("Issuer does not state this clearly", "warn") + "</span>" : "") +
+        "</span></li>";
+    }).join("") + "</ul>";
+  }
+
   function daysLeft(n) { return n < 0 ? "Deadline passed" : n === 0 ? "Last day" : n === 1 ? "1 day left" : n + " days left"; }
 
   function rowHtml(r, perks) {
@@ -413,10 +465,13 @@
       (r.hasFee ? '<span class="wl-when' + (soon ? " on" : "") + '">' + esc(whenText(rn)) + "</span>" : "") +
       '<span class="wl-rowacts"><button class="wl-link" data-wl="edit" data-id="' + esc(e.id) + '">Edit</button>' +
       '<button class="wl-link" data-wl="remove" data-id="' + esc(e.id) + '">Remove</button></span></div></div>';
-    if (mine.length) {
+    var earnCount = earningFor(catalog(), c.id).length;
+    if (mine.length || earnCount) {
       html += '<button class="wl-perkbtn" data-wl="perks" data-id="' + esc(e.id) + '" aria-expanded="' + open + '">' +
-        (open ? "Hide perks" : "Perks and credits (" + mine.length + ")") + "</button>";
-      if (open) html += '<ul class="wl-pks">' + mine.map(function (x) { return perkHtml(x); }).join("") + "</ul>";
+        (open ? "Hide details" : "How it earns, perks and credits") + "</button>";
+      if (open) html += '<div class="wl-detail">' + earnHtml(c.id) +
+        (mine.length ? '<h4 class="wl-h4">Perks and credits</h4><ul class="wl-pks">' + mine.map(function (x) { return perkHtml(x); }).join("") + "</ul>" : "") +
+        "</div>";
     } else if (c.note) {
       html += '<p class="wl-pk-note wl-cardnote">' + esc(c.note) + "</p>";
     }
@@ -448,6 +503,7 @@
           '<div class="wl-pk-when">' + esc(r.card.name) + (r.entry.nickname ? " (" + esc(r.entry.nickname) + ")" : "") + " &middot; " +
           (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) + (p.approx ? " or earlier" : "") +
           ' <span class="wl-pk-days' + (p.days <= 14 ? " on" : "") + '">' + esc(daysLeft(p.days)) + "</span></div>" +
+          (b.type === "activation" ? rotatingLine(b.card) : "") +
           '<div class="wl-tags">' + perkTags(b, p) + "</div></div>" +
           '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
           '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
@@ -611,6 +667,19 @@
       ".wl-tick{flex:0 0 auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--text);cursor:pointer;white-space:nowrap;padding-top:1px}",
       ".wl-tick input{width:18px;height:18px;accent-color:#e8824c;cursor:pointer}",
       ".wl-soonbox{border-color:rgba(242,184,75,.55)}",
+      ".wl-h4{margin:16px 0 8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}",
+      ".wl-detail .wl-h4:first-child{margin-top:12px}",
+      ".wl-earn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}",
+      ".wl-earn li{display:flex;gap:12px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--line)}",
+      ".wl-earn li:first-child{border-top:0}",
+      ".wl-rate{flex:0 0 64px;text-align:center;font-size:14px;font-weight:800;color:#1c3d5a;background:rgba(159,193,212,.28);border-radius:8px;padding:4px 0}",
+      "[data-theme=dark] .wl-rate{color:#d6e7f2}",
+      ".wl-rate.st{font-size:11.5px;color:#7a5a12;background:rgba(242,184,75,.22)}",
+      "[data-theme=dark] .wl-rate.st{color:#f2b84b}",
+      ".wl-earn-main{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13.5px;color:var(--text)}",
+      ".wl-earn-sub{font-size:12px;line-height:1.45;color:var(--muted)}",
+      ".wl-dim{color:var(--muted);font-weight:500}",
+      ".wl-pk-rot{font-size:12.5px;line-height:1.45;color:var(--text)}",
       ".wl-risk{font-size:13px;font-weight:800;color:#b4580f;background:rgba(242,184,75,.22);border-radius:999px;padding:3px 11px}",
       "[data-theme=dark] .wl-risk{color:#f2b84b}",
       ".wl-sub2{margin:-4px 0 0;font-size:12.5px;color:var(--muted)}",
@@ -623,7 +692,8 @@
     _test: { parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
-      perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked },
+      perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked,
+      rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
     show: function () {
       styles();
       host = document.getElementById("wl-host");

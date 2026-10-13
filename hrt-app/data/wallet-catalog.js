@@ -994,5 +994,972 @@ window.HRT_WALLET_CATALOG={
    "source": "https://bankofamerica.com/credit-cards/products/alaska-airlines-credit-card",
    "checked": "2026-10-13"
   }
+ ],
+ "earning": [
+  {
+   "card": "amex-gold",
+   "category": "Restaurants worldwide",
+   "groups": [
+    "dining"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "up to $50,000 in purchases per calendar year, then 1x",
+   "via": "",
+   "note": "Excludes bars, nightclubs, cafeterias, caterers, bakeries, and restaurants inside hotels, casinos or event venues (these may code as the hotel, which matters at Waikiki resorts). Card page does not say whether U.S. takeout or delivery counts.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-gold",
+   "category": "U.S. supermarkets",
+   "groups": [
+    "grocery"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "up to $25,000 in purchases per calendar year, then 1x",
+   "via": "",
+   "note": "Hawaii counts as U.S., so Foodland, Times and Safeway should qualify. Excluded: superstores (Walmart, Target), warehouse clubs (Costco, Sam's), convenience stores, meal kits, bakeries, butchers and liquor stores. Don Quijote coding not confirmed.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-gold",
+   "category": "Flights",
+   "groups": [
+    "flights"
+   ],
+   "rate": 3.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "booked directly with airlines or through AmexTravel.com",
+   "note": "Charter flights, vacation packages and most third-party agency bookings excluded. Hawaiian or Alaska airfare bought on the airline site qualifies.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-gold",
+   "category": "Prepaid hotels",
+   "groups": [
+    "hotels"
+   ],
+   "rate": 5.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "booked through AmexTravel.com",
+   "note": "Prepaid rates only. Pay-at-hotel bookings do not earn this rate.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-gold",
+   "category": "Prepaid car rentals and cruises",
+   "groups": [
+    "car-rental",
+    "travel"
+   ],
+   "rate": 2.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "booked through AmexTravel.com",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-gold",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-platinum",
+   "category": "Flights",
+   "groups": [
+    "flights"
+   ],
+   "rate": 5.0,
+   "currency": "Membership Rewards points",
+   "cap": "up to $500,000 in purchases per calendar year, then 1x",
+   "via": "booked directly with airlines or through Amex Travel",
+   "note": "Charter flights and vacation packages excluded.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-platinum",
+   "category": "Prepaid hotels",
+   "groups": [
+    "hotels"
+   ],
+   "rate": 5.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "booked through Amex Travel",
+   "note": "Prepaid rates only.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-platinum",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "U.S. restaurants including takeout and delivery",
+   "groups": [
+    "dining"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "top 2 categories each billing cycle only; $150,000 combined per calendar year, then 1x",
+   "via": "",
+   "note": "Each billing cycle Amex gives 4x on the 2 eligible categories where you spent the most. The other categories earn 1x that cycle.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "U.S. gas stations",
+   "groups": [
+    "gas"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "top 2 categories each billing cycle only; $150,000 combined per calendar year, then 1x",
+   "via": "",
+   "note": "Costco, Safeway and other supermarket or warehouse club fuel does NOT count as a gas station.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "Transit",
+   "groups": [
+    "transit"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "top 2 categories each billing cycle only; $150,000 combined per calendar year, then 1x",
+   "via": "",
+   "note": "Trains, taxis, rideshare, ferries, tolls, parking, buses (TheBus, Skyline, Uber). Airfare, car rentals and cruises are not transit.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "U.S. electronics retailers and software and cloud providers",
+   "groups": [
+    "business"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "top 2 categories each billing cycle only; $150,000 combined per calendar year, then 1x",
+   "via": "",
+   "note": "Amazon, eBay, superstores, wireless carriers and app stores excluded.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "U.S. advertising in select media",
+   "groups": [
+    "business"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "top 2 categories each billing cycle only; $150,000 combined per calendar year, then 1x",
+   "via": "",
+   "note": "Online, TV and radio ads bought directly from the media provider. Amex footnote says select merchants only from February 17, 2027; merchant list not found.",
+   "confidence": "assumed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "U.S. wireless phone service",
+   "groups": [
+    "business"
+   ],
+   "rate": 4.0,
+   "currency": "Membership Rewards points",
+   "cap": "top 2 categories each billing cycle only; $150,000 combined per calendar year, then 1x",
+   "via": "monthly service paid directly to a U.S. wireless provider",
+   "note": "Phones and hardware excluded. Same February 17, 2027 select merchants footnote as advertising.",
+   "confidence": "assumed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "Flights and prepaid hotels",
+   "groups": [
+    "flights",
+    "hotels"
+   ],
+   "rate": 3.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "booked through AmexTravel.com",
+   "note": "Flights booked directly with the airline earn only 1x on this card.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-gold",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-platinum",
+   "category": "Flights and prepaid hotels",
+   "groups": [
+    "flights",
+    "hotels"
+   ],
+   "rate": 5.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "booked through Amex Travel",
+   "note": "Flights booked directly with the airline do not earn 5x on this card.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-platinum",
+   "category": "U.S. construction materials and hardware suppliers",
+   "groups": [
+    "business"
+   ],
+   "rate": 2.0,
+   "currency": "Membership Rewards points",
+   "cap": "$2 million per calendar year shared across all 2x purchases, then 1x",
+   "via": "",
+   "note": "Examples: Lowe's, Sherwin-Williams. Superstores and warehouse clubs excluded.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-platinum",
+   "category": "U.S. electronics retailers and software and cloud providers",
+   "groups": [
+    "business"
+   ],
+   "rate": 2.0,
+   "currency": "Membership Rewards points",
+   "cap": "$2 million per calendar year shared across all 2x purchases, then 1x",
+   "via": "",
+   "note": "Amazon, eBay and superstores excluded.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-platinum",
+   "category": "U.S. shipping",
+   "groups": [
+    "business"
+   ],
+   "rate": 2.0,
+   "currency": "Membership Rewards points",
+   "cap": "$2 million per calendar year shared across all 2x purchases, then 1x",
+   "via": "",
+   "note": "FedEx, UPS, USPS. Shipping charges on retail orders do not count.",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-platinum",
+   "category": "Single purchases of $5,000 or more",
+   "groups": [
+    "business"
+   ],
+   "rate": 2.0,
+   "currency": "Membership Rewards points",
+   "cap": "$2 million per calendar year shared across all 2x purchases, then 1x",
+   "via": "",
+   "note": "Does not stack with other bonuses. Page does not say whether U.S. only.",
+   "confidence": "assumed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "amex-business-platinum",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Membership Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Travel through Chase Travel",
+   "groups": [
+    "travel"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked through Chase Travel",
+   "note": "The first $100 of Chase Travel hotel purchases each account year earns no points (pairs with the $100 hotel credit).",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Dining",
+   "groups": [
+    "dining"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Restaurants including takeout and eligible delivery. Bakeries, caterers and meal kits excluded.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Online grocery",
+   "groups": [
+    "grocery"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "online orders, pickup or delivery",
+   "note": "In-store grocery earns only 1x. Target, Walmart, wholesale clubs and liquor stores excluded.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Gas stations",
+   "groups": [
+    "gas"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Grocery store fuel counts only if the merchant codes as a gas station.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "EV charging",
+   "groups": [
+    "ev"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Public charging stations.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Select streaming",
+   "groups": [
+    "streaming"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Includes Netflix, Hulu, Disney+, Max, Spotify, YouTube Premium and others on Chase's list.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Vacation homes",
+   "groups": [
+    "travel"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked directly with Airbnb, Vrbo, Vacasa and other listed brands",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Other travel",
+   "groups": [
+    "travel"
+   ],
+   "rate": 2.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Airlines, hotels, car rentals, cruises, ride and transit. Excludes in-flight purchases and merchants inside hotels or airports.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Lyft",
+   "groups": [
+    "promo"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "in the Lyft app",
+   "note": "Limited time through September 30 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Peloton equipment over $150",
+   "groups": [
+    "promo"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "$5,000 in total purchases",
+   "via": "",
+   "note": "Limited time through December 31 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-preferred",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-unlimited",
+   "category": "Travel through Chase Travel",
+   "groups": [
+    "travel"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "booked through Chase Travel",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-unlimited",
+   "category": "Dining",
+   "groups": [
+    "dining"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "Restaurants including takeout and eligible delivery.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-unlimited",
+   "category": "Drugstores",
+   "groups": [
+    "drugstores"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "Pharmacies inside grocery, warehouse and discount stores excluded. Longs Drugs should count, depending on how it codes.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-unlimited",
+   "category": "Lyft",
+   "groups": [
+    "promo"
+   ],
+   "rate": 2.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "in the Lyft app",
+   "note": "Limited time through September 30 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-unlimited",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.5,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-flex",
+   "category": "Rotating 5% categories",
+   "groups": [
+    "rotating"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "$1,500 combined per quarter, then 1%",
+   "via": "activate each quarter",
+   "note": "See the quarterly categories.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-flex",
+   "category": "Travel through Chase Travel",
+   "groups": [
+    "travel"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "booked through Chase Travel",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-flex",
+   "category": "Dining",
+   "groups": [
+    "dining"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "Restaurants including takeout and eligible delivery.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-flex",
+   "category": "Drugstores",
+   "groups": [
+    "drugstores"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "Pharmacies inside grocery, warehouse and discount stores excluded.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-flex",
+   "category": "Lyft",
+   "groups": [
+    "promo"
+   ],
+   "rate": 2.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "in the Lyft app",
+   "note": "Limited time through September 30 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-flex",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "capone-venture",
+   "category": "Hotels, vacation rentals and rental cars",
+   "groups": [
+    "hotels",
+    "car-rental",
+    "travel"
+   ],
+   "rate": 5.0,
+   "currency": "Capital One miles",
+   "cap": "",
+   "via": "booked through Capital One Travel",
+   "note": "Capital One's page is inconsistent about whether vacation rentals are included. Flights through Capital One Travel earn the 2x base.",
+   "confidence": "assumed",
+   "source": "https://www.capitalone.com/credit-cards/venture/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "capone-venture",
+   "category": "Capital One Entertainment tickets",
+   "groups": [
+    "entertainment"
+   ],
+   "rate": 5.0,
+   "currency": "Capital One miles",
+   "cap": "",
+   "via": "bought on the Capital One Entertainment platform",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.capitalone.com/credit-cards/venture/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "capone-venture",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 2.0,
+   "currency": "Capital One miles",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.capitalone.com/credit-cards/venture/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "capone-venture-x",
+   "category": "Hotels and rental cars",
+   "groups": [
+    "hotels",
+    "car-rental"
+   ],
+   "rate": 10.0,
+   "currency": "Capital One miles",
+   "cap": "",
+   "via": "booked through Capital One Travel",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.capitalone.com/credit-cards/venture-x/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "capone-venture-x",
+   "category": "Flights and vacation rentals",
+   "groups": [
+    "flights",
+    "travel"
+   ],
+   "rate": 5.0,
+   "currency": "Capital One miles",
+   "cap": "",
+   "via": "booked through Capital One Travel",
+   "note": "Interisland and mainland flights booked here earn 5x; booked directly with the airline, 2x.",
+   "confidence": "confirmed",
+   "source": "https://www.capitalone.com/credit-cards/venture-x/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "capone-venture-x",
+   "category": "Capital One Entertainment tickets",
+   "groups": [
+    "entertainment"
+   ],
+   "rate": 5.0,
+   "currency": "Capital One miles",
+   "cap": "",
+   "via": "bought on the Capital One Entertainment platform",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.capitalone.com/credit-cards/venture-x/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "capone-venture-x",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 2.0,
+   "currency": "Capital One miles",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.capitalone.com/credit-cards/venture-x/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-summit",
+   "category": "Alaska and Hawaiian Airlines purchases",
+   "groups": [
+    "flights"
+   ],
+   "rate": 3.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Bank of America account holders may get a 10% points bonus on card purchases.",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-summit",
+   "category": "Dining",
+   "groups": [
+    "dining"
+   ],
+   "rate": 3.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Bank of America does not define dining on the card page.",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-summit",
+   "category": "Foreign purchases",
+   "groups": [
+    "foreign"
+   ],
+   "rate": 3.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "No foreign transaction fee.",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-summit",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-summit",
+   "category": "Status points on all purchases",
+   "groups": [
+    "status"
+   ],
+   "rate": 0.5,
+   "currency": "Atmos status points",
+   "cap": "",
+   "via": "",
+   "note": "1 status point per $2 spent, plus 10,000 each card anniversary.",
+   "confidence": "confirmed",
+   "source": "https://news.alaskaair.com/loyalty/alaska-airlines-and-bank-of-america-present-a-new-premium-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-ascent",
+   "category": "Alaska and Hawaiian Airlines purchases",
+   "groups": [
+    "flights"
+   ],
+   "rate": 3.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Bank of America account holders may get a 10% points bonus on card purchases.",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-ascent",
+   "category": "Gas, EV charging, local transit and rideshare",
+   "groups": [
+    "gas",
+    "ev",
+    "transit"
+   ],
+   "rate": 2.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-ascent",
+   "category": "Cable and streaming",
+   "groups": [
+    "streaming"
+   ],
+   "rate": 2.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-ascent",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-credit-card/",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-ascent",
+   "category": "Status points on all purchases",
+   "groups": [
+    "status"
+   ],
+   "rate": 0.3333,
+   "currency": "Atmos status points",
+   "cap": "",
+   "via": "",
+   "note": "Believed to be 1 status point per $3. Alaska's own article is inconsistent; Bank of America's page does not say.",
+   "confidence": "assumed",
+   "source": "https://news.alaskaair.com/loyalty/atmos-rewards-2026-expanded-status-earning-bew-partnerships-and-exclusive-perks-announced/",
+   "checked": "2026-10-13"
+  }
+ ],
+ "quarterly": [
+  {
+   "card": "chase-freedom-flex",
+   "quarter": "2026-Q4",
+   "categories": "Grocery stores (Walmart and Target excluded), dining, American Red Cross donations",
+   "rate": 5.0,
+   "cap": 1500.0,
+   "deadline": "2026-12-14",
+   "note": "Runs October 1 to December 31, 2026. Foodland, Times and Safeway should count. Costco and Sam's Club do not. Don Quijote may code as a discount store.",
+   "confidence": "confirmed",
+   "source": "https://media.chase.com/news/chase-freedom-2026-q4-categories",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-freedom-flex",
+   "quarter": "2027-Q1",
+   "categories": "Grocery stores (Walmart and Target excluded), top streaming services",
+   "rate": 5.0,
+   "cap": 1500.0,
+   "deadline": "",
+   "note": "Shown as next quarter on Chase's Freedom Flex page, activation opens December 15, 2026. Deadline not published yet.",
+   "confidence": "assumed",
+   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "checked": "2026-10-13"
+  }
  ]
 };

@@ -163,6 +163,26 @@ const e = { used: { a: { '2024-03': true, '2025-12': true, '2026-Q4': true }, b:
 T.pruneUsed(e, TODAY);
 ok('prune keeps this year and last', JSON.stringify(e.used) === JSON.stringify({ a: { '2025-12': true, '2026-Q4': true }, c: { A2025: true } }), JSON.stringify(e.used));
 
+// ============ EARNING ============
+ok('catalog has 62 earning rates and 2 quarters', CAT.earning.length === 62 && CAT.quarterly.length === 2, CAT.earning.length + '/' + CAT.quarterly.length);
+const E = (card, cat) => CAT.earning.find(e => e.card === card && e.category === cat);
+ok('points show as 4x', T.rateText(E('amex-gold', 'Restaurants worldwide')) === '4x');
+ok('cash back shows as 1.5%', T.rateText(E('chase-freedom-unlimited', 'Everything else')) === '1.5%');
+ok('status 0.5 shows 1 per $2', T.rateText(E('atmos-summit', 'Status points on all purchases')) === '1 per $2');
+ok('status 0.3333 shows 1 per $3', T.rateText(E('atmos-ascent', 'Status points on all purchases')) === '1 per $3');
+ok('10x Venture X hotels', T.rateText(E('capone-venture-x', 'Hotels and rental cars')) === '10x');
+ok('empty cap words removed', E('chase-sapphire-preferred', 'Dining').cap === '' && E('atmos-summit', 'Dining').via === '');
+const sum = T.earningFor(CAT, 'atmos-summit').map(e => e.category);
+ok('bonus categories first, everything else then status last', sum[sum.length - 1].startsWith('Status') && sum[sum.length - 2] === 'Everything else', sum.join(' | '));
+ok('every card has an everything-else rate', CAT.cards.every(c => CAT.earning.some(e => e.card === c.id && e.groups.includes('everyday'))));
+let qs = T.quartersFor(CAT, 'chase-freedom-flex', TODAY);
+ok('Oct 2026: current Q4, next Q1 2027', qs.current.quarter === '2026-Q4' && qs.next.quarter === '2027-Q1');
+ok('Q4 deadline Dec 14, Q1 deadline not announced', qs.current.deadline === '2026-12-14' && qs.next.deadline === '');
+qs = T.quartersFor(CAT, 'chase-freedom-flex', day(2027, 4, 2));
+ok('Apr 2027 with no data: nothing shown, nothing invented', qs.current === null && qs.next === null);
+ok('quarter names', T.quarterName('2026-Q4') === 'Oct to Dec 2026' && T.quarterName('2027-Q1') === 'Jan to Mar 2027');
+ok('other cards have no quarters', T.quartersFor(CAT, 'amex-gold', TODAY).current === null);
+
 // --- house style ---
 const src = fs.readFileSync('./assets/wallet.js', 'utf8') + fs.readFileSync('./data/wallet-catalog.js', 'utf8');
 ok('no em or en dashes in member-facing code', !/[–—]/.test(src.replace(/\\u201[34]/g, '')));

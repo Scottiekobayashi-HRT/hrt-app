@@ -35,6 +35,10 @@ RESETS = {"calendar", "anniversary", "unclear", "application date", "n/a"}
 CONFIDENCE = {"confirmed", "assumed", "unverified"}
 UNITS = {"usd", "points", "passes", "certificates"}
 FEE_BASIS = {"anniversary", "n/a"}
+GROUPS = {"everyday", "dining", "grocery", "gas", "ev", "transit", "streaming", "drugstores", "flights",
+          "hotels", "car-rental", "travel", "foreign", "entertainment", "business", "promo", "rotating", "status"}
+QUARTER_RE = re.compile(r"^\d{4}-Q[1-4]$")
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 
 
@@ -167,6 +171,79 @@ def build_benefits(ws, card_ids):
     return out, dropped
 
 
+def blankish(v):
+    """Research fills empty cells with words like 'None stated' or 'Any'. Treat them as empty."""
+    t = text(v)
+    return "" if t.lower() in {"", "none", "none stated", "none (unlimited)", "any", "card spend", "n/a"} else t
+
+
+def build_earning(table, card_ids):
+    out, dropped, seen = [], 0, set()
+    for n, r in rows(table):
+        where = f"Earning row {n}"
+        cid = text(r.get("card_id", ""))
+        if cid not in card_ids:
+            raise SheetError(f"{where}: card_id '{cid}' is not on the Cards tab")
+        cat = text(r.get("category", ""))
+        if not cat:
+            raise SheetError(f"{where}: category is empty")
+        if (cid, cat.lower()) in seen:
+            raise SheetError(f"{where}: {cid} has '{cat}' twice")
+        seen.add((cid, cat.lower()))
+        groups = text(r.get("group", "")).lower().split()
+        bad = [g for g in groups if g not in GROUPS]
+        if not groups or bad:
+            raise SheetError(f"{where}: group '{' '.join(bad) or '(empty)'}' must be from {sorted(GROUPS)}")
+        conf = text(r.get("confidence", "")).lower()
+        if conf not in CONFIDENCE:
+            raise SheetError(f"{where}: confidence '{conf}' must be one of {sorted(CONFIDENCE)}")
+        if conf == "unverified":
+            dropped += 1
+            continue
+        rate = number(r.get("rate", ""), where)
+        if not (0 < rate <= 25):
+            raise SheetError(f"{where}: rate {rate} looks wrong")
+        out.append({
+            "card": cid, "category": cat, "groups": groups, "rate": rate,
+            "currency": text(r.get("currency", "")),
+            "cap": blankish(r.get("cap", "")), "via": blankish(r.get("via", "")),
+            "note": text(r.get("notes", "")), "confidence": conf,
+            "source": text(r.get("source_url", "")),
+            "checked": checked_date(r.get("checked", ""), where),
+        })
+    return out, dropped
+
+
+def build_quarterly(table, card_ids):
+    out, seen = [], set()
+    for n, r in rows(table):
+        where = f"Quarterly row {n}"
+        cid = text(r.get("card_id", ""))
+        if cid not in card_ids:
+            raise SheetError(f"{where}: card_id '{cid}' is not on the Cards tab")
+        q = text(r.get("quarter", ""))
+        if not QUARTER_RE.match(q):
+            raise SheetError(f"{where}: quarter '{q}' should look like 2026-Q4")
+        if (cid, q) in seen:
+            raise SheetError(f"{where}: {cid} {q} appears twice")
+        seen.add((cid, q))
+        dl = text(r.get("activation_deadline", ""))
+        if dl and not DATE_RE.match(dl):
+            raise SheetError(f"{where}: activation_deadline '{dl}' should look like 2026-12-14 or be empty")
+        conf = text(r.get("confidence", "")).lower()
+        if conf not in CONFIDENCE:
+            raise SheetError(f"{where}: confidence '{conf}' must be one of {sorted(CONFIDENCE)}")
+        if conf == "unverified":
+            continue
+        out.append({
+            "card": cid, "quarter": q, "categories": text(r.get("categories", "")),
+            "rate": number(r.get("rate", ""), where), "cap": number(r.get("spend_cap", "0") or 0, where),
+            "deadline": dl, "note": text(r.get("notes", "")), "confidence": conf,
+            "source": text(r.get("source_url", "")), "checked": checked_date(r.get("checked", ""), where),
+        })
+    return out
+
+
 def no_em_dashes(obj):
     """House style: no em or en dashes reach members."""
     s = json.dumps(obj, ensure_ascii=False)
@@ -216,7 +293,12 @@ def main(tables):
     benefits, dropped = ([], 0)
     if "Benefits" in tables:
         benefits, dropped = build_benefits(tables["Benefits"], ids)
-    catalog = {"v": 1, "built": date.today().isoformat(), "cards": cards, "benefits": benefits}
+    earning, e_dropped = ([], 0)
+    if "Earning" in tables:
+        earning, e_dropped = build_earning(tables["Earning"], ids)
+    quarterly = build_quarterly(tables["Quarterly"], ids) if "Quarterly" in tables else []
+    catalog = {"v": 1, "built": date.today().isoformat(), "cards": cards, "benefits": benefits,
+               "earning": earning, "quarterly": quarterly}
     no_em_dashes(catalog)
     body = json.dumps(catalog, ensure_ascii=False, indent=1)
     OUT.write_text(
@@ -226,7 +308,8 @@ def main(tables):
         encoding="utf-8",
     )
     print(f"Wrote {OUT.relative_to(OUT.parent.parent.parent)}: "
-          f"{len(cards)} cards, {len(benefits)} benefits, {dropped} unverified benefits left out.")
+          f"{len(cards)} cards, {len(benefits)} benefits, {len(earning)} earning rates, "
+          f"{len(quarterly)} quarters; left out as unverified: {dropped} benefits, {e_dropped} rates.")
 
 
 if __name__ == "__main__":
