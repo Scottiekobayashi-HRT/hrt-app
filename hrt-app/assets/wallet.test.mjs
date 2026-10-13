@@ -183,6 +183,28 @@ ok('Apr 2027 with no data: nothing shown, nothing invented', qs.current === null
 ok('quarter names', T.quarterName('2026-Q4') === 'Oct to Dec 2026' && T.quarterName('2027-Q1') === 'Jan to Mar 2027');
 ok('other cards have no quarters', T.quartersFor(CAT, 'amex-gold', TODAY).current === null);
 
+// ============ DASHBOARD TILES ============
+const names = Object.fromEntries(CAT.cards.map(c => [c.id, T.shortName(c.name)]));
+ok('short names read naturally', names['amex-platinum'] === 'Amex Platinum' && names['amex-gold'] === 'Amex Gold' &&
+  names['amex-business-platinum'] === 'Amex Business Platinum' && names['amex-business-gold'] === 'Amex Business Gold' &&
+  names['atmos-summit'] === 'Atmos Summit' && names['atmos-ascent'] === 'Atmos Ascent' && names['capone-venture'] === 'Venture' &&
+  names['capone-venture-x'] === 'Venture X' && names['chase-sapphire-preferred'] === 'Sapphire Preferred' &&
+  names['chase-freedom-flex'] === 'Freedom Flex' && names['chase-freedom-unlimited'] === 'Freedom Unlimited', JSON.stringify(names));
+const wb = { v: 1, points: [], cards: [
+  { id: 'p', cardId: 'amex-platinum', opened: '2024-03-15', used: { uber: { '2026-10': true } } },
+  { id: 'x', cardId: 'capone-venture-x', opened: '2022-11-02' },
+  { id: 'f', cardId: 'chase-freedom-flex', opened: '2020-01-01' }
+]};
+const rowsB = T.perkRows(wb, CAT, TODAY);
+const card = id => CAT.cards.find(c => c.id === id);
+let bf = T.cardBrief(wb.cards[0], card('amex-platinum'), rowsB, TODAY);
+ok('Platinum brief: next is an Oct 31 credit, not the ticked Uber', bf.next && bf.next.period.days === 18 && bf.next.perk.id !== 'uber', bf.next && bf.next.perk.id);
+ok('Platinum brief: renews Mar 15, not soon', bf.hasFee && bf.renewal.m === 3 && !bf.renewSoon);
+bf = T.cardBrief(wb.cards[1], card('capone-venture-x'), rowsB, TODAY);
+ok('Venture X brief: renews in 20 days, $300 travel credit next', bf.renewSoon && bf.renewal.days === 20 && bf.next.perk.id === 'travel');
+bf = T.cardBrief(wb.cards[2], card('chase-freedom-flex'), rowsB, TODAY);
+ok('Freedom Flex brief: activation flagged separately, no fee', bf.activate && bf.activate.perk.id === 'rotating' && !bf.hasFee && bf.next.perk.id === 'doordash');
+
 // --- house style ---
 const src = fs.readFileSync('./assets/wallet.js', 'utf8') + fs.readFileSync('./data/wallet-catalog.js', 'utf8');
 ok('no em or en dashes in member-facing code', !/[–—]/.test(src.replace(/\\u201[34]/g, '')));

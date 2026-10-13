@@ -242,6 +242,39 @@
       });
   }
 
+  /* Short names for tight spaces: "American Express Gold Card" -> "Amex Gold" */
+  function shortName(name) {
+    var n = String(name || "").replace(/^The /, "");
+    var amex = /American Express/.test(n);
+    n = n.replace(/ Card from American Express$/, "").replace(/^American Express /, "").replace(/ Card$/, "")
+      .replace(/ Visa (Infinite|Signature)$/, "").replace(/^Atmos Rewards /, "Atmos ").replace(/^Capital One /, "")
+      .replace(/^Chase /, "").replace(/ Rewards$/, "");
+    return amex ? "Amex " + n : n;
+  }
+  function shortAmount(b) {
+    if (!(b.amount > 0)) return "";
+    if (b.unit === "usd") return " " + money(b.amount);
+    if (b.unit === "passes") return " (" + b.amount + (b.amount === 1 ? " pass)" : " passes)");
+    return "";
+  }
+  var ISSUER_TONE = { "American Express": "#4f7fb8", "Chase": "#1f4e8c", "Capital One": "#c4473a", "Bank of America": "#2a8c8c" };
+
+  /* What one card needs a member to know right now. Pure. */
+  function cardBrief(entry, card, perks, today) {
+    var mine = perks.filter(function (r) { return r.entry.id === entry.id && r.period && !r.used && r.period.days >= 0; })
+      .sort(function (a, b) { return a.period.days - b.period.days; });
+    var credits = mine.filter(function (r) { return r.perk.type !== "activation"; });
+    var act = mine.filter(function (r) { return r.perk.type === "activation"; })[0] || null;
+    var hasFee = card.fee > 0 && card.feeBasis === "anniversary";
+    var rn = hasFee ? nextRenewal(entry.opened, today) : null;
+    return {
+      hasFee: hasFee, renewal: rn, renewSoon: !!(rn && rn.days <= SOON_DAYS),
+      next: credits[0] || null, open: credits.length,
+      openUsd: credits.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0),
+      activate: act
+    };
+  }
+
   /* ============================= EARNING =============================
      catalog.earning: { card, category, groups[], rate, currency, cap, via, ... }
      catalog.quarterly: Freedom Flex style rotating categories by quarter.
@@ -456,7 +489,7 @@
     var rn = r.renewal, soon = r.hasFee && rn && rn.days <= SOON_DAYS;
     var feeLine = r.hasFee ? money(c.fee) + " a year" : "No annual fee";
     var renewLine = r.hasFee ? "Renews " + esc(renewalText(rn)) : "Opened " + esc(openedText(e.opened));
-    var html = '<li class="wl-row' + (soon ? " wl-soon" : "") + '"><div class="wl-rowtop">' +
+    var html = '<li class="wl-row' + (soon ? " wl-soon" : "") + '" data-entry="' + esc(e.id) + '"><div class="wl-rowtop">' +
       '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
       '<span class="wl-sub">' + esc(c.issuer) + (e.nickname ? " &middot; " + esc(e.nickname) : "") + "</span>" +
       '<span class="wl-meta">' + renewLine + (r.hasFee ? ' <span class="wl-dot">&middot;</span> Opened ' + esc(openedText(e.opened)) : "") + "</span>" +
@@ -544,12 +577,28 @@
       '<p class="wl-hm-sub">' + s.count + (s.count === 1 ? " card" : " cards") + " &middot; " + esc(money(s.yearly)) + " in annual fees &middot; up to " +
       esc(money(credits)) + " a year in credits" + (nx ? " &middot; " + esc(nx) : "") + "</p></div>" +
       '<a class="wl-btn wl-pri" href="#wallet" data-route="wallet">Open My Wallet &rarr;</a></div>';
+    html += '<div class="wl-tiles">' + s.rows.map(function (row) {
+      var e = row.entry, c = row.card;
+      if (!c) return "";
+      var bf = cardBrief(e, c, perks);
+      var lines = '<span class="wl-tl-fee">' + (bf.hasFee ? esc(money(c.fee)) + " fee &middot; renews " + esc(bf.renewal.exact ? dayText(bf.renewal) : MONTHS[bf.renewal.m - 1].slice(0, 3)) : "No annual fee") + "</span>";
+      if (bf.next) lines += '<span class="wl-tl-next">Next: ' + esc(bf.next.perk.label) + esc(shortAmount(bf.next.perk)) + ', <b class="' + (bf.next.period.days <= 14 ? "hot" : "") + '">' + esc(daysLeft(bf.next.period.days).replace(" left", "")) + "</b></span>";
+      else if (perks.some(function (r) { return r.entry.id === e.id && r.period; })) lines += '<span class="wl-tl-next ok">All credits used this period</span>';
+      var pills = "";
+      if (bf.activate) pills += '<span class="wl-tl-pill">Activate 5% by ' + esc(dayText(bf.activate.period.end)) + "</span>";
+      if (bf.renewSoon) pills += '<span class="wl-tl-pill">Renews in ' + bf.renewal.days + (bf.renewal.days === 1 ? " day" : " days") + "</span>";
+      if (bf.open > 1) pills += '<span class="wl-tl-pill soft">' + bf.open + " credits open</span>";
+      return '<button class="wl-tile" data-wl="go-card" data-id="' + esc(e.id) + '" style="--tone:' + (ISSUER_TONE[c.issuer] || "#7a8ca0") + '">' +
+        '<span class="wl-tl-name">' + esc(shortName(c.name)) + "</span>" +
+        (e.nickname ? '<span class="wl-tl-nick">' + esc(e.nickname) + "</span>" : "") + lines +
+        (pills ? '<span class="wl-tl-pills">' + pills + "</span>" : "") + "</button>";
+    }).join("") + "</div>";
     if (soon.length) {
-      html += '<ul class="wl-pks wl-hm-list">' + soon.slice(0, 3).map(function (r) {
+      html += '<h3 class="wl-h4 wl-hm-h4">Use these soon</h3><ul class="wl-pks wl-hm-list">' + soon.slice(0, 3).map(function (r) {
         var b = r.perk, p = r.period;
         return '<li class="wl-pk"><div class="wl-pk-main"><div class="wl-pk-top"><b>' + esc(b.label) + "</b>" +
           '<span class="wl-pk-amt">' + esc(b.unit === "usd" ? money(b.amount) : perkAmount(b)) + "</span></div>" +
-          '<div class="wl-pk-when">' + esc(r.card.name) + " &middot; " + (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) +
+          '<div class="wl-pk-when">' + esc(shortName(r.card.name)) + " &middot; " + (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) +
           ' <span class="wl-pk-days' + (p.days <= 14 ? " on" : "") + '">' + esc(daysLeft(p.days)) + "</span></div></div>" +
           '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
           '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
@@ -597,6 +646,11 @@
       '. Where an issuer does not say when a credit resets, we say so and show calendar periods. Renewal is your card anniversary; most issuers bill the fee on the statement after it. Your wallet is private to your account.</p>';
     host.innerHTML = html;
     if (state.editing) bindForm(editingEntry);
+    if (state.focus) {
+      var row = host.querySelector('[data-entry="' + state.focus + '"]');
+      state.focus = null;
+      if (row) setTimeout(function () { try { row.scrollIntoView({ block: "start", behavior: "smooth" }); } catch (x) { row.scrollIntoView(); } }, 60);
+    }
   }
   function fmtIso(s) { var o = parseOpened(s); return o ? MONTHS[o.m - 1].slice(0, 3) + " " + o.d + ", " + o.y : s; }
 
@@ -637,6 +691,7 @@
     var act = b.getAttribute("data-wl"), id = b.getAttribute("data-id");
     if (act === "use") return; /* handled on change */
     if (act === "retry") return load();
+    if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; location.hash = "wallet"; return; }
     if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
     if (act === "add") { state.editing = "new"; state.msg = ""; paint(); host.scrollIntoView({ block: "nearest" }); return; }
     if (act === "cancel") { state.editing = null; paint(); return; }
@@ -725,7 +780,24 @@
       "[data-theme=dark] .wl-hm-eye{color:#f2b84b}",
       ".wl-hm-h{margin:0;font-size:20px;line-height:1.25;font-weight:800;color:var(--text)}",
       ".wl-hm-sub{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}",
-      ".wl-hm-list{margin-top:14px}",
+      ".wl-hm-list{margin-top:0}",
+      ".wl-hm-h4{margin-top:18px}",
+      ".wl-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:16px}",
+      ".wl-tile{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:12px 13px 12px 15px;border:1px solid var(--line);border-left:4px solid var(--tone);border-radius:12px;background:var(--surface);transition:box-shadow .15s,transform .15s}",
+      ".wl-tile:hover{box-shadow:var(--shadow);transform:translateY(-1px)}",
+      ".wl-tile:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
+      ".wl-tl-name{font-size:14.5px;font-weight:800;color:var(--text)}",
+      ".wl-tl-nick{font-size:11.5px;color:var(--muted);margin-top:-3px}",
+      ".wl-tl-fee{font-size:12.5px;color:var(--muted)}",
+      ".wl-tl-next{font-size:12.5px;color:var(--text);line-height:1.4}",
+      ".wl-tl-next b{font-weight:800}.wl-tl-next b.hot{color:#b4580f}",
+      "[data-theme=dark] .wl-tl-next b.hot{color:#f2b84b}",
+      ".wl-tl-next.ok{color:#2f855a}",
+      "[data-theme=dark] .wl-tl-next.ok{color:#6fd39b}",
+      ".wl-tl-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}",
+      ".wl-tl-pill{font-size:11px;font-weight:800;color:#8a4a10;background:rgba(242,184,75,.25);border-radius:999px;padding:2px 8px}",
+      "[data-theme=dark] .wl-tl-pill{color:#f2b84b}",
+      ".wl-tl-pill.soft{color:var(--muted);background:var(--surface-2,rgba(0,0,0,.05))}",
       ".wl-hm-more{display:inline-block;margin-top:10px;font-size:13px;font-weight:800;color:var(--coral);text-decoration:none}",
       ".wl-hm-ok{margin:12px 0 0;font-size:13px;color:var(--muted)}",
       ".wl-hm .wl-banner{margin:12px 0 0}",
@@ -756,6 +828,7 @@
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
+      shortName: shortName, cardBrief: cardBrief,
       rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
     show: function () {
       styles();
