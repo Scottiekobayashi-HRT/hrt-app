@@ -41,7 +41,8 @@
   values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
   resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex Platinum credit each quarter" },
-  status:{ title:"Atmos Status Planner", hint:"Pick the right way to earn" }
+  status:{ title:"Atmos Status Planner", hint:"Pick the right way to earn" },
+  wallet:{ title:"My Wallet", hint:"Your cards and annual fees" }
  };
  var shown = {}, current = null;
  var onShow = {};
@@ -480,6 +481,7 @@
  });
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
  onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };
+ onShow.wallet = function(){ if(window.HRT_WALLET) window.HRT_WALLET.show(); };
 
  /* ============================== BOOT ============================== */
  homeKama(); homeVals(); homeLounges(); tbLoad();
