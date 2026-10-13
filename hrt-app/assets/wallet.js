@@ -479,8 +479,27 @@
   }
 
   /* optimistic: show the change at once (used for ticks), undo it if the save fails */
+  /* Example wallet: lets a new member (or Scottie) see everything working before
+     adding their own cards. Lives only in this page; nothing is ever saved. */
+  function exampleWallet() {
+    var c = function (id, cardId, opened, nickname) { return { id: "ex-" + id, cardId: cardId, opened: opened, nickname: nickname || "" }; };
+    return { v: 1, points: [], cards: [
+      c("plat", "amex-platinum", "2024-03-15"), c("gold", "amex-gold", "2023-06-08"),
+      c("csp", "chase-sapphire-preferred", "2021-11-20"), c("flex", "chase-freedom-flex", "2020-01"),
+      c("vx", "capone-venture-x", "2022-11-02"), c("summit", "atmos-summit", "2025-08-20"),
+      c("ascent", "atmos-ascent", "2019-02", "Spouse's card")
+    ] };
+  }
+  function startExample() { state.demo = true; state.wallet = exampleWallet(); state.editing = null; state.msg = ""; paint(); }
+  function endExample() { state.demo = false; state.wallet = null; state.open = {}; state.which = ""; load(); }
+
   function save(change, done, optimistic) {
     if (state.busy) return;
+    if (state.demo) {
+      var copy = JSON.parse(JSON.stringify(state.wallet)), out = change(copy);
+      state.wallet = out === undefined ? copy : out; if (done) done(); paint();
+      return;
+    }
     var before = state.wallet;
     if (optimistic && before) {
       var draft = JSON.parse(JSON.stringify(before));
@@ -693,7 +712,8 @@
       homeHost.innerHTML = '<div class="wl-card wl-hm wl-hm-empty">' + head +
         "<h2 class=\"wl-hm-h\">Every card, fee and credit in one place</h2>" +
         '<p class="wl-hm-sub">Add the cards you hold. My Wallet shows what each one costs, what it gives back, and which credits are about to expire.</p></div>' +
-        '<button class="wl-btn wl-pri" data-wl="go-add">Add your cards &rarr;</button></div></div>';
+        '<div class="wl-hm-acts"><button class="wl-btn wl-pri" data-wl="go-add">Add your cards &rarr;</button>' +
+        '<button class="wl-btn" data-wl="demo">See an example</button></div></div></div>';
       return;
     }
     var perks = perkRows(state.wallet, catalog());
@@ -701,7 +721,7 @@
     var soon = expiringSoon(perks, SOON_PERK_DAYS);
     var atRisk = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
     var nx = s.next ? s.next.card.name + " renews " + renewalText(s.next.renewal) : "";
-    var html = '<div class="wl-card wl-hm">' + head +
+    var html = '<div class="wl-card wl-hm">' + exampleBanner() + head +
       '<h2 class="wl-hm-h">' + (soon.length ? esc(money(atRisk)) + " in credits to use soon" : "You are all caught up") + "</h2>" +
       '<p class="wl-hm-sub">' + s.count + (s.count === 1 ? " card" : " cards") + " &middot; " + esc(money(s.yearly)) + " in annual fees &middot; up to " +
       esc(money(credits)) + " a year in credits" + (nx ? " &middot; " + esc(nx) : "") + "</p></div>" +
@@ -739,6 +759,11 @@
     }
     if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     homeHost.innerHTML = html + "</div>";
+  }
+
+  function exampleBanner() {
+    return state.demo ? '<div class="wl-demo"><span><b>Example wallet.</b> Try anything; nothing here is saved.</span>' +
+      '<button class="wl-btn" data-wl="demo-off">Use my own cards</button></div>' : "";
   }
 
   function whichHtml() {
@@ -780,7 +805,7 @@
     if (!state.wallet || state.error || !state.wallet.cards.length) { alertHost.innerHTML = ""; return; }
     var list = topAlerts(state.wallet, catalog());
     if (!list.length) { alertHost.innerHTML = ""; return; }
-    alertHost.innerHTML = '<div class="wl-alerts" role="region" aria-label="Needs your attention"><span class="wl-al-h">Needs your attention</span>' +
+    alertHost.innerHTML = '<div class="wl-alerts" role="region" aria-label="Needs your attention"><span class="wl-al-h">Needs your attention' + (state.demo ? " (example)" : "") + "</span>" +
       list.map(function (a) {
         return '<button class="wl-al ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + ">" +
           '<span class="wl-al-dot"></span>' + esc(a.text) + '<span class="wl-al-go" aria-hidden="true">&rsaquo;</span></button>';
@@ -802,14 +827,15 @@
     setStats(s);
     var editingEntry = state.editing && state.editing !== "new" ?
       state.wallet.cards.filter(function (c) { return c.id === state.editing; })[0] : null;
-    var html = "";
+    var html = exampleBanner();
     if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     if (state.editing) html += '<div class="wl-card">' + formHtml(editingEntry) + "</div>";
 
     if (!s.count && !state.editing) {
       html += '<div class="wl-card wl-empty"><h3 class="wl-h3">Start with the cards in your wallet</h3>' +
         "<p>Add each card and the month you opened it. You will see every annual fee and every credit in one place, with the ones about to expire at the top, so none of them slip by.</p>" +
-        '<button class="wl-btn wl-pri" data-wl="add">Add your first card</button></div>';
+        '<div class="wl-hm-acts wl-center"><button class="wl-btn wl-pri" data-wl="add">Add your first card</button>' +
+        '<button class="wl-btn" data-wl="demo">See an example</button></div></div>';
     } else if (s.count) {
       if (!state.editing) html += soonHtml(perks) + '<div class="wl-card">' + whichHtml() + "</div>";
       html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Your cards</h3>' +
@@ -868,9 +894,12 @@
     if (act === "use") return; /* handled on change */
     if (act === "clamp") { if (ev.target.closest("a")) return; b.classList.toggle("full"); return; }
     if (act === "retry") return load();
+    if (act === "demo") { startExample(); if (location.hash !== "#home" && location.hash !== "#wallet") location.hash = "wallet"; return; }
+    if (act === "demo-off") { endExample(); return; }
     if (act === "which") { var k = b.getAttribute("data-key"); state.which = state.which === k ? "" : k; paint(); return; }
     if (act === "go-wallet") { location.hash = "wallet"; return; }
     if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; location.hash = "wallet"; return; }
+    if ((act === "go-add" || act === "add") && state.demo) { endExample(); state.editing = "new"; if (act === "go-add") location.hash = "wallet"; return; }
     if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
     if (act === "add") { state.editing = "new"; state.msg = ""; paint(); host.scrollIntoView({ block: "nearest" }); return; }
     if (act === "cancel") { state.editing = null; paint(); return; }
@@ -956,6 +985,9 @@
       "[data-theme=dark] .wl-tick:has(input:checked){color:#6fd39b}",
       ".wl-clamp{cursor:pointer}",
       ".wl-soonbox{border-color:rgba(242,184,75,.55)}",
+      ".wl-demo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:0 0 12px;padding:9px 12px;border-radius:12px;background:rgba(159,193,212,.22);border:1px dashed rgba(28,61,90,.35);font-size:13px;color:var(--text)}",
+      ".wl-demo .wl-btn{min-height:36px;padding:6px 12px}",
+      ".wl-hm-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.wl-hm-acts.wl-center{justify-content:center}",
       ".wl-wc-h{margin-top:18px}.wl-card > .wl-wc .wl-wc-h{margin-top:0}",
       ".wl-chips{display:flex;flex-wrap:wrap;gap:7px}",
       ".wl-chip{all:unset;box-sizing:border-box;cursor:pointer;min-height:38px;padding:0 13px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;font-size:13.5px;font-weight:700;color:var(--text);background:var(--surface);-webkit-tap-highlight-color:transparent}",
@@ -1055,7 +1087,7 @@
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
       shortName: shortName, cardBrief: cardBrief, topAlerts: topAlerts,
-      whichCard: whichCard, centsPer: centsPer, valueText: valueText, SPEND: SPEND,
+      whichCard: whichCard, exampleWallet: exampleWallet, centsPer: centsPer, valueText: valueText, SPEND: SPEND,
       rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
     show: function () {
       styles();
