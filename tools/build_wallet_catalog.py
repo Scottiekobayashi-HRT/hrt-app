@@ -290,6 +290,28 @@ def tables_from_urls(pairs):
     return tables_from_csv_text(texts)
 
 
+EXPECTED_HEADERS = {
+    "Cards": {"card_id", "issuer", "card_name", "annual_fee", "fee_basis", "checked"},
+    "Benefits": {"card_id", "benefit_id", "label", "cadence", "resets", "confidence", "checked"},
+    "Earning": {"card_id", "category", "group", "rate", "currency", "confidence", "checked"},
+    "Quarterly": {"card_id", "quarter", "categories", "activation_deadline", "confidence", "checked"},
+}
+
+
+def check_headers(tables):
+    """Google serves the FIRST published tab when an unpublished one is asked for,
+    so a tab must prove it is the tab we think it is by its column headers."""
+    for name, need in EXPECTED_HEADERS.items():
+        if name not in tables or not tables[name]:
+            continue
+        got = {str(h).strip() for h in tables[name][0] if h is not None}
+        missing = sorted(need - got)
+        if missing:
+            raise SheetError(f"The {name} tab does not have the {name} columns (missing: {', '.join(missing)}). "
+                             "If this came from a published link, that tab is probably not published, "
+                             "and Google sent a different tab instead.")
+
+
 def current_counts():
     """Row counts in the data file the site is using now, or None if there is none."""
     if not OUT.exists():
@@ -307,6 +329,7 @@ def main(tables, require=(), allow_shrink=False):
     missing = [t for t in require if t not in tables]
     if missing:
         raise SheetError(f"Missing tab(s): {', '.join(missing)}. Found: {sorted(tables)}")
+    check_headers(tables)
     if "Cards" not in tables:
         raise SheetError(f"No 'Cards' tab. Tabs found: {sorted(tables)}")
     cards = build_cards(tables["Cards"])
