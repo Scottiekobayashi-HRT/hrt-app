@@ -675,9 +675,9 @@
     if (!list.length) return "";
     var atRisk = list.reduce(function (s, r) { return s + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
     var shown = state.showAllSoon ? list : list.slice(0, 6);
-    return '<div class="wl-card wl-soonbox"><div class="wl-head"><h3 class="wl-h3">Use it or lose it</h3>' +
-      (atRisk ? '<span class="wl-risk">' + esc(money(atRisk)) + " unused</span>" : "") + "</div>" +
-      '<p class="wl-sub2">Credits that reset in the next ' + SOON_PERK_DAYS + " days and are not ticked off yet.</p>" +
+    return '<div class="wl-card wl-soonbox"><div class="wl-head"><h3 class="wl-h3">Credits to use</h3>' +
+      (atRisk ? '<span class="wl-risk">' + esc(money(atRisk)) + " left</span>" : "") + "</div>" +
+      '<p class="wl-sub2">These reset in the next ' + SOON_PERK_DAYS + " days. Tick each one once you have used it.</p>" +
       '<ul class="wl-pks wl-pks-soon">' + shown.map(function (r) {
         var b = r.perk, p = r.period;
         return '<li class="wl-pk"><div class="wl-pk-main"><div class="wl-pk-top"><b>' + esc(b.label) + "</b>" +
@@ -700,7 +700,7 @@
   var homeHost;
   function paintHome() {
     if (!homeHost) return;
-    var head = '<div class="wl-hm-head"><div><span class="wl-hm-eye">My Wallet</span>';
+    var head = '<div class="wl-hm-head"><div><h2 class="wl-hm-h">Your cards</h2>';
     if (state.error) {
       homeHost.innerHTML = '<div class="wl-card wl-hm">' + head + "<p class=\"wl-hm-sub\">" + esc(errText(state.error)) + "</p></div>" +
         (state.error.code === "READ_FAILED" ? '<button class="wl-btn" data-wl="retry">Try again</button>' : "") + "</div></div>";
@@ -708,24 +708,11 @@
     }
     if (!state.wallet) { homeHost.innerHTML = '<div class="wl-card wl-hm">' + head + '<p class="wl-hm-sub">Loading your wallet</p></div></div></div>'; return; }
     var s = summarize(state.wallet, catalog());
-    if (!s.count) {
-      homeHost.innerHTML = '<div class="wl-card wl-hm wl-hm-empty">' + head +
-        "<h2 class=\"wl-hm-h\">Every card, fee and credit in one place</h2>" +
-        '<p class="wl-hm-sub">Add the cards you hold. My Wallet shows what each one costs, what it gives back, and which credits are about to expire.</p></div>' +
-        '<div class="wl-hm-acts"><button class="wl-btn wl-pri" data-wl="go-add">Add your cards &rarr;</button>' +
-        '<button class="wl-btn" data-wl="demo">See an example</button></div></div></div>';
-      return;
-    }
+    if (!s.count) { homeHost.innerHTML = ""; return; } /* the summary card above invites them to start */
     var perks = perkRows(state.wallet, catalog());
-    var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
     var soon = expiringSoon(perks, SOON_PERK_DAYS);
-    var atRisk = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
-    var nx = s.next ? s.next.card.name + " renews " + renewalText(s.next.renewal) : "";
-    var html = '<div class="wl-card wl-hm">' + exampleBanner() + head +
-      '<h2 class="wl-hm-h">' + (soon.length ? esc(money(atRisk)) + " in credits to use soon" : "You are all caught up") + "</h2>" +
-      '<p class="wl-hm-sub">' + s.count + (s.count === 1 ? " card" : " cards") + " &middot; " + esc(money(s.yearly)) + " in annual fees &middot; up to " +
-      esc(money(credits)) + " a year in credits" + (nx ? " &middot; " + esc(nx) : "") + "</p></div>" +
-      '<a class="wl-btn wl-pri" href="#wallet" data-route="wallet">Open My Wallet &rarr;</a></div>';
+    var html = '<div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' +
+      '<a class="wl-link" href="#wallet" data-route="wallet">See all details</a></div>';
     html += '<div class="wl-tiles">' + s.rows.map(function (row) {
       var e = row.entry, c = row.card;
       if (!c) return "";
@@ -744,7 +731,7 @@
     }).join("") + "</div>";
     html += whichHtml();
     if (soon.length) {
-      html += '<h3 class="wl-h4 wl-hm-h4">Use these soon</h3><ul class="wl-pks wl-hm-list">' + soon.slice(0, 3).map(function (r) {
+      html += '<h3 class="wl-h4 wl-hm-h4">Credits to use</h3><ul class="wl-pks wl-hm-list">' + soon.slice(0, 3).map(function (r) {
         var b = r.perk, p = r.period;
         return '<li class="wl-pk"><div class="wl-pk-main"><div class="wl-pk-top"><b>' + esc(b.label) + "</b>" +
           '<span class="wl-pk-amt">' + esc(b.unit === "usd" ? money(b.amount) : perkAmount(b)) + "</span></div>" +
@@ -753,7 +740,7 @@
           '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
           '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
       }).join("") + "</ul>";
-      if (soon.length > 3) html += '<a class="wl-hm-more" href="#wallet" data-route="wallet">' + (soon.length - 3) + " more expiring soon &rarr;</a>";
+      if (soon.length > 3) html += '<a class="wl-hm-more" href="#wallet" data-route="wallet">' + (soon.length - 3) + " more credits to use</a>";
     } else {
       html += '<p class="wl-hm-ok">Nothing resets in the next ' + SOON_PERK_DAYS + " days that you have not already used.</p>";
     }
@@ -799,17 +786,67 @@
       "</div>";
   }
 
+  /* The wallet summary card: the first thing a member sees, on the Dashboard
+     (under the Aloha greeting) and at the top of My Wallet. */
+  function summaryHtml(where) {
+    var home = where === "home";
+    if (!state.wallet || state.error) return "";
+    var s = summarize(state.wallet, catalog());
+    var title = home ? "Your wallet" : "My Wallet";
+    if (!s.count) {
+      return '<section class="wl-sum wl-sum-empty" aria-label="' + title + '">' + exampleBanner() +
+        '<h2 class="wl-sum-title">' + title + "</h2>" +
+        '<p class="wl-sum-lede">Add the cards you hold and see, in one place, what each one costs, what it gives back, and which credits to use before they reset.</p>' +
+        '<div class="wl-sum-acts"><button class="wl-btn wl-gold" data-wl="' + (home ? "go-add" : "add") + '">Add your cards</button>' +
+        '<button class="wl-btn wl-ghost" data-wl="demo">See an example</button></div></section>';
+    }
+    var perks = perkRows(state.wallet, catalog());
+    var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
+    var soon = expiringSoon(perks, SOON_PERK_DAYS);
+    var due = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
+    var alerts = topAlerts(state.wallet, catalog()).filter(function (a) { return a.level !== "info"; });
+    var nx = s.next;
+    var stat = function (label, value, sub) {
+      return '<div class="wl-sum-stat"><dt>' + label + "</dt><dd>" + value + (sub ? "<small>" + sub + "</small>" : "") + "</dd></div>";
+    };
+    var html = '<section class="wl-sum" aria-label="' + title + '">' + exampleBanner() +
+      '<div class="wl-sum-top"><h2 class="wl-sum-title">' + title + "</h2>" +
+      (home ? '<a class="wl-btn wl-ghost" href="#wallet" data-route="wallet">Open My Wallet</a>'
+            : (state.editing ? "" : '<button class="wl-btn wl-ghost" data-wl="add">Add a card</button>')) + "</div>" +
+      '<div class="wl-sum-hero">' +
+      (due ? '<span class="wl-sum-big">' + esc(money(due)) + '</span><span class="wl-sum-cap">in credits to use in the next ' + SOON_PERK_DAYS + " days</span>"
+           : '<span class="wl-sum-big wl-sum-ok">All caught up</span><span class="wl-sum-cap">No unused credits reset in the next ' + SOON_PERK_DAYS + " days</span>") +
+      "</div>" +
+      '<dl class="wl-sum-stats">' +
+      stat("Cards", String(s.count)) +
+      stat("Annual fees", esc(money(s.yearly))) +
+      stat("Credits a year", esc(money(credits)), "if you use them all") +
+      stat("Next renewal", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None",
+        nx ? esc(shortName(nx.card.name)) : "") +
+      "</dl>";
+    if (s.yearly > 0 && credits > 0) {
+      var max = Math.max(s.yearly, credits), feePos = Math.round(s.yearly / max * 100), crW = Math.round(credits / max * 100);
+      var line = credits >= s.yearly
+        ? "If you use them, your credits are worth " + (Math.round(credits / s.yearly * 10) / 10) + " times your annual fees."
+        : "Your credits cover " + Math.round(credits / s.yearly * 100) + "% of your annual fees.";
+      html += '<div class="wl-sum-meter" role="img" aria-label="Annual fees ' + esc(money(s.yearly)) + ", credits up to " + esc(money(credits)) + '">' +
+        '<div class="wl-sum-bar"><span class="wl-sum-cr" style="width:' + crW + '%"></span><span class="wl-sum-fee" style="left:' + feePos + '%"></span></div>' +
+        '<div class="wl-sum-legend"><span class="cr">Credits a year</span><span class="fee">Annual fees</span></div>' +
+        '<p class="wl-sum-note">' + esc(line) + " Passes, companion fares and points are extra.</p></div>";
+    }
+    if (alerts.length) {
+      html += '<ul class="wl-sum-alerts" aria-label="Needs your attention">' + alerts.map(function (a) {
+        return '<li><button class="wl-sum-al ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + ">" +
+          '<span class="wl-sum-dot" aria-hidden="true"></span><span>' + esc(a.text) + '</span><span class="wl-sum-go" aria-hidden="true">&rsaquo;</span></button></li>';
+      }).join("") + "</ul>";
+    }
+    return html + "</section>";
+  }
+
   var alertHost;
   function paintAlerts() {
     if (!alertHost) return;
-    if (!state.wallet || state.error || !state.wallet.cards.length) { alertHost.innerHTML = ""; return; }
-    var list = topAlerts(state.wallet, catalog());
-    if (!list.length) { alertHost.innerHTML = ""; return; }
-    alertHost.innerHTML = '<div class="wl-alerts" role="region" aria-label="Needs your attention"><span class="wl-al-h">Needs your attention' + (state.demo ? " (example)" : "") + "</span>" +
-      list.map(function (a) {
-        return '<button class="wl-al ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + ">" +
-          '<span class="wl-al-dot"></span>' + esc(a.text) + '<span class="wl-al-go" aria-hidden="true">&rsaquo;</span></button>';
-      }).join("") + "</div>";
+    alertHost.innerHTML = summaryHtml("home");
   }
 
   function paintMain() {
@@ -827,19 +864,15 @@
     setStats(s);
     var editingEntry = state.editing && state.editing !== "new" ?
       state.wallet.cards.filter(function (c) { return c.id === state.editing; })[0] : null;
-    var html = exampleBanner();
+    var html = summaryHtml("page");
     if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     if (state.editing) html += '<div class="wl-card">' + formHtml(editingEntry) + "</div>";
 
     if (!s.count && !state.editing) {
-      html += '<div class="wl-card wl-empty"><h3 class="wl-h3">Start with the cards in your wallet</h3>' +
-        "<p>Add each card and the month you opened it. You will see every annual fee and every credit in one place, with the ones about to expire at the top, so none of them slip by.</p>" +
-        '<div class="wl-hm-acts wl-center"><button class="wl-btn wl-pri" data-wl="add">Add your first card</button>' +
-        '<button class="wl-btn" data-wl="demo">See an example</button></div></div>';
+      /* the summary card above invites them to add cards */
     } else if (s.count) {
       if (!state.editing) html += soonHtml(perks) + '<div class="wl-card">' + whichHtml() + "</div>";
-      html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Your cards</h3>' +
-        (state.editing ? "" : '<button class="wl-btn wl-pri" data-wl="add">Add a card</button>') + "</div>" +
+      html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Your cards</h3></div>' +
         (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
         '<ul class="wl-list">' + s.rows.map(function (r) { return rowHtml(r, perks); }).join("") + "</ul></div>";
     }
@@ -988,6 +1021,49 @@
       ".wl-demo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:0 0 12px;padding:9px 12px;border-radius:12px;background:rgba(159,193,212,.22);border:1px dashed rgba(28,61,90,.35);font-size:13px;color:var(--text)}",
       ".wl-demo .wl-btn{min-height:36px;padding:6px 12px}",
       ".wl-hm-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.wl-hm-acts.wl-center{justify-content:center}",
+      /* ---- wallet summary card: navy with a gold edge, like a premium card ---- */
+      ".wl-sum{position:relative;overflow:hidden;margin:0 0 18px;padding:22px 24px 20px;border-radius:20px;color:#eef4fa;" +
+        "background:radial-gradient(120% 150% at 100% 0%,rgba(242,184,75,.18),rgba(242,184,75,0) 46%),linear-gradient(160deg,#18324f 0%,#10243a 55%,#0b1a2c 100%);" +
+        "border:1px solid rgba(242,184,75,.45);box-shadow:0 18px 40px -24px rgba(9,20,35,.75)}",
+      ".wl-sum .wl-sum-top{display:flex;align-items:center;justify-content:space-between;gap:12px}",
+      ".wl-sum .wl-sum-title{margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#cfe0ee}",
+      ".wl-sum .wl-sum-hero{display:flex;flex-direction:column;gap:4px;margin:14px 0 18px}",
+      ".wl-sum .wl-sum-big{font-size:clamp(34px,5vw,46px);font-weight:800;line-height:1.02;letter-spacing:-.015em;color:#fff;font-variant-numeric:tabular-nums}",
+      ".wl-sum .wl-sum-big.wl-sum-ok{color:#a6e9c3;font-size:clamp(28px,4vw,36px)}",
+      ".wl-sum .wl-sum-cap{font-size:14px;line-height:1.4;color:#b9cbdc}",
+      ".wl-sum .wl-sum-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;border-top:1px solid rgba(255,255,255,.13)}",
+      ".wl-sum .wl-sum-stat{padding:13px 14px 2px 0;min-width:0}",
+      ".wl-sum .wl-sum-stat + .wl-sum-stat{padding-left:16px;border-left:1px solid rgba(255,255,255,.13)}",
+      ".wl-sum dt{margin:0 0 3px;font-size:12.5px;color:#9fb4c8}",
+      ".wl-sum dd{margin:0;font-size:21px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+      ".wl-sum dd small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:#9fb4c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+      ".wl-sum .wl-sum-meter{margin-top:18px}",
+      ".wl-sum .wl-sum-bar{position:relative;height:10px;border-radius:999px;background:rgba(255,255,255,.1)}",
+      ".wl-sum .wl-sum-cr{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#2fb46c,#7fe0a8)}",
+      ".wl-sum .wl-sum-fee{position:absolute;top:-5px;bottom:-5px;width:4px;margin-left:-2px;border-radius:2px;background:#f2b84b;box-shadow:0 0 0 2px #10243a}",
+      ".wl-sum .wl-sum-legend{display:flex;gap:16px;margin-top:9px;font-size:12px;color:#b9cbdc}",
+      ".wl-sum .wl-sum-legend span:before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}",
+      ".wl-sum .wl-sum-legend .cr:before{background:#4cc884}.wl-sum .wl-sum-legend .fee:before{width:4px;background:#f2b84b}",
+      ".wl-sum .wl-sum-note{margin:6px 0 0;font-size:13px;line-height:1.5;color:#cfe0ee}",
+      ".wl-sum .wl-sum-alerts{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:6px}",
+      ".wl-sum .wl-sum-al{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:10px;min-height:44px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.07);color:#fff;font-size:14px;font-weight:600;line-height:1.35;-webkit-tap-highlight-color:transparent}",
+      ".wl-sum .wl-sum-al:hover{background:rgba(255,255,255,.12)}.wl-sum .wl-sum-al:focus-visible{outline:2px solid #f2b84b;outline-offset:2px}",
+      ".wl-sum .wl-sum-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:#9fc1d4}",
+      ".wl-sum .hot .wl-sum-dot{background:#ff7a70}.wl-sum .warn .wl-sum-dot{background:#f2b84b}",
+      ".wl-sum .wl-sum-go{margin-left:auto;font-size:20px;line-height:1;color:#9fb4c8}",
+      ".wl-sum .wl-btn{min-height:40px;text-decoration:none;display:inline-flex;align-items:center}",
+      ".wl-sum .wl-btn.wl-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);color:#fff}",
+      ".wl-sum .wl-btn.wl-ghost:hover{background:rgba(255,255,255,.14)}",
+      ".wl-sum .wl-btn.wl-gold{background:linear-gradient(90deg,#f2b84b,#e8824c);border-color:transparent;color:#14202e}",
+      ".wl-sum .wl-sum-lede{margin:10px 0 0;max-width:56ch;font-size:15px;line-height:1.55;color:#cfe0ee}",
+      ".wl-sum .wl-sum-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}",
+      ".wl-sum .wl-demo{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);color:#eef4fa}",
+      ".wl-hm .wl-hm-head{align-items:center}.wl-hm .wl-hm-h{font-size:17px}",
+      "@media (max-width:560px){.wl-sum{padding:18px 16px 16px;border-radius:18px}" +
+        ".wl-sum .wl-sum-stats{grid-template-columns:1fr 1fr}" +
+        ".wl-sum .wl-sum-stat:nth-child(odd){padding-left:0;border-left:0}" +
+        ".wl-sum .wl-sum-stat:nth-child(n+3){border-top:1px solid rgba(255,255,255,.13);margin-top:10px}" +
+        ".wl-sum dd{font-size:19px}.wl-sum .wl-btn{min-height:44px}}",
       ".wl-wc-h{margin-top:18px}.wl-card > .wl-wc .wl-wc-h{margin-top:0}",
       ".wl-chips{display:flex;flex-wrap:wrap;gap:7px}",
       ".wl-chip{all:unset;box-sizing:border-box;cursor:pointer;min-height:38px;padding:0 13px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;font-size:13.5px;font-weight:700;color:var(--text);background:var(--surface);-webkit-tap-highlight-color:transparent}",
@@ -1103,7 +1179,7 @@
     home: function () {
       styles();
       homeHost = document.getElementById("wl-home");
-      alertHost = document.getElementById("wl-alerts");
+      alertHost = document.getElementById("wl-summary");
       if (alertHost && !alertHost.getAttribute("data-ready")) {
         alertHost.setAttribute("data-ready", "1");
         alertHost.addEventListener("click", onClick);

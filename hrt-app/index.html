@@ -158,13 +158,13 @@ html.ms-ready .hrt-boot{display:none}
 <!-- ================= HOME ================= -->
 <section class="view" data-page="home" id="v-home">
 <div class="content">
- <!-- My Wallet: the most urgent things, first thing on the Dashboard (empty when nothing is urgent) -->
- <div id="wl-alerts"></div>
  <div class="pro-welcome pro-only">
   <span class="pro-pill">&#9733; HRT PRO</span>
   <div class="pw-text"><h2>Aloha, <span class="ms-first-name">PRO member</span></h2><p>Your PRO tools are unlocked. Fresh Atmos saver space lands every morning.</p></div>
   <div class="pw-links"><a href="#atmos" data-route="atmos" data-cal="calendar.html">Deals Calendar</a><a href="#atmos" data-route="atmos" data-cal="search.html">Deals Search</a><a href="#atmos" data-route="atmos" data-cal="explore.html">Points Explorer</a></div>
  </div>
+ <!-- My Wallet summary: the member's key numbers, first thing after the greeting -->
+ <div id="wl-summary"></div>
  <div class="toprow">
   <div class="hero">
    <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
@@ -496,19 +496,6 @@ html.ms-ready .hrt-boot{display:none}
 <!-- ================= MY WALLET (free: fees, perks and credits) ================= -->
 <section class="view" data-page="wallet" id="v-wallet">
 <div class="content">
- <div class="hero slim">
-  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
-  <div class="hs-text">
-   <h1>My <span class="wave">Wallet</span></h1>
-   <p>Every card you hold, what it costs, what it gives back, and which credits are about to expire. No spreadsheet needed.</p>
-  </div>
-  <div class="hstats">
-   <div class="hstat"><b class="tnum" id="wlStatCount">0</b><span><i style="background:#9fc1d4"></i>Cards</span></div>
-   <div class="hstat"><b class="tnum" id="wlStatFees">$0</b><span><i style="background:#e8c15e"></i>Annual fees</span></div>
-   <div class="hstat"><b class="tnum" id="wlStatCredits">$0</b><span><i style="background:#3fce7f"></i>Credits a year</span></div>
-   <div class="hstat"><b class="tnum" id="wlStatNext">None</b><span><i style="background:#f2726e"></i>Next renewal</span></div>
-  </div>
- </div>
  <div id="wl-host"></div>
 </div>
 </section>
