@@ -74,6 +74,17 @@ html:not(.ms-ready) .hrt-app,html:not(.ms-ready) .hrt-gate{display:none!importan
 html.ms-ready:not(.ms-in) .hrt-app{display:none!important}
 html.ms-ready.ms-in .hrt-gate{display:none!important}
 html.ms-ready:not(.ms-in),html.ms-ready:not(.ms-in) body{height:auto!important;overflow:auto!important}
+/* ===== phones: the top bar stays one compact row ===== */
+@media (max-width:560px){
+ .topbar .tbin{flex-wrap:nowrap!important;gap:6px!important}
+ .topbar .crumb{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .topbar .ms-auth{display:flex;gap:6px;flex:0 0 auto}
+ .topbar .ms-btn{padding:0 11px;min-height:38px;font-size:13px;white-space:nowrap}
+ .topbar .pro-pill{display:none!important}
+ .topbar .ms-btn[data-ms-action="customer-portal"]{font-size:0}
+ .topbar .ms-btn[data-ms-action="customer-portal"]:after{content:"Billing";font-size:13px}
+ html.ms-pro .pro-member-chip{display:none!important}
+}
 .hrt-boot{position:fixed;inset:0;display:grid;place-items:center;background:#0a121c;z-index:60}
 html.ms-ready .hrt-boot{display:none}
 .hrt-boot i{width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.16);border-top-color:#e8824c;display:block;animation:hrtspin .8s linear infinite}
