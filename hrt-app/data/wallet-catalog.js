@@ -11,7 +11,7 @@ window.HRT_WALLET_CATALOG={
    "network": "Visa",
    "fee": 95.0,
    "feeBasis": "anniversary",
-   "note": "",
+   "note": "The 10% anniversary points bonus ended for new applicants on June 15, 2026. Existing cardholders get it on purchases through October 1, 2026.",
    "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
    "checked": "2026-10-13"
   },
@@ -55,7 +55,7 @@ window.HRT_WALLET_CATALOG={
    "network": "Visa",
    "fee": 95.0,
    "feeBasis": "anniversary",
-   "note": "This is the renamed Alaska Airlines Visa Signature. Companion Fare now has a $6,000 spend gate.",
+   "note": "This is the renamed Alaska Airlines Visa Signature. Companion Fare now has a $6,000 spend gate. No foreign transaction fee.",
    "source": "https://bankofamerica.com/credit-cards/products/alaska-airlines-credit-card",
    "checked": "2026-10-13"
   },
@@ -121,7 +121,7 @@ window.HRT_WALLET_CATALOG={
    "network": "Visa",
    "fee": 395.0,
    "feeBasis": "anniversary",
-   "note": "Both annual benefits reset on the ANNIVERSARY, not Jan 1.",
+   "note": "Both annual benefits reset on the ANNIVERSARY, not Jan 1. Lounge access for authorized users now costs $125 a year each, and guests pay unless the cardholder spends $75,000 a year.",
    "source": "https://www.capitalone.com/credit-cards/travel-and-miles/",
    "checked": "2026-10-13"
   }
@@ -714,11 +714,11 @@ window.HRT_WALLET_CATALOG={
    "amount": 10.0,
    "perYear": 4.0,
    "cadence": "quarterly",
-   "resets": "unclear",
+   "resets": "calendar",
    "enroll": "yes",
    "spendGate": "",
    "confidence": "confirmed",
-   "note": "Needs DashPass.",
+   "note": "Needs DashPass. Chase says $10 off each calendar quarter; an unused discount does not roll over.",
    "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
    "checked": "2026-10-13"
   },
@@ -735,8 +735,8 @@ window.HRT_WALLET_CATALOG={
    "enroll": "yes",
    "spendGate": "",
    "confidence": "confirmed",
-   "note": "5% on up to $1,500 spend a quarter, so $75 max. MUST be activated by the 14th of the quarter's third month.",
-   "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+   "note": "5% on up to $1,500 spend a quarter, so $75 max. Activate by the 14th of the quarter's third month. Chase says activating after the quarter starts still earns 5% on earlier purchases that quarter.",
+   "source": "https://www.chase.com/personal/credit-cards/freedom/flex",
    "checked": "2026-10-13"
   },
   {
@@ -870,9 +870,9 @@ window.HRT_WALLET_CATALOG={
    "resets": "anniversary",
    "enroll": "no",
    "spendGate": "",
-   "confidence": "assumed",
-   "note": "Current BoA page implies no spend requirement. The 2025 press release said there was one.",
-   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
+   "confidence": "confirmed",
+   "note": "Issued every account anniversary with no spending needed. The first one comes with the welcome offer.",
+   "source": "https://www.alaskaair.com/atmosrewards/content/credit-cards/benefits/visa-summit",
    "checked": "2026-10-13"
   },
   {
@@ -922,8 +922,8 @@ window.HRT_WALLET_CATALOG={
    "enroll": "unclear",
    "spendGate": "",
    "confidence": "confirmed",
-   "note": "Official sources disagree, $50 vs $75. See To verify.",
-   "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
+   "note": "Waives the same-day change fee that applies: $75 on most flights, $50 on intrastate and Seattle to Portland nonstops. Covers the cardholder and companions on the same reservation.",
+   "source": "https://www.alaskaair.com/content/travel-info/at-the-airport/same-day-flight-changes",
    "checked": "2026-10-13"
   },
   {
@@ -992,6 +992,40 @@ window.HRT_WALLET_CATALOG={
    "confidence": "confirmed",
    "note": "20% back on Alaska and Hawaiian inflight purchases. A rebate, not a credit.",
    "source": "https://bankofamerica.com/credit-cards/products/alaska-airlines-credit-card",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-summit",
+   "id": "wifi",
+   "label": "Inflight Wi-Fi passes",
+   "type": "passes",
+   "unit": "passes",
+   "amount": 2.0,
+   "perYear": 4.0,
+   "cadence": "quarterly",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "assumed",
+   "note": "2 single-use passes credited each Jan 1, Apr 1, Jul 1 and Oct 1, expiring at quarter end. Alaska's terms also mention a 12 month cycle, so the timing is likely but not certain.",
+   "source": "https://www.alaskaair.com/atmosrewards/content/credit-cards/benefits/visa-summit",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "atmos-summit",
+   "id": "inflight",
+   "label": "Inflight savings",
+   "type": "event",
+   "unit": "usd",
+   "amount": 0.0,
+   "perYear": 0.0,
+   "cadence": "per purchase",
+   "resets": "n/a",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "20% back as a statement credit on Alaska Airlines onboard food, drinks and Wi-Fi paid with the card.",
+   "source": "https://www.alaskaair.com/atmosrewards/content/credit-cards/benefits/visa-summit",
    "checked": "2026-10-13"
   }
  ],
@@ -1686,8 +1720,8 @@ window.HRT_WALLET_CATALOG={
    "currency": "Capital One miles",
    "cap": "",
    "via": "booked through Capital One Travel",
-   "note": "Capital One's page is inconsistent about whether vacation rentals are included. Flights through Capital One Travel earn the 2x base.",
-   "confidence": "assumed",
+   "note": "Capital One's card page lists vacation rentals in the 5x. Flights through Capital One Travel earn the 2x base.",
+   "confidence": "confirmed",
    "source": "https://www.capitalone.com/credit-cards/venture/",
    "checked": "2026-10-13"
   },
@@ -1930,9 +1964,9 @@ window.HRT_WALLET_CATALOG={
    "currency": "Atmos status points",
    "cap": "",
    "via": "",
-   "note": "Believed to be 1 status point per $3. Alaska's own article is inconsistent; Bank of America's page does not say.",
-   "confidence": "assumed",
-   "source": "https://news.alaskaair.com/loyalty/atmos-rewards-2026-expanded-status-earning-bew-partnerships-and-exclusive-perks-announced/",
+   "note": "1 status point per $3 spent on net purchases, no yearly cap.",
+   "confidence": "confirmed",
+   "source": "https://www.alaskaair.com/atmosrewards/content/credit-cards/benefits/visa-ascent",
    "checked": "2026-10-13"
   }
  ],
