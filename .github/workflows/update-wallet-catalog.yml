@@ -1,0 +1,59 @@
+# Daily: read the My Wallet card catalog Google Sheet and update the dashboard.
+#
+# Lives on main only because GitHub runs scheduled jobs from the default
+# branch. It never touches main's files: it checks out memberstack-sandbox,
+# rebuilds hrt-app/data/wallet-catalog.js from the sheet, and commits there
+# only when the data actually changed. Cloudflare then redeploys the site.
+#
+# If the sheet has a mistake, the script refuses, nothing is committed, the
+# site keeps its last good data, and GitHub emails a failure notice naming
+# the bad row. Run it any time: Actions tab > this workflow > Run workflow.
+#
+# The four links are the sheet's "Publish to web" CSV links, one per tab
+# (gid = the tab). They are public by design, so they are not secrets.
+# Only Cards, Benefits, Earning and Quarterly are published; To verify is not.
+name: Update My Wallet card catalog
+
+on:
+  schedule:
+    - cron: "17 15 * * *"   # 5:17am Hawaii time, every day
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wallet-catalog
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: memberstack-sandbox
+
+      - name: Build the catalog from the sheet
+        env:
+          CARDS: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKjBtswv1nsbLlttiVB9HmjU2hYffGMUksxTNczlrHMyAKxg95gAAwU8tw7VFPcSKly587LJM0lrj-/pub?single=true&output=csv&gid=725278544"
+          BENEFITS: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKjBtswv1nsbLlttiVB9HmjU2hYffGMUksxTNczlrHMyAKxg95gAAwU8tw7VFPcSKly587LJM0lrj-/pub?single=true&output=csv&gid=379097943"
+          EARNING: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKjBtswv1nsbLlttiVB9HmjU2hYffGMUksxTNczlrHMyAKxg95gAAwU8tw7VFPcSKly587LJM0lrj-/pub?single=true&output=csv&gid=510001"
+          QUARTERLY: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKjBtswv1nsbLlttiVB9HmjU2hYffGMUksxTNczlrHMyAKxg95gAAwU8tw7VFPcSKly587LJM0lrj-/pub?single=true&output=csv&gid=510002"
+        run: |
+          python3 tools/build_wallet_catalog.py \
+            --require Cards,Benefits,Earning,Quarterly \
+            --urls "Cards=$CARDS" "Benefits=$BENEFITS" "Earning=$EARNING" "Quarterly=$QUARTERLY"
+
+      - name: Commit only if the card data changed
+        run: |
+          f=hrt-app/data/wallet-catalog.js
+          if git diff --quiet -I '"built":' -- "$f"; then
+            git checkout -- "$f"
+            echo "Sheet unchanged. Nothing to publish."
+            exit 0
+          fi
+          git config user.name "HRT catalog update"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Card catalog: update from the Google Sheet" -- "$f"
+          git push origin memberstack-sandbox
