@@ -259,7 +259,8 @@
     var tone = ISSUER_TONE[c.issuer] || "#7a8ca0";
     return '<span class="wl-art wl-art-' + size + '" style="--tone:' + tone + '" aria-hidden="true">' +
       '<span class="wl-art-ph"><i></i>' + esc(ISSUER_SHORT[c.issuer] || c.issuer || "") + "</span>" +
-      (c.art ? '<img src="' + esc(c.art) + '" alt="" loading="lazy" decoding="async">' : "") + "</span>";
+      (c.art ? '<img src="' + esc(c.art) + '" alt="" loading="lazy" decoding="async"' +
+        ' onload="this.parentNode.classList.add(\'wl-art-ok\')" onerror="this.remove()">' : "") + "</span>";
   }
   function shortAmount(b) {
     if (!(b.amount > 0)) return "";
@@ -1349,7 +1350,9 @@
       ".wl-tl-body{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}",
       ".wl-art{position:relative;flex:0 0 auto;display:block;aspect-ratio:1.586;border-radius:6px;overflow:hidden;box-shadow:0 1px 2px rgba(10,20,35,.25),0 3px 8px rgba(10,20,35,.12)}",
       ".wl-art-sm{width:78px;border-radius:5px}.wl-art-md{width:104px}",
-      ".wl-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}",
+      ".wl-art img{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;width:auto;height:auto;display:block;border-radius:inherit}",
+      /* Once the image loads, show all of it (no cropping): the plain card steps aside and the image itself carries the rounded corners and shadow. */
+      ".wl-art.wl-art-ok{background:none;box-shadow:none;overflow:visible}.wl-art.wl-art-ok .wl-art-ph{display:none}.wl-art.wl-art-ok img{box-shadow:0 1px 2px rgba(10,20,35,.25),0 3px 8px rgba(10,20,35,.12)}",
       ".wl-art-ph{position:absolute;inset:0;display:flex;align-items:flex-end;padding:0 0 6% 8%;box-sizing:border-box;background:linear-gradient(135deg,var(--tone),#0e1b2c);color:rgba(255,255,255,.85);font:800 8px/1 system-ui,sans-serif;letter-spacing:.08em}",
       ".wl-art-md .wl-art-ph{font-size:9.5px}",
       ".wl-art-ph i{position:absolute;left:9%;top:30%;width:17%;height:21%;border-radius:2px;background:linear-gradient(135deg,#e8d39a,#b8954a);opacity:.9}",
