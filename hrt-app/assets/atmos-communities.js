@@ -363,47 +363,59 @@
     return l.label;
   }
 
-  var SHORT = {
-    challenge: function (l) { return ["Challenge destinations, " + l.n + " of 10", fmt(l.pts) + " pts"]; },
-    island: function (l) { return ["50% bonus on your island trips", fmt(l.pts) + " pts"]; },
-    nibags: function (l) { return ["Free checked bags between islands", money(l.cash)]; },
-    code: function (l) { return ["Island fare discount codes", money(l.cash)]; },
-    foodland: function () { return ["Foodland Maikaʻi at 3x", "up to 3,000 pts"]; },
-    intl: function (l) { return ["Extra status on international trips", fmt(l.status) + " status"]; },
-    transfer: function (l) { return ["Status from points you transfer in", fmt(l.status) + " status"]; },
-    kids: function (l) { return ["Points back on kids' award seats", fmt(l.pts) + " pts"]; },
-    akbags: function (l) { return ["Free checked bags on Alaska trips", money(l.cash)]; },
-    travelnow: function (l) { return ["Travel Now fare discounts", money(l.cash)]; }
-  };
-
   function hero(r) {
     var best = r.best, sec = r.second;
-    var how = "To join, sign in to Atmos Rewards and choose Join a Community. It is free, and you can switch once a year.";
+    var h = el("div", "qz-hero");
     if (best.score <= 0) {
-      return Q.pass({ kicker: "Your best Atmos Community", title: "Any of them, for now", value: "$0", unit: "a year so far",
-        note: "Nothing you told us earns much in any Community yet. Pick the one whose places you are most likely to visit, and come back when your plans change.", how: how });
+      h.appendChild(el("span", "qz-pill", "Your answer"));
+      h.appendChild(el("h2", "qz-big", "Any of them, for now"));
+      h.appendChild(el("p", "qz-line", "Nothing you told us earns much in any Community yet. Pick the one whose places you are most likely to visit, and come back when your plans change."));
+      return h;
     }
+    h.appendChild(el("span", "qz-pill", "Your best Community"));
+    var row = el("div", "qz-hrow");
+    var b = icon(ICON[best.c.key], 30); b.className = "qz-badge"; b.style.background = best.c.color;
+    row.appendChild(b);
+    var t = el("div");
+    t.appendChild(el("h2", "qz-big", best.c.name));
+    t.appendChild(el("p", "qz-sub", "About " + money(best.score) + " a year for you"));
+    row.appendChild(t);
+    h.appendChild(row);
     var gap = best.score - (sec && sec.score > 0 ? sec.score : 0);
-    var note = sec && sec.score > 0
-      ? (gap < 25 ? "A close call with " + sec.c.name + ". Go with the one whose places you are most likely to fly."
-                  : "About " + money(gap) + " a year more than the next best, " + sec.c.name + ".")
-      : "No other Community gives you anything for the trips you described.";
-    var lines = best.lines.filter(function (l) { return l.pts || l.cash || l.status; })
-      .sort(function (a, z) { return worth(z, r) - worth(a, r); }).slice(0, 4)
-      .map(function (l) { return SHORT[l.kind] ? SHORT[l.kind](l) : [l.label, ""]; });
-    return Q.pass({ kicker: "Your best Atmos Community", title: best.c.name, color: best.c.color,
-      value: money(best.score), unit: "a year, for you", note: note, lines: lines, how: how });
+    h.appendChild(el("p", "qz-line", sec && sec.score > 0
+      ? (gap < 25 ? "A close call with " + sec.c.name + ". Either is a good pick, so go with the places you are most likely to fly."
+                  : "That is about " + money(gap) + " a year more than the next best, " + sec.c.name + ".")
+      : "No other Community gives you anything for the trips you described."));
+    var why = best.lines.filter(function (l) { return l.pts || l.cash || l.status; })
+      .sort(function (a, z) { return worth(z, r) - worth(a, r); }).slice(0, 3).map(plain);
+    if (why.length) h.appendChild(Q.whyList(why));
+    return h;
   }
 
   function rankCard(r) {
+    var c = el("div", "qz-card");
+    c.appendChild(el("h3", "qz-h3", "How the Communities compare for you"));
+    var list = el("div", "qz-rank");
     var elig = r.ranked.filter(function (x) { return x.eligible; });
     var max = Math.max(1, elig[0] ? elig[0].score : 1);
-    var rows = elig.map(function (x, i) {
-      return { name: x.c.name, value: money(Math.max(0, x.score)), frac: Math.max(0, x.score) / max, color: x.c.color, win: i === 0 };
+    elig.forEach(function (x, i) {
+      var row = el("div", "qz-r" + (i === 0 ? " win" : ""));
+      var d = icon(ICON[x.c.key], 17); d.className = "qz-dot"; d.style.background = x.c.color;
+      row.appendChild(d);
+      var mid = el("div");
+      mid.appendChild(el("div", "qz-rn", x.c.name));
+      var tr = el("div", "qz-rt"); var f = el("i"); f.style.width = Math.max(0, x.score) / max * 100 + "%"; f.style.background = x.c.color;
+      tr.appendChild(f); mid.appendChild(tr);
+      row.appendChild(mid);
+      row.appendChild(el("span", "qz-rv", money(Math.max(0, x.score))));
+      list.appendChild(row);
     });
-    var off = r.all.filter(function (x) { return !x.eligible; }).map(function (x) { return x.c.name + " is for " + (x.c.res === "HI" ? "Hawaiʻi" : "Alaska") + " residents"; });
-    return Q.ranking("All the Communities you can join", rows,
-      "Yearly value for you, counting each point at " + r.cpp.toFixed(1) + "¢." + (off.length ? " " + off.join(", and ") + "." : ""));
+    c.appendChild(list);
+    var off = r.all.filter(function (x) { return !x.eligible; }).map(function (x) { return x.c.name + ": " + x.c.who; });
+    c.appendChild(el("p", "qz-small", "Dollar values per year, counting points at " + r.cpp.toFixed(1) + "¢ each." + (off.length ? " Not shown, " + off.join("; ") + "." : "")));
+    var join = el("p", "qz-small", "To join, sign in to Atmos Rewards and choose Join a Community. It is free, and you can switch once a year.");
+    c.appendChild(join);
+    return c;
   }
 
   /* ---------- folded sections ---------- */
@@ -619,13 +631,11 @@
       wrap.appendChild(answerChips());
       wrap.appendChild(hero(r));
       wrap.appendChild(rankCard(r));
-      wrap.appendChild(Q.moreList([
-        ["ac-math", "See the math", "Your top two, line by line", function () { return compareBody(compute()); }],
-        ["ac-tune", "Fine tune", "Your card, bags, how you earn, what matters most", fineTuneBody],
-        ["ac-six", "Meet the six Communities", "What each one gives you", function () { return sixBody(compute()); }],
-        ["ac-how", "How Communities work", "The rules and the bonus points challenge", howBody],
-        ["ac-fine", "Fine print and sources", null, fineBody]
-      ]));
+      wrap.appendChild(Q.more("ac-math", "See the math", "Your top two, line by line", function () { return compareBody(compute()); }));
+      wrap.appendChild(Q.more("ac-tune", "Fine tune", "Your card, bags, how you earn, what matters most", fineTuneBody));
+      wrap.appendChild(Q.more("ac-six", "Meet the six Communities", "What each one gives you", function () { return sixBody(compute()); }));
+      wrap.appendChild(Q.more("ac-how", "How Communities work", "The rules and the bonus points challenge", howBody));
+      wrap.appendChild(Q.more("ac-fine", "Fine print and sources", null, fineBody));
     }
     host.appendChild(wrap);
   }
