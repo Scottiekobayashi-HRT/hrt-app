@@ -40,9 +40,9 @@
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
   values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
-  resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex Platinum credit each quarter" },
+  resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex credit each quarter" },
   status:{ title:"Atmos Choose to Earn Calculator", hint:"Distance, price or segments" },
-  communities:{ title:"Atmos Community Calculator", hint:"Find the Community that pays you most" },
+  communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" }
  };
  var shown = {}, current = null;
@@ -122,7 +122,7 @@
    .then(use)
    .catch(function(){
     tbState("Could not load bonus data", "We are having trouble reaching the bonus data right now. Please check back shortly.");
-    $("tbUpdated").textContent = "Live data unavailable";
+    $("tbUpdated").textContent = "Live data unavailable"; $("tbUpdated").parentNode.classList.add("off");
     var h = $("hmTbList"); if(h) h.innerHTML = '<div class="mini-empty">Live bonuses are unavailable right now.</div>';
    });
  }
@@ -375,25 +375,27 @@
 
  /* ========================== HNL LOUNGES ========================== */
  var LOUNGES = [
-  { id:"plumeria", name:"Plumeria Lounge", op:"Hawaiian / Atmos", t:"t1", gate:"T1 · 3rd floor", r:3.5, x:86, y:67, url:"/hnl-lounges/plumeria", access:["Biz/First Class","Atmos Elite","Day Pass"], tags:["day-pass"], blurb:"Serene, island inspired space with local food, drinks and quiet seating. Better than Premier Club but not as impressive as the international lounges.", note:"Priority Pass access ended April 1, 2025." },
+  { id:"plumeria", name:"Plumeria Lounge", op:"Hawaiian / Atmos", t:"t1", gate:"T1 · 3rd floor", r:3.5, x:86, y:67, url:"/hnl-lounges/plumeria-lounge", access:["Biz/First Class","Atmos Elite","Day Pass"], tags:["day-pass"], blurb:"Serene, island inspired space with local food, drinks and quiet seating. Better than Premier Club but not as impressive as the international lounges.", note:"Priority Pass access ended April 1, 2025." },
   { id:"premier", name:"Premier Club", op:"Hawaiian Airlines", t:"t1", gate:"T1 · Gate A18", r:2.5, x:91.5, y:62, url:"/hnl-lounges/premier-club", access:["Priority Pass","First Class HA","Pualani Plat/Gold","Day Pass"], tags:["priority-pass","day-pass"], blurb:"Modest lounge with snacks, Hawaiian coffee and comfortable seating. As of 2025, Priority Pass is accepted here.", note:"Newly added to Priority Pass in 2025." },
-  { id:"ana", name:"ANA Lounge & Suite Lounge", op:"All Nippon Airways", t:"t2", gate:"T2 · above Gate C4", r:4.2, x:85, y:14, url:"/hnl-lounges/ana", access:["ANA First (Suite)","ANA Business","Star Alliance Gold"], tags:["star-alliance"], blurb:"Highest rated lounge at HNL. Hawaiian motifs meet Japanese design, with exceptional service.", note:"Transfer Amex MR to ANA to fly Biz HNL to NRT for automatic access." },
-  { id:"qantas", name:"Qantas Business Lounge", op:"Qantas Airways", t:"t2", gate:"T2 · Gate 26 / Garden Court", r:4.1, x:48, y:30, url:"/hnl-lounges/qantas", access:["Qantas Biz/First","Oneworld Sapphire/Emerald"], tags:["oneworld"], blurb:"Stylish, full dining, attentive service. One of the better lounges outside ANA." },
-  { id:"sakura", name:"Sakura Lounge", op:"Japan Airlines", t:"t2", gate:"T2 · above The Local @HNL", r:4.0, x:53.5, y:40, url:"/hnl-lounges/sakura", access:["JAL Biz/First","Oneworld Sapphire/Emerald"], tags:["oneworld"], blurb:"Serene, Japanese and Western cuisine, excellent service. Popular with Japan bound travelers.", note:"Book JAL Biz with Bilt or Capital One for automatic access." },
-  { id:"delta", name:"Delta Sky Club (current)", op:"Delta Air Lines", t:"t2", gate:"T2 · across from F1", r:4.0, x:35, y:47, url:"/hnl-lounges/delta-sky-club", access:["Delta Sky Club","Delta One","Eligible premium cards"], tags:["skyteam","amex"], blurb:"Modern lounge with Hawaiian artwork, often praised for the best food at HNL. Small, and fills up fast on Sunday red eyes.", note:"A much larger Sky Club is being built next to gate F2." },
-  { id:"united", name:"United Club", op:"United Airlines", t:"t2", gate:"T2 · above Gate G3", r:3.8, x:18.5, y:20, url:"/hnl-lounges/united-club", access:["United Club","Polaris Biz","Star Alliance Gold","Eligible premium cards"], tags:["star-alliance","chase"], blurb:"Comfortable and spacious with big tarmac view windows. Solid for United flyers or Star Alliance Gold." },
+  { id:"ana", name:"ANA Lounge & Suite Lounge", op:"All Nippon Airways", t:"t2", gate:"T2 · above Gate C4", r:4.2, x:85, y:14, url:"/hnl-lounges/ana-lounge", access:["ANA First (Suite)","ANA Business","Star Alliance Gold"], tags:["star-alliance"], blurb:"Highest rated lounge at HNL. Hawaiian motifs meet Japanese design, with exceptional service.", note:"Transfer Amex MR to ANA to fly Biz HNL to NRT for automatic access." },
+  { id:"qantas", name:"Qantas Business Lounge", op:"Qantas Airways", t:"t2", gate:"T2 · Gate 26 / Garden Court", r:4.1, x:48, y:30, url:"" /* coming: /hnl-lounges/qantas-lounge */, access:["Qantas Biz/First","Oneworld Sapphire/Emerald"], tags:["oneworld"], blurb:"Stylish, full dining, attentive service. One of the better lounges outside ANA." },
+  { id:"sakura", name:"Sakura Lounge", op:"Japan Airlines", t:"t2", gate:"T2 · above The Local @HNL", r:4.0, x:53.5, y:40, url:"/hnl-lounges/jal-sakura", access:["JAL Biz/First","Oneworld Sapphire/Emerald"], tags:["oneworld"], blurb:"Serene, Japanese and Western cuisine, excellent service. Popular with Japan bound travelers.", note:"Book JAL Biz with Bilt or Capital One for automatic access." },
+  { id:"delta", name:"Delta Sky Club (current)", op:"Delta Air Lines", t:"t2", gate:"T2 · across from F1", r:4.0, x:35, y:47, url:"", access:["Delta Sky Club","Delta One","Eligible premium cards"], tags:["skyteam","amex"], blurb:"Modern lounge with Hawaiian artwork, often praised for the best food at HNL. Small, and fills up fast on Sunday red eyes.", note:"A much larger Sky Club is being built next to gate F2." },
+  { id:"united", name:"United Club", op:"United Airlines", t:"t2", gate:"T2 · above Gate G3", r:3.8, x:18.5, y:20, url:"" /* coming: /hnl-lounges/united-club */, access:["United Club","Polaris Biz","Star Alliance Gold","Eligible premium cards"], tags:["star-alliance","chase"], blurb:"Comfortable and spacious with big tarmac view windows. Solid for United flyers or Star Alliance Gold." },
   { id:"admirals", name:"Admirals Club", op:"American Airlines", t:"t2", gate:"T2 · 3rd level above The Local", r:3.7, x:49, y:38, url:"/hnl-lounges/admirals-club", access:["Admirals Club","AA First/Biz","Day Pass"], tags:["oneworld","day-pass"], blurb:"Comfortable lounge, quiet atmosphere, friendly staff. A solid choice for American Airlines flyers." },
-  { id:"iass", name:"IASS Hawaii Lounge", op:"Independent", t:"t2", gate:"T2 · near Gate 14, ground level", r:2.5, x:57, y:39, url:"/hnl-lounges/iass", access:["Priority Pass","Eligible premium travel cards"], tags:["priority-pass"], blurb:"A Priority Pass lounge at HNL. Basic but convenient for T2 departures.", note:"Two Priority Pass options at HNL now: IASS (T2) and Premier Club (T1)." },
-  { id:"korean", name:"Korean Air Lounge", op:"Korean Air", t:"t2", gate:"T2 · near Gate 31", r:null, x:57, y:35, url:"/hnl-lounges/korean-air", access:["Korean Air First/Biz","SkyTeam Elite Plus"], tags:["skyteam"], blurb:"Comfortable lounge for Korean Air passengers on transpacific routes." },
-  { id:"fslanai", name:"Four Seasons Lanai Lounge", op:"Four Seasons Resort Lanai", t:"t2", gate:"T2 · near Gates D1 and D2", r:4.0, x:68, y:41, url:"/hnl-lounges/four-seasons-lanai", access:["Four Seasons Lanai guests","Sensei Lanai guests"], tags:["resort-only"], blurb:"A hidden gem tucked into T2, exclusive to Four Seasons Lanai and Sensei Lanai guests.", note:"New April 2026: a separate Lanai Air Lounge for private charter guests." },
-  { id:"koolina", name:"Ko Olina Lounge", op:"Ko Olina Resorts", t:"t2", gate:"T2 · Cultural Garden · ground level", r:3.0, x:43, y:38, url:"/hnl-lounges/ko-olina", access:["Aulani guests","Four Seasons Ko Olina","Marriott Ko Olina","Beach Villas at Ko Olina"], tags:["resort-only"], blurb:"Small, serene resort lounge overlooking the Cultural Garden. Water, coffee and seating. No food and no alcohol.", note:"Resort guests only. Advance reservation required." },
-  { id:"deltanew", name:"New Delta Sky Club", op:"Delta Air Lines", t:"t2", gate:"T2 · next to gate F2 · 2nd level", r:null, x:29, y:39, url:"/hnl-lounges/delta-sky-club-new", access:["Opening late 2027 to mid 2028"], tags:["coming-soon","skyteam","amex"], soon:true, blurb:"12,280 sq ft across four rooms in Buildings 341 and 363, about three times the size of the current Sky Club.", note:"Lease approved March 27, 2026." },
-  { id:"southwest", name:"Southwest VIP Lounge", op:"Southwest Airlines", t:"t2", gate:"T2 · Building 342", r:null, x:50, y:35, url:"/hnl-lounges/southwest-vip", access:["Coming soon, access to be announced"], tags:["coming-soon"], soon:true, blurb:"A historic first. Southwest has never run an airport lounge anywhere, and HNL is its debut.", note:"Lease approved October 2025." },
-  { id:"alaskahawaiian", name:"New Alaska/Hawaiian Premium Lounge", op:"Alaska Air Group", t:"t1", gate:"T1 · Mauka Concourse entrance", r:null, x:84, y:73, url:"/hnl-lounges/alaska-hawaiian-premium", access:["Opening late 2027"], tags:["coming-soon"], soon:true, blurb:"15,000 sq ft, five times larger than the current Plumeria. Expected to rival Delta One and United Polaris lounges.", note:"May carry the Atmos brand and will serve both Alaska and Hawaiian guests." }
+  { id:"iass", name:"IASS Hawaii Lounge", op:"Independent", t:"t2", gate:"T2 · near Gate 14, ground level", r:2.5, x:57, y:39, url:"/hnl-lounges/iass-lounge", access:["Priority Pass","Eligible premium travel cards"], tags:["priority-pass"], blurb:"A Priority Pass lounge at HNL. Basic but convenient for T2 departures.", note:"Two Priority Pass options at HNL now: IASS (T2) and Premier Club (T1)." },
+  { id:"korean", name:"Korean Air Lounge", op:"Korean Air", t:"t2", gate:"T2 · near Gate 31", r:null, x:57, y:35, url:"" /* coming: /hnl-lounges/korean-air-lounge */, access:["Korean Air First/Biz","SkyTeam Elite Plus"], tags:["skyteam"], blurb:"Comfortable lounge for Korean Air passengers on transpacific routes." },
+  { id:"fslanai", name:"Four Seasons Lanai Lounge", op:"Four Seasons Resort Lanai", t:"t2", gate:"T2 · near Gates D1 and D2", r:4.0, x:68, y:41, url:"", access:["Four Seasons Lanai guests","Sensei Lanai guests"], tags:["resort-only"], blurb:"A hidden gem tucked into T2, exclusive to Four Seasons Lanai and Sensei Lanai guests.", note:"New April 2026: a separate Lanai Air Lounge for private charter guests." },
+  { id:"koolina", name:"Ko Olina Lounge", op:"Ko Olina Resorts", t:"t2", gate:"T2 · Cultural Garden · ground level", r:3.0, x:43, y:38, url:"", access:["Aulani guests","Four Seasons Ko Olina","Marriott Ko Olina","Beach Villas at Ko Olina"], tags:["resort-only"], blurb:"Small, serene resort lounge overlooking the Cultural Garden. Water, coffee and seating. No food and no alcohol.", note:"Resort guests only. Advance reservation required." },
+  { id:"deltanew", name:"New Delta Sky Club", op:"Delta Air Lines", t:"t2", gate:"T2 · next to gate F2 · 2nd level", r:null, x:29, y:39, url:"", access:["Opening late 2027 to mid 2028"], tags:["coming-soon","skyteam","amex"], soon:true, blurb:"12,280 sq ft across four rooms in Buildings 341 and 363, about three times the size of the current Sky Club.", note:"Lease approved March 27, 2026." },
+  { id:"southwest", name:"Southwest VIP Lounge", op:"Southwest Airlines", t:"t2", gate:"T2 · Building 342", r:null, x:50, y:35, url:"", access:["Coming soon, access to be announced"], tags:["coming-soon"], soon:true, blurb:"A historic first. Southwest has never run an airport lounge anywhere, and HNL is its debut.", note:"Lease approved October 2025." },
+  { id:"alaskahawaiian", name:"New Alaska/Hawaiian Premium Lounge", op:"Alaska Air Group", t:"t1", gate:"T1 · Mauka Concourse entrance", r:null, x:84, y:73, url:"/hnl-lounges/alaska-hawaiian-premium-lounge", access:["Opening late 2027"], tags:["coming-soon"], soon:true, blurb:"15,000 sq ft, five times larger than the current Plumeria. Expected to rival Delta One and United Polaris lounges.", note:"May carry the Atmos brand and will serve both Alaska and Hawaiian guests." }
  ];
  var LG_F = [ ["all","All lounges",function(){ return true; }], ["t1","Terminal 1",function(l){ return l.t === "t1"; }], ["t2","Terminal 2",function(l){ return l.t === "t2"; }], ["pp","Priority Pass",function(l){ return l.tags.indexOf("priority-pass") > -1; }], ["soon","Coming soon",function(l){ return !!l.soon; }] ];
  var LG_TAG = { "priority-pass":["Priority Pass","pp"], "star-alliance":["Star Alliance",""], "oneworld":["Oneworld",""], "skyteam":["SkyTeam",""], "amex":["Amex",""], "chase":["Chase",""], "day-pass":["Day Pass",""], "resort-only":["Resort only","resort"], "coming-soon":["Coming soon","soon"] };
  var LG = { f:"all", active:null };
+ /* Only lounges with a published review page get the button. Add the path to url to switch one on. */
+ function lgReview(l){ return l.url ? '<a class="btn coral" href="'+SITE+l.url+'" target="_top">Read the full review &rarr;</a>' : '<span class="lg-soon-note">Full review coming soon</span>'; }
  function lgNum(l){ return l.soon ? "&#10022;" : (LOUNGES.indexOf(l) + 1); }
  function lgStars(r){ if(r == null) return '<span class="lg-rate none">No rating</span>'; return '<span class="lg-rate">'+"★".repeat(Math.floor(r))+(r % 1 >= .5 ? "½" : "")+" "+r.toFixed(1)+'</span>'; }
  function lgTags(l){ return l.tags.map(function(t){ var x = LG_TAG[t] || [t,""]; return '<span class="lg-tag '+x[1]+'">'+x[0]+'</span>'; }).join(""); }
@@ -406,7 +408,7 @@
    return '<div role="button" tabindex="0" class="lg-card'+(l.soon?' soon':'')+(lgMatch(l)?'':' off')+(LG.active === l.id ? ' on' : '')+'" data-l-id="'+l.id+'">'
     + '<div class="lg-top"><span class="lg-num">'+lgNum(l)+'</span><span class="lg-name">'+esc(l.name)+'</span>'+lgStars(l.r)+'</div>'
     + '<div class="lg-meta">'+esc(l.gate)+' &middot; '+esc(l.op)+'</div><div class="lg-tags">'+lgTags(l)+'</div>'
-    + '<div class="lg-det"><p>'+esc(l.blurb)+'</p>'+(l.note ? '<p class="nt">'+esc(l.note)+'</p>' : '')+'<p><b>Access:</b> '+esc(l.access.join(" · "))+'</p><a class="btn coral" href="'+SITE+l.url+'" target="_top">View full review &rarr;</a></div></div>';
+    + '<div class="lg-det"><p>'+esc(l.blurb)+'</p>'+(l.note ? '<p class="nt">'+esc(l.note)+'</p>' : '')+'<p><b>Access:</b> '+esc(l.access.join(" · "))+'</p>'+lgReview(l)+'</div></div>';
   }).join("");
  }
  function lgPop(){
@@ -414,7 +416,7 @@
   if(!l){ pop.hidden = true; return; }
   pop.innerHTML = '<button type="button" class="x" data-l-close aria-label="Close">&times;</button><b>'+esc(l.name)+'</b><small>'+esc(l.gate)+' &middot; '+esc(l.op)+'</small><div class="lg-tags" style="margin:0">'+lgTags(l)+'</div>'
    + (l.note ? '<div style="color:#c25c26;margin-top:6px;font-style:italic">'+esc(l.note)+'</div>' : '') + '<div style="margin-top:6px"><b style="display:inline;font-size:12px">Access:</b> '+esc(l.access.join(" · "))+'</div>'
-   + '<a class="btn coral" href="'+SITE+l.url+'" target="_top">View full review &rarr;</a>';
+   + lgReview(l);
   pop.hidden = false;
   var w = pop.parentElement.offsetWidth, h = pop.parentElement.offsetHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
   var mx = l.x / 100 * w, my = l.y / 100 * h;
