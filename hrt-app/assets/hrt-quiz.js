@@ -1,9 +1,15 @@
 /* ---------------------------------------------------------------------------
    hrt-quiz.js - shared "one question at a time" look for HRT calculators.
 
-   Design rule (Scottie, Oct 13 2026): a calculator must never overwhelm.
-   One question on screen, big tap targets, one clear answer, and everything
-   else folded behind a plain "See the math" style link.
+   Design rules (Scottie, Oct 13 2026): never overwhelm, never look like AI
+   slop, stay on the HRT brand.
+   - One question per screen. Answers are plain rows with a radio dot.
+   - The answer is a boarding pass: the one bold element on the page.
+   - Brand: navy #1B2840, deep teal #1c3a45, gold #c9923a, sunset #D97040
+     (main button only), paper #F4F1EC (the pass only). DM Serif Display for
+     question titles and the answer, Inter for everything else.
+   - No gradient pills, no all caps labels, no glows, no icon tiles.
+   - Everything secondary sits in one quiet "More about this" list.
 
    Used by atmos-status.js (Choose to Earn) and atmos-communities.js.
    Must load before both. Exposes window.HRT_QUIZ.
@@ -14,189 +20,289 @@
   function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
   function icon(path, size) {
     var w = el("span", "qz-ic");
-    w.innerHTML = '<svg width="' + (size || 22) + '" height="' + (size || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
+    w.innerHTML = '<svg width="' + (size || 18) + '" height="' + (size || 18) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + '</svg>';
     return w;
   }
-  var CHECK = '<path d="M20 6 9 17l-5-5"/>';
+  var RESTART = '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>';
 
-  /* q = { n, total, title, hint, options:[{value,label,sub,icon}], current, multi, onPick, onBack, nextLabel, onNext, extra } */
+  function fonts() {
+    if (document.getElementById("qz-font")) return;
+    var l = document.createElement("link"); l.id = "qz-font"; l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap";
+    document.head.appendChild(l);
+  }
+
+  /* q = { n, total, title, hint, options:[{value,label,sub}], current, multi, compact, onPick, onBack, nextLabel, onNext, extra } */
   function question(q) {
-    var card = el("div", "qz-card");
+    var card = el("section", "qz-q");
     var top = el("div", "qz-top");
-    top.appendChild(el("span", "qz-count", "Question " + q.n + " of " + q.total));
-    if (q.onBack) {
-      var back = el("button", "qz-back", "Back");
-      back.type = "button"; back.addEventListener("click", q.onBack);
-      top.appendChild(back);
-    }
+    var steps = el("div", "qz-steps");
+    steps.setAttribute("aria-label", "Question " + q.n + " of " + q.total);
+    for (var i = 1; i <= q.total; i++) steps.appendChild(el("i", i < q.n ? "done" : i === q.n ? "now" : ""));
+    top.appendChild(steps);
+    top.appendChild(el("span", "qz-count", q.n + " of " + q.total));
     card.appendChild(top);
-    var bar = el("div", "qz-prog"); var fill = el("i"); fill.style.width = (q.n / q.total * 100) + "%";
-    bar.appendChild(fill); card.appendChild(bar);
     card.appendChild(el("h2", "qz-title", q.title));
     if (q.hint) card.appendChild(el("p", "qz-hint", q.hint));
-    var grid = el("div", "qz-opts" + (q.compact ? " compact" : ""));
+    var list = el("div", "qz-opts" + (q.compact ? " compact" : ""));
+    list.setAttribute("role", q.multi ? "group" : "radiogroup");
     q.options.forEach(function (o) {
       var on = q.multi ? !!(q.current && q.current[o.value]) : q.current === o.value;
-      var b = el("button", "qz-opt" + (on ? " on" : ""));
-      b.type = "button"; b.setAttribute("aria-pressed", on ? "true" : "false");
-      if (o.icon) b.appendChild(icon(o.icon, 24));
+      var b = el("button", "qz-opt" + (on ? " on" : "") + (q.multi ? " multi" : ""));
+      b.type = "button";
+      b.setAttribute(q.multi ? "aria-pressed" : "aria-checked", on ? "true" : "false");
+      if (!q.multi) b.setAttribute("role", "radio");
+      b.appendChild(el("span", "qz-mark"));
       var t = el("span", "qz-optt");
       t.appendChild(el("b", null, o.label));
       if (o.sub) t.appendChild(el("span", null, o.sub));
       b.appendChild(t);
-      if (q.multi) b.appendChild(icon(CHECK, 16)).className = "qz-tick";
       b.addEventListener("click", function () {
         if (q.multi) {
           var now = !b.classList.contains("on");
           b.classList.toggle("on", now); b.setAttribute("aria-pressed", now ? "true" : "false");
+        } else {
+          list.querySelectorAll(".qz-opt").forEach(function (x) { x.classList.remove("on"); x.setAttribute("aria-checked", "false"); });
+          b.classList.add("on"); b.setAttribute("aria-checked", "true");
         }
         q.onPick(o.value);
       });
-      grid.appendChild(b);
+      list.appendChild(b);
     });
-    card.appendChild(grid);
+    card.appendChild(list);
     if (q.extra) card.appendChild(q.extra);
+    var foot = el("div", "qz-foot");
+    if (q.onBack) {
+      var back = el("button", "qz-back", "Back");
+      back.type = "button"; back.addEventListener("click", q.onBack);
+      foot.appendChild(back);
+    }
     if (q.onNext) {
       var nx = el("button", "qz-next", q.nextLabel || "Next");
       nx.type = "button"; nx.addEventListener("click", q.onNext);
-      card.appendChild(nx);
+      foot.appendChild(nx);
     }
+    if (foot.childNodes.length) card.appendChild(foot);
     return card;
   }
 
-  /* answers = [{ label, value, onEdit }] shown as small tappable chips */
+  /* list = [{ label, value, onEdit }]. Start over is a real button, not a link. */
   function answers(list, onRestart) {
     var w = el("div", "qz-answers");
-    w.appendChild(el("span", "qz-al", "Your answers"));
+    var head = el("div", "qz-ahead");
+    var ht = el("p", "qz-al");
+    ht.appendChild(el("b", null, "Your answers"));
+    ht.appendChild(document.createTextNode(" Tap one to change it."));
+    head.appendChild(ht);
+    if (onRestart) {
+      var r = el("button", "qz-restart");
+      r.type = "button";
+      r.appendChild(icon(RESTART, 16));
+      r.appendChild(el("span", null, "Start over"));
+      r.addEventListener("click", onRestart);
+      head.appendChild(r);
+    }
+    w.appendChild(head);
+    var chips = el("div", "qz-chips");
     list.forEach(function (a) {
       var b = el("button", "qz-chip");
-      b.type = "button"; b.title = "Change this answer";
+      b.type = "button"; b.setAttribute("aria-label", "Change " + a.label + ", now " + a.value);
       b.appendChild(el("span", null, a.label));
       b.appendChild(el("b", null, a.value));
       b.addEventListener("click", a.onEdit);
-      w.appendChild(b);
+      chips.appendChild(b);
     });
-    if (onRestart) {
-      var r = el("button", "qz-restart", "Start over");
-      r.type = "button"; r.addEventListener("click", onRestart);
-      w.appendChild(r);
-    }
+    w.appendChild(chips);
     return w;
   }
 
-  /* A folded section. key keeps it open across repaints. */
-  var openState = {};
-  function more(key, title, sub, build) {
-    var d = el("details", "qz-more");
-    if (openState[key]) d.open = true;
-    var s = el("summary");
-    var t = el("span", "qz-mt");
-    t.appendChild(el("b", null, title));
-    if (sub) t.appendChild(el("span", null, sub));
-    s.appendChild(t);
-    d.appendChild(s);
-    var body = el("div", "qz-mb");
-    var built = false;
-    function fill() { if (!built) { built = true; body.appendChild(build()); } }
-    if (d.open) fill();
-    d.addEventListener("toggle", function () { openState[key] = d.open; if (d.open) fill(); });
-    d.appendChild(body);
-    return d;
+  /* p = { kicker, title, color, value, unit, lines:[[label, value]], note, how }
+     The answer as a boarding pass: body on the left, tear-off stub on the right. */
+  function pass(p) {
+    var t = el("article", "qz-pass");
+    if (p.color) t.style.setProperty("--pc", p.color);
+    var body = el("div", "qz-pbody");
+    body.appendChild(el("p", "qz-pk", p.kicker));
+    body.appendChild(el("h2", "qz-pt", p.title));
+    if (p.note) body.appendChild(el("p", "qz-pn", p.note));
+    if (p.lines && p.lines.length) {
+      var dl = el("dl", "qz-plines");
+      p.lines.forEach(function (l) {
+        var row = el("div", "qz-pl");
+        row.appendChild(el("dt", null, l[0]));
+        row.appendChild(el("dd", null, l[1]));
+        dl.appendChild(row);
+      });
+      body.appendChild(dl);
+    }
+    if (p.how) body.appendChild(el("p", "qz-phow", p.how));
+    t.appendChild(body);
+    var stub = el("div", "qz-pstub");
+    stub.appendChild(el("span", "qz-psl", p.valueLabel || "Worth about"));
+    stub.appendChild(el("b", "qz-pv", p.value));
+    stub.appendChild(el("span", "qz-pu", p.unit || ""));
+    t.appendChild(stub);
+    return t;
   }
 
-  /* why = array of strings, shown as gold check lines in the answer card */
-  function whyList(why) {
-    var ul = el("ul", "qz-why");
-    why.forEach(function (w) {
-      var li = el("li");
-      li.appendChild(icon(CHECK, 14));
-      li.appendChild(el("span", null, w));
-      ul.appendChild(li);
+  /* rows = [{ name, value, frac, color, win }] */
+  function ranking(title, rows, note) {
+    var c = el("section", "qz-rankc");
+    c.appendChild(el("h3", "qz-h3", title));
+    var list = el("ol", "qz-rank");
+    rows.forEach(function (r) {
+      var li = el("li", "qz-r" + (r.win ? " win" : ""));
+      var top = el("div", "qz-rtop");
+      var n = el("span", "qz-rn");
+      var dot = el("i", "qz-rdot"); dot.style.background = r.color;
+      n.appendChild(dot); n.appendChild(document.createTextNode(r.name));
+      top.appendChild(n);
+      top.appendChild(el("span", "qz-rv", r.value));
+      li.appendChild(top);
+      var tr = el("div", "qz-rt"); var f = el("i"); f.style.width = Math.max(0, Math.min(1, r.frac)) * 100 + "%";
+      tr.appendChild(f); li.appendChild(tr);
+      list.appendChild(li);
     });
-    return ul;
+    c.appendChild(list);
+    if (note) c.appendChild(el("p", "qz-small", note));
+    return c;
+  }
+
+  /* One quiet panel holding every folded section. items = [[key, title, sub, build]] */
+  var openState = {};
+  function moreList(items) {
+    var wrap = el("section", "qz-morelist");
+    wrap.appendChild(el("h3", "qz-h3", "More about this answer"));
+    items.forEach(function (it) {
+      var key = it[0];
+      var d = el("details", "qz-more");
+      if (openState[key]) d.open = true;
+      var s = el("summary");
+      var t = el("span", "qz-mt");
+      t.appendChild(el("b", null, it[1]));
+      if (it[2]) t.appendChild(el("span", null, it[2]));
+      s.appendChild(t);
+      d.appendChild(s);
+      var body = el("div", "qz-mb");
+      var built = false;
+      function fill() { if (!built) { built = true; body.appendChild(it[3]()); } }
+      if (d.open) fill();
+      d.addEventListener("toggle", function () { openState[key] = d.open; if (d.open) fill(); });
+      d.appendChild(body);
+      wrap.appendChild(d);
+    });
+    return wrap;
   }
 
   function css() {
+    fonts();
     if (document.getElementById("qz-css")) return;
     var s = document.createElement("style"); s.id = "qz-css";
+    var SERIF = "'DM Serif Display',Georgia,'Times New Roman',serif";
     s.textContent = [
-      ".qz-wrap{max-width:760px;margin:0 auto}",
-      ".qz-card{border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:var(--shadow);padding:22px 22px 24px;margin-bottom:14px}",
-      "@media (max-width:560px){.qz-card{padding:18px 16px 20px}}",
-      ".qz-top{display:flex;justify-content:space-between;align-items:center;gap:10px}",
-      ".qz-count{font-size:12px;font-weight:700;color:var(--muted)}",
-      ".qz-back{font:inherit;font-size:13px;font-weight:700;color:var(--muted);background:none;border:0;cursor:pointer;padding:10px 4px;min-height:44px}",
-      ".qz-back:before{content:'\\2190  '}",
-      ".qz-back:hover{color:var(--coral)}",
-      ".qz-prog{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin:6px 0 18px}",
-      ".qz-prog i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#f2b84b,#e8824c);transition:width .3s}",
-      ".qz-card .qz-title{margin:0 0 6px;font-size:23px;line-height:1.25;color:var(--text)}",
-      "@media (max-width:560px){.qz-card .qz-title{font-size:20px}}",
-      ".qz-card .qz-hint{margin:0 0 16px;font-size:14px;color:var(--muted);line-height:1.5}",
-      ".qz-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}",
-      ".qz-opts.compact{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}",
-      "@media (max-width:560px){.qz-opts{grid-template-columns:1fr}.qz-opts.compact{grid-template-columns:1fr 1fr}}",
-      ".qz-opt{position:relative;display:flex;align-items:center;gap:12px;text-align:left;font:inherit;cursor:pointer;min-height:64px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--text);transition:border-color .15s,background .15s,transform .1s}",
-      ".qz-opts.compact .qz-opt{min-height:52px;padding:10px 12px}",
-      ".qz-opt:hover{border-color:var(--coral)}",
-      ".qz-opt:active{transform:scale(.99)}",
-      ".qz-opt .qz-ic{flex:0 0 auto;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--coral);background:color-mix(in srgb,var(--coral) 12%,var(--surface))}",
-      ".qz-optt{display:flex;flex-direction:column;gap:2px;min-width:0}",
-      ".qz-optt b{font-size:15px;line-height:1.25}",
-      ".qz-opts.compact .qz-optt b{font-size:14px}",
-      ".qz-optt span{font-size:12px;color:var(--muted);font-weight:600;line-height:1.35}",
-      ".qz-opt.on{border-color:#0e1b2c;background:#0e1b2c;color:#fff;box-shadow:inset 0 -3px 0 #f2b84b}",
-      ".qz-opt.on .qz-optt span{color:#c7d4e2}",
-      ".qz-opt.on .qz-ic{background:rgba(242,184,75,.18);color:#f5c75a}",
-      ":root[data-theme=\"dark\"] .qz-opt.on{border-color:#f2b84b;background:#1d2c42}",
-      ".qz-tick{margin-left:auto;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line);color:transparent;flex:0 0 auto}",
-      ".qz-opt.on .qz-tick{background:linear-gradient(135deg,#f5c75a,#e8824c);border-color:transparent;color:#1a1204}",
-      ".qz-next{display:block;width:100%;margin-top:18px;min-height:52px;font:inherit;font-size:16px;font-weight:800;cursor:pointer;border:0;border-radius:14px;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c)}",
-      ".qz-next:hover{filter:brightness(1.04)}",
-      /* the answer card */
-      ".qz-hero{position:relative;overflow:hidden;border-radius:22px;padding:24px;margin-bottom:14px;color:#fff;background:linear-gradient(135deg,#0e1b2c 0%,#16294a 65%,#23345a 100%);border:1px solid rgba(242,184,75,.45);box-shadow:var(--shadow)}",
-      "@media (max-width:560px){.qz-hero{padding:20px 18px}}",
-      ".qz-hero .qz-pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:5px 11px}",
-      ".qz-hero .qz-hrow{display:flex;gap:14px;align-items:center;margin-top:14px}",
-      ".qz-hero .qz-badge{flex:0 0 auto;width:60px;height:60px;border-radius:17px;display:grid;place-items:center;color:#fff;box-shadow:0 0 0 3px rgba(242,184,75,.5)}",
-      ".qz-hero .qz-big{margin:0;font-size:30px;line-height:1.1;color:#fff}",
-      "@media (max-width:560px){.qz-hero .qz-big{font-size:24px}}",
-      ".qz-hero .qz-sub{margin:6px 0 0;font-size:17px;font-weight:800;color:#f5c75a}",
-      ".qz-hero .qz-line{margin:14px 0 0;font-size:14px;color:#dce6f1;line-height:1.5}",
-      ".qz-why{list-style:none;margin:16px 0 0;padding:14px 0 0;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:9px}",
-      ".qz-why li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:#fff}",
-      ".qz-why .qz-ic{flex:0 0 auto;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#f5c75a,#e8824c);color:#1a1204;margin-top:1px}",
-      /* simple ranking */
-      ".qz-rank{display:flex;flex-direction:column;gap:10px}",
-      ".qz-r{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}",
-      ".qz-r .qz-dot{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff}",
-      ".qz-r .qz-rn{font-size:14px;font-weight:700;color:var(--text)}",
-      ".qz-r .qz-rt{height:8px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:5px}",
-      ".qz-r .qz-rt i{display:block;height:100%;border-radius:5px}",
-      ".qz-r .qz-rv{font-size:15px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}",
-      ".qz-r.win .qz-rn{font-weight:800}",
-      ".qz-small{margin:12px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}",
-      ".qz-h3{margin:0 0 14px;font-size:16px;color:var(--text)}",
-      /* answers chips */
-      ".qz-answers{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:0 0 14px}",
-      ".qz-al{font-size:12px;font-weight:800;color:var(--muted);margin-right:2px}",
-      ".qz-chip{display:inline-flex;gap:6px;align-items:baseline;font:inherit;font-size:12.5px;cursor:pointer;padding:8px 12px;min-height:36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}",
-      ".qz-chip b{color:var(--text)}",
-      ".qz-chip:hover{border-color:var(--coral)}",
-      ".qz-restart{font:inherit;font-size:12.5px;font-weight:700;color:var(--coral);background:none;border:0;cursor:pointer;padding:8px 6px;min-height:36px}",
-      /* folded sections */
-      ".qz-more{border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow);margin-bottom:10px}",
-      ".qz-more>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;padding:16px 18px;min-height:56px;box-sizing:border-box}",
+      ".qz-wrap{--hn:#1B2840;--ht:#1c3a45;--hg:#c9923a;--hs:#D97040;--hp:#F4F1EC;max-width:680px;margin:0 auto}",
+      ".qz-wrap .qz-h3{margin:0 0 14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text)}",
+      /* question */
+      ".qz-q{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 26px 22px}",
+      "@media (max-width:560px){.qz-q{padding:20px 16px 16px}}",
+      ".qz-top{display:flex;align-items:center;gap:12px;margin-bottom:22px}",
+      ".qz-steps{display:flex;gap:5px;flex:1}",
+      ".qz-steps i{flex:1;height:3px;border-radius:2px;background:var(--line)}",
+      ".qz-steps i.done{background:var(--hn)}",
+      ".qz-steps i.now{background:var(--hg)}",
+      ":root[data-theme=\"dark\"] .qz-steps i.done{background:#9fb2c7}",
+      ".qz-count{font-size:12px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}",
+      ".qz-wrap .qz-title{margin:0;font-family:" + SERIF + ";font-weight:400;font-size:30px;line-height:1.15;letter-spacing:0;color:var(--text)}",
+      "@media (max-width:560px){.qz-wrap .qz-title{font-size:25px}}",
+      ".qz-wrap .qz-hint{margin:8px 0 0;font-size:14.5px;color:var(--muted);line-height:1.5;max-width:56ch}",
+      ".qz-opts{display:flex;flex-direction:column;gap:8px;margin-top:20px}",
+      ".qz-opts.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px}",
+      "@media (max-width:560px){.qz-opts.compact{grid-template-columns:1fr 1fr}}",
+      ".qz-opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;font:inherit;cursor:pointer;min-height:58px;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);transition:border-color .12s,background-color .12s}",
+      ".qz-opts.compact .qz-opt{min-height:48px;padding:9px 12px;gap:10px}",
+      ".qz-opt:hover{border-color:var(--hn)}",
+      ":root[data-theme=\"dark\"] .qz-opt:hover{border-color:#9fb2c7}",
+      ".qz-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid #9aa6b4;display:grid;place-items:center}",
+      ".qz-opt.multi .qz-mark{border-radius:5px}",
+      ".qz-opt.on{border-color:var(--hn);background:color-mix(in srgb,var(--hn) 6%,var(--surface))}",
+      ".qz-opt.on .qz-mark{border-color:var(--hn);background:var(--hn);box-shadow:inset 0 0 0 4px var(--surface)}",
+      ".qz-opt.multi.on .qz-mark{box-shadow:none;background:var(--hn) url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6 9 17l-5-5' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\") center/14px no-repeat}",
+      ":root[data-theme=\"dark\"] .qz-opt.on{border-color:#c9923a;background:color-mix(in srgb,#c9923a 10%,var(--surface))}",
+      ":root[data-theme=\"dark\"] .qz-opt.on .qz-mark{border-color:#c9923a;background:#c9923a}",
+      ".qz-optt{display:flex;flex-direction:column;gap:1px;min-width:0}",
+      ".qz-optt b{font-size:15.5px;font-weight:600;line-height:1.3}",
+      ".qz-opts.compact .qz-optt b{font-size:14px;font-weight:700;letter-spacing:.02em}",
+      ".qz-optt span{font-size:13px;color:var(--muted);line-height:1.35}",
+      ".qz-opts.compact .qz-optt span{font-size:11.5px}",
+      ".qz-foot{display:flex;align-items:center;gap:12px;margin-top:18px}",
+      ".qz-back{font:inherit;font-size:14px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;padding:10px 2px;min-height:44px}",
+      ".qz-back:hover{color:var(--text);text-decoration:underline}",
+      ".qz-next{margin-left:auto;min-height:48px;padding:0 26px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;border:0;border-radius:10px;color:#fff;background:var(--hs)}",
+      ".qz-next:hover{background:#c45f31}",
+      "@media (max-width:560px){.qz-next{flex:1}}",
+      /* answers */
+      ".qz-answers{margin:0 0 16px}",
+      ".qz-ahead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}",
+      ".qz-wrap .qz-al{margin:0;font-size:13px;color:var(--muted)}",
+      ".qz-al b{color:var(--text);margin-right:4px}",
+      ".qz-restart{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 15px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;border-radius:10px;border:1.5px solid var(--hn);background:var(--surface);color:var(--hn)}",
+      ".qz-restart:hover{background:var(--hn);color:#fff}",
+      ":root[data-theme=\"dark\"] .qz-restart{border-color:#c9923a;color:#e2b768;background:transparent}",
+      ":root[data-theme=\"dark\"] .qz-restart:hover{background:#c9923a;color:#1B2840}",
+      ".qz-chips{display:flex;flex-wrap:wrap;gap:6px}",
+      ".qz-chip{display:inline-flex;gap:6px;align-items:baseline;font:inherit;font-size:13px;cursor:pointer;padding:7px 11px;min-height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}",
+      ".qz-chip b{font-weight:600;color:var(--text);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--text) 25%,transparent);text-underline-offset:3px}",
+      ".qz-chip:hover{border-color:var(--hn)}",
+      /* the boarding pass */
+      ".qz-pass{--pc:#c9923a;position:relative;display:grid;grid-template-columns:1fr 196px;margin:0 0 18px;color:#1B2840;background:var(--hp);border-radius:14px;box-shadow:0 1px 0 rgba(27,40,64,.08),0 14px 30px -18px rgba(27,40,64,.45)}",
+      ".qz-pass:before{content:'';position:absolute;left:0;top:0;bottom:0;width:7px;border-radius:14px 0 0 14px;background:var(--pc)}",
+      ".qz-pbody{padding:24px 24px 22px 31px;min-width:0}",
+      ".qz-wrap .qz-pk{margin:0;font-size:13px;font-weight:600;color:#5d6675}",
+      ".qz-wrap .qz-pt{margin:4px 0 0;font-family:" + SERIF + ";font-weight:400;font-size:34px;line-height:1.08;color:#1B2840;letter-spacing:0}",
+      ".qz-wrap .qz-pn{margin:10px 0 0;font-size:14px;line-height:1.5;color:#3d4757;max-width:52ch}",
+      ".qz-plines{margin:16px 0 0;padding:0}",
+      ".qz-pl{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-top:1px solid #ddd6c8;font-size:14px}",
+      ".qz-pl dt{flex:1;min-width:0;color:#1B2840}",
+      ".qz-pl dd{margin:0;font-weight:700;color:#1B2840;font-variant-numeric:tabular-nums;white-space:nowrap}",
+      ".qz-wrap .qz-phow{margin:14px 0 0;font-size:12.5px;line-height:1.5;color:#5d6675}",
+      ".qz-pstub{position:relative;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:22px 20px;color:#F4F1EC;background:#1c3a45;border-radius:0 14px 14px 0;border-left:2px dashed #F4F1EC}",
+      ".qz-pstub:before,.qz-pstub:after{content:'';position:absolute;left:-12px;width:22px;height:22px;border-radius:50%;background:var(--bg)}",
+      ".qz-pstub:before{top:-11px}.qz-pstub:after{bottom:-11px}",
+      ".qz-psl{font-size:13px;color:#b9cdd2}",
+      ".qz-pv{font-family:" + SERIF + ";font-weight:400;font-size:44px;line-height:1;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:0}",
+      ".qz-pu{font-size:13.5px;color:#e2b768;font-weight:600}",
+      "@media (max-width:600px){.qz-pass{grid-template-columns:1fr}.qz-pstub{order:-1;border-left:0;border-bottom:2px dashed #F4F1EC;border-radius:14px 14px 0 0;padding:18px 20px 18px 27px;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:10px}",
+      ".qz-pstub:before,.qz-pstub:after{top:auto;bottom:-12px;left:auto}.qz-pstub:before{left:-11px}.qz-pstub:after{right:-11px}",
+      ".qz-pass:before{border-radius:14px 0 0 14px}.qz-psl{width:100%}.qz-pv{font-size:38px}.qz-pbody{padding:18px 18px 18px 25px}.qz-wrap .qz-pt{font-size:28px}}",
+      /* ranking */
+      ".qz-rankc{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:14px}",
+      "@media (max-width:560px){.qz-rankc{padding:16px}}",
+      ".qz-rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}",
+      ".qz-rtop{display:flex;justify-content:space-between;gap:10px;align-items:baseline}",
+      ".qz-rn{display:inline-flex;align-items:center;gap:9px;font-size:14.5px;color:var(--text)}",
+      ".qz-rdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}",
+      ".qz-r.win .qz-rn{font-weight:700}",
+      ".qz-rv{font-size:14.5px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}",
+      ".qz-rt{height:6px;border-radius:3px;background:var(--surface-2);margin-top:7px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}",
+      ".qz-rt i{display:block;height:100%;border-radius:3px;background:#9aa6b4}",
+      ".qz-r.win .qz-rt i{background:var(--hg)}",
+      ".qz-wrap .qz-small{margin:14px 0 0;font-size:13px;color:var(--muted);line-height:1.5}",
+      /* more */
+      ".qz-morelist{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px 6px;margin-bottom:14px}",
+      "@media (max-width:560px){.qz-morelist{padding:16px 16px 4px}}",
+      ".qz-morelist .qz-h3{margin-bottom:4px}",
+      ".qz-more{border-top:1px solid var(--line)}",
+      ".qz-more>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;padding:14px 0;min-height:56px;box-sizing:border-box}",
       ".qz-more>summary::-webkit-details-marker{display:none}",
-      ".qz-more>summary:after{content:'';margin-left:auto;flex:0 0 auto;width:9px;height:9px;border-right:2px solid var(--coral);border-bottom:2px solid var(--coral);transform:rotate(45deg);transition:transform .15s}",
-      ".qz-more[open]>summary:after{transform:rotate(-135deg)}",
+      ".qz-more>summary:after{content:'+';margin-left:auto;flex:0 0 auto;font-size:22px;line-height:1;font-weight:400;color:var(--muted)}",
+      ".qz-more[open]>summary:after{content:'\\2212'}",
       ".qz-mt{display:flex;flex-direction:column;gap:2px}",
-      ".qz-mt b{font-size:15px;color:var(--text)}",
-      ".qz-mt span{font-size:12.5px;color:var(--muted)}",
-      ".qz-mb{padding:0 18px 18px}"
+      ".qz-mt b{font-size:14.5px;font-weight:600;color:var(--text)}",
+      ".qz-mt span{font-size:13px;color:var(--muted)}",
+      ".qz-mb{padding:0 0 18px}"
     ].join("\n");
     document.head.appendChild(s);
   }
 
-  window.HRT_QUIZ = { el: el, icon: icon, question: question, answers: answers, more: more, whyList: whyList, css: css };
+  window.HRT_QUIZ = { el: el, icon: icon, question: question, answers: answers, pass: pass, ranking: ranking, moreList: moreList, css: css };
 })();

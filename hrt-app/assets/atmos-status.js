@@ -194,7 +194,7 @@
   function questionScreen() {
     var list = steps(), i = Math.min(state.step, list.length - 1), key = list[i], q;
     if (key === "preset") q = { title: "How do you mostly fly?", hint: "Pick the closest. You can fine tune it later.",
-      options: PRESETS.map(function (p) { return { value: p.key, label: p.name, sub: p.blurb, icon: ICONS[p.key] }; }) };
+      options: PRESETS.map(function (p) { return { value: p.key, label: p.name, sub: p.blurb }; }) };
     if (key === "trips") q = { title: "How many round trips a year?", hint: "Paid flights on Alaska or Hawaiian. Count there and back as one.", options: TRIP_OPTS };
     if (key === "card") q = { title: "Do you have an Atmos credit card?", hint: "Card spending earns status points too, whichever way you choose.", options: CARD_OPTS };
     if (key === "spend") q = { title: "How much do you put on it?", hint: "Roughly, per month.", options: SPEND_OPTS };
@@ -204,23 +204,22 @@
   }
 
   function hero(r) {
-    var h = el("div", "qz-hero");
-    h.appendChild(el("span", "qz-pill", "Your answer"));
-    h.appendChild(el("h2", "qz-big ap-hbig", "Earn " + r.best.verb));
-    h.appendChild(el("p", "qz-sub", "About " + fmt(r.best.total) + " status points a year"));
-    var dflt = r.methods[0];
-    h.appendChild(el("p", "qz-line", r.best.key === "distance"
-      ? "Good news: distance is what you get if you do nothing, so there is nothing to change."
-      : "If you do nothing you stay on distance, which would cost you about " + fmt(r.best.total - dflt.total) + " status points a year."));
-    var reached = tierFor(r.best.total), nxt = nextTier(r.best.total);
-    var why = [OPTIONS[r.best.key].rate + ". " + OPTIONS[r.best.key].bestFor];
-    why.push(reached ? "That is enough for Atmos " + reached.name + (nxt ? ", and " + fmt(nxt.pts - r.best.total) + " short of " + nxt.name + "." : ", the top tier.")
-                     : "That is " + fmt(TIERS[0].pts - r.best.total) + " short of Silver, the first elite tier at 20,000.");
-    if (r.cardPts > 0) why.push(fmt(r.cardPts) + " of those come from your card, the same whichever way you choose.");
-    h.appendChild(Q.whyList(why));
-    var how = el("p", "ap-hhow", "To choose: sign in to Atmos Rewards and open Choose how you earn. It applies to flights from Jan 1 2027, and you can change it once a year.");
-    h.appendChild(how);
-    return h;
+    var reached = tierFor(r.best.total);
+    var cardName = { ascent: "Atmos Ascent", summit: "Atmos Summit" }[state.card];
+    var lines = [["From your flights", fmt(r.best.fly)]];
+    if (r.cardPts > 0) lines.push(["From your " + cardName + " card", fmt(r.cardPts)]);
+    lines.push(["Elite tier this reaches", reached ? "Atmos " + reached.name : "Not Silver yet"]);
+    var nxt = nextTier(r.best.total);
+    if (nxt) lines.push(["Still to go for " + nxt.name, fmt(nxt.pts - r.best.total)]);
+    return Q.pass({
+      kicker: "Your best way to earn on Atmos", title: "Earn " + r.best.verb, color: MCOL[r.best.key],
+      valueLabel: "About", value: fmt(r.best.total), unit: "status points a year",
+      note: r.best.key === "distance"
+        ? "Distance is what you get if you do nothing, so there is nothing to change."
+        : "If you do nothing you stay on distance, which would cost you about " + fmt(r.best.total - r.methods[0].total) + " status points a year.",
+      lines: lines,
+      how: "To choose, sign in to Atmos Rewards and open Choose how you earn. It applies to flights from Jan 1 2027, and you can change it once a year."
+    });
   }
 
   var MICON = {
@@ -230,25 +229,10 @@
   };
   var MCOL = { distance: "#5c7fa3", price: "#0b7fc0", segment: "#d4722f" };
   function rankCard(r) {
-    var c = el("div", "qz-card");
-    c.appendChild(el("h3", "qz-h3", "The three choices, for you"));
-    var list = el("div", "qz-rank");
     var max = r.best.total || 1;
-    r.sorted.forEach(function (m, i) {
-      var row = el("div", "qz-r" + (i === 0 ? " win" : ""));
-      var d = Q.icon(MICON[m.key], 17); d.className = "qz-dot"; d.style.background = MCOL[m.key];
-      row.appendChild(d);
-      var mid = el("div");
-      mid.appendChild(el("div", "qz-rn", OPTIONS[m.key].name + (i === 0 ? "  ✓" : "")));
-      var tr = el("div", "qz-rt"); var f = el("i"); f.style.width = m.total / max * 100 + "%"; f.style.background = MCOL[m.key];
-      tr.appendChild(f); mid.appendChild(tr);
-      row.appendChild(mid);
-      row.appendChild(el("span", "qz-rv", fmt(m.total)));
-      list.appendChild(row);
-    });
-    c.appendChild(list);
-    c.appendChild(el("p", "qz-small", "Status points a year, flights plus card. Saver and Basic Economy fares earn nothing on any choice."));
-    return c;
+    return Q.ranking("The three choices, for you", r.sorted.map(function (m, i) {
+      return { name: OPTIONS[m.key].name, value: fmt(m.total), frac: m.total / max, color: MCOL[m.key], win: i === 0 };
+    }), "Status points a year, flights plus card. Saver and Basic Economy fares earn nothing on any choice.");
   }
 
   function tuneBody() {
@@ -495,11 +479,13 @@
       wrap.appendChild(answerChips());
       wrap.appendChild(hero(r));
       wrap.appendChild(rankCard(r));
-      wrap.appendChild(Q.more("ap-why", "Why the choice matters", "Short hops versus long flights", explainCard));
-      wrap.appendChild(Q.more("ap-tiers", "How to reach each tier", "Silver, Gold, Platinum, Titanium", function () { return pathwaysCard(compute()); }));
-      wrap.appendChild(Q.more("ap-tune", "Fine tune", "Miles, fares and status you already hold", tuneBody));
-      wrap.appendChild(Q.more("ap-faq", "Common questions", null, faqCard));
-      wrap.appendChild(Q.more("ap-fine", "Fine print", null, function () { return footerCard(compute()); }));
+      wrap.appendChild(Q.moreList([
+        ["ap-why", "Why the choice matters", "Short hops versus long flights", explainCard],
+        ["ap-tiers", "How to reach each tier", "Silver, Gold, Platinum and Titanium", function () { return pathwaysCard(compute()); }],
+        ["ap-tune", "Fine tune", "Miles, fares and any status you already hold", tuneBody],
+        ["ap-faq", "Common questions", null, faqCard],
+        ["ap-fine", "Fine print", null, function () { return footerCard(compute()); }]
+      ]));
     }
     host.appendChild(wrap);
   }
