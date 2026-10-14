@@ -754,8 +754,6 @@
     var t = "";
     if (b.enroll === "yes") t += badge("Enroll first");
     if (b.spendGate) t += badge("Needs $" + Number(b.spendGate).toLocaleString("en-US") + " spend");
-    if (b.confidence === "assumed") t += badge("Issuer does not state this", "warn");
-    else if (p && p.assumed) t += badge("Reset date not confirmed", "warn");
     return t;
   }
 
@@ -805,7 +803,7 @@
         (sub ? '<span class="wl-earn-sub">' + esc(sub) + "</span>" : "") +
         (e.note && !status && e.groups.indexOf("everyday") < 0 && e.groups.indexOf("rotating") < 0 ? '<span class="wl-earn-sub wl-dim wl-clamp" data-wl="clamp">' + esc(e.note) + "</span>" : "") +
         (e.groups.indexOf("rotating") > -1 ? rotatingLine(cardId) : "") +
-        (e.confidence === "assumed" ? '<span class="wl-tags">' + badge("Issuer does not state this clearly", "warn") + "</span>" : "") +
+
         "</span></li>";
     }).join("") + "</ul>";
   }
@@ -1135,7 +1133,7 @@
     }
     var checked = catalog().cards.length ? catalog().cards.map(function (c) { return c.checked; }).sort()[0] : "";
     html += '<p class="wl-foot">Fees and credits come from each issuer\'s own website' + (checked ? ", checked " + esc(fmtIso(checked)) : "") +
-      '. Where an issuer does not say when a credit resets, we say so and show calendar periods. Renewal is your card anniversary; most issuers bill the fee on the statement after it. Your wallet is private to your account.</p>';
+      '. Where an issuer does not say when a credit resets, we show calendar periods. Renewal is your card anniversary; most issuers bill the fee on the statement after it. Your wallet is private to your account.</p>';
     host.innerHTML = html;
     if (state.editing) bindForm(editingEntry);
     if (state.focus) {
@@ -1287,21 +1285,23 @@
       ".wl-tick:has(input:checked){border-color:rgba(47,133,90,.5);background:rgba(63,206,127,.14);color:#2f855a}",
       "[data-theme=dark] .wl-tick:has(input:checked){color:#6fd39b}",
       ".wl-clamp{cursor:pointer}",
-      ".wl-soonbox{border:1.5px solid rgba(232,130,76,.55);background:linear-gradient(180deg,rgba(242,184,75,.17),rgba(242,184,75,.03) 150px),var(--surface)}",
+      ".wl-soonbox{position:relative;overflow:hidden;border:1px solid #e3c785;background:linear-gradient(180deg,#fbf4e2 0,#fdf9ef 110px,var(--surface) 240px)}",
+      ".wl-soonbox:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#c9973a,#f2c766 45%,#e0aa48)}",
+      "[data-theme=dark] .wl-soonbox{border-color:rgba(242,199,102,.45);background:linear-gradient(180deg,rgba(242,199,102,.12),rgba(242,199,102,.03) 160px),var(--surface)}",
       ".wl-cr-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}",
       ".wl-soonbox .wl-cr-title{margin:0;font-size:19px;font-weight:800;line-height:1.25;color:var(--text)}",
       ".wl-soonbox .wl-cr-sub{margin:4px 0 0;font-size:13px;line-height:1.45;color:var(--muted)}",
       ".wl-cr-total{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto;text-align:right}",
       ".wl-cr-total b{font-size:28px;font-weight:800;line-height:1.05;color:var(--text);font-variant-numeric:tabular-nums}",
-      ".wl-cr-total span{font-size:12px;font-weight:700;color:#b4580f}[data-theme=dark] .wl-cr-total span{color:#f2b84b}",
+      ".wl-cr-total span{font-size:12px;font-weight:700;letter-spacing:.02em;color:#9a6b12}[data-theme=dark] .wl-cr-total span{color:#f2c766}",
       ".wl-ctabs{display:flex;gap:8px;margin:14px 0 12px}",
       "@media (max-width:560px){.wl-cr-head{flex-direction:column;gap:8px}.wl-cr-total{flex-direction:row;align-items:baseline;gap:8px;text-align:left}.wl-cr-total b{font-size:26px}}",
       ".wl-ctab{all:unset;box-sizing:border-box;cursor:pointer;flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:1px;min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);-webkit-tap-highlight-color:transparent}",
       ".wl-ctab b{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wl-ctab span{font-size:12.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}",
       ".wl-ctab:hover{border-color:var(--coral)}.wl-ctab:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
-      ".wl-ctab.on{background:#1c3d5a;border-color:#1c3d5a}.wl-ctab.on b{color:#fff}.wl-ctab.on span{color:#f2b84b}",
+      ".wl-ctab.on{background:#1c3d5a;border-color:#1c3d5a;box-shadow:inset 0 -3px 0 #e0aa48}.wl-ctab.on b{color:#fff}.wl-ctab.on span{color:#f2c766}",
       "[data-theme=dark] .wl-ctab.on{background:#f2b84b;border-color:#f2b84b}[data-theme=dark] .wl-ctab.on b,[data-theme=dark] .wl-ctab.on span{color:#14202e}",
-      ".wl-pks-soon .wl-pk{background:var(--surface);border:1px solid var(--line)}",
+      ".wl-pks-soon .wl-pk{background:var(--surface);border:1px solid rgba(201,151,58,.22)}",
       ".wl-pk.warm{box-shadow:inset 3px 0 0 #f2b84b}.wl-pk.hot{box-shadow:inset 3px 0 0 #e8824c}",
       ".wl-pk-days.warm,.wl-pk-days.hot{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px}",
       ".wl-pk-days.warm{background:rgba(242,184,75,.25);color:#8a4a10}.wl-pk-days.hot{background:rgba(232,130,76,.2);color:#a3410f}",
