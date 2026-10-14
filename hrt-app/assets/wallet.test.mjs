@@ -310,6 +310,17 @@ ok("bonus due within 30 days is an alert", bAl.some(a => /Spend \$3,650 more on 
 const ex = T.exampleWallet();
 ok('example wallet has a Reserve with a bonus in progress', ex.cards.some(c => c.cardId === 'chase-sapphire-reserve' && c.bonus && !T.bonusState(c).met));
 
+// --- credits to use: quarterly and yearly credits are never hidden ---
+const platOnly = { v: 1, points: [], cards: [{ id: 'p', cardId: 'amex-platinum', opened: '2024-03-15' }] };
+const cg = T.creditGroups(T.perkRows(platOnly, CAT, { y: 2026, m: 10, d: 13 }), { y: 2026, m: 10, d: 13 });
+ok('groups are next 31 days, by Dec 31, later', cg.map(g => g.key).join() === 'soon,quarter', cg.map(g => g.key).join());
+ok('Resy and lululemon quarterly credits show by Dec 31', ['resy', 'lululemon'].every(id => cg[1].rows.some(r => r.perk.id === id)));
+ok('the quarter group has a label with its end date', cg[1].label === 'By Dec 31');
+ok('used credits are left out of every group', !T.creditGroups(T.perkRows({ v: 1, points: [], cards: [{ ...platOnly.cards[0], used: { resy: { '2026-Q4': true } } }] }, CAT, { y: 2026, m: 10, d: 13 }), { y: 2026, m: 10, d: 13 }).some(g => g.rows.some(r => r.perk.id === 'resy')));
+const vxOnly = { v: 1, points: [], cards: [{ id: 'v', cardId: 'capone-venture-x', opened: '2022-03-02' }] };
+const cg2 = T.creditGroups(T.perkRows(vxOnly, CAT, { y: 2026, m: 10, d: 13 }), { y: 2026, m: 10, d: 13 });
+ok('a credit ending next year is under Later', cg2.some(g => g.key === 'later' && g.rows.some(r => r.perk.id === 'travel')));
+
 // --- card art ---
 ok('card art links are https only', CAT.cards.every(c => !c.art || /^https:\/\/[^\s"'<>()\\]+$/.test(c.art)));
 const artA = T.artHtml({ issuer: 'Chase', name: 'X', art: 'https://img.example/a.png?x=1&y=2' }, 'sm');
