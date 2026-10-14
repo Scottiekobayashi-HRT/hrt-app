@@ -5,7 +5,8 @@
  /* ========================================================
     EDIT POINTS
     ======================================================== */
- var SNAPSHOT_LABEL = "September 20, 2026";
+ /* Set by the daily refresh in data/kamaaina-deals.js; the fallback is the first manual snapshot. */
+ var SNAPSHOT_LABEL = window.HRT_KAMAAINA_UPDATED || "September 20, 2026";
  var HRT_HOME = "https://www.hawaiirewardtravel.com";
  var COACHING_URL = "https://www.hawaiirewardtravel.com/our-accelerated-program";
  var PRO_URL = "https://www.hawaiirewardtravel.com/pro";
@@ -600,6 +601,7 @@
  function locFor(d){
   if(LOC[d.b]) return LOC[d.b];
   if(d._isl === "all") return null;               /* statewide offers have no single spot */
+  if(d.ll && d.ll.length === 2) return d.ll;      /* exact spot from HVCB's listing */
   if(d.h && AREA_LOC[d.h]) return AREA_LOC[d.h];
   return ISL_CENTER[d._isl] || null;
  }
