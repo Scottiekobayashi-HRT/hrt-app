@@ -1,0 +1,80 @@
+# Daily: refresh the Kamaʻāina Deals in the dashboard.
+#
+# Lives on main only because GitHub runs scheduled jobs from the default
+# branch. It never touches main's files: it checks out memberstack-sandbox,
+# reads HVCB's kamaʻāina offers in a real browser (the vetted baseline), adds
+# hotel-chain deals Scottie approved in the review sheet, rebuilds
+# hrt-app/data/kamaaina-deals.js and commits it to memberstack-sandbox.
+#
+# If HVCB changes its pages and fewer than 40 offers come back, the script
+# stops, nothing is committed, the site keeps its last good deals, and GitHub
+# emails a failure notice. Run it any time: Actions tab > this workflow > Run
+# workflow. Untick "publish" to see the list without changing the site.
+name: Update Kamaaina deals
+
+on:
+  schedule:
+    - cron: "47 15 * * *"   # 5:47am Hawaii time, every day
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to the dashboard (untick for a dry run)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kamaaina-deals
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: memberstack-sandbox
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install a browser
+        run: |
+          npm install --no-save --no-package-lock playwright@1.48.2
+          npx playwright install --with-deps chromium
+
+      - name: Test the deal builder
+        run: node tools/kamaaina/build.test.mjs
+
+      - name: Read HVCB and rebuild the deals
+        env:
+          # Published CSV link of the "Kamaaina review" tab. Blank = HVCB only.
+          KAMAAINA_SHEET_CSV: ""
+        run: node tools/kamaaina/scrape.mjs --out hrt-app/data/kamaaina-deals.js
+
+      - name: Show the top 15
+        run: |
+          node -e '
+            const vm=require("vm"),fs=require("fs");const c={window:{}};
+            vm.runInNewContext(fs.readFileSync("hrt-app/data/kamaaina-deals.js","utf8"),c);
+            const D=c.window.HRT_KAMAAINA_DEALS;
+            console.log(D.length+" deals | "+D.filter(d=>d.g=="Stays").length+" hotels | "+D.filter(d=>d.n).length+" new");
+            D.slice(0,15).forEach((d,i)=>console.log((i+1)+". ["+d.s+"] "+d.b+" | "+d.t+" | "+d.i.join("+")+" | ends "+d.e));'
+
+      - name: Commit only if the deals changed
+        if: github.event_name == 'schedule' || inputs.publish
+        run: |
+          f=hrt-app/data/kamaaina-deals.js
+          if git diff --quiet -I 'HRT_KAMAAINA_UPDATED' -- "$f"; then
+            git checkout -- "$f"
+            echo "Deals unchanged. Nothing to publish."
+            exit 0
+          fi
+          git config user.name "HRT deals update"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Kamaaina deals: daily refresh from HVCB" -- "$f"
+          git push origin memberstack-sandbox
