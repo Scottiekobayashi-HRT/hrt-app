@@ -2,7 +2,7 @@
    Do not hand-edit. Change the sheet, download it, run the script. */
 window.HRT_WALLET_CATALOG={
  "v": 1,
- "built": "2026-10-13",
+ "built": "2026-10-14",
  "cards": [
   {
    "id": "chase-sapphire-preferred",
@@ -13,7 +13,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "The 10% anniversary points bonus ended for new applicants on June 15, 2026. Existing cardholders get it on purchases through October 1, 2026.",
    "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/c4ecfbb1-64a6-4940-ae32-83819ef7a154/Chase+Sapphire+Preferred%C2%AE+Card+NEW.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-freedom-unlimited",
@@ -24,7 +25,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "",
    "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/882a1d3e-639a-40ce-a7ef-c1efc4f2d46f/Chase+Freedom+Unlimited%C2%AE.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-freedom-flex",
@@ -35,7 +37,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "Rotating 5% categories need activating every quarter.",
    "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/85855236-dde8-415d-bcdc-1299e0a2fb78/Chase+Freedom+Flex%C2%AE.png?content-type=image%2Fpng"
   },
   {
    "id": "atmos-summit",
