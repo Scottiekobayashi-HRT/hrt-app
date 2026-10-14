@@ -49,7 +49,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Launched Aug 2025. No monthly or quarterly dollar credits. Value is dated benefits.",
    "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3cf19166-75c2-48ef-9128-92faf4c8975c/Atmos+Rewards+Summit+Visa+Infinite.png"
   },
   {
    "id": "atmos-ascent",
@@ -60,7 +61,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "This is the renamed Alaska Airlines Visa Signature. Companion Fare now has a $6,000 spend gate. No foreign transaction fee.",
    "source": "https://bankofamerica.com/credit-cards/products/alaska-airlines-credit-card",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e448bf79-0d7f-45c4-ad46-8daa31ad9bdf/Atmos+Rewards+Ascent+Visa+Signature.png"
   },
   {
    "id": "amex-gold",
@@ -71,7 +73,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "",
    "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/60d0730a-f5e7-478e-8a61-fec52c589c49/American+Express+Gold+Card.png"
   },
   {
    "id": "amex-platinum",
@@ -82,7 +85,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Saks credit appears removed as of July 2026. See To verify.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b8c90877-2aed-4a17-b871-c6d6508d5c3a/The+Platinum+Card+from+American+Express.png"
   },
   {
    "id": "amex-business-gold",
@@ -93,7 +97,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "FedEx was replaced by UPS.com on the Flexible Business Credit.",
    "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/cc682c1a-0ba2-402f-a34a-7ddcecc68f34/American+Express+Business+Gold+Card.png"
   },
   {
    "id": "amex-business-platinum",
@@ -104,7 +109,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "",
    "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ba563ba0-9bf1-4ec6-a9d6-841391adf193/The+Business+Platinum+Card+from+American+Express.png"
   },
   {
    "id": "capone-venture",
@@ -115,7 +121,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "No recurring statement credits at all. Only the Global Entry credit.",
    "source": "https://www.capitalone.com/credit-cards/venture/",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3ca1ab97-cd21-4514-8ad9-c8fbd937f281/Capital+One+Venture+Rewards+card.png"
   },
   {
    "id": "capone-venture-x",
@@ -126,7 +133,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Both annual benefits reset on the ANNIVERSARY, not Jan 1. Lounge access for authorized users now costs $125 a year each, and guests pay unless the cardholder spends $75,000 a year.",
    "source": "https://www.capitalone.com/credit-cards/travel-and-miles/",
-   "checked": "2026-10-13"
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/18ed6062-a9b1-47d3-b107-13573749ac0e/Capital+One+Venture+X.png"
   },
   {
    "id": "chase-sapphire-reserve",
@@ -139,6 +147,18 @@ window.HRT_WALLET_CATALOG={
    "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
    "checked": "2026-10-13",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8149f80c-4f79-4427-8b2b-e873b94a6f0f/Chase+Sapphire+Reserve%C2%AE.PNG?content-type=image%2Fpng"
+  },
+  {
+   "id": "chase-sapphire-reserve-business",
+   "issuer": "Chase",
+   "name": "Chase Sapphire Reserve for Business",
+   "network": "Visa",
+   "fee": 795.0,
+   "feeBasis": "anniversary",
+   "note": "Employee cards are free. Lounges are for the business owner only. Spend $120,000 in a calendar year for Hyatt and IHG status and more. Part of the balance can be carried (Flex for Business); the rest is due in full each month.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/4bf88517-38ca-45c8-9691-ac1ff83aa12e/Sapphire+Reserve+for+Business%E2%84%A0.png?content-type=image%2Fpng"
   }
  ],
  "benefits": [
@@ -1195,6 +1215,176 @@ window.HRT_WALLET_CATALOG={
    "note": "Pay the application fee with the card.",
    "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
    "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "travel",
+   "label": "$300 Travel Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 300.0,
+   "perYear": 1.0,
+   "cadence": "annual",
+   "resets": "anniversary",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "ANNIVERSARY, not Jan 1: Chase says the year begins with your account open date. Any travel purchase counts automatically, and the purchases it covers earn no points.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "edit",
+   "label": "The Edit Hotel Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 500.0,
+   "perYear": 1.0,
+   "cadence": "annual",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Up to $250 per prepaid stay of 2 or more nights through The Edit by Chase Travel. Chase says the yearly maximum rises to $1,000 from Jan 1, 2027.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "hotel2026",
+   "label": "Select Chase Travel Hotel Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 250.0,
+   "perYear": 1.0,
+   "cadence": "annual",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "2026 only, ends Dec 31, 2026. Prepaid stays of 2 or more nights at IHG, Montage, Pendry, Omni, Virgin, Minor or Pan Pacific through Chase Travel.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "google",
+   "label": "Google Workspace Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 200.0,
+   "perYear": 1.0,
+   "cadence": "annual",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Bought directly from Google. Applied automatically. Through Dec 31, 2027.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "ziprecruiter",
+   "label": "ZipRecruiter Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 200.0,
+   "perYear": 2.0,
+   "cadence": "semiannual",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "$200 Jan to Jun and $200 Jul to Dec, bought directly on ZipRecruiter. Through Dec 31, 2027.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "giftcards",
+   "label": "Gift Card Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 50.0,
+   "perYear": 2.0,
+   "cadence": "semiannual",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "$50 Jan to Jun and $50 Jul to Dec, at giftcards.com/reservebusiness only. Through Oct 31, 2028.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "doordashrest",
+   "label": "DoorDash restaurant order",
+   "type": "discount",
+   "unit": "usd",
+   "amount": 5.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "$5 off one restaurant order a month. Needs the free DashPass from this card (activate by Dec 31, 2027). Does not roll over.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "doordash",
+   "label": "DoorDash non-restaurant",
+   "type": "discount",
+   "unit": "usd",
+   "amount": 20.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Two $10 promos a month on separate non-restaurant orders. Needs DashPass. Does not roll over.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "lyft",
+   "label": "Lyft Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 10.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Add the card in the Lyft app. Unused credit is lost at month end. Through Sep 30, 2027.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "id": "globalentry",
+   "label": "Global Entry, TSA PreCheck or NEXUS",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 120.0,
+   "perYear": 0.25,
+   "cadence": "every4years",
+   "resets": "application date",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Pay the application fee with the card.",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
   }
  ],
  "earning": [
@@ -2240,6 +2430,96 @@ window.HRT_WALLET_CATALOG={
    "note": "",
    "confidence": "confirmed",
    "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "category": "Travel through Chase Travel",
+   "groups": [
+    "travel"
+   ],
+   "rate": 8.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked through Chase Travel",
+   "note": "Includes The Edit. Purchases covered by the travel, hotel or Edit credits earn no points.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "category": "Flights booked direct",
+   "groups": [
+    "flights"
+   ],
+   "rate": 4.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked directly with the airline",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "category": "Hotels booked direct",
+   "groups": [
+    "hotels"
+   ],
+   "rate": 4.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked directly with the hotel",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "category": "Social media and search ads",
+   "groups": [
+    "business"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "from Nov 15, 2026: first $1,000,000 per account year, then 1x",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "category": "Lyft",
+   "groups": [
+    "promo"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "in the Lyft app",
+   "note": "Limited time through September 30 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve-business",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "No bonus on dining, unlike the personal Reserve.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
    "checked": "2026-10-13"
   }
  ],
