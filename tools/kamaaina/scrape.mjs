@@ -29,8 +29,11 @@ function readPrev(file) {
   } catch (e) { return []; }
 }
 
+const note = (m) => console.log((process.env.GITHUB_ACTIONS ? "::notice::" : "") + m);
+
 async function collectPaths(page, path) {
-  await page.goto(BASE + path, { waitUntil: "domcontentloaded", timeout: 60000 });
+  const res = await page.goto(BASE + path, { waitUntil: "domcontentloaded", timeout: 60000 });
+  note(path + " loaded: HTTP " + (res ? res.status() : "?") + ", title: " + (await page.title()).slice(0, 80));
   await page.waitForSelector("div.item a.title", { timeout: 45000 });
   const paths = new Set();
   for (let guard = 0; guard < 20; guard++) {
@@ -54,7 +57,7 @@ async function main() {
   const all = new Set();
   for (const p of ISLANDS) {
     const got = await collectPaths(page, p);
-    console.log(p, got.length, "offers");
+    note(p + " " + got.length + " offers");
     got.forEach((x) => all.add(x));
     await sleep(1500);
   }
@@ -67,11 +70,11 @@ async function main() {
       const o = parseOfferPage(await res.text());
       if (!o) throw new Error("no offer data");
       if ((o.categories || []).some((c) => c.categoryid === 7)) { o._path = p; offers.push(o); }
-    } catch (e) { failed++; console.log("skip", p, e.message); }
+    } catch (e) { failed++; if (failed <= 3) note("skip " + p + ": " + e.message); }
     await sleep(700);
   }
   await browser.close();
-  console.log("read", offers.length, "of", all.size, "offer pages,", failed, "failed");
+  note("read " + offers.length + " of " + all.size + " offer pages, " + failed + " failed");
   if (failed > all.size * 0.25) throw new Error("Too many offer pages failed (" + failed + "). Keeping the last good data.");
 
   let sheetRows = [];
@@ -83,7 +86,7 @@ async function main() {
   }
   const rows = build({ hvcb: offers, sheetRows, prevList: readPrev(OUT), today });
   fs.writeFileSync(OUT, toJs(rows, today));
-  console.log("wrote", rows.length, "deals to", OUT, "| new:", rows.filter((r) => r.n).length, "| top:", rows[0] && rows[0].b);
+  note("wrote " + rows.length + " deals | new: " + rows.filter((r) => r.n).length + " | top: " + (rows[0] && rows[0].b));
 }
 
-if (import.meta.url === "file://" + process.argv[1]) main().catch((e) => { console.error(e.message); process.exit(1); });
+if (import.meta.url === "file://" + process.argv[1]) main().catch((e) => { console.log((process.env.GITHUB_ACTIONS ? "::error::" : "") + String(e.message).split("\n")[0].slice(0, 300)); process.exit(1); });
