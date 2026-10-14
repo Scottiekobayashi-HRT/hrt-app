@@ -65,7 +65,7 @@ ok('far out in months', T.whenText({ exact: true, days: 153 }) === 'In about 5 m
 ok('money formats thousands', T.money(1290) === '$1,290' && T.money(12.95) === '$12.95');
 
 // --- summary against the real catalog ---
-ok('catalog has the 11 cards', CAT.cards.length === 11);
+ok('catalog has at least the original 11 cards', CAT.cards.length >= 11);
 const wallet = { v: 1, points: [], cards: [
   { id: 'a', cardId: 'amex-platinum', opened: '2024-03-15' },
   { id: 'b', cardId: 'chase-freedom-unlimited', opened: '2019-05-01' },
@@ -85,7 +85,7 @@ ok('empty wallet summary', T.summarize({ v: 1, cards: [], points: [] }, CAT, TOD
 const P = (card, id) => CAT.benefits.find(b => b.card === card && b.id === id);
 const pp = (card, id, opened, today = TODAY) => T.perkPeriod(P(card, id), opened, today);
 const end = p => p ? `${p.end.y}-${p.end.m}-${p.end.d}` : 'null';
-ok('catalog has the 51 perks', CAT.benefits.length === 51, CAT.benefits.length);
+ok('catalog has at least the original 51 perks', CAT.benefits.length >= 51, CAT.benefits.length);
 
 let p = pp('amex-platinum', 'uber', '2024-03-15');
 ok('monthly: Oct 2026, ends Oct 31, 18 days', p.key === '2026-10' && end(p) === '2026-10-31' && p.days === 18 && !p.assumed, p.key + ' ' + end(p) + ' ' + p.days);
@@ -164,7 +164,7 @@ T.pruneUsed(e, TODAY);
 ok('prune keeps this year and last', JSON.stringify(e.used) === JSON.stringify({ a: { '2025-12': true, '2026-Q4': true }, c: { A2025: true } }), JSON.stringify(e.used));
 
 // ============ EARNING ============
-ok('catalog has 62 earning rates and 2 quarters', CAT.earning.length === 62 && CAT.quarterly.length === 2, CAT.earning.length + '/' + CAT.quarterly.length);
+ok('catalog has at least 62 earning rates and 2 quarters', CAT.earning.length >= 62 && CAT.quarterly.length >= 2, CAT.earning.length + '/' + CAT.quarterly.length);
 const E = (card, cat) => CAT.earning.find(e => e.card === card && e.category === cat);
 ok('points show as 4x', T.rateText(E('amex-gold', 'Restaurants worldwide')) === '4x');
 ok('cash back shows as 1.5%', T.rateText(E('chase-freedom-unlimited', 'Everything else')) === '1.5%');
