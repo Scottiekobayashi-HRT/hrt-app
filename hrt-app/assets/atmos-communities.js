@@ -183,40 +183,40 @@
       var hits = cm.dests.filter(function (d) { return !!s.dests[d]; });
       var n = hits.length;
       var lines = [];
-      function add(label, pts, status, cash, note) {
-        lines.push({ label: label, pts: pts || 0, status: status || 0, cash: cash || 0, note: note || "" });
+      function add(label, pts, status, cash, note, kind) {
+        lines.push({ label: label, pts: pts || 0, status: status || 0, cash: cash || 0, note: note || "", kind: kind || "", n: n });
       }
       add("Bonus Points Challenge, " + n + " of 10 destinations", CUMUL[n], CUMUL[n], 0,
-        n ? "Your picks on its list: " + hits.join(", ") : "None of the places you picked are on its list");
+        n ? "Your picks on its list: " + hits.join(", ") : "None of the places you picked are on its list", "challenge");
 
       if (cm.key === "huakai") {
         var trips = num(s.island);
         var base = perRoundTrip(s.earn, s.niMiles, s.niFare) * trips;
         add("50% more on " + fmt(trips) + " interisland round trips", base * 0.5, base * 0.5, 0,
-          "Earning by " + EARN[s.earn].label.toLowerCase() + ", " + fmt(base) + " points before the bonus");
+          "Earning by " + EARN[s.earn].label.toLowerCase() + ", " + fmt(base) + " points before the bonus", "island");
         var b = Math.min(2, Math.round(num(s.bags)));
         var perWay = (b >= 1 && !s.freeBag ? FEES.niFirst : 0) + (b >= 2 ? FEES.niSecond : 0);
         add("Free checked bags between the islands", 0, 0, perWay * 2 * trips,
-          b ? b + (b === 1 ? " bag" : " bags") + " each way, for you" + (s.freeBag ? ", first bag already free with your card" : "") : "You said you do not check bags");
+          b ? b + (b === 1 ? " bag" : " bags") + " each way, for you" + (s.freeBag ? ", first bag already free with your card" : "") : "You said you do not check bags", "nibags");
         var uses = Math.min(4, Math.ceil(trips));
         var pct = s.card === "none" ? 0.10 : 0.20;
         add("Quarterly Neighbor Island fare code", 0, 0, uses * pct * num(s.niFare) * party,
-          uses + (uses === 1 ? " code" : " codes") + " at " + Math.round(pct * 100) + "% off a booking for " + party + (party === 1 ? " person" : " people"));
-        if (s.foodland) add("Foodland Maikaʻi points at 3x", 3000, 0, 0, "Up to 3,000 bonus points a year, if you convert regularly");
+          uses + (uses === 1 ? " code" : " codes") + " at " + Math.round(pct * 100) + "% off a booking for " + party + (party === 1 ? " person" : " people"), "code");
+        if (s.foodland) add("Foodland Maikaʻi points at 3x", 3000, 0, 0, "Up to 3,000 bonus points a year, if you convert regularly", "foodland");
       }
       if (cm.key === "global") {
         var ib = perRoundTrip(s.earn, s.intlMiles, s.intlFare) * num(s.intl);
         add("10% more status points on " + fmt(num(s.intl)) + " international round trips", 0, ib * 0.1, 0,
-          "Status points only, on flights that start or end outside the U.S.");
+          "Status points only, on flights that start or end outside the U.S.", "intl");
         var tr = num(s.transfer);
         add("Status points on points you transfer in", 0, Math.floor(tr / 25), 0,
-          tr ? fmt(tr) + " points from Bilt or Marriott, 1 status point per 25" : "You did not plan any transfers");
+          tr ? fmt(tr) + " points from Bilt or Marriott, 1 status point per 25" : "You did not plan any transfers", "transfer");
       }
       if (cm.key === "families") {
         var kids = Math.min(7, Math.round(num(s.kids)));
         var spent = kids * num(s.kidTrips) * num(s.kidPts);
         add("20% back on kids' award seats", spent * 0.2, 0, 0,
-          kids ? fmt(spent) + " points on " + kids + (kids === 1 ? " child" : " children") + " 12 and under" : "No kids 12 and under on award seats");
+          kids ? fmt(spent) + " points on " + kids + (kids === 1 ? " child" : " children") + " 12 and under" : "No kids 12 and under on award seats", "kids");
       }
       if (cm.key === "club49" && eligible) {
         var ak = num(s.akTrips);
@@ -224,9 +224,9 @@
         var way = (bb >= 1 ? FEES.mlFirst : 0) + (bb >= 2 ? FEES.mlSecond : 0);
         var people = Math.min(8, party);
         add("Free checked bags on trips that include Alaska", 0, 0, way * 2 * ak * people,
-          fmt(ak) + " round trips, " + people + (people === 1 ? " traveler" : " travelers"));
+          fmt(ak) + " round trips, " + people + (people === 1 ? " traveler" : " travelers"), "akbags");
         add("Two Travel Now discounts", 0, 0, Math.min(2, ak) * 0.3 * num(s.akFare),
-          "30% off a refundable one-way fare, if you book within 4 days");
+          "30% off a refundable one-way fare, if you book within 4 days", "travelnow");
       }
 
       var pts = 0, status = 0, cash = 0;
@@ -239,225 +239,192 @@
     return { all: out, ranked: ranked, best: ranked[0], second: ranked[1], cpp: c * 100, weight: w };
   }
 
-  /* ---------- left column: the questions ---------- */
-  function seg(options, current, onPick) {
-    var g = el("div", "ac-seg");
-    options.forEach(function (o) {
-      var b = el("button", "ac-segb" + (o[0] === current ? " on" : ""), o[1]);
-      b.type = "button"; b.setAttribute("aria-pressed", o[0] === current ? "true" : "false");
-      b.addEventListener("click", function () { onPick(o[0]); });
-      g.appendChild(b);
-    });
-    return g;
-  }
-  function field(label, node, hint) {
-    var w = el("div", "ac-field");
-    w.appendChild(el("span", "ac-lab", label));
-    w.appendChild(node);
-    if (hint) w.appendChild(el("span", "ac-hint", hint));
-    return w;
-  }
-  function slider(label, key, min, max, step, show) {
-    var w = el("div", "ac-sl");
-    var head = el("div", "ac-slh");
-    head.appendChild(el("span", "ac-lab", label));
-    var v = el("b", "ac-slv", show(state[key]));
-    head.appendChild(v);
-    w.appendChild(head);
-    var i = document.createElement("input");
-    i.type = "range"; i.min = min; i.max = max; i.step = step; i.value = state[key];
-    i.className = "ac-range"; i.setAttribute("aria-label", label);
-    i.addEventListener("input", function () { state[key] = +i.value; v.textContent = show(i.value); state.preset = ""; soft(); });
-    w.appendChild(i);
-    return w;
-  }
-  function plural(word) { return function (v) { return fmt(v) + " " + word + (+v === 1 ? "" : "s"); }; }
+  /* ======================= the screens =======================
+     One question at a time, then one clear answer. Everything else
+     (the math, fine tuning, the six, the rules) is folded away. */
+  var Q = window.HRT_QUIZ;
+  var ICO = {
+    home: '<path d="M4 11 12 4l8 7M6 9.5V20h12V9.5"/>',
+    mount: '<path d="M3 19 9 8l4 6 3-4 5 9Z"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>',
+    one: '<circle cx="12" cy="7" r="3"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>',
+    two: '<circle cx="8.5" cy="7.5" r="2.6"/><circle cx="16" cy="7.5" r="2.6"/><path d="M3.5 19.5v-1.5a5 5 0 0 1 10 0v1.5M13 13.3a5 5 0 0 1 7.5 4.2v2"/>',
+    fam: '<circle cx="7" cy="6.5" r="2.3"/><circle cx="17" cy="6.5" r="2.3"/><circle cx="12" cy="11" r="1.8"/><path d="M3 19v-3.5a4 4 0 0 1 8 0M13 15.5a4 4 0 0 1 8 0V19M9.5 19v-1.5a2.5 2.5 0 0 1 5 0V19"/>',
+    group: '<circle cx="6" cy="8" r="2"/><circle cx="12" cy="6.5" r="2.2"/><circle cx="18" cy="8" r="2"/><path d="M2.5 18v-1a3.5 3.5 0 0 1 7 0M8 18v-1.5a4 4 0 0 1 8 0V18M14.5 17a3.5 3.5 0 0 1 7 0v1"/>'
+  };
+  var POPULAR = {
+    HI: ["HNL", "OGG", "KOA", "LIH", "ITO", "LAX", "SFO", "SAN", "LAS", "PHX", "HND", "NRT", "ICN", "SYD", "CUN", "JFK"],
+    AK: ["KOA", "LAS", "PHX", "PSP", "SJD", "PVR", "LAX", "SFO", "SAN", "JFK", "SYD", "NRT", "CUN", "SBA", "FLL", "DEN"],
+    other: ["LAX", "SFO", "SAN", "LAS", "PHX", "JFK", "ORD", "DEN", "MCO", "KOA", "OGG", "HNL", "CUN", "NRT", "LHR", "SYD"]
+  };
 
-  function stepCard(nTxt, title) {
-    var c = el("div", "ac-card");
-    var h = el("h3", "ac-q");
-    h.appendChild(el("span", "ac-step", nTxt));
-    h.appendChild(document.createTextNode(title));
-    c.appendChild(h);
+  /* Questions answered so far; nothing is highlighted until it is answered. */
+  state.ans = state.ans || {};
+  state.step = 0; state.done = false; state.allPlaces = false;
+  state.dests = {};
+
+  function steps() {
+    var s = ["home"];
+    if (state.home === "HI") s.push("island");
+    if (state.home === "AK") s.push("akTrips");
+    s.push("party");
+    if (state.party >= 3) s.push("kids");
+    s.push("intl", "places");
+    return s;
+  }
+
+  function pick(key, value) {
+    state[key] = value; state.ans[key] = true;
+    if (key === "party" && value < 3) state.kids = 0;
+    if (key === "kids") state.kidTrips = value > 0 ? (state.kidTrips || 2) : 0;
+    setTimeout(function () { go(state.step + 1); }, 140);
+  }
+  function go(i) {
+    var n = steps().length;
+    if (i >= n) { state.done = true; } else { state.step = Math.max(0, i); state.done = false; }
+    paint();
+    if (state.done) try { host.scrollIntoView({ block: "start", behavior: "smooth" }); } catch (e) {}
+  }
+
+  var QS = {
+    home: function () { return { title: "Where do you live?", hint: "Two of the six Communities are only for residents.",
+      key: "home", options: [
+        { value: "HI", label: "Hawaiʻi", sub: "Huakaʻi is open to you", icon: ICO.home },
+        { value: "AK", label: "Alaska", sub: "Club 49 is open to you", icon: ICO.mount },
+        { value: "other", label: "Somewhere else", sub: "Four Communities are open to you", icon: ICO.globe }] }; },
+    island: function () { return { title: "How often do you fly between the islands?", hint: "Count round trips, like Honolulu to Maui and back.",
+      key: "island", options: [
+        { value: 0, label: "Rarely or never" },
+        { value: 3, label: "A few times a year", sub: "2 to 4 round trips" },
+        { value: 8, label: "Every other month", sub: "6 to 10 round trips" },
+        { value: 15, label: "Monthly or more", sub: "12 or more round trips" }] }; },
+    akTrips: function () { return { title: "How many trips a year include Alaska?", hint: "Round trips that start, end or stop in Alaska.",
+      key: "akTrips", options: [
+        { value: 0, label: "None" }, { value: 2, label: "One or two" },
+        { value: 5, label: "Three to six" }, { value: 10, label: "More than six" }] }; },
+    party: function () { return { title: "Who usually travels with you?", hint: "The people on the same booking, you included.",
+      key: "party", options: [
+        { value: 1, label: "Just me", icon: ICO.one }, { value: 2, label: "Two of us", icon: ICO.two },
+        { value: 4, label: "Family of 3 or 4", icon: ICO.fam }, { value: 6, label: "5 or more", icon: ICO.group }] }; },
+    kids: function () { return { title: "How many are kids 12 and under?", hint: "Count the kids you book award seats for with points.",
+      key: "kids", options: [
+        { value: 0, label: "None" }, { value: 1, label: "One" },
+        { value: 2, label: "Two" }, { value: 3, label: "Three or more" }] }; },
+    intl: function () { return { title: "How many trips outside the U.S. this year?", hint: "Japan, Korea, Australia, Mexico, Europe and so on.",
+      key: "intl", options: [
+        { value: 0, label: "None" }, { value: 1, label: "One trip" },
+        { value: 2, label: "Two or three" }, { value: 4, label: "Four or more" }] }; }
+  };
+
+  function placesQuestion(n, total) {
+    var codes = state.allPlaces ? Object.keys(AIRPORTS) : (POPULAR[state.home] || POPULAR.other);
+    var extra = el("button", "ac-moreplaces", state.allPlaces ? "Show fewer places" : "Show more places");
+    extra.type = "button";
+    extra.addEventListener("click", function () { state.allPlaces = !state.allPlaces; paint(); });
+    return Q.question({
+      n: n, total: total, compact: true, multi: true, current: state.dests,
+      title: "Where are you headed by the end of 2027?",
+      hint: "Tap every place you will fly to or connect through. Flying home counts, so keep HNL if you live on Oʻahu. Skip this if you are not sure.",
+      options: codes.map(function (c) { return { value: c, label: c, sub: AIRPORTS[c] }; }),
+      onPick: function (c) { if (state.dests[c]) delete state.dests[c]; else state.dests[c] = 1; state.ans.places = true; },
+      extra: extra,
+      onBack: function () { go(n - 2); },
+      nextLabel: "See my answer", onNext: function () { state.ans.places = true; go(n); }
+    });
+  }
+
+  function questionScreen() {
+    var list = steps(), i = Math.min(state.step, list.length - 1), key = list[i];
+    if (key === "places") return placesQuestion(i + 1, list.length);
+    var q = QS[key]();
+    return Q.question({
+      n: i + 1, total: list.length, title: q.title, hint: q.hint, options: q.options,
+      current: state.ans[q.key] ? state[q.key] : null,
+      onPick: function (v) { pick(q.key, v); },
+      onBack: i > 0 ? function () { go(i - 1); } : null
+    });
+  }
+
+  /* ---------- the answer ---------- */
+  function worth(l, r) { return l.pts * r.cpp / 100 + l.cash + l.status * r.cpp / 100 * Math.max(r.weight, 0.25); }
+  function plain(l) {
+    switch (l.kind) {
+      case "challenge": return fmt(l.pts) + " bonus points from " + l.n + " of your destinations on its challenge list";
+      case "island": return fmt(l.pts) + " extra points from your island trips, and the same in status points";
+      case "nibags": return money(l.cash) + " saved on checked bags between the islands";
+      case "code": return money(l.cash) + " off island fares with the discount code you get every three months";
+      case "foodland": return "Up to 3,000 points a year from your Foodland Maikaʻi points";
+      case "intl": return fmt(l.status) + " extra status points on your international trips";
+      case "transfer": return fmt(l.status) + " status points from points you transfer in";
+      case "kids": return fmt(l.pts) + " points back on your kids' award seats";
+      case "akbags": return money(l.cash) + " saved on checked bags on Alaska trips";
+      case "travelnow": return money(l.cash) + " off last minute Alaska fares";
+    }
+    return l.label;
+  }
+
+  function hero(r) {
+    var best = r.best, sec = r.second;
+    var h = el("div", "qz-hero");
+    if (best.score <= 0) {
+      h.appendChild(el("span", "qz-pill", "Your answer"));
+      h.appendChild(el("h2", "qz-big", "Any of them, for now"));
+      h.appendChild(el("p", "qz-line", "Nothing you told us earns much in any Community yet. Pick the one whose places you are most likely to visit, and come back when your plans change."));
+      return h;
+    }
+    h.appendChild(el("span", "qz-pill", "Your best Community"));
+    var row = el("div", "qz-hrow");
+    var b = icon(ICON[best.c.key], 30); b.className = "qz-badge"; b.style.background = best.c.color;
+    row.appendChild(b);
+    var t = el("div");
+    t.appendChild(el("h2", "qz-big", best.c.name));
+    t.appendChild(el("p", "qz-sub", "About " + money(best.score) + " a year for you"));
+    row.appendChild(t);
+    h.appendChild(row);
+    var gap = best.score - (sec && sec.score > 0 ? sec.score : 0);
+    h.appendChild(el("p", "qz-line", sec && sec.score > 0
+      ? (gap < 25 ? "A close call with " + sec.c.name + ". Either is a good pick, so go with the places you are most likely to fly."
+                  : "That is about " + money(gap) + " a year more than the next best, " + sec.c.name + ".")
+      : "No other Community gives you anything for the trips you described."));
+    var why = best.lines.filter(function (l) { return l.pts || l.cash || l.status; })
+      .sort(function (a, z) { return worth(z, r) - worth(a, r); }).slice(0, 3).map(plain);
+    if (why.length) h.appendChild(Q.whyList(why));
+    return h;
+  }
+
+  function rankCard(r) {
+    var c = el("div", "qz-card");
+    c.appendChild(el("h3", "qz-h3", "How the Communities compare for you"));
+    var list = el("div", "qz-rank");
+    var elig = r.ranked.filter(function (x) { return x.eligible; });
+    var max = Math.max(1, elig[0] ? elig[0].score : 1);
+    elig.forEach(function (x, i) {
+      var row = el("div", "qz-r" + (i === 0 ? " win" : ""));
+      var d = icon(ICON[x.c.key], 17); d.className = "qz-dot"; d.style.background = x.c.color;
+      row.appendChild(d);
+      var mid = el("div");
+      mid.appendChild(el("div", "qz-rn", x.c.name));
+      var tr = el("div", "qz-rt"); var f = el("i"); f.style.width = Math.max(0, x.score) / max * 100 + "%"; f.style.background = x.c.color;
+      tr.appendChild(f); mid.appendChild(tr);
+      row.appendChild(mid);
+      row.appendChild(el("span", "qz-rv", money(Math.max(0, x.score))));
+      list.appendChild(row);
+    });
+    c.appendChild(list);
+    var off = r.all.filter(function (x) { return !x.eligible; }).map(function (x) { return x.c.name + ": " + x.c.who; });
+    c.appendChild(el("p", "qz-small", "Dollar values per year, counting points at " + r.cpp.toFixed(1) + "¢ each." + (off.length ? " Not shown, " + off.join("; ") + "." : "")));
+    var join = el("p", "qz-small", "To join, sign in to Atmos Rewards and choose Join a Community. It is free, and you can switch once a year.");
+    c.appendChild(join);
     return c;
   }
 
-  function questions() {
-    var col = el("div", "ac-col");
-
-    var c1 = stepCard("1", "Where do you live?");
-    c1.appendChild(seg([["HI", "Hawaiʻi"], ["AK", "Alaska"], ["other", "Somewhere else"]], state.home,
-      function (k) { state.home = k; paint(); }));
-    c1.appendChild(el("p", "ac-note", "Huakaʻi is only for Hawaiʻi residents and Club 49 only for Alaskans. The other four are open to everyone."));
-    col.appendChild(c1);
-
-    var c2 = stepCard("2", "Which sounds most like you?");
-    var g = el("div", "ac-presets");
-    PRESETS.forEach(function (p) {
-      var b = el("button", "ac-p" + (p.key === state.preset ? " on" : ""));
-      b.type = "button";
-      b.appendChild(el("b", null, p.name));
-      b.appendChild(el("span", null, p.blurb));
-      b.addEventListener("click", function () {
-        state.preset = p.key;
-        Object.keys(p.set).forEach(function (k) {
-          if (k === "dests") { state.dests = {}; p.set.dests.forEach(function (d) { state.dests[d] = 1; }); }
-          else state[k] = p.set[k];
-        });
-        paint();
-      });
-      g.appendChild(b);
-    });
-    c2.appendChild(g);
-    c2.appendChild(el("p", "ac-note", "A starting point. Fine tune everything below."));
-    col.appendChild(c2);
-
-    var c3 = stepCard("3", "Your next 12 months");
-    if (state.home === "HI") c3.appendChild(slider("Interisland round trips", "island", 0, 30, 1, plural("trip")));
-    if (state.home === "AK") c3.appendChild(slider("Round trips that include Alaska", "akTrips", 0, 20, 1, plural("trip")));
-    c3.appendChild(slider("International round trips", "intl", 0, 12, 1, plural("trip")));
-    c3.appendChild(slider("People on your bookings, you included", "party", 1, 8, 1, plural("person")));
-    c3.appendChild(slider("Kids 12 and under on award seats", "kids", 0, 7, 1, plural("kid")));
-    if (state.kids > 0) c3.appendChild(slider("Award round trips with them", "kidTrips", 0, 8, 1, plural("trip")));
-    c3.appendChild(slider("Points you will transfer in from Bilt or Marriott", "transfer", 0, 200000, 5000, function (v) { return fmt(v) + " pts"; }));
-    c3.appendChild(field("Checked bags you usually bring, each way",
-      seg([[0, "None"], [1, "One"], [2, "Two"]], state.bags, function (k) { state.bags = k; state.preset = ""; paint(); })));
-    if (state.home === "HI") {
-      c3.appendChild(field("Your Atmos or Hawaiian credit card",
-        seg([["none", "None"], ["atmos", "Atmos Visa"], ["hawaiian", "Hawaiian MC"]], state.card,
-          function (k) { state.card = k; paint(); }), "An Atmos Rewards Visa or Hawaiian World Elite Mastercard doubles the Huakaʻi fare code to 20%."));
-      var t = el("div", "ac-toggles");
-      [["freeBag", "My card already gets me a free first bag between islands"], ["foodland", "I shop at Foodland and use Maikaʻi points"]].forEach(function (x) {
-        var lab = el("label", "ac-tog");
-        var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!state[x[0]];
-        cb.addEventListener("change", function () { state[x[0]] = cb.checked; soft(); });
-        lab.appendChild(cb); lab.appendChild(el("span", null, x[1]));
-        t.appendChild(lab);
-      });
-      c3.appendChild(t);
-    }
-    col.appendChild(c3);
-
-    var c4 = stepCard("4", "Where will you fly through 2027?");
-    c4.appendChild(el("p", "ac-note", "Tap every place you expect to fly to or connect through by Dec 31 2027. Flying home counts too, so most Oʻahu travelers should keep HNL on."));
-    REGIONS.forEach(function (r) {
-      var box = el("div", "ac-reg");
-      box.appendChild(el("span", "ac-regn", r[0]));
-      var chips = el("div", "ac-chips");
-      r[1].forEach(function (code) {
-        var on = !!state.dests[code];
-        var b = el("button", "ac-chip" + (on ? " on" : ""));
-        b.type = "button"; b.setAttribute("aria-pressed", on ? "true" : "false");
-        b.title = AIRPORTS[code];
-        b.appendChild(el("b", null, code));
-        b.appendChild(el("span", null, AIRPORTS[code]));
-        b.addEventListener("click", function () {
-          if (state.dests[code]) delete state.dests[code]; else state.dests[code] = 1;
-          var now = !!state.dests[code];
-          b.classList.toggle("on", now); b.setAttribute("aria-pressed", now ? "true" : "false");
-          state.preset = ""; soft();
-        });
-        chips.appendChild(b);
-      });
-      box.appendChild(chips);
-      c4.appendChild(box);
-    });
-    col.appendChild(c4);
-
-    var c5 = stepCard("5", "Two last things");
-    c5.appendChild(field("How do you earn on Atmos?",
-      seg([["segment", "Segments"], ["distance", "Distance"], ["price", "Price"]], state.earn,
-        function (k) { state.earn = k; paint(); })));
-    var link = el("a", "ac-link", "Not sure? Run the Choose to Earn Calculator");
-    link.href = "#status"; link.setAttribute("data-route", "status");
-    c5.appendChild(link);
-    c5.appendChild(field("What matters most to you?",
-      seg([["money", "Free trips"], ["both", "Both"], ["status", "Elite status"]], state.goal,
-        function (k) { state.goal = k; paint(); }),
-      "Status points cannot be spent, so this decides how much they count in the ranking."));
-    var adv = el("button", "ac-adv", state.advanced ? "Hide the details" : "Adjust the details");
-    adv.type = "button";
-    adv.addEventListener("click", function () { state.advanced = !state.advanced; paint(); });
-    c5.appendChild(adv);
-    if (state.advanced) {
-      var d = el("div", "ac-det");
-      [["niFare", "Interisland fare, round trip, $"], ["niMiles", "Interisland miles, one way"],
-       ["intlFare", "International fare, round trip, $"], ["intlMiles", "International miles, one way"],
-       ["kidPts", "Points per kid's award round trip"], ["akFare", "Refundable one-way fare to Alaska, $"]].forEach(function (f) {
-        var lab = el("label", "ac-f");
-        lab.appendChild(el("span", "ac-lab", f[1]));
-        var inp = document.createElement("input");
-        inp.type = "number"; inp.min = "0"; inp.inputMode = "numeric"; inp.className = "ac-in"; inp.value = state[f[0]];
-        inp.addEventListener("input", function () { state[f[0]] = num(inp.value); soft(); });
-        lab.appendChild(inp);
-        d.appendChild(lab);
-      });
-      d.appendChild(el("p", "ac-note", "Check real award prices for kids' seats on the Atmos Award Calendar before you rely on this number."));
-      c5.appendChild(d);
-    }
-    col.appendChild(c5);
-    return col;
-  }
-
-  /* ---------- right column: the answer ---------- */
-  function answer(r) {
-    var best = r.best, sec = r.second;
-    var wrap = el("div", "ac-card ac-answer");
-    wrap.appendChild(el("span", "ac-pill", "Your best Community"));
-    var head = el("div", "ac-ahead");
-    var badge = icon(ICON[best.c.key], 26); badge.className = "ac-abadge"; badge.style.background = best.c.color;
-    head.appendChild(badge);
-    var ht = el("div");
-    ht.appendChild(el("h2", "ac-big", best.c.name));
-    var gap = best.score - (sec && sec.score > 0 ? sec.score : 0);
-    ht.appendChild(el("p", "ac-bigsub", "Worth about " + money(Math.max(0, best.score)) + " a year to you."));
-    head.appendChild(ht);
-    wrap.appendChild(head);
-
-    var verdict;
-    if (best.score <= 0) verdict = "Nothing you entered moves the needle yet. Add trips or destinations and the ranking will sort itself out.";
-    else if (sec && sec.score > 0 && gap < 25) verdict = "Close call with " + sec.c.name + ". Pick the one whose destinations you are most likely to actually fly.";
-    else if (sec && sec.score > 0) verdict = "Beats " + sec.c.name + " by about " + money(gap) + " a year for the way you travel.";
-    else verdict = "No other Community gives you anything for the trips you entered.";
-    wrap.appendChild(el("p", "ac-verdict", verdict));
-    wrap.appendChild(el("p", "ac-made", "That is " + fmt(best.pts) + " points" + (best.cash ? " and " + money(best.cash) + " in savings" : "") +
-      (best.status ? ", plus " + fmt(best.status) + " status points" + (r.weight ? " counted at " + (r.weight === 1 ? "full" : "half") + " value" : " we did not count") : "") + "."));
-
-    var max = Math.max.apply(null, r.ranked.map(function (x) { return x.score; })) || 1;
-    var list = el("div", "ac-rank");
-    r.ranked.forEach(function (x, i) {
-      var row = el("div", "ac-row" + (i === 0 ? " win" : "") + (x.eligible ? "" : " off"));
-      var ic = icon(ICON[x.c.key], 16); ic.className = "ac-rdot"; ic.style.background = x.c.color;
-      row.appendChild(ic);
-      var mid = el("div", "ac-rmid");
-      var top = el("div", "ac-rtop");
-      top.appendChild(el("b", null, x.c.name));
-      top.appendChild(el("span", "ac-rval", x.eligible ? money(Math.max(0, x.score)) : x.c.who));
-      mid.appendChild(top);
-      var tr = el("div", "ac-rtrack");
-      var bar = el("i"); bar.style.width = (x.eligible ? Math.max(0, x.score) / max * 100 : 0) + "%"; bar.style.background = x.c.color;
-      tr.appendChild(bar);
-      mid.appendChild(tr);
-      if (x.eligible) mid.appendChild(el("span", "ac-rsub", fmt(x.pts) + " points, " + fmt(x.status) + " status points" + (x.cash ? ", " + money(x.cash) + " saved" : "")));
-      row.appendChild(mid);
-      list.appendChild(row);
-    });
-    wrap.appendChild(list);
-    wrap.appendChild(el("p", "ac-foot", "Values use " + r.cpp.toFixed(1) + "¢ per Atmos point from our Points Valuations. " +
-      (r.weight === 0 ? "Status points are shown but not counted in the ranking." : r.weight === 1 ? "Status points count the same as spendable points in the ranking." : "Status points count at half the value of spendable points in the ranking.")));
-    return wrap;
-  }
-
-  /* The part that makes the answer believable: the top two, line by line. */
-  function compare(r) {
+  /* ---------- folded sections ---------- */
+  function compareBody(r) {
     var a = r.best, b = r.second;
-    var wrap = el("div", "ac-card");
-    var h = el("h3", "ac-q");
-    h.appendChild(document.createTextNode("Line by line: " + a.c.short + " vs " + (b ? b.c.short : "")));
-    wrap.appendChild(h);
-    if (!b) return wrap;
+    var wrap = el("div");
     var g = el("div", "ac-cmp");
     [a, b].forEach(function (x, i) {
+      if (!x) return;
       var col = el("div", "ac-cmpc" + (i === 0 ? " win" : ""));
       col.style.setProperty("--cc", x.c.color);
       var hd = el("div", "ac-cmph");
@@ -477,18 +444,105 @@
         if (l.note) row.appendChild(el("span", "ac-linen", l.note));
         col.appendChild(row);
       });
-      var tot = el("div", "ac-tot");
-      tot.appendChild(el("span", null, "Total"));
-      tot.appendChild(el("b", null, fmt(x.pts) + " pts, " + fmt(x.status) + " status" + (x.cash ? ", " + money(x.cash) : "")));
-      col.appendChild(tot);
       g.appendChild(col);
     });
     wrap.appendChild(g);
-    wrap.appendChild(el("p", "ac-note", "Points and status points are estimates before any elite bonus. Dollar savings use Alaska's published bag fees ($30 and $40 between the islands, $45 and $55 on the mainland) and the fares you set."));
+    var how = el("ul", "ac-list ac-howmath");
+    ["Points are worth " + r.cpp.toFixed(1) + "¢ each, the Atmos value from our Points Valuations.",
+     "Status points cannot be spent, so they count " + (r.weight === 1 ? "the same as points" : r.weight === 0 ? "for nothing" : "at half the value of points") + ", based on what you said matters to you. Change that under Fine tune.",
+     "Bag savings use Alaska's published fees: $30 and $40 between the islands, $45 and $55 on the mainland.",
+     "Island and international points depend on how you earn on Atmos (" + EARN[state.earn].label.toLowerCase() + ", " + EARN[state.earn].rule + "), before any elite bonus."].forEach(function (t) { how.appendChild(el("li", null, t)); });
+    wrap.appendChild(how);
     return wrap;
   }
 
-  /* ---------- below: the six, neatly ---------- */
+  function fineTuneBody() {
+    var w = el("div", "ac-tune");
+    function row(label, opts, key, hint) {
+      var f = el("div", "ac-field");
+      f.appendChild(el("span", "ac-lab", label));
+      var g = el("div", "ac-seg");
+      opts.forEach(function (o) {
+        var b = el("button", "ac-segb" + (state[key] === o[0] ? " on" : ""), o[1]);
+        b.type = "button"; b.setAttribute("aria-pressed", state[key] === o[0] ? "true" : "false");
+        b.addEventListener("click", function () { state[key] = o[0]; paint(); });
+        g.appendChild(b);
+      });
+      f.appendChild(g);
+      if (hint) f.appendChild(el("span", "ac-hint", hint));
+      w.appendChild(f);
+    }
+    row("What matters most to you?", [["money", "Free trips"], ["both", "Both"], ["status", "Elite status"]], "goal",
+      "Decides how much status points count, since they cannot be spent.");
+    row("How do you earn on Atmos?", [["segment", "Segments"], ["distance", "Distance"], ["price", "Price"]], "earn");
+    var link = el("a", "ac-link", "Not sure? Try the Choose to Earn Calculator");
+    link.href = "#status"; link.setAttribute("data-route", "status");
+    w.appendChild(link);
+    row("Checked bags each way", [[0, "None"], [1, "One"], [2, "Two"]], "bags");
+    if (state.home === "HI") {
+      row("Your Atmos or Hawaiian card", [["none", "None"], ["atmos", "Atmos Visa"], ["hawaiian", "Hawaiian MC"]], "card",
+        "Either card doubles the Huakaʻi fare code to 20%.");
+      var t = el("div", "ac-toggles");
+      [["freeBag", "My card already gets me a free first bag between islands"], ["foodland", "I shop at Foodland and use Maikaʻi points"]].forEach(function (x) {
+        var lab = el("label", "ac-tog");
+        var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!state[x[0]];
+        cb.addEventListener("change", function () { state[x[0]] = cb.checked; paint(); });
+        lab.appendChild(cb); lab.appendChild(el("span", null, x[1]));
+        t.appendChild(lab);
+      });
+      w.appendChild(t);
+    }
+    var d = el("div", "ac-det");
+    var fields = [["transfer", "Points you will transfer in from Bilt or Marriott"], ["intlFare", "International fare, round trip, $"], ["niFare", "Island fare, round trip, $"]];
+    if (state.kids > 0) fields.unshift(["kidTrips", "Award round trips with the kids"], ["kidPts", "Points per kid's award round trip"]);
+    if (state.home === "AK") fields.push(["akFare", "Refundable one-way fare to Alaska, $"]);
+    fields.forEach(function (f) {
+      var lab = el("label", "ac-f");
+      lab.appendChild(el("span", "ac-lab", f[1]));
+      var inp = document.createElement("input");
+      inp.type = "number"; inp.min = "0"; inp.inputMode = "numeric"; inp.className = "ac-in"; inp.value = state[f[0]];
+      inp.addEventListener("change", function () { state[f[0]] = num(inp.value); paint(); });
+      lab.appendChild(inp);
+      d.appendChild(lab);
+    });
+    w.appendChild(d);
+    return w;
+  }
+
+  function sixBody(r) {
+    var w = el("div", "ac-accs");
+    r.all.forEach(function (x) {
+      var d = el("details", "ac-acc" + (x.eligible ? "" : " off"));
+      d.style.setProperty("--cc", x.c.color);
+      var s = el("summary");
+      var ic = icon(ICON[x.c.key], 18); ic.className = "ac-accic";
+      s.appendChild(ic);
+      var t = el("span", "ac-acct");
+      t.appendChild(el("b", null, x.c.name));
+      t.appendChild(el("span", null, x.c.tag + (x.c.res ? ". " + x.c.who + "." : "")));
+      s.appendChild(t);
+      d.appendChild(s);
+      var body = el("div", "ac-accb");
+      var ul = el("ul", "ac-perks");
+      x.c.perks.forEach(function (p) { ul.appendChild(el("li", null, p)); });
+      body.appendChild(ul);
+      var hh = el("div", "ac-dhead");
+      hh.appendChild(el("b", null, "Its 10 challenge destinations"));
+      hh.appendChild(el("span", null, x.hits.length + " on your list"));
+      body.appendChild(hh);
+      var chips = el("div", "ac-dchips");
+      x.c.dests.forEach(function (code) {
+        var on = !!state.dests[code];
+        var sp = el("span", "ac-d" + (on ? " on" : ""), code); sp.title = AIRPORTS[code];
+        chips.appendChild(sp);
+      });
+      body.appendChild(chips);
+      d.appendChild(body);
+      w.appendChild(d);
+    });
+    return w;
+  }
+
   function ladder() {
     var wrap = el("div", "ac-ladder");
     var top = LADDER[LADDER.length - 1];
@@ -503,141 +557,87 @@
     return wrap;
   }
 
-  function howItWorks() {
-    var wrap = el("div", "ac-card ac-how");
-    wrap.appendChild(el("h3", "ac-h2", "How Atmos Communities work"));
+  function howBody() {
+    var w = el("div");
     var g = el("div", "ac-rules");
-    [["Free to join", "Sign in to Atmos Rewards and pick Join a Community. It costs nothing."],
-     ["One at a time", "You belong to one Community. You cannot stack them."],
-     ["Switch once a year", "One change per calendar year. Switching resets your challenge progress, but you keep points already earned."],
-     ["The day you fly counts", "Benefits follow the Community you are in on the day you fly, not the day you book."]].forEach(function (x, i) {
+    [["Free to join", "Sign in to Atmos Rewards and choose Join a Community."],
+     ["One at a time", "You belong to one Community. They do not stack."],
+     ["Switch once a year", "Switching resets your challenge progress, but you keep points already earned."],
+     ["The day you fly counts", "Benefits follow the Community you are in when you fly, not when you book."]].forEach(function (x, i) {
       var c = el("div", "ac-rule");
       c.appendChild(el("span", "ac-rulen", String(i + 1)));
       c.appendChild(el("b", null, x[0]));
       c.appendChild(el("p", null, x[1]));
       g.appendChild(c);
     });
-    wrap.appendChild(g);
-
+    w.appendChild(g);
     var ch = el("div", "ac-chal");
     var left = el("div", "ac-chalt");
     left.appendChild(el("span", "ac-kicker", "In every Community"));
     left.appendChild(el("h4", null, "The Bonus Points Challenge"));
-    left.appendChild(el("p", null, "Each Community has 10 destinations. Your first flight to or through each one, in any order, pays bonus points and the same number of status points. Every new place pays more than the last, up to 10,000 of each for all ten."));
-    left.appendChild(el("p", "ac-fine", "Runs Oct 1 2026 to Dec 31 2027. Award tickets count. The first member in each Community to finish the list earns 100,000 bonus points. A new list arrives Jan 1 2028."));
+    left.appendChild(el("p", null, "Each Community lists 10 places. Your first flight to or through each one pays bonus points plus the same number of status points, and every new place pays more than the last."));
+    left.appendChild(el("p", "ac-fine", "Oct 1 2026 to Dec 31 2027, award tickets count. All ten pays 10,000 of each, and the first member in each Community to finish gets 100,000 bonus points."));
     ch.appendChild(left);
     var right = el("div", "ac-chalg");
     right.appendChild(ladder());
-    right.appendChild(el("span", "ac-lcap", "Bonus points for your 1st to 10th destination"));
+    right.appendChild(el("span", "ac-lcap", "Points for your 1st to 10th place"));
     ch.appendChild(right);
-    wrap.appendChild(ch);
-
-    var sh = el("div", "ac-shared");
-    sh.appendChild(el("b", null, "Also in every Community"));
-    ["Flight deals by email (monthly for Huakaʻi, quarterly for most)", "20% off Atmos Rewards Unlocked experiences", "Partner offers"].forEach(function (t) {
-      sh.appendChild(el("span", "ac-sharedi", t));
-    });
-    wrap.appendChild(sh);
-    return wrap;
+    w.appendChild(ch);
+    return w;
   }
 
-  function sixCards(r) {
-    var wrap = el("div", "ac-six-wrap");
-    wrap.appendChild(el("h3", "ac-h2", "Meet the six Communities"));
-    wrap.appendChild(el("p", "ac-note", "Your picks from step 4 light up on each challenge list."));
-    var g = el("div", "ac-six");
-    r.all.forEach(function (x) {
-      var c = el("article", "ac-cc" + (x.eligible ? "" : " off") + (x.c.key === r.best.c.key ? " best" : ""));
-      c.style.setProperty("--cc", x.c.color);
-      var band = el("div", "ac-band");
-      band.appendChild(icon(ICON[x.c.key], 22));
-      var bt = el("div");
-      bt.appendChild(el("h4", null, x.c.name));
-      bt.appendChild(el("span", null, x.c.tag));
-      band.appendChild(bt);
-      if (x.c.key === r.best.c.key) band.appendChild(el("span", "ac-bestp", "Best for you"));
-      c.appendChild(band);
-      var body = el("div", "ac-ccb");
-      body.appendChild(el("span", "ac-who" + (x.c.res ? " res" : ""), x.c.who));
-      var ul = el("ul", "ac-perks");
-      x.c.perks.forEach(function (p) { ul.appendChild(el("li", null, p)); });
-      body.appendChild(ul);
-      var ch = el("div", "ac-dlist");
-      var hh = el("div", "ac-dhead");
-      hh.appendChild(el("b", null, x.c.challenge ? "Challenge: " + x.c.challenge : "Challenge destinations"));
-      hh.appendChild(el("span", null, x.hits.length + " of 10 for you"));
-      ch.appendChild(hh);
-      var chips = el("div", "ac-dchips");
-      x.c.dests.forEach(function (d) {
-        var on = !!state.dests[d];
-        var s = el("span", "ac-d" + (on ? " on" : ""), d);
-        s.title = AIRPORTS[d] + (on ? ", on your list" : "");
-        chips.appendChild(s);
-      });
-      ch.appendChild(chips);
-      body.appendChild(ch);
-      c.appendChild(body);
-      g.appendChild(c);
-    });
-    wrap.appendChild(g);
-    return wrap;
-  }
-
-  function finePrint() {
-    var d = el("details", "ac-sec");
-    d.appendChild(el("summary", "ac-secs", "The fine print and sources"));
-    var b = el("div", "ac-secb");
+  function fineBody() {
+    var w = el("div");
     var ul = el("ul", "ac-list");
-    ["Huakaʻi needs a Hawaiʻi address and Club 49 an Alaska address. The other four are open to every Atmos Rewards member.",
-     "Joining signs you up for Community emails, which is how the flight deals and codes arrive. Turning them off can cost you those deals.",
-     "Huakaʻi's 50% interisland bonus starts with flights on Jan 1 2027. We assume the free bags cover you, not everyone on the booking, because the page does not say.",
-     "Families on the Go returns 20% of the points spent on the kids' seats only, not taxes or fees, once travel is complete. You must stay in the Community until the trip is done.",
+    ["Joining signs you up for Community emails, which is how the flight deals and codes arrive. Turning them off can cost you those deals.",
+     "Huakaʻi's 50% island bonus starts with flights on Jan 1 2027. We count its free bags for you only, because the page does not say if they cover your whole booking.",
+     "Families on the Go returns 20% of the points spent on the kids' seats, not taxes or fees, once the trip is done. Stay in the Community until then.",
      "Global Locals' 10% is status points only. Transfer bonus points do not earn status points.",
-     "Saver and Basic Economy fares earn no flight points, so the interisland and international bonuses assume regular fares.",
-     "Estimates for planning only, before elite bonuses. Benefits can change; confirm in your Atmos Rewards account before you choose."].forEach(function (t) { ul.appendChild(el("li", null, t)); });
-    b.appendChild(ul);
+     "Saver and Basic Economy fares earn no flight points, so island and international bonuses assume regular fares.",
+     "Every Community also gets flight deals by email, 20% off Atmos Rewards Unlocked experiences and partner offers, so those do not change the ranking.",
+     "Estimates for planning only. Benefits can change, so check your Atmos Rewards account before you choose."].forEach(function (t) { ul.appendChild(el("li", null, t)); });
+    w.appendChild(ul);
     var src = el("ul", "ac-list ac-src");
     COMMUNITIES.forEach(function (c) { src.appendChild(el("li", null, c.name + ": " + c.source)); });
     src.appendChild(el("li", null, "Bag fees: news.alaskaair.com, Update on bag fees, for tickets from Apr 10 2026"));
-    b.appendChild(el("p", "ac-note", "Sources, checked Oct 13 2026:"));
-    b.appendChild(src);
-    d.appendChild(b);
-    return d;
+    w.appendChild(el("p", "ac-note", "Sources, checked Oct 13 2026:"));
+    w.appendChild(src);
+    return w;
+  }
+
+  function answerChips() {
+    var list = steps().filter(function (k) { return k !== "places"; }).map(function (k, i) {
+      var q = QS[k](), lab = "";
+      q.options.forEach(function (o) { if (o.value === state[k]) lab = o.label; });
+      var short = { home: "Home", island: "Island trips", akTrips: "Alaska trips", party: "Travel", kids: "Kids", intl: "Abroad" }[k];
+      return { label: short, value: lab || "?", onEdit: function () { go(i); } };
+    });
+    var nP = Object.keys(state.dests).length;
+    list.push({ label: "Places", value: nP ? nP + " picked" : "none", onEdit: function () { go(steps().length - 1); } });
+    return Q.answers(list, function () { state.ans = {}; state.dests = {}; go(0); });
   }
 
   /* ---------- render ---------- */
-  var host = null, timer = null;
-  function results(col, r) {
-    col.appendChild(answer(r));
-    col.appendChild(compare(r));
-  }
+  var host = null;
   function paint() {
     if (!host) return;
-    var y = host.closest(".hrt-main"); var keep = y ? y.scrollTop : 0;
-    var r = compute();
     host.innerHTML = "";
-    var grid = el("div", "ac-grid");
-    grid.appendChild(questions());
-    var R = el("div", "ac-col ac-res");
-    results(R, r);
-    grid.appendChild(R);
-    host.appendChild(grid);
-    host.appendChild(howItWorks());
-    host.appendChild(sixCards(r));
-    host.appendChild(finePrint());
-    if (y) y.scrollTop = keep;
-  }
-  /* Sliders and chips must not lose focus, so only the results repaint. */
-  function soft() {
-    clearTimeout(timer);
-    timer = setTimeout(function () {
-      if (!host) return;
+    var wrap = el("div", "qz-wrap");
+    if (!state.done) {
+      wrap.appendChild(questionScreen());
+      wrap.appendChild(el("p", "ac-reassure", "About a minute. Nothing is saved or shared."));
+    } else {
       var r = compute();
-      var R = host.querySelector(".ac-res"), six = host.querySelector(".ac-six-wrap");
-      if (!R || !six) return paint();
-      R.innerHTML = ""; results(R, r);
-      six.parentNode.replaceChild(sixCards(r), six);
-    }, 40);
+      wrap.appendChild(answerChips());
+      wrap.appendChild(hero(r));
+      wrap.appendChild(rankCard(r));
+      wrap.appendChild(Q.more("ac-math", "See the math", "Your top two, line by line", function () { return compareBody(compute()); }));
+      wrap.appendChild(Q.more("ac-tune", "Fine tune", "Your card, bags, how you earn, what matters most", fineTuneBody));
+      wrap.appendChild(Q.more("ac-six", "Meet the six Communities", "What each one gives you", function () { return sixBody(compute()); }));
+      wrap.appendChild(Q.more("ac-how", "How Communities work", "The rules and the bonus points challenge", howBody));
+      wrap.appendChild(Q.more("ac-fine", "Fine print and sources", null, fineBody));
+    }
+    host.appendChild(wrap);
   }
 
   function styles() {
@@ -782,6 +782,23 @@
       H + ".ac-dchips{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}",
       H + ".ac-d{text-align:center;font-size:11px;font-weight:800;padding:5px 0;border-radius:7px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);letter-spacing:.02em}",
       H + ".ac-d.on{color:#fff;background:var(--cc);border-color:var(--cc)}",
+      H + ".ac-reassure{text-align:center;font-size:12.5px;color:var(--muted);margin:4px 0 0}",
+      H + ".ac-moreplaces{display:block;margin:12px auto 0;font:inherit;font-size:13px;font-weight:700;color:var(--coral);background:none;border:0;cursor:pointer;padding:10px;min-height:44px}",
+      H + ".ac-howmath{margin-top:14px;font-size:12.5px;color:var(--muted)}",
+      H + ".ac-tune .ac-det{margin-top:4px}",
+      H + ".ac-accs{display:flex;flex-direction:column;gap:8px}",
+      H + ".ac-acc{border:1px solid var(--line);border-left:4px solid var(--cc);border-radius:12px;background:var(--surface-2)}",
+      H + ".ac-acc.off{opacity:.6}",
+      H + ".ac-acc>summary{display:flex;gap:12px;align-items:center;padding:12px 14px;cursor:pointer;list-style:none;min-height:56px;box-sizing:border-box}",
+      H + ".ac-acc>summary::-webkit-details-marker{display:none}",
+      H + ".ac-acc>summary:after{content:'+';margin-left:auto;font-size:20px;font-weight:700;color:var(--cc)}",
+      H + ".ac-acc[open]>summary:after{content:'\\2212'}",
+      H + ".ac-accic{flex:0 0 auto;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;background:var(--cc)}",
+      H + ".ac-acct{display:flex;flex-direction:column;gap:2px;min-width:0}",
+      H + ".ac-acct b{font-size:14px;color:var(--text)}",
+      H + ".ac-acct span{font-size:12px;color:var(--muted);line-height:1.4}",
+      H + ".ac-accb{padding:0 14px 14px}",
+      H + ".ac-accb .ac-perks{margin-top:2px}",
       /* fine print */
       H + ".ac-sec{border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);margin-bottom:10px}",
       H + ".ac-secs{cursor:pointer;list-style:none;padding:14px 16px;font-size:13.5px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:9px;min-height:44px;box-sizing:border-box}",
@@ -799,6 +816,7 @@
   window.HRT_COMMUNITIES = {
     _test: { compute: compute, state: state, COMMUNITIES: COMMUNITIES, CUMUL: CUMUL, PRESETS: PRESETS, perRoundTrip: perRoundTrip },
     show: function () {
+      if (window.HRT_QUIZ) window.HRT_QUIZ.css();
       styles();
       host = document.getElementById("ac-host");
       if (host && !host.getAttribute("data-ready")) { host.setAttribute("data-ready", "1"); paint(); }

@@ -147,7 +147,7 @@
     var methods = [
       { key: "distance", name: "Distance", verb: "by distance", rule: "1 point per mile",      fly: miles * PER_MILE * b },
       { key: "price",    name: "Price",    verb: "by price",    rule: "5 points per dollar",   fly: dollars * PER_DOLLAR * b },
-      { key: "segment",  name: "Segments", verb: "by segment",  rule: "500 points per flight", fly: segments * PER_SEGMENT * b }
+      { key: "segment",  name: "Segments", verb: "by segments",  rule: "500 points per flight", fly: segments * PER_SEGMENT * b }
     ];
     methods.forEach(function (m) { m.total = m.fly + cardPts; });
     var sorted = methods.slice().sort(function (a, z) { return z.total - a.total; });
@@ -155,185 +155,152 @@
              cardPts: cardPts, bonus: b - 1, miles: miles, dollars: dollars, segments: segments };
   }
 
-  /* ---------- pieces ---------- */
-  function presetCards() {
-    var wrap = el("div", "ap-card");
-    wrap.appendChild(el("h3", "ap-q", "1. Which sounds most like you?"));
-    var grid = el("div", "ap-presets");
-    PRESETS.forEach(function (p) {
-      var b = el("button", "ap-p" + (p.key === state.preset ? " on" : ""));
-      b.type = "button";
-      b.appendChild(svg(ICONS[p.key], 26));
-      b.appendChild(el("b", null, p.name));
-      b.appendChild(el("span", null, p.blurb));
-      b.addEventListener("click", function () {
-        state.preset = p.key; state.trips = p.trips; redraw();
-      });
-      grid.appendChild(b);
-    });
-    wrap.appendChild(grid);
-    return wrap;
+  /* ======================= the screens =======================
+     Redesigned Oct 13 2026 (Scottie: "must not overwhelm"). One question at
+     a time, then one clear answer. The teaching, tier paths, fine tuning,
+     questions and fine print are folded away. */
+  var Q = window.HRT_QUIZ;
+  state.ans = {}; state.step = 0; state.done = false;
+
+  var TRIP_OPTS = [
+    { value: 3, label: "A few", sub: "2 to 4 round trips a year" },
+    { value: 8, label: "Several", sub: "6 to 10 round trips" },
+    { value: 14, label: "A lot", sub: "12 to 16 round trips" },
+    { value: 24, label: "All the time", sub: "20 or more round trips" }
+  ];
+  var SPEND_OPTS = [
+    { value: 500, label: "About $500 a month" }, { value: 1500, label: "About $1,500 a month" },
+    { value: 3000, label: "About $3,000 a month" }, { value: 6000, label: "$5,000 or more a month" }
+  ];
+  var CARD_OPTS = [
+    { value: "none", label: "No Atmos card" },
+    { value: "ascent", label: "Atmos Ascent", sub: "1 status point per $3 spent" },
+    { value: "summit", label: "Atmos Summit", sub: "1 per $2, plus 10,000 on your card anniversary" }
+  ];
+
+  function steps() { var s = ["preset", "trips", "card"]; if (state.card !== "none") s.push("spend"); return s; }
+  function go(i) {
+    if (i >= steps().length) state.done = true; else { state.step = Math.max(0, i); state.done = false; }
+    paint();
+    if (state.done) try { host.scrollIntoView({ block: "start", behavior: "smooth" }); } catch (e) {}
+  }
+  function pick(key, v) {
+    state[key] = v; state.ans[key] = true;
+    if (key === "preset") { state.trips = presetFor(v).trips; }
+    if (key === "card" && v === "none") state.spend = 0;
+    setTimeout(function () { go(state.step + 1); }, 140);
   }
 
-  function slider(label, value, min, max, step, suffix, onInput) {
-    var w = el("div", "ap-sl");
-    var head = el("div", "ap-slh");
-    head.appendChild(el("span", "ap-sll", label));
-    var val = el("b", "ap-slv", suffix(value));
-    head.appendChild(val);
-    w.appendChild(head);
-    var i = document.createElement("input");
-    i.type = "range"; i.min = min; i.max = max; i.step = step; i.value = value;
-    i.className = "ap-range";
-    i.addEventListener("input", function () { val.textContent = suffix(i.value); onInput(i.value); });
-    w.appendChild(i);
-    return w;
+  function questionScreen() {
+    var list = steps(), i = Math.min(state.step, list.length - 1), key = list[i], q;
+    if (key === "preset") q = { title: "How do you mostly fly?", hint: "Pick the closest. You can fine tune it later.",
+      options: PRESETS.map(function (p) { return { value: p.key, label: p.name, sub: p.blurb, icon: ICONS[p.key] }; }) };
+    if (key === "trips") q = { title: "How many round trips a year?", hint: "Paid flights on Alaska or Hawaiian. Count there and back as one.", options: TRIP_OPTS };
+    if (key === "card") q = { title: "Do you have an Atmos credit card?", hint: "Card spending earns status points too, whichever way you choose.", options: CARD_OPTS };
+    if (key === "spend") q = { title: "How much do you put on it?", hint: "Roughly, per month.", options: SPEND_OPTS };
+    var cur = state.ans[key] ? (key === "preset" ? state.preset : key === "trips" ? state.trips : key === "card" ? state.card : state.spend) : null;
+    return Q.question({ n: i + 1, total: list.length, title: q.title, hint: q.hint, options: q.options, current: cur,
+      onPick: function (v) { pick(key, v); }, onBack: i > 0 ? function () { go(i - 1); } : null });
   }
 
-  function inputsCard() {
-    var wrap = el("div", "ap-card");
-    wrap.appendChild(el("h3", "ap-q", "2. A couple of quick numbers"));
-
-    wrap.appendChild(slider("Round trips a year", state.trips, 0, 40, 1,
-      function (v) { return v + (+v === 1 ? " trip" : " trips"); },
-      function (v) { state.trips = v; softRedraw(); }));
-
-    var cw = el("div", "ap-cardsel");
-    cw.appendChild(el("span", "ap-sll", "Atmos credit card"));
-    var row = el("div", "ap-seg3");
-    Object.keys(CARDS).forEach(function (k) {
-      var b = el("button", "ap-segb" + (k === state.card ? " on" : ""), CARDS[k].label);
-      b.type = "button";
-      b.addEventListener("click", function () { state.card = k; redraw(); });
-      row.appendChild(b);
-    });
-    cw.appendChild(row);
-    wrap.appendChild(cw);
-
-    if (state.card !== "none") {
-      wrap.appendChild(slider("Card spend a month", state.spend, 0, 10000, 250,
-        function (v) { return "$" + (+v).toLocaleString("en-US"); },
-        function (v) { state.spend = v; softRedraw(); }));
-    }
-
-    var adv = el("button", "ap-adv", (state.advanced ? "Hide the details" : "Adjust the details"));
-    adv.type = "button";
-    adv.addEventListener("click", function () { state.advanced = !state.advanced; redraw(); });
-    wrap.appendChild(adv);
-
-    if (state.advanced) {
-      var p = presetFor(state.preset);
-      var det = el("div", "ap-det");
-      det.appendChild(el("p", "ap-note", "Typical numbers for your trips. Change them if yours are different."));
-      Object.keys(p.mix).forEach(function (k) {
-        var L = state.legs[k];
-        var r = el("div", "ap-detrow");
-        r.appendChild(el("b", null, L.label));
-        var g = el("div", "ap-detg");
-        [["Miles each way", "miles"], ["Fare per round trip", "fare"], ["Flights per round trip", "segs"]].forEach(function (f) {
-          var lab = el("label", "ap-f");
-          lab.appendChild(el("span", "ap-fl", f[0]));
-          var inp = document.createElement("input");
-          inp.type = "number"; inp.min = 0; inp.value = L[f[1]]; inp.className = "ap-in";
-          inp.addEventListener("input", function () { L[f[1]] = inp.value; softRedraw(); });
-          lab.appendChild(inp);
-          g.appendChild(lab);
-        });
-        r.appendChild(g);
-        det.appendChild(r);
-      });
-      var st = el("label", "ap-f");
-      st.appendChild(el("span", "ap-fl", "Status you already hold"));
-      var sel = document.createElement("select"); sel.className = "ap-in";
-      var o0 = document.createElement("option"); o0.value = "none"; o0.textContent = "None yet"; sel.appendChild(o0);
-      TIERS.forEach(function (t) {
-        var o = document.createElement("option"); o.value = t.key;
-        o.textContent = t.name + " (+" + Math.round(t.bonus * 100) + "% on flights)";
-        if (t.key === state.current) o.selected = true; sel.appendChild(o);
-      });
-      sel.addEventListener("change", function () { state.current = sel.value; redraw(); });
-      st.appendChild(sel);
-      det.appendChild(st);
-      wrap.appendChild(det);
-    }
-    return wrap;
-  }
-
-  /* THE headline. Atmos's "choose how you earn" is the decision this tool
-     exists for, so the three options are the first thing on the page and the
-     winner is obvious without reading a word of body copy. */
-  function choiceCards(r) {
-    var wrap = el("div", "ap-card ap-answer ap-choice");
-    wrap.appendChild(el("span", "ap-pill", "Your answer"));
-    wrap.appendChild(el("h2", "ap-big", "Earn " + r.best.verb));
-    wrap.appendChild(el("p", "ap-bigsub", OPTIONS[r.best.key].rate + ", which gets you " +
-      fmt(r.best.total) + " status points a year."));
-
-    var max = Math.max.apply(null, r.methods.map(function (m) { return m.total; })) || 1;
-    var g = el("div", "ap-opts");
-    r.methods.forEach(function (m) {
-      var o = OPTIONS[m.key];
-      var win = m.key === r.best.key;
-      var c = el("div", "ap-opt" + (win ? " win" : ""));
-      c.appendChild(el("span", "ap-ribbon" + (win ? "" : " off"), win ? "Best for you" : ""));
-      c.appendChild(el("h4", "ap-optn", o.name));
-      c.appendChild(el("span", "ap-optr", o.rate));
-      c.appendChild(el("b", "ap-optv", fmt(m.total)));
-      c.appendChild(el("span", "ap-optu", win ? "status points a year"
-        : fmt(r.best.total - m.total) + " fewer a year"));
-
-      var tr = el("div", "ap-track");
-      var f = el("i", "ap-seg fly"); f.style.width = (m.fly / max * 100) + "%";
-      f.title = "From flying: " + fmt(m.fly) + " points";
-      var cd = el("i", "ap-seg card"); cd.style.width = (r.cardPts / max * 100) + "%";
-      cd.title = "From card spend: " + fmt(r.cardPts) + " points";
-      tr.appendChild(f); tr.appendChild(cd);
-      c.appendChild(tr);
-
-      c.appendChild(el("p", "ap-optb", o.bestFor));
-      c.appendChild(el("p", "ap-opta", o.award));
-      g.appendChild(c);
-    });
-    wrap.appendChild(g);
-
-    var legend = el("div", "ap-legend");
-    [["fly", "From flying"], ["card", "From card spend"]].forEach(function (pp) {
-      var i = el("span", "ap-lg"); var sw = el("i", "ap-sw"); sw.style.background = PALETTE[pp[0]];
-      i.appendChild(sw); i.appendChild(el("span", null, pp[1])); legend.appendChild(i);
-    });
-    wrap.appendChild(legend);
-
-    var dflt = r.methods[0]; /* distance is the do-nothing default */
-    if (r.best.key !== "distance" && r.best.total > dflt.total) {
-      wrap.appendChild(el("p", "ap-cost",
-        "Doing nothing leaves you on distance and costs you " + fmt(r.best.total - dflt.total) + " points a year."));
-    }
-
+  function hero(r) {
+    var h = el("div", "qz-hero");
+    h.appendChild(el("span", "qz-pill", "Your answer"));
+    h.appendChild(el("h2", "qz-big ap-hbig", "Earn " + r.best.verb));
+    h.appendChild(el("p", "qz-sub", "About " + fmt(r.best.total) + " status points a year"));
+    var dflt = r.methods[0];
+    h.appendChild(el("p", "qz-line", r.best.key === "distance"
+      ? "Good news: distance is what you get if you do nothing, so there is nothing to change."
+      : "If you do nothing you stay on distance, which would cost you about " + fmt(r.best.total - dflt.total) + " status points a year."));
     var reached = tierFor(r.best.total), nxt = nextTier(r.best.total);
-    var lad = el("div", "ap-ladder");
-    TIERS.forEach(function (t) {
-      var hit = r.best.total >= t.pts;
-      var b = el("div", "ap-badge" + (hit ? " hit" : ""));
-      b.appendChild(el("i", "ap-bdot", hit ? "\u2713" : ""));
-      b.appendChild(el("b", null, t.name));
-      b.appendChild(el("span", null, fmt(t.pts)));
-      lad.appendChild(b);
-    });
-    wrap.appendChild(lad);
-    wrap.appendChild(el("p", "ap-tierline", reached
-      ? "That reaches " + reached.name + (nxt ? ", and you are " + fmt(nxt.pts - r.best.total) + " points short of " + nxt.name + "." : ", the top tier.")
-      : "That is " + fmt(TIERS[0].pts - r.best.total) + " points short of Silver, the first tier."));
-    return wrap;
+    var why = [OPTIONS[r.best.key].rate + ". " + OPTIONS[r.best.key].bestFor];
+    why.push(reached ? "That is enough for Atmos " + reached.name + (nxt ? ", and " + fmt(nxt.pts - r.best.total) + " short of " + nxt.name + "." : ", the top tier.")
+                     : "That is " + fmt(TIERS[0].pts - r.best.total) + " short of Silver, the first elite tier at 20,000.");
+    if (r.cardPts > 0) why.push(fmt(r.cardPts) + " of those come from your card, the same whichever way you choose.");
+    h.appendChild(Q.whyList(why));
+    var how = el("p", "ap-hhow", "To choose: sign in to Atmos Rewards and open Choose how you earn. It applies to flights from Jan 1 2027, and you can change it once a year.");
+    h.appendChild(how);
+    return h;
   }
 
-  /* Everything below the answer folds away, so the first screen is the choice. */
-  function section(title, node) {
-    var d = el("details", "ap-sec");
-    d.appendChild(el("summary", "ap-secs", title));
-    var body = el("div", "ap-secb");
-    body.appendChild(node);
-    d.appendChild(body);
-    return d;
+  var MICON = {
+    distance: '<path d="M4 18h16M4 18l3-3M4 18l3 3M20 18l-3-3M20 18l-3 3"/><circle cx="12" cy="8" r="3"/>',
+    price: '<path d="M12 3v18M16.5 7.5c0-1.9-2-3-4.5-3s-4.5 1.2-4.5 3.2 2 2.8 4.5 3.3 4.5 1.4 4.5 3.4-2 3.1-4.5 3.1-4.5-1.1-4.5-3"/>',
+    segment: '<path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" fill="currentColor" stroke="none"/>'
+  };
+  var MCOL = { distance: "#5c7fa3", price: "#0b7fc0", segment: "#d4722f" };
+  function rankCard(r) {
+    var c = el("div", "qz-card");
+    c.appendChild(el("h3", "qz-h3", "The three choices, for you"));
+    var list = el("div", "qz-rank");
+    var max = r.best.total || 1;
+    r.sorted.forEach(function (m, i) {
+      var row = el("div", "qz-r" + (i === 0 ? " win" : ""));
+      var d = Q.icon(MICON[m.key], 17); d.className = "qz-dot"; d.style.background = MCOL[m.key];
+      row.appendChild(d);
+      var mid = el("div");
+      mid.appendChild(el("div", "qz-rn", OPTIONS[m.key].name + (i === 0 ? "  ✓" : "")));
+      var tr = el("div", "qz-rt"); var f = el("i"); f.style.width = m.total / max * 100 + "%"; f.style.background = MCOL[m.key];
+      tr.appendChild(f); mid.appendChild(tr);
+      row.appendChild(mid);
+      row.appendChild(el("span", "qz-rv", fmt(m.total)));
+      list.appendChild(row);
+    });
+    c.appendChild(list);
+    c.appendChild(el("p", "qz-small", "Status points a year, flights plus card. Saver and Basic Economy fares earn nothing on any choice."));
+    return c;
+  }
+
+  function tuneBody() {
+    var p = presetFor(state.preset);
+    var det = el("div", "ap-det ap-tune");
+    det.appendChild(el("p", "ap-note", "We used typical numbers for your trips. Change them if yours are different."));
+    var tr = el("label", "ap-f");
+    tr.appendChild(el("span", "ap-fl", "Round trips a year"));
+    var ti = document.createElement("input"); ti.type = "number"; ti.min = 0; ti.value = state.trips; ti.className = "ap-in";
+    ti.addEventListener("change", function () { state.trips = Math.max(0, +ti.value || 0); paint(); });
+    tr.appendChild(ti); det.appendChild(tr);
+    Object.keys(p.mix).forEach(function (k) {
+      var L = state.legs[k];
+      var r = el("div", "ap-detrow");
+      r.appendChild(el("b", null, L.label));
+      var g = el("div", "ap-detg");
+      [["Miles each way", "miles"], ["Fare per round trip", "fare"], ["Flights per round trip", "segs"]].forEach(function (f) {
+        var lab = el("label", "ap-f");
+        lab.appendChild(el("span", "ap-fl", f[0]));
+        var inp = document.createElement("input");
+        inp.type = "number"; inp.min = 0; inp.value = L[f[1]]; inp.className = "ap-in";
+        inp.addEventListener("change", function () { L[f[1]] = inp.value; paint(); });
+        lab.appendChild(inp);
+        g.appendChild(lab);
+      });
+      r.appendChild(g);
+      det.appendChild(r);
+    });
+    var st = el("label", "ap-f");
+    st.appendChild(el("span", "ap-fl", "Status you already hold"));
+    var sel = document.createElement("select"); sel.className = "ap-in";
+    var o0 = document.createElement("option"); o0.value = "none"; o0.textContent = "None yet"; sel.appendChild(o0);
+    TIERS.forEach(function (t) {
+      var o = document.createElement("option"); o.value = t.key;
+      o.textContent = t.name + " (+" + Math.round(t.bonus * 100) + "% on flights)";
+      if (t.key === state.current) o.selected = true; sel.appendChild(o);
+    });
+    sel.addEventListener("change", function () { state.current = sel.value; paint(); });
+    st.appendChild(sel);
+    det.appendChild(st);
+    return det;
+  }
+
+  function answerChips() {
+    var cardLab = { none: "None", ascent: "Ascent", summit: "Summit" };
+    var list = [
+      { label: "Flying", value: presetFor(state.preset).name, onEdit: function () { go(0); } },
+      { label: "Trips", value: fmt(state.trips) + " a year", onEdit: function () { go(1); } },
+      { label: "Card", value: cardLab[state.card], onEdit: function () { go(2); } }
+    ];
+    if (state.card !== "none") list.push({ label: "Spend", value: "$" + fmt(state.spend) + "/mo", onEdit: function () { go(3); } });
+    return Q.answers(list, function () { state.ans = {}; go(0); });
   }
 
   /* The teaching graphic: why a flat 500 changes everything on short hops. */
@@ -516,50 +483,27 @@
 
   /* ---------- render ---------- */
   var host = null;
-
-  /* The choice and the tier it reaches are always open. The teaching, the
-     tier pathways, the questions and the fine print fold away. */
-  function rightColumn(col, r) {
-    col.appendChild(choiceCards(r));
-    [["why", "Why the choice matters", explainCard()],
-     ["tiers", "How to reach each tier", pathwaysCard(r)],
-     ["faq", "Common questions", faqCard()],
-     ["fine", "The fine print", footerCard(r)]].forEach(function (x) {
-      var d = section(x[1], x[2]);
-      d.dataset.k = x[0];
-      col.appendChild(d);
-    });
-  }
-
   function paint() {
-    var r = compute();
-    host.innerHTML = "";
-    var grid = el("div", "ap-grid");
-    var L = el("div", "ap-col");
-    L.appendChild(presetCards());
-    L.appendChild(inputsCard());
-    var R = el("div", "ap-col");
-    rightColumn(R, r);
-    grid.appendChild(L); grid.appendChild(R);
-    host.appendChild(grid);
-  }
-  function redraw() { if (host) paint(); }
-  /* Sliders must not lose focus mid-drag, so only the right column repaints. */
-  var softTimer = null;
-  function softRedraw() {
     if (!host) return;
-    clearTimeout(softTimer);
-    softTimer = setTimeout(function () {
+    host.innerHTML = "";
+    var wrap = el("div", "qz-wrap");
+    if (!state.done) {
+      wrap.appendChild(questionScreen());
+      wrap.appendChild(el("p", "ap-reassure", "Under a minute. Nothing is saved or shared."));
+    } else {
       var r = compute();
-      var col = host.querySelectorAll(".ap-col")[1];
-      if (!col) return paint();
-      var open = {};
-      col.querySelectorAll("details.ap-sec").forEach(function (d) { open[d.dataset.k] = d.open; });
-      col.innerHTML = "";
-      rightColumn(col, r);
-      col.querySelectorAll("details.ap-sec").forEach(function (d) { if (open[d.dataset.k]) d.open = true; });
-    }, 40);
+      wrap.appendChild(answerChips());
+      wrap.appendChild(hero(r));
+      wrap.appendChild(rankCard(r));
+      wrap.appendChild(Q.more("ap-why", "Why the choice matters", "Short hops versus long flights", explainCard));
+      wrap.appendChild(Q.more("ap-tiers", "How to reach each tier", "Silver, Gold, Platinum, Titanium", function () { return pathwaysCard(compute()); }));
+      wrap.appendChild(Q.more("ap-tune", "Fine tune", "Miles, fares and status you already hold", tuneBody));
+      wrap.appendChild(Q.more("ap-faq", "Common questions", null, faqCard));
+      wrap.appendChild(Q.more("ap-fine", "Fine print", null, function () { return footerCard(compute()); }));
+    }
+    host.appendChild(wrap);
   }
+  function redraw() { paint(); }
 
   function styles() {
     if (document.getElementById("ap-css")) return;
@@ -683,6 +627,14 @@
       ".ap-answer .ap-opta{margin:6px 0 0;font-size:11px;line-height:1.5;color:#9fb2c7}",
       ".ap-answer .ap-legend{margin:12px 0 0}",
       ".ap-answer .ap-lg{color:#9fb2c7}",
+      ".qz-mb .ap-card{border:0;box-shadow:none;padding:0;margin:0;background:none}",
+      ".qz-mb .ap-q{display:none}",
+      ".qz-hero .ap-hbig{margin-top:14px}",
+      ".qz-hero .ap-hhow{margin:14px 0 0;font-size:12.5px;color:#9fb2c7;line-height:1.5}",
+      ".ap-reassure{text-align:center;font-size:12.5px;color:var(--muted);margin:4px 0 0}",
+      ".ap-tune{border-top:0;margin-top:0;padding-top:0}",
+      ".ap-tune>.ap-f{margin-bottom:12px}",
+      ".ap-in{font-size:16px}",
       /* collapsed detail sections */
       ".ap-sec{border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);margin-bottom:10px}",
       ".ap-secs{cursor:pointer;list-style:none;padding:14px 16px;font-size:13.5px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:9px}",
@@ -699,6 +651,7 @@
   window.HRT_ATMOS = {
     _test: { compute: compute, tierFor: tierFor, state: state, PRESETS: PRESETS },
     show: function () {
+      if (window.HRT_QUIZ) window.HRT_QUIZ.css();
       styles();
       host = document.getElementById("as-host");
       if (host && !host.getAttribute("data-ready")) { host.setAttribute("data-ready", "1"); paint(); }
