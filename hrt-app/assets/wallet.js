@@ -953,6 +953,9 @@
     setUsed(t.getAttribute("data-id"), t.getAttribute("data-perk"), t.getAttribute("data-key"), t.checked);
   }
 
+  /* Background photo for the wallet summary card (hosted on HRT's Squarespace) */
+  var SUMMARY_PHOTO = "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b3017d69-9c62-4d52-9714-0c39f1cadff7/michelle-spollen-dC2FsjoXsPQ-unsplash+%281%29.jpg?content-type=image%2Fjpeg";
+
   function styles() {
     if (document.getElementById("wl-css")) return;
     var s = document.createElement("style");
@@ -1023,7 +1026,10 @@
       ".wl-hm-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.wl-hm-acts.wl-center{justify-content:center}",
       /* ---- wallet summary card: navy with a gold edge, like a premium card ---- */
       ".wl-sum{position:relative;overflow:hidden;margin:0 0 18px;padding:22px 24px 20px;border-radius:20px;color:#eef4fa;" +
-        "background:radial-gradient(120% 150% at 100% 0%,rgba(242,184,75,.18),rgba(242,184,75,0) 46%),linear-gradient(160deg,#18324f 0%,#10243a 55%,#0b1a2c 100%);" +
+        /* photo at the back, the welcome tile's navy to blue gradient over it (strong, so text stays easy to read), soft light top right */
+        "background:radial-gradient(1100px 320px at 88% -50%,rgba(159,193,212,.42),transparent 60%)," +
+          "linear-gradient(120deg,rgba(14,27,44,.93),rgba(22,38,61,.88) 52%,rgba(29,51,80,.84))," +
+          "url('" + SUMMARY_PHOTO + "') center 60%/cover no-repeat,#16263d;" +
         "border:1px solid rgba(242,184,75,.45);box-shadow:0 18px 40px -24px rgba(9,20,35,.75)}",
       ".wl-sum .wl-sum-top{display:flex;align-items:center;justify-content:space-between;gap:12px}",
       ".wl-sum .wl-sum-title{margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#cfe0ee}",
