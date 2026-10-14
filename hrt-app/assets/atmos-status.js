@@ -1,5 +1,6 @@
 /* ---------------------------------------------------------------------------
-   atmos-status.js - HRT Atmos Status Planner (free tool)
+   atmos-status.js - HRT Atmos Choose to Earn Calculator (free tool)
+   (formerly "Status Planner"; renamed Oct 13 2026, route key stays "status")
 
    Atmos Rewards lets members pick ONE way to earn flight points per calendar
    year: distance, price, or segments. Selections opened 1 Oct 2026 for flights

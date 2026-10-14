@@ -41,7 +41,8 @@
   values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
   resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex Platinum credit each quarter" },
-  status:{ title:"Atmos Status Planner", hint:"Pick the right way to earn" },
+  status:{ title:"Atmos Choose to Earn Calculator", hint:"Distance, price or segments" },
+  communities:{ title:"Atmos Community Calculator", hint:"Find the Community that pays you most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" }
  };
  var shown = {}, current = null;
@@ -483,6 +484,7 @@
  });
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
  onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };
+ onShow.communities = function(){ if(window.HRT_COMMUNITIES) window.HRT_COMMUNITIES.show(); };
  onShow.wallet = function(){ if(window.HRT_WALLET) window.HRT_WALLET.show(); };
  /* My Wallet panel on the Dashboard home; wraps any existing home handler */
  (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
