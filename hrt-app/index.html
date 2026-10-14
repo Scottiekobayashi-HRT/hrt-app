@@ -89,8 +89,19 @@ html.ms-ready:not(.ms-in),html.ms-ready:not(.ms-in) body{height:auto!important;o
 html.ms-ready .hrt-boot{display:none}
 .hrt-boot i{width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.16);border-top-color:#e8824c;display:block;animation:hrtspin .8s linear infinite}
 @keyframes hrtspin{to{transform:rotate(360deg)}}
-.hrt-gate{min-height:100vh;box-sizing:border-box;background:#0a121c;color:#e9eff6;display:flex;align-items:center;justify-content:center;padding:30px 18px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
-.hrt-gate .gt{width:100%;max-width:420px;text-align:center}
+.hrt-gate{min-height:100vh;box-sizing:border-box;background:radial-gradient(ellipse 70% 45% at 50% 0%,rgba(242,184,75,.16),transparent 70%),linear-gradient(180deg,rgba(10,18,28,.78) 0%,rgba(10,18,28,.9) 40%,#0a121c 92%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e1133fb8-9be7-499a-bbfd-bd5e0aa853b4/Screenshot+2026-10-14+at+12.06.48%E2%80%AFAM.png?content-type=image%2Fpng") center top/cover no-repeat,#0a121c;color:#e9eff6;display:flex;align-items:center;justify-content:center;padding:30px 18px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
+.hrt-gate .gt{width:100%;max-width:460px;text-align:center;background:rgba(10,18,28,.62);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:30px 26px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.hrt-gate .glab{margin:22px 0 10px;text-align:left;font-size:13px;font-weight:800;color:#fff}
+.hrt-gate .gpro{margin:0 0 4px;text-align:left;border-radius:16px;padding:16px 16px 14px;background:linear-gradient(160deg,rgba(242,184,75,.16),rgba(232,130,76,.06) 60%,rgba(255,255,255,.02));border:1px solid rgba(242,184,75,.55);box-shadow:0 10px 30px rgba(232,130,76,.12)}
+.hrt-gate .gpro-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.hrt-gate .gpro-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:4px 10px}
+.hrt-gate .gpro-price{font-size:13px;font-weight:800;color:#f5c75a;white-space:nowrap}
+.hrt-gate .gpro h2{margin:2px 0 4px;font-size:18px;line-height:1.25;font-weight:800;color:#fff}
+.hrt-gate .gpro p{margin:0 0 10px;font-size:13.5px;line-height:1.55;color:#cfdae6}
+.hrt-gate .gpro ul{margin:0 0 10px}
+.hrt-gate .gpro li svg{color:#f2b84b}
+.hrt-gate .gpro .gpro-note{margin:0;font-size:12px;color:#9fb2c7}
+@media(max-width:480px){.hrt-gate .gt{padding:24px 18px;border-radius:18px}}
 .hrt-gate .glogo{width:200px;max-width:68%;height:auto;display:block;margin:0 auto 24px}
 .hrt-gate h1{margin:0 0 10px;font-size:25px;line-height:1.22;font-weight:800;color:#fff}
 .hrt-gate h1 span{background:linear-gradient(135deg,#f5c75a,#e8824c);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -113,7 +124,13 @@ html.ms-ready .hrt-boot{display:none}
  <img class="glogo" src="https://images.squarespace-cdn.com/content/v1/67cfe44f78d8ac79bcf6ec19/2c17ba8e-8242-40f2-8981-d59fc98eda1c/Website+Wallpaper+TCH-6.png?format=750w" alt="Hawaii Reward Travel" width="750" height="234">
  <h1>Free points and miles tools, <span>built for Hawaiʻi</span></h1>
  <p class="sub">Make a free account to open the dashboard. No card, nothing to pay, and your settings are waiting for you next time.</p>
+ <div class="btns">
+  <button type="button" class="go" data-ms-modal="signup" data-ms-plan:add="pln_free-member-09dc08yw">Create a free account</button>
+  <button type="button" class="alt" data-ms-modal="login">I already have one</button>
+ </div>
+ <p class="glab">Free with your account</p>
  <ul>
+  <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>My Wallet: every card you hold, its fees, and the credits to use before they reset</span></li>
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Kamaʻāina hotel deals across every island, scored for value</span></li>
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Every lounge at HNL, and exactly how to get into each one</span></li>
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Live transfer bonuses and what your points are actually worth</span></li>
@@ -121,11 +138,18 @@ html.ms-ready .hrt-boot{display:none}
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>The Atmos Choose to Earn Calculator, built around how you fly</span></li>
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>The Atmos Community Calculator, so you join the right one</span></li>
  </ul>
- <div class="btns">
-  <button type="button" class="go" data-ms-modal="signup" data-ms-plan:add="pln_free-member-09dc08yw">Create a free account</button>
-  <button type="button" class="alt" data-ms-modal="login">I already have one</button>
+ <div class="gpro">
+  <div class="gpro-top"><span class="gpro-pill">&#9733; HRT PRO</span><span class="gpro-price">$9.99 a month</span></div>
+  <h2>Atmos Award Calendar</h2>
+  <p>Every Atmos Rewards saver award seat out of Hawaiʻi, laid out by date and color coded by value, so the good days jump out.</p>
+  <ul>
+   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>About 270 days of award space, refreshed by 6am Hawaiʻi time every morning</span></li>
+   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Filter by the airline actually flying it, something Alaska&#39;s own site will not do</span></li>
+   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deals Calendar, Deals Search and Points Explorer in one place</span></li>
+  </ul>
+  <p class="gpro-note">Start with a free account. Unlock PRO any time from the dashboard, and cancel in one click.</p>
  </div>
- <p class="fine">The Atmos Award Calendar is part of HRT PRO at $9.99 a month. Everything else above is free.<br>
+ <p class="fine">Everything except HRT PRO is free, with no card needed.<br>
  <a href="https://www.hawaiirewardtravel.com" target="_top">Back to hawaiirewardtravel.com</a></p>
 </div></div>
 <div class="hrt-app"><aside class="hrt-sb"><a class="hrt-brand" href="#home" data-route="home"><img class="hrt-logo" src="https://images.squarespace-cdn.com/content/v1/67cfe44f78d8ac79bcf6ec19/2c17ba8e-8242-40f2-8981-d59fc98eda1c/Website+Wallpaper+TCH-6.png?format=750w" alt="Hawaii Reward Travel" width="750" height="234" decoding="async"><span class="hrt-bn"><span class="free-only">Free Tools</span><span class="pro-only pro-pill">&#9733; HRT PRO</span></span></a>
