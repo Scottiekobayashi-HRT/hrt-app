@@ -127,6 +127,18 @@ window.HRT_WALLET_CATALOG={
    "note": "Both annual benefits reset on the ANNIVERSARY, not Jan 1. Lounge access for authorized users now costs $125 a year each, and guests pay unless the cardholder spends $75,000 a year.",
    "source": "https://www.capitalone.com/credit-cards/travel-and-miles/",
    "checked": "2026-10-13"
+  },
+  {
+   "id": "chase-sapphire-reserve",
+   "issuer": "Chase",
+   "name": "Chase Sapphire Reserve",
+   "network": "Visa",
+   "fee": 795.0,
+   "feeBasis": "anniversary",
+   "note": "Unlimited Chase Sapphire Lounge and Priority Pass visits for you and two guests. Apple TV and Apple Music included if activated by June 22, 2027. Spend $75,000 in a calendar year for Hyatt and IHG status and more. Authorized users cost $195 each.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8149f80c-4f79-4427-8b2b-e873b94a6f0f/Chase+Sapphire+Reserve%C2%AE.PNG?content-type=image%2Fpng"
   }
  ],
  "benefits": [
@@ -1029,6 +1041,159 @@ window.HRT_WALLET_CATALOG={
    "confidence": "confirmed",
    "note": "20% back as a statement credit on Alaska Airlines onboard food, drinks and Wi-Fi paid with the card.",
    "source": "https://www.alaskaair.com/atmosrewards/content/credit-cards/benefits/visa-summit",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "travel",
+   "label": "$300 Travel Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 300.0,
+   "perYear": 1.0,
+   "cadence": "annual",
+   "resets": "anniversary",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "ANNIVERSARY, not Jan 1: Chase says the year begins with your account open date. Any travel purchase counts automatically, and the purchases it covers earn no points.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "edit",
+   "label": "The Edit Hotel Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 500.0,
+   "perYear": 1.0,
+   "cadence": "annual",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Up to $250 per prepaid stay of 2 or more nights booked through The Edit by Chase Travel, $500 a calendar year in total.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "dining",
+   "label": "Exclusive Tables Dining Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 150.0,
+   "perYear": 2.0,
+   "cadence": "semiannual",
+   "resets": "calendar",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Only at restaurants in the Sapphire Reserve Exclusive Tables program on OpenTable. $150 Jan to Jun and $150 Jul to Dec.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "stubhub",
+   "label": "StubHub Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 150.0,
+   "perYear": 2.0,
+   "cadence": "semiannual",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "StubHub or viagogo. Activate first. $150 Jan to Jun and $150 Jul to Dec, through Dec 31, 2027.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "doordashrest",
+   "label": "DoorDash restaurant order",
+   "type": "discount",
+   "unit": "usd",
+   "amount": 15.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "$15 off one order a month, a DoorDash checkout discount. Needs the free DashPass from this card (activate by Dec 31, 2029). Does not roll over.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "doordash",
+   "label": "DoorDash non-restaurant",
+   "type": "discount",
+   "unit": "usd",
+   "amount": 20.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Two $10 promos a month on non-restaurant orders such as groceries. Needs DashPass. Does not roll over.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "lyft",
+   "label": "Lyft Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 10.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Add the card in the Lyft app. Unused credit is lost at month end. Through Sep 30, 2027.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "peloton",
+   "label": "Peloton Membership Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 10.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Peloton memberships. Activate on Peloton's promo page. Through Dec 31, 2027.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "id": "globalentry",
+   "label": "Global Entry, TSA PreCheck or NEXUS",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 120.0,
+   "perYear": 0.25,
+   "cadence": "every4years",
+   "resets": "application date",
+   "enroll": "no",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Pay the application fee with the card.",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
    "checked": "2026-10-13"
   }
  ],
@@ -1970,6 +2135,111 @@ window.HRT_WALLET_CATALOG={
    "note": "1 status point per $3 spent on net purchases, no yearly cap.",
    "confidence": "confirmed",
    "source": "https://www.alaskaair.com/atmosrewards/content/credit-cards/benefits/visa-ascent",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "category": "Travel through Chase Travel",
+   "groups": [
+    "travel"
+   ],
+   "rate": 8.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked through Chase Travel",
+   "note": "Includes The Edit. Purchases covered by the $300 travel credit or The Edit credit earn no points.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "category": "Flights booked direct",
+   "groups": [
+    "flights"
+   ],
+   "rate": 4.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked directly with the airline",
+   "note": "Other travel, such as car rentals and cruises, earns 1x unless booked through Chase Travel.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "category": "Hotels booked direct",
+   "groups": [
+    "hotels"
+   ],
+   "rate": 4.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "booked directly with the hotel",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "category": "Dining",
+   "groups": [
+    "dining"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Restaurants worldwide, including takeout and eligible delivery.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "category": "Lyft",
+   "groups": [
+    "promo"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "in the Lyft app",
+   "note": "Limited time through September 30 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "category": "Peloton equipment over $150",
+   "groups": [
+    "promo"
+   ],
+   "rate": 10.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "$5,000 in total purchases",
+   "via": "",
+   "note": "Limited time through December 31 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+   "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-sapphire-reserve",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
    "checked": "2026-10-13"
   }
  ],
