@@ -358,7 +358,7 @@
  });
  (function(){ var c = { eligible:0, pending:0, unconfirmed:0 }; V.forEach(function(v){ c[v.s]++; });
   $("rsS1").textContent = V.length; $("rsS2").textContent = c.eligible; $("rsS3").textContent = c.pending; $("rsS4").textContent = c.unconfirmed;
-  $("navResy").textContent = V.length; $("hmResy").textContent = c.eligible; $("ttResy").textContent = c.eligible + " credit eligible spots";
+  $("navResy").textContent = V.length; $("ttResy").textContent = c.eligible + " credit eligible spots";
   rsChips(); rsRender(false);
  })();
  /* Live reminder of how long the current quarter's $100 has left. */
@@ -492,7 +492,19 @@
  (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
 
  /* ============================== BOOT ============================== */
- homeKama(); homeVals(); homeLounges(); tbLoad();
+ /* First class deals from Hawaiʻi: read from the calendar's public feed once
+    the generator publishes a first_class_deals count. Until then the stat stays hidden. */
+ function homeFirst(){
+  var FEED = "https://hrt-calendar-pro.pages.dev/marketing_deals.json";
+  try{
+   fetch(FEED, { cache:"no-cache" }).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(d){
+    var n = d && d.first_class_deals;
+    if(typeof n !== "number" || !(n > 0)) return;
+    $("hmFirst").textContent = n; $("hmFirstWrap").hidden = false;
+   }).catch(function(){});
+  }catch(e){}
+ }
+ homeKama(); homeVals(); homeLounges(); homeFirst(); tbLoad();
  var start = (location.hash || parentHash() || "").replace("#","");
  route(ROUTES[start] ? start : "home", true);
 })();

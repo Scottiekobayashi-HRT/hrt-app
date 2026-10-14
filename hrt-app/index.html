@@ -44,6 +44,27 @@ html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
 .atmos-frame.crop iframe{left:-248px;width:calc(100% + 248px)}
 html.ms-atmos #v-atmos .tips, html.ms-atmos #v-atmos .hero .cta-row{display:none}
 /* SANDBOX: PRO mode (navy base + gold/orange premium accents) */
+html.ms-named .hero .unnamed{display:none}html:not(.ms-named) .hero .named{display:none}
+.hero .hero-pro{display:inline-flex;width:max-content;max-width:100%;align-self:flex-start;justify-self:start;margin:0 0 10px;position:relative}
+@media(min-width:761px){#v-home .hero .hstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 18px}}
+
+/* ===== Phone navigation: bottom tab bar + "More" sheet with every tool ===== */
+.hrt-tabbar,.hrt-navback{display:none}
+@media(max-width:900px){
+ .hrt-tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0e1b2c;border-top:1px solid #22344f;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+ html.ms-pro .hrt-tabbar{box-shadow:inset 0 1px 0 rgba(242,184,75,.35)}
+ .hrt-tabbar a,.hrt-tabbar button{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:48px;padding:4px 2px;border:0;background:none;color:#9fb2c7;font:inherit;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .hrt-tabbar .on,.hrt-tabbar [aria-expanded="true"]{color:#fff}
+ .hrt-tabbar .on svg{color:#f2b84b}
+ .hrt-main{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+ .hrt-sb .hrt-nav{display:none}
+ html.nav-open .hrt-sb .hrt-nav{display:flex;position:fixed;left:0;right:0;bottom:calc(61px + env(safe-area-inset-bottom));z-index:59;flex-direction:column;flex-wrap:nowrap;gap:2px;max-height:72vh;overflow-y:auto;padding:14px 12px 16px;background:#0e1b2c;border-radius:18px 18px 0 0;border-top:1px solid #22344f;box-shadow:0 -18px 40px rgba(0,0,0,.4)}
+ html.nav-open .hrt-sb .hrt-lbl{display:block;margin:12px 6px 4px}
+ html.nav-open .hrt-sb .hrt-lbl:first-child{margin-top:0}
+ html.nav-open .hrt-navi{white-space:normal;padding:11px 12px;min-height:44px}
+ html.nav-open .hrt-navi.on{box-shadow:inset 3px 0 0 #e8824c}
+ html.nav-open .hrt-navback{display:block;position:fixed;inset:0;z-index:58;background:rgba(5,10,16,.55)}
+}
 html:not(.ms-pro) .pro-only{display:none!important}
 html.ms-pro .free-only{display:none!important}
 html.ms-pro .atmos-tabs{display:none}
@@ -191,25 +212,19 @@ html.ms-ready .hrt-boot{display:none}
 <!-- ================= HOME ================= -->
 <section class="view" data-page="home" id="v-home">
 <div class="content">
- <div class="pro-welcome pro-only">
-  <span class="pro-pill">&#9733; HRT PRO</span>
-  <div class="pw-text"><h2>Aloha, <span class="ms-first-name">PRO member</span></h2><p>Your PRO tools are unlocked. Fresh Atmos saver space lands every morning.</p></div>
-  <div class="pw-links"><a href="#atmos" data-route="atmos" data-cal="calendar.html">Deals Calendar</a><a href="#atmos" data-route="atmos" data-cal="search.html">Deals Search</a><a href="#atmos" data-route="atmos" data-cal="explore.html">Points Explorer</a></div>
- </div>
- <!-- My Wallet summary: the member's key numbers, first thing after the greeting -->
- <div id="wl-summary"></div>
  <div class="toprow">
   <div class="hero">
    <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
    <span class="plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>
-   <h1><span class="free-only">Aloha, welcome to <span class="wave">HRT Free Tools</span></span><span class="pro-only">Your everyday <span class="wave">HRT tools</span></span></h1>
-   <p>The tools we use to plan points and miles trips from the islands, in one place and free for every Hawaiʻi traveler.</p>
-   <div class="cta-row"><a class="btn coral" href="#kamaaina" data-route="kamaaina">Find a staycation deal &rarr;</a><a class="btn ghost" href="#transfers" data-route="transfers">See transfer bonuses</a></div>
+   <span class="pro-pill pro-only hero-pro">&#9733; HRT PRO</span>
+   <h1><span class="named">Aloha, <span class="wave ms-first-name">friend</span></span><span class="unnamed">Aloha, welcome to <span class="wave">HRT</span></span></h1>
+   <p class="free-only">The tools we use to plan points and miles trips from the islands, in one place and free for every Hawaiʻi traveler.</p><p class="pro-only">Your PRO tools are unlocked. Fresh Atmos award space lands every morning.</p>
+   <div class="cta-row"><a class="btn coral" href="#wallet" data-route="wallet">Open My Wallet &rarr;</a><a class="btn ghost free-only" href="#atmos" data-route="atmos">Atmos tools</a><a class="btn ghost pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Atmos tools</a><a class="btn ghost" href="#kamaaina" data-route="kamaaina">Kamaʻāina deals</a></div>
    <div class="hstats">
     <div class="hstat"><b class="tnum" id="hmKama">&ndash;</b><span><i style="background:#9fc1d4"></i>Kamaʻāina hotel deals</span></div>
     <div class="hstat"><b class="tnum" id="hmTb">&ndash;</b><span><i style="background:#3fce7f"></i>Transfer bonuses live</span></div>
     <div class="hstat"><b class="tnum" id="hmTbBest">&ndash;</b><span><i style="background:#e8c15e"></i>Best transfer bonus</span></div>
-    <div class="hstat"><b class="tnum" id="hmResy">&ndash;</b><span><i style="background:#f2726e"></i>Resy credit spots</span></div>
+    <div class="hstat" id="hmFirstWrap" hidden><b class="tnum" id="hmFirst">&ndash;</b><span><i style="background:#f2b84b"></i>First class deals from Hawaiʻi</span></div>
    </div>
   </div>
   <div class="spot procard">
@@ -229,6 +244,8 @@ html.ms-ready .hrt-boot{display:none}
    </div>
   </div>
  </div>
+ <!-- My Wallet summary: secondary, under the greeting row -->
+ <div id="wl-summary"></div>
 
  <!-- My Wallet: premier spot, under the Aloha banner and the Atmos box -->
  <div id="wl-home"></div>
@@ -774,6 +791,7 @@ html.ms-ready .hrt-boot{display:none}
   document.documentElement.classList.toggle("ms-pro",ok);
   var nm=(m&&m.customFields&&(m.customFields["first-name"]||m.customFields.firstName))||"";
   document.querySelectorAll(".ms-first-name").forEach(function(el){ if(nm) el.textContent=nm; });
+  document.documentElement.classList.toggle("ms-named", !!nm);
   /* after a checkout, land on the unlocked Atmos page */
   try{ if(ok && localStorage.getItem("hrtGoAtmos")){ localStorage.removeItem("hrtGoAtmos"); location.hash="atmos"; } }catch(e){}
   var f=document.getElementById("atmosIframe");
@@ -803,5 +821,24 @@ html.ms-ready .hrt-boot{display:none}
 })();
 </script>
 
-</main></div>
+</main><nav class="hrt-tabbar" aria-label="Main menu"><a href="#home" data-route="home" data-tab="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Home</span></a><a href="#wallet" data-route="wallet" data-tab="wallet"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a1 1 0 0 1 1 1v2"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5Z"/><circle cx="16" cy="13.5" r="1.2"/></svg><span>Wallet</span></a><a class="free-only" href="#atmos" data-route="atmos" data-tab="atmos"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Atmos</span></a><a class="pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html" data-tab="atmos"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Atmos</span></a><a href="#kamaaina" data-route="kamaaina" data-tab="kamaaina"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="11" r="1.6"/></svg><span>Deals</span></a><button type="button" data-navmore aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>More</span></button></nav><div class="hrt-navback" data-navclose></div>
+</div>
+<script>
+/* Phone tab bar: highlight the current tab, open and close the More sheet */
+(function(){
+ var root=document.documentElement;
+ var ATMOS={atmos:1,status:1,communities:1};
+ function mark(){
+  var h=(location.hash||"#home").slice(1)||"home"; var t=ATMOS[h]?"atmos":h;
+  document.querySelectorAll(".hrt-tabbar [data-tab]").forEach(function(a){a.classList.toggle("on",a.getAttribute("data-tab")===t);});
+ }
+ function setOpen(o){ root.classList.toggle("nav-open",o); var b=document.querySelector("[data-navmore]"); if(b) b.setAttribute("aria-expanded",o?"true":"false"); }
+ document.addEventListener("click",function(e){
+  if(!e.target.closest) return;
+  if(e.target.closest("[data-navmore]")){ setOpen(!root.classList.contains("nav-open")); return; }
+  if(e.target.closest("[data-navclose]")||e.target.closest("#sideNav a")||e.target.closest(".hrt-tabbar a")) setOpen(false);
+ });
+ window.addEventListener("hashchange",mark); mark();
+})();
+</script>
 <script src="assets/theme.js"></script></body></html>

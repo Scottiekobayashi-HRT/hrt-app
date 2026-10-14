@@ -1080,14 +1080,13 @@
         nx ? esc(shortName(nx.card.name)) : "") +
       "</dl>";
     if (s.yearly > 0 && credits > 0) {
-      var max = Math.max(s.yearly, credits), feePos = Math.round(s.yearly / max * 100), crW = Math.round(credits / max * 100);
-      var line = credits >= s.yearly
-        ? "If you use them, your credits are worth " + (Math.round(credits / s.yearly * 10) / 10) + " times your annual fees."
-        : "Your credits cover " + Math.round(credits / s.yearly * 100) + "% of your annual fees.";
-      html += '<div class="wl-sum-meter" role="img" aria-label="Annual fees ' + esc(money(s.yearly)) + ", credits up to " + esc(money(credits)) + '">' +
-        '<div class="wl-sum-bar"><span class="wl-sum-cr" style="width:' + crW + '%"></span><span class="wl-sum-fee" style="left:' + feePos + '%"></span></div>' +
-        '<div class="wl-sum-legend"><span class="cr">Credits a year</span><span class="fee">Annual fees</span></div>' +
-        '<p class="wl-sum-note">' + esc(line) + " Passes, companion fares and points are extra.</p></div>";
+      /* Plain sentence instead of a bar: Scottie found the fees vs credits bar hard to read. */
+      var diff = credits - s.yearly;
+      var line = diff >= 0
+        ? "Use every credit and you get back " + money(credits) + " a year, " + money(diff) + " more than the " + money(s.yearly) + " you pay in fees."
+        : "Your credits add up to " + money(credits) + " a year, " + money(-diff) + " less than the " + money(s.yearly) + " you pay in fees.";
+      html += '<div class="wl-sum-meter"><p class="wl-sum-verdict ' + (diff >= 0 ? "up" : "down") + '">' + esc(line) + '</p>' +
+        '<p class="wl-sum-note">Lounge passes, companion fares and points are on top of that.</p></div>';
     }
     if (alerts.length) {
       html += '<ul class="wl-sum-alerts" aria-label="Needs your attention">' + alerts.map(function (a) {
@@ -1328,7 +1327,8 @@
       ".wl-sum dt{margin:0 0 3px;font-size:12.5px;color:#9fb4c8}",
       ".wl-sum dd{margin:0;font-size:21px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
       ".wl-sum dd small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:#9fb4c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-      ".wl-sum .wl-sum-meter{margin-top:18px}",
+      ".wl-sum .wl-sum-meter{margin-top:16px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.06)}",
+      ".wl-sum .wl-sum-verdict{margin:0;font-size:14.5px;font-weight:700;line-height:1.45;color:#fff}.wl-sum .wl-sum-verdict.up{color:#a6e9c3}",
       ".wl-sum .wl-sum-bar{position:relative;height:10px;border-radius:999px;background:rgba(255,255,255,.1)}",
       ".wl-sum .wl-sum-cr{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#2fb46c,#7fe0a8)}",
       ".wl-sum .wl-sum-fee{position:absolute;top:-5px;bottom:-5px;width:4px;margin-left:-2px;border-radius:2px;background:#f2b84b;box-shadow:0 0 0 2px #10243a}",
