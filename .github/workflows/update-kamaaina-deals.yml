@@ -12,9 +12,10 @@
 # workflow. Untick "publish" to see the list without changing the site.
 name: Update Kamaaina deals
 
+# PAUSED Oct 14 2026: HVCB answers GitHub's servers with 403 Access Denied,
+# so the daily run moved to Scottie's Mac mini (tools/kamaaina/mac/).
+# Kept for manual runs only.
 on:
-  schedule:
-    - cron: "47 15 * * *"   # 5:47am Hawaii time, every day
   workflow_dispatch:
     inputs:
       publish:
@@ -66,7 +67,7 @@ jobs:
             D.slice(0,15).forEach((d,i)=>console.log((i+1)+". ["+d.s+"] "+d.b+" | "+d.t+" | "+d.i.join("+")+" | ends "+d.e));'
 
       - name: Commit only if the deals changed
-        if: github.event_name == 'schedule' || inputs.publish
+        if: inputs.publish
         run: |
           f=hrt-app/data/kamaaina-deals.js
           if git diff --quiet -I 'HRT_KAMAAINA_UPDATED' -- "$f"; then
