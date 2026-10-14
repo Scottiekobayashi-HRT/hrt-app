@@ -52,7 +52,12 @@ async function collectPaths(page, path) {
 
 async function main() {
   const today = hawaiiToday();
-  const browser = await chromium.launch();
+  /* On the Mac: KAMAAINA_CHANNEL=chrome uses the installed Google Chrome, and
+     KAMAAINA_HEADED=1 shows a real window for the minute or two it runs. */
+  const browser = await chromium.launch({
+    channel: process.env.KAMAAINA_CHANNEL || undefined,
+    headless: process.env.KAMAAINA_HEADED !== "1"
+  });
   const page = await browser.newPage();
   const all = new Set();
   for (const p of ISLANDS) {

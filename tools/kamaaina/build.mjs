@@ -65,13 +65,20 @@ export function clip(s, n) {
 }
 
 /* What a deal gives: percent off, fee discount, perks, nightly price */
-export function readDeal(text, isStay) {
-  const t = " " + text.replace(/\s+/g, " ") + " ";
+/* Room or ticket percent off. The headline wins when it names one, because
+   descriptions often mention other percentages (spa, parking, dining). */
+function pctOff(text) {
   let p = 0;
-  for (const m of t.matchAll(/(?:up to |save |enjoy |receive |get |a )?(\d{1,2})\s?%\s*(?:off|discount|savings)?([^.;,%]{0,40})/gi)) {
+  for (const m of (" " + text + " ").matchAll(/(?:up to |save |enjoy |receive |get |a )?(\d{1,2})\s?%\s*(?:off|discount|savings)?([^.;,%]{0,40})/gi)) {
     const v = +m[1], tail = (m[2] || "").toLowerCase();
     if (v > 0 && v <= 75 && !/amenity|resort fee|resort charge|parking|valet|spa|dining|food|f&b|retail|restaurant|breakfast/.test(tail)) { p = Math.max(p, v); }
   }
+  return p;
+}
+
+export function readDeal(text, isStay, headline) {
+  const t = " " + text.replace(/\s+/g, " ") + " ";
+  const p = (headline && pctOff(headline)) || pctOff(t);
   let a = 0;
   const am = t.match(/(\d{1,3})\s?%\s*off[^.%]{0,25}(?:amenity|resort)\s*(?:fee|charge)/i);
   if (am) a = Math.min(100, +am[1]);
@@ -128,7 +135,7 @@ export function fromHvcb(o, today, prev) {
   const t = stripHtml(o.title);
   const desc = stripHtml(o.description);
   const terms = stripHtml(udf["2703"] && udf["2703"].value);
-  const deal = readDeal([t, desc].join(". "), g === "Stays");
+  const deal = readDeal([t, desc].join(". "), g === "Stays", t);
   const key = (b + "|" + t).toLowerCase();
   const old = prev[key] || prev["b:" + b.toLowerCase()];
   const h = (old && old.h) || areaFor(L.city);
@@ -154,7 +161,7 @@ export function fromSheet(r, today, prev) {
   const g = groupFor(r.category || "Accommodations");
   const b = stripHtml(r.business), t = stripHtml(r.title);
   const desc = stripHtml(r.description), terms = stripHtml(r.terms);
-  const deal = readDeal([t, desc].join(". "), g === "Stays");
+  const deal = readDeal([t, desc].join(". "), g === "Stays", t);
   if (r.percent_off) deal.p = +r.percent_off || deal.p;
   if (r.perks) deal.k = r.perks.split(/\s*;\s*/).filter(Boolean);
   if (r.nightly_from) deal.v = +r.nightly_from || deal.v;

@@ -31,6 +31,8 @@ eq("no em dash", stripHtml("<p>Ocean view — best rate</p>"), "Ocean view, best
 eq("rating", [ratingFor(88), ratingFor(40), ratingFor(25), ratingFor(5)], ["Top pick", "Strong", "Solid", "Worth a look"]);
 eq("days left", daysLeft("2026-12-31", "2026-10-14"), 78);
 
+eq("headline percent wins", readDeal("Enjoy 30% off room rates, No Amenity Fees. Up to 50% off select stays", true, "Enjoy 30% off room rates, No Amenity Fees").p, 30);
+
 /* offer page parsing */
 const html = '<script>var data = {"recid":"2856","title":"Enjoy up to 10% off room rate","description":"<p>Up to 10% off room rates</p>","offerlink":"https://www.aquaaston.com/x","categories":[{"categoryid":7}],"udfs_object":{"2724":{"valuearray":[{"listid":5626,"value":"Oʻahu"}]},"3915":{"value":"Accommodations - Oʻahu"},"2703":{"value":"Rates plus tax. {braces} \\"quoted\\""}},"listings":[{"title":"Aston at the Executive Centre Hotel","city":"Honolulu","region":"Oʻahu","latitude":21.30932,"longitude":-157.86,"primary_category":{"catname":"Accommodations"}}]};</script>' +
   '<script type="application/ld+json">{"validFrom":"2026-09-28","priceValidUntil":"2027-09-27"}</script>';
