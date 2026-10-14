@@ -251,6 +251,16 @@
       .replace(/^Chase /, "").replace(/ Rewards$/, "");
     return amex ? "Amex " + n : n;
   }
+  /* Card art: the issuer's own card image when the sheet has one, otherwise a
+     plain card in the issuer's colour. The plain card sits underneath the image,
+     so if an image ever fails to load the member still sees a tidy card. */
+  var ISSUER_SHORT = { "American Express": "AMEX", "Chase": "CHASE", "Capital One": "CAPITAL ONE", "Bank of America": "ATMOS" };
+  function artHtml(c, size) {
+    var tone = ISSUER_TONE[c.issuer] || "#7a8ca0";
+    return '<span class="wl-art wl-art-' + size + '" style="--tone:' + tone + '" aria-hidden="true">' +
+      '<span class="wl-art-ph"><i></i>' + esc(ISSUER_SHORT[c.issuer] || c.issuer || "") + "</span>" +
+      (c.art ? '<img src="' + esc(c.art) + '" alt="" loading="lazy" decoding="async">' : "") + "</span>";
+  }
   function shortAmount(b) {
     if (!(b.amount > 0)) return "";
     if (b.unit === "usd") return " " + money(b.amount);
@@ -638,7 +648,7 @@
     var feeLine = r.hasFee ? money(c.fee) + " a year" : "No annual fee";
     var renewLine = r.hasFee ? "Renews " + esc(renewalText(rn)) : "Opened " + esc(openedText(e.opened));
     var html = '<li class="wl-row' + (soon ? " wl-soon" : "") + '" data-entry="' + esc(e.id) + '"><div class="wl-rowtop">' +
-      '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
+      artHtml(c, "md") + '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
       '<span class="wl-sub">' + esc(c.issuer) + (e.nickname ? " &middot; " + esc(e.nickname) : "") + "</span>" +
       '<span class="wl-meta">' + renewLine + (r.hasFee ? ' <span class="wl-dot">&middot;</span> Opened ' + esc(openedText(e.opened)) : "") + "</span>" +
       valueLine(credits, other) +
@@ -724,10 +734,10 @@
       if (bf.activate) pills += '<span class="wl-tl-pill">Activate 5% by ' + esc(dayText(bf.activate.period.end)) + "</span>";
       if (bf.renewSoon) pills += '<span class="wl-tl-pill">Renews in ' + bf.renewal.days + (bf.renewal.days === 1 ? " day" : " days") + "</span>";
       if (bf.open > 1) pills += '<span class="wl-tl-pill soft">' + bf.open + " credits open</span>";
-      return '<button class="wl-tile" data-wl="go-card" data-id="' + esc(e.id) + '" style="--tone:' + (ISSUER_TONE[c.issuer] || "#7a8ca0") + '">' +
-        '<span class="wl-tl-name">' + esc(shortName(c.name)) + "</span>" +
+      return '<button class="wl-tile" data-wl="go-card" data-id="' + esc(e.id) + '">' + artHtml(c, "sm") +
+        '<span class="wl-tl-body"><span class="wl-tl-name">' + esc(shortName(c.name)) + "</span>" +
         (e.nickname ? '<span class="wl-tl-nick">' + esc(e.nickname) + "</span>" : "") + lines +
-        (pills ? '<span class="wl-tl-pills">' + pills + "</span>" : "") + "</button>";
+        (pills ? '<span class="wl-tl-pills">' + pills + "</span>" : "") + "</span></button>";
     }).join("") + "</div>";
     html += whichHtml();
     if (soon.length) {
@@ -766,12 +776,12 @@
       var list = whichCard(state.wallet, catalog(), k);
       if (list.length) {
         var top = list[0];
-        res = '<div class="wl-wc-res" aria-live="polite"><div class="wl-wc-best"><span class="wl-wc-tag">Use this card</span>' +
+        res = '<div class="wl-wc-res" aria-live="polite"><div class="wl-wc-top">' + artHtml(top.card, "sm") + '<div class="wl-wc-best"><span class="wl-wc-tag">Use this card</span>' +
           '<b class="wl-wc-name">' + esc(shortName(top.card.name)) + (top.entry.nickname ? ' <span class="wl-dim">(' + esc(top.entry.nickname) + ")</span>" : "") + "</b>" +
           '<span class="wl-wc-why"><b>' + esc(top.rateText) + "</b> on " + esc(top.row.groups.indexOf("everyday") > -1 ? "everything" :
             top.row.groups.indexOf("rotating") > -1 ? sp.label.toLowerCase() + " this quarter" : top.row.category.charAt(0).toLowerCase() + top.row.category.slice(1)) +
           ", " + esc(valueText(top.value)) + "</span>" +
-          (top.notes.length ? '<span class="wl-wc-notes">' + top.notes.map(esc).join(". ") + "</span>" : "") + "</div>" +
+          (top.notes.length ? '<span class="wl-wc-notes">' + top.notes.map(esc).join(". ") + "</span>" : "") + "</div></div>" +
           (list.length > 1 ? '<ol class="wl-wc-rest" start="2">' + list.slice(1, 4).map(function (c) {
             return "<li><b>" + esc(shortName(c.card.name)) + "</b> " + esc(c.rateText) + ", " + esc(valueText(c.value)) +
               (c.notes.length ? ' <span class="wl-dim">(' + esc(c.notes[0]) + ")</span>" : "") + "</li>";
@@ -994,6 +1004,7 @@
       ".wl-err{margin:0;min-height:1em;font-size:13px;font-weight:700;color:#c0392b}",
       ".wl-acts{display:flex;gap:10px}",
       ".wl-rowtop{display:flex;justify-content:space-between;gap:14px}",
+      ".wl-rowtop>.wl-main{flex:1;min-width:0}",
       ".wl-row{flex-direction:column;gap:0}",
       ".wl-value{font-size:12.5px;font-weight:700;color:#2f855a;margin-top:2px}",
       "[data-theme=dark] .wl-value{color:#6fd39b}",
@@ -1070,7 +1081,7 @@
         ".wl-sum .wl-sum-stat:nth-child(odd){padding-left:0;border-left:0}" +
         ".wl-sum .wl-sum-stat:nth-child(n+3){border-top:1px solid rgba(255,255,255,.13);margin-top:10px}" +
         ".wl-sum dd{font-size:19px}.wl-sum .wl-btn{min-height:44px}}",
-      ".wl-wc-h{margin-top:18px}.wl-card > .wl-wc .wl-wc-h{margin-top:0}",
+      ".wl-wc-h{margin-top:18px}.wl-card > .wl-wc .wl-wc-h{margin-top:0}.wl-card.wl-hm > .wl-wc .wl-wc-h{margin-top:22px}",
       ".wl-chips{display:flex;flex-wrap:wrap;gap:7px}",
       ".wl-chip{all:unset;box-sizing:border-box;cursor:pointer;min-height:38px;padding:0 13px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;font-size:13.5px;font-weight:700;color:var(--text);background:var(--surface);-webkit-tap-highlight-color:transparent}",
       ".wl-chip:hover{border-color:var(--coral)}.wl-chip:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
@@ -1107,8 +1118,16 @@
       ".wl-hm-sub{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}",
       ".wl-hm-list{margin-top:0}",
       ".wl-hm-h4{margin-top:18px}",
-      ".wl-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:16px}",
-      ".wl-tile{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:12px 13px 12px 15px;border:1px solid var(--line);border-left:4px solid var(--tone);border-radius:12px;background:var(--surface);transition:box-shadow .15s,transform .15s}",
+      ".wl-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:16px}",
+      ".wl-tile{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);transition:box-shadow .15s,transform .15s}",
+      ".wl-tl-body{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}",
+      ".wl-art{position:relative;flex:0 0 auto;display:block;aspect-ratio:1.586;border-radius:6px;overflow:hidden;box-shadow:0 1px 2px rgba(10,20,35,.25),0 3px 8px rgba(10,20,35,.12)}",
+      ".wl-art-sm{width:78px;border-radius:5px}.wl-art-md{width:104px}",
+      ".wl-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}",
+      ".wl-art-ph{position:absolute;inset:0;display:flex;align-items:flex-end;padding:0 0 6% 8%;box-sizing:border-box;background:linear-gradient(135deg,var(--tone),#0e1b2c);color:rgba(255,255,255,.85);font:800 8px/1 system-ui,sans-serif;letter-spacing:.08em}",
+      ".wl-art-md .wl-art-ph{font-size:9.5px}",
+      ".wl-art-ph i{position:absolute;left:9%;top:30%;width:17%;height:21%;border-radius:2px;background:linear-gradient(135deg,#e8d39a,#b8954a);opacity:.9}",
+      ".wl-wc-top{display:flex;gap:12px;align-items:flex-start}",
       ".wl-tile:hover{box-shadow:var(--shadow);transform:translateY(-1px)}",
       ".wl-tile:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
       ".wl-tl-name{font-size:14.5px;font-weight:800;color:var(--text)}",
@@ -1151,20 +1170,20 @@
         ".wl-clamp.full{display:block;-webkit-line-clamp:unset;overflow:visible}" +
         ".wl-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:14px -14px 0;padding:2px 14px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}" +
         ".wl-tiles::-webkit-scrollbar{display:none}" +
-        ".wl-tile{flex:0 0 76%;scroll-snap-align:start;scroll-margin-left:14px}" +
+        ".wl-tile{flex:0 0 84%;scroll-snap-align:start;scroll-margin-left:14px}" +
         ".wl-tl-pill{font-size:12px}" +
         ".wl-earn li{gap:10px}.wl-rate{flex-basis:52px}" +
         ".wl-btn{min-height:44px}" +
         ".wl-perkbtn{min-height:40px;padding:8px 14px}" +
         ".wl-form select,.wl-form input{min-height:44px;font-size:16px}" +
       "}",
-      "@media (max-width:560px){.wl-rowtop{flex-direction:column;gap:8px}.wl-side{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:8px 12px;align-items:center}.wl-rowacts{margin-left:auto}.wl-date{grid-template-columns:1fr 1fr}.wl-date select:first-child{grid-column:1/-1}}"
+      "@media (max-width:560px){.wl-rowtop{display:grid;grid-template-columns:auto 1fr;gap:8px 12px}.wl-rowtop>.wl-side{grid-column:1/-1}.wl-art-md{width:72px;border-radius:5px}.wl-art-md .wl-art-ph{font-size:7.5px}.wl-side{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:8px 12px;align-items:center}.wl-rowacts{margin-left:auto}.wl-date{grid-template-columns:1fr 1fr}.wl-date select:first-child{grid-column:1/-1}}"
     ].join("");
     document.head.appendChild(s);
   }
 
   window.HRT_WALLET = {
-    _test: { parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
+    _test: { artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,

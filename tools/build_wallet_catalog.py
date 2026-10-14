@@ -95,6 +95,11 @@ def checked_date(v, where):
     return s
 
 
+# Card art: an https link only. No spaces, quotes, brackets or backslashes, so the
+# link is always safe inside an <img src="..."> attribute.
+ART_RE = re.compile(r'^https://[^\s"\'<>()\\]+$')
+
+
 def build_cards(ws):
     cards, seen = [], set()
     for n, r in rows(ws):
@@ -111,7 +116,10 @@ def build_cards(ws):
         name = text(r.get("card_name", ""))
         if not name:
             raise SheetError(f"{where}: card_name is empty")
-        cards.append({
+        art = text(r.get("card_art", ""))
+        if art and not ART_RE.match(art):
+            raise SheetError(f"{where}: card_art must be an https image link with no spaces or quotes")
+        card = {
             "id": cid,
             "issuer": text(r.get("issuer", "")),
             "name": name,
@@ -121,7 +129,10 @@ def build_cards(ws):
             "note": text(r.get("notes", "")),
             "source": text(r.get("source_url", "")),
             "checked": checked_date(r.get("checked", ""), where),
-        })
+        }
+        if art:
+            card["art"] = art
+        cards.append(card)
     if not cards:
         raise SheetError("Cards tab has no cards")
     return cards

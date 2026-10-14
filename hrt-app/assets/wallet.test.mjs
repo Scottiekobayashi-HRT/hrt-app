@@ -259,6 +259,12 @@ ok('value text', T.valueText(10.25) === 'worth about 10.3% back' && T.valueText(
 ok('every spend type answers for the sample wallet', T.SPEND.every(sp => wc(seven, sp.key).length === 7));
 
 // --- house style ---
+// --- card art ---
+ok('card art links are https only', CAT.cards.every(c => !c.art || /^https:\/\/[^\s"'<>()\\]+$/.test(c.art)));
+const artA = T.artHtml({ issuer: 'Chase', name: 'X', art: 'https://img.example/a.png?x=1&y=2' }, 'sm');
+ok('card with art shows the image over a plain card', /<img src="https:\/\/img\.example\/a\.png\?x=1&amp;y=2"/.test(artA) && artA.includes('wl-art-ph'));
+const artB = T.artHtml({ issuer: 'Capital One', name: 'Y' }, 'md');
+ok('card without art shows a plain card in the issuer colour', !artB.includes('<img') && artB.includes('CAPITAL ONE') && artB.includes('#c4473a'));
 const src = fs.readFileSync('./assets/wallet.js', 'utf8') + fs.readFileSync('./data/wallet-catalog.js', 'utf8');
 ok('no em or en dashes in member-facing code', !/[–—]/.test(src.replace(/\\u201[34]/g, '')));
 
