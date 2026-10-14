@@ -18,7 +18,9 @@
    Wallet shape (v1):
      { v:1,
        cards:  [ { id, cardId, opened:"2024-03-15" or "2024-03", nickname,
-                   used: { perkId: { periodKey: true or amount used } }, ...future fields kept } ],
+                   used: { perkId: { periodKey: true or amount used } },
+                   bonus: { spend, months, spent, reward } (optional welcome bonus),
+                   ...future fields kept } ],
        points: [ { program, balance, asOf } ] }
 
    Memberstack's docs say never gate access on Member JSON. Nothing here does.
@@ -68,6 +70,14 @@
       if (typeof c.cardId !== "string" || !c.cardId) throw fail("INVALID", "card " + i + " cardId");
       if (typeof c.opened !== "string" || !OPENED_RE.test(c.opened)) throw fail("INVALID", "card " + i + " opened date");
       if (c.nickname != null && (typeof c.nickname !== "string" || c.nickname.length > 40)) throw fail("INVALID", "card " + i + " nickname");
+      if (c.bonus != null) {
+        var bn = c.bonus;
+        if (typeof bn !== "object" || Array.isArray(bn)) throw fail("INVALID", "card " + i + " bonus");
+        if (!(typeof bn.spend === "number" && bn.spend > 0 && bn.spend <= 1000000)) throw fail("INVALID", "card " + i + " bonus spend");
+        if (!(typeof bn.months === "number" && bn.months % 1 === 0 && bn.months >= 1 && bn.months <= 24)) throw fail("INVALID", "card " + i + " bonus months");
+        if (bn.spent != null && !(typeof bn.spent === "number" && bn.spent >= 0 && bn.spent <= 10000000)) throw fail("INVALID", "card " + i + " bonus spent");
+        if (bn.reward != null && (typeof bn.reward !== "string" || bn.reward.length > 40)) throw fail("INVALID", "card " + i + " bonus reward");
+      }
       if (c.used != null) {
         if (typeof c.used !== "object" || Array.isArray(c.used)) throw fail("INVALID", "card " + i + " used");
         Object.keys(c.used).forEach(function (pid) {

@@ -102,6 +102,16 @@ ok('negative amount refused', await code(S.update(d => { d.cards[0].used.resy['2
 ok('used as a list refused', await code(S.update(d => { d.cards[0].used = []; })) === 'INVALID');
 ok('refused ticks write nothing', f.writes === 1);
 
+// 11c. welcome bonus is checked
+f = fakeMs({ wallet: { v: 1, cards: [card('a')], points: [] } });
+await S.update(d => { d.cards[0].bonus = { spend: 6000, months: 3, spent: 2350, reward: '100,000 points' }; });
+ok('valid welcome bonus saves', f.stored.wallet.cards[0].bonus.spent === 2350);
+ok('bonus without spend refused', await code(S.update(d => { d.cards[0].bonus = { months: 3 }; })) === 'INVALID');
+ok('bonus with odd months refused', await code(S.update(d => { d.cards[0].bonus = { spend: 4000, months: 2.5 }; })) === 'INVALID');
+ok('bonus with negative spent refused', await code(S.update(d => { d.cards[0].bonus.spent = -1; })) === 'INVALID');
+ok('bonus with long reward refused', await code(S.update(d => { d.cards[0].bonus.reward = 'x'.repeat(41); })) === 'INVALID');
+ok('refused bonus writes nothing', f.writes === 1);
+
 // 12. size limit
 f = fakeMs({ big: 'x'.repeat(S._test.MAX_BYTES), wallet: { v: 1, cards: [], points: [] } });
 ok('over the size limit refused', await code(S.update(d => { d.cards.push(card('a')); })) === 'TOO_BIG' && f.writes === 0);

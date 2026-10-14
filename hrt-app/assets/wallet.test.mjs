@@ -259,6 +259,57 @@ ok('value text', T.valueText(10.25) === 'worth about 10.3% back' && T.valueText(
 ok('every spend type answers for the sample wallet', T.SPEND.every(sp => wc(seven, sp.key).length === 7));
 
 // --- house style ---
+// --- store search ---
+const FS = q => (T.findStore(q) || {}).name;
+ok('Foodland is a grocery store', T.findStore('foodland').spend === 'grocery');
+ok('typing part of a name finds it', FS('food') === 'Foodland' && FS('cost') === 'Costco');
+ok('name then branch still matches', FS('Foodland Kapolei') === 'Foodland' && FS('longs drugs waipahu') === 'Longs Drugs');
+ok('Hawaiian Electric is not Hawaiian Airlines', FS('hawaiian electric') === 'Hawaiian Electric' && FS('hawaiian') === 'Hawaiian Airlines');
+ok('Uber Eats is dining, Uber is a ride', T.findStore('uber eats').spend === 'dining' && T.findStore('uber').spend === 'transit');
+ok("apostrophes and ampersands are ignored", FS("Zippy's") === "Zippy's" && FS('L&L') === 'L&L Hawaiian Barbecue');
+ok('Hawaii Gas is a bill, not a gas station', T.findStore('hawaii gas').spend === 'everyday');
+ok('unknown store finds nothing', T.findStore('zzqx shop') === null && T.findStore('a') === null);
+ok('every store points at a real spend type', T.STORES.every(st => T.SPEND.some(x => x.key === st.spend)));
+const costcoW = { v: 1, points: [], cards: [{ id: 'g', cardId: 'amex-gold', opened: '2023-06-08' }, { id: 'vx', cardId: 'capone-venture-x', opened: '2022-11-02' }] };
+const cw = T.whichCard(costcoW, CAT, 'everyday', null, null, { visaOnly: true });
+ok('Costco leaves out cards that are not Visa', cw.length === 1 && cw[0].card.id === 'capone-venture-x');
+ok('no Visa at Costco gives an empty list', T.whichCard({ v: 1, points: [], cards: [costcoW.cards[0]] }, CAT, 'everyday', null, null, { visaOnly: true }).length === 0);
+
+// --- Sapphire Reserve in the catalog ---
+const CSR = CAT.cards.find(c => c.id === 'chase-sapphire-reserve');
+ok('Sapphire Reserve is in the catalog with its fee and art', CSR && CSR.fee === 795 && /^https:/.test(CSR.art));
+ok('Reserve $300 travel credit resets on the anniversary', P('chase-sapphire-reserve', 'travel').resets === 'anniversary');
+const csrW = { v: 1, points: [], cards: [{ id: 'r', cardId: 'chase-sapphire-reserve', opened: '2024-05-01' }] };
+ok('Reserve wins dining at 3x', T.whichCard(csrW, CAT, 'dining')[0].rate === 3);
+
+// --- keep or cancel ---
+const oct13 = { y: 2026, m: 10, d: 13 };
+ok('card year starts on the last anniversary', JSON.stringify(T.cardYearStart('2022-11-02', oct13)) === '{"y":2025,"m":11,"d":2}');
+ok('card year of a new card starts on its open date', JSON.stringify(T.cardYearStart('2026-09-03', oct13)) === '{"y":2026,"m":9,"d":3}');
+const vxE = { id: 'vx', cardId: 'capone-venture-x', opened: '2022-11-02', used: { travel: { A2025: true } } };
+const u1 = T.usedThisCardYear(vxE, CAT, oct13);
+ok('a ticked anniversary credit counts in full', u1.used === 300, JSON.stringify(u1));
+ok('last card year does not count', T.usedThisCardYear({ ...vxE, used: { travel: { A2024: true } } }, CAT, oct13).used === 0);
+const platE = { id: 'p', cardId: 'amex-platinum', opened: '2024-03-15', used: { uber: { '2026-04': true, '2026-05': 7, '2026-02': true }, resy: { '2026-Q1': true } } };
+const u2 = T.usedThisCardYear(platE, CAT, oct13);
+ok('monthly ticks and partial amounts add up within the card year', u2.used === 15 + 7 + 100, JSON.stringify(u2));
+ok('nothing ticked means nothing used', T.usedThisCardYear({ id: 'x', cardId: 'amex-gold', opened: '2023-06-08' }, CAT, oct13).used === 0);
+
+// --- welcome bonus ---
+const bE = { id: 'b', cardId: 'chase-sapphire-reserve', opened: '2026-09-03', bonus: { spend: 6000, months: 3, spent: 2350, reward: '100,000 points' } };
+const b1 = T.bonusState(bE, oct13);
+ok('bonus deadline is open date plus the months', JSON.stringify(b1.by) === '{"y":2026,"m":12,"d":3}' && b1.days === 51 && !b1.approx);
+ok('bonus shows what is left', b1.left === 3650 && b1.pct === 39 && !b1.met && !b1.missed);
+ok('month-only open date uses the earliest deadline', JSON.stringify(T.bonusState({ ...bE, opened: '2026-09' }, oct13).by) === '{"y":2026,"m":11,"d":30}');
+ok('deadline in the next year rolls over', JSON.stringify(T.bonusState({ ...bE, opened: '2026-11-30' }, oct13).by) === '{"y":2027,"m":2,"d":28}');
+ok('spend reached is met', T.bonusState({ ...bE, bonus: { ...bE.bonus, spent: 6000 } }, oct13).met);
+ok('deadline passed is missed', T.bonusState({ ...bE, opened: '2026-05-01' }, oct13).missed);
+ok('no bonus, no state', T.bonusState({ ...bE, bonus: undefined }, oct13) === null);
+const bAl = T.topAlerts({ v: 1, points: [], cards: [{ ...bE, opened: '2026-07-20' }] }, CAT, oct13);
+ok("bonus due within 30 days is an alert", bAl.some(a => /Spend \$3,650 more on Sapphire Reserve by Oct 20/.test(a.text) && a.level === 'hot'), JSON.stringify(bAl));
+const ex = T.exampleWallet();
+ok('example wallet has a Reserve with a bonus in progress', ex.cards.some(c => c.cardId === 'chase-sapphire-reserve' && c.bonus && !T.bonusState(c).met));
+
 // --- card art ---
 ok('card art links are https only', CAT.cards.every(c => !c.art || /^https:\/\/[^\s"'<>()\\]+$/.test(c.art)));
 const artA = T.artHtml({ issuer: 'Chase', name: 'X', art: 'https://img.example/a.png?x=1&y=2' }, 'sm');

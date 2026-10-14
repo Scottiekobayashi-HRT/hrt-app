@@ -309,6 +309,12 @@
       out.push({ level: "warn", id: r.entry.id, text: shortName(r.card.name) + " renews " +
         (r.renewal.days === 0 ? "today" : "in " + r.renewal.days + (r.renewal.days === 1 ? " day" : " days")) + ", " + money(r.card.fee) + " fee" });
     });
+    // 2b. welcome bonus spend due (30 days)
+    (wallet && wallet.cards || []).forEach(function (e) {
+      var c = (catalog.cards || []).filter(function (k) { return k.id === e.cardId; })[0], bs = c && bonusState(e, t);
+      if (bs && !bs.met && bs.days >= 0 && bs.days <= 30) out.push({ level: bs.days <= 7 ? "hot" : "warn", id: e.id,
+        text: "Spend " + money(bs.left) + " more on " + shortName(c.name) + " by " + dayText(bs.by) + " for the welcome bonus" });
+    });
     // 3. activations due (30 days)
     open.filter(function (r) { return r.perk.type === "activation" && r.period.days <= 30; }).forEach(function (r) {
       out.push({ level: "warn", id: r.entry.id, text: "Activate " + shortName(r.card.name) + " 5% by " + dayText(r.period.end) });
@@ -320,6 +326,59 @@
       if (mUsd) out.push({ level: "info", id: null, text: money(mUsd) + " in credits to use in the next " + (month[month.length - 1] ? "31 days" : "month") });
     }
     return out.slice(0, max || 3);
+  }
+
+  /* ====================== KEEP OR CANCEL AT RENEWAL ======================
+     What the member got from a card's dollar credits in the current card year
+     (last anniversary, or the open date, to today), to set against the fee.
+     Counts only credits and discounts the member ticked: a tick is the full
+     amount, a stored number is that amount. Periods that overlap the card
+     year count. Lounges, points and passes are not dollars, so not counted. */
+  function cardYearStart(opened, today) {
+    var t = today || todayParts(), nx = nextRenewal(opened, addDays(t, 1));
+    return nx ? { y: nx.y - 1, m: nx.m, d: nx.exact ? nx.d : 1 } : null;
+  }
+  function usedThisCardYear(entry, catalog, today) {
+    var t = today || todayParts(), start = cardYearStart(entry.opened, t), out = { used: 0, offered: 0 };
+    if (!start) return out;
+    var t0 = dayNum(t.y, t.m, t.d), dates = [start];
+    for (var y = start.y, m = start.m + 1; ; m++) {
+      if (m > 12) { m = 1; y++; }
+      if (dayNum(y, m, 1) > t0) break;
+      dates.push({ y: y, m: m, d: 1 });
+    }
+    (catalog && catalog.benefits || []).forEach(function (b) {
+      if (b.card !== entry.cardId || !perkYearUsd(b) || !isTracked(b)) return;
+      out.offered += perkYearUsd(b);
+      var u = entry.used && entry.used[b.id], seen = {};
+      if (!u) return;
+      dates.forEach(function (d) {
+        var p = perkPeriod(b, entry.opened, d);
+        if (!p || seen[p.key]) return;
+        seen[p.key] = 1;
+        var v = u[p.key];
+        if (v === true) out.used += b.amount; else if (typeof v === "number" && v > 0) out.used += Math.min(v, b.amount);
+      });
+    });
+    out.used = Math.round(out.used * 100) / 100;
+    return out;
+  }
+
+  /* ========================= WELCOME BONUS =========================
+     entry.bonus = { spend, months, spent, reward }. The deadline is worked out
+     from the open date, never stored: "within 3 months of account opening".
+     Month-only open date: we use the earliest it could be, and say "about". */
+  function bonusState(entry, today) {
+    var b = entry && entry.bonus, o = entry && parseOpened(entry.opened);
+    if (!b || !o || !(b.spend > 0) || !(b.months > 0)) return null;
+    var t = today || todayParts(), mm = o.m + b.months, yy = o.y + Math.floor((mm - 1) / 12), by;
+    mm = (mm - 1) % 12 + 1;
+    if (o.d) by = { y: yy, m: mm, d: Math.min(o.d, daysInMonth(yy, mm)) };
+    else by = addDays({ y: yy, m: mm, d: 1 }, -1);
+    var spent = b.spent > 0 ? b.spent : 0, left = Math.max(0, Math.round((b.spend - spent) * 100) / 100);
+    var days = dayNum(by.y, by.m, by.d) - dayNum(t.y, t.m, t.d);
+    return { spend: b.spend, spent: spent, left: left, by: by, approx: !o.d, days: days, reward: b.reward || "",
+      met: left <= 0, missed: left > 0 && days < 0, pct: Math.min(100, Math.round(spent / b.spend * 100)) };
   }
 
   /* ============================= EARNING =============================
@@ -375,6 +434,74 @@
     { key: "foreign", label: "Shopping abroad", groups: ["foreign"], words: [] },
     { key: "everyday", label: "Everything else", groups: ["everyday"], words: [] }
   ];
+  /* Stores members type into "Which card should I use?". Each points at a
+     spend type above. Hawaii names first. `visaOnly`: Costco warehouses take
+     only Visa. `note` says how banks usually see the store, which decides the
+     bonus. Keep notes plain and hedged: banks decide coding, not us. */
+  var STORES = [
+    { name: "Foodland", spend: "grocery", words: ["foodland", "sack n save", "sack and save"] },
+    { name: "Times Supermarket", spend: "grocery", words: ["times supermarket", "times", "big way"] },
+    { name: "Safeway", spend: "grocery", words: ["safeway"], note: "Gas at Safeway usually counts as grocery store gas, not a gas station." },
+    { name: "KTA Super Stores", spend: "grocery", words: ["kta"] },
+    { name: "Down to Earth", spend: "grocery", words: ["down to earth"] },
+    { name: "Whole Foods", spend: "grocery", words: ["whole foods"] },
+    { name: "Tokyo Central (Marukai)", spend: "grocery", words: ["tokyo central", "marukai"] },
+    { name: "Nijiya Market", spend: "grocery", words: ["nijiya"] },
+    { name: "Palama Supermarket", spend: "grocery", words: ["palama"] },
+    { name: "Mana Foods", spend: "grocery", words: ["mana foods"] },
+    { name: "Don Quijote", spend: "grocery", words: ["don quijote", "donki", "don q"],
+      note: "We have not confirmed that banks count Don Quijote as a supermarket. Check your statement after your first visit." },
+    { name: "Costco", spend: "everyday", words: ["costco"], visaOnly: true,
+      note: "Costco warehouses take Visa only. Warehouse clubs do not count as grocery stores, and Costco gas usually is not a gas station." },
+    { name: "Sam's Club", spend: "everyday", words: ["sams club", "sams"], note: "Warehouse clubs do not count as grocery stores for most cards." },
+    { name: "Walmart", spend: "everyday", words: ["walmart"], note: "Walmart does not count as a grocery store for most cards." },
+    { name: "Target", spend: "everyday", words: ["target"], note: "Target does not count as a grocery store for most cards." },
+    { name: "Longs Drugs", spend: "drugstores", words: ["longs drugs", "longs", "cvs"], note: "Longs is CVS, so it counts as a drugstore, even when you buy food there." },
+    { name: "Walgreens", spend: "drugstores", words: ["walgreens"] },
+    { name: "Aloha Petroleum and Minit Stop", spend: "gas", words: ["aloha petroleum", "aloha gas", "minit stop"],
+      note: "Pay at the pump. Snacks bought inside may code as a convenience store." },
+    { name: "Shell", spend: "gas", words: ["shell"] },
+    { name: "Chevron", spend: "gas", words: ["chevron"] },
+    { name: "Texaco", spend: "gas", words: ["texaco"] },
+    { name: "76", spend: "gas", words: ["76", "union 76"] },
+    { name: "Hawaii Gas", spend: "everyday", words: ["hawaii gas"], note: "Hawaii Gas is a utility bill, not a gas station." },
+    { name: "Hawaiian Electric", spend: "everyday", words: ["hawaiian electric", "heco"] },
+    { name: "Zippy's", spend: "dining", words: ["zippys"] },
+    { name: "L&L Hawaiian Barbecue", spend: "dining", words: ["l and l", "l and l hawaiian barbecue"] },
+    { name: "Starbucks", spend: "dining", words: ["starbucks"] },
+    { name: "McDonald's", spend: "dining", words: ["mcdonalds"] },
+    { name: "DoorDash", spend: "dining", words: ["doordash", "door dash"], note: "Restaurant delivery counts as dining on most cards. Grocery orders through DoorDash may not." },
+    { name: "Uber Eats", spend: "dining", words: ["uber eats", "ubereats"] },
+    { name: "Uber and Lyft rides", spend: "transit", words: ["uber", "lyft"] },
+    { name: "Hawaiian Airlines", spend: "flights", words: ["hawaiian airlines", "hawaiian air", "hawaiian"] },
+    { name: "Alaska Airlines", spend: "flights", words: ["alaska airlines", "alaska air", "alaska"] },
+    { name: "Southwest", spend: "flights", words: ["southwest"] },
+    { name: "Hotels", spend: "hotels", words: ["hotel", "hilton", "marriott", "hyatt", "ihg", "outrigger"] },
+    { name: "Streaming services", spend: "streaming", words: ["netflix", "disney", "hulu", "spotify", "youtube premium", "max"] },
+    { name: "Amazon", spend: "everyday", words: ["amazon"] },
+    { name: "Home Depot and Lowe's", spend: "everyday", words: ["home depot", "lowes"] },
+    { name: "Ross", spend: "everyday", words: ["ross"] },
+    { name: "Ala Moana Center", spend: "everyday", words: ["ala moana"] }
+  ];
+  function normStore(s) {
+    return String(s || "").toLowerCase().replace(/['’]/g, "").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  /* Best store for what was typed: an exact name, then "foodland kapolei"
+     (name first), then a name that starts with what was typed (3+ letters). */
+  function findStore(q) {
+    q = normStore(q);
+    if (q.length < 2) return null;
+    var best = null, top = 0;
+    STORES.forEach(function (st) {
+      st.words.forEach(function (w) {
+        w = normStore(w);
+        var sc = q === w ? 1000 + w.length : q.indexOf(w + " ") === 0 ? 500 + w.length :
+          (q.length >= 3 && w.indexOf(q) === 0) ? Math.max(1, 100 - (w.length - q.length)) : 0;
+        if (sc > top) { top = sc; best = st; }
+      });
+    });
+    return best;
+  }
   var CPP_DEFAULT = { "Amex Membership Rewards": 2.0, "Chase Ultimate Rewards": 2.05, "Capital One Miles": 1.85, "Alaska Atmos Rewards": 1.4 };
   function pointValues() {
     var out = {}, src = window.HRT_POINT_VALUES && window.HRT_POINT_VALUES.list;
@@ -394,13 +521,14 @@
     return 1;
   }
 
-  function whichCard(wallet, catalog, spendKey, today, values) {
+  function whichCard(wallet, catalog, spendKey, today, values, opts) {
     var sp = SPEND.filter(function (x) { return x.key === spendKey; })[0];
     if (!sp || !wallet) return [];
     var vals = values || pointValues(), cards = {}, seen = {};
     (catalog.cards || []).forEach(function (c) { cards[c.id] = c; });
     var held = wallet.cards.filter(function (e) { return cards[e.cardId]; });
     var sapphire = held.some(function (e) { return /^chase-sapphire/.test(e.cardId); });
+    if (opts && opts.visaOnly) held = held.filter(function (e) { return cards[e.cardId].network === "Visa"; });
     var perks = perkRows(wallet, catalog, today);
     var out = [];
     held.forEach(function (e) {
@@ -493,12 +621,20 @@
      adding their own cards. Lives only in this page; nothing is ever saved. */
   function exampleWallet() {
     var c = function (id, cardId, opened, nickname) { return { id: "ex-" + id, cardId: cardId, opened: opened, nickname: nickname || "" }; };
-    return { v: 1, points: [], cards: [
+    var w = { v: 1, points: [], cards: [
       c("plat", "amex-platinum", "2024-03-15"), c("gold", "amex-gold", "2023-06-08"),
       c("csp", "chase-sapphire-preferred", "2021-11-20"), c("flex", "chase-freedom-flex", "2020-01"),
       c("vx", "capone-venture-x", "2022-11-02"), c("summit", "atmos-summit", "2025-08-20"),
       c("ascent", "atmos-ascent", "2019-02", "Spouse's card")
     ] };
+    var t = todayParts(), o = addDays(t, -40), csr = c("csr", "chase-sapphire-reserve", o.y + "-" + (o.m < 10 ? "0" : "") + o.m + "-" + (o.d < 10 ? "0" : "") + o.d);
+    csr.bonus = { spend: 6000, months: 3, spent: 2350, reward: "100,000 points" };
+    w.cards.splice(2, 0, csr);
+    /* Venture X renews soon: show what keep or cancel looks like with real ticks */
+    var vx = w.cards.filter(function (k) { return k.id === "ex-vx"; })[0];
+    vx.used = { travel: {} };
+    vx.used.travel["A" + cardYearStart(vx.opened, t).y] = true;
+    return w;
   }
   function startExample() { state.demo = true; state.wallet = exampleWallet(); state.editing = null; state.msg = ""; paint(); }
   function endExample() { state.demo = false; state.wallet = null; state.open = {}; state.which = ""; load(); }
@@ -552,11 +688,34 @@
       '<select id="wlYear" aria-label="Year opened">' + years + "</select></div>" +
       '<small class="wl-help">Month and year are enough. Add the day if you know it for an exact renewal date. It is on your first statement or in your issuer\'s app.</small></div>' +
       '<label class="wl-lab">Nickname (optional)<input id="wlNick" maxlength="40" placeholder="e.g. Business card, Spouse\'s card" value="' + esc(entry && entry.nickname || "") + '"></label>' +
+      bonusFields(entry) +
       '<p class="wl-err" id="wlFormErr" role="alert"></p>' +
       '<div class="wl-acts"><button class="wl-btn wl-pri" type="submit"' + (state.busy ? " disabled" : "") + ">" + (state.busy ? "Saving" : entry ? "Save changes" : "Add card") + "</button>" +
       '<button class="wl-btn" type="button" data-wl="cancel">Cancel</button></div></form>';
   }
 
+  function bonusFields(entry) {
+    var b = entry && entry.bonus || null, mo = b ? b.months : 3, opts = "";
+    [1, 2, 3, 4, 5, 6, 9, 12].forEach(function (n) { opts += '<option value="' + n + '"' + (n === mo ? " selected" : "") + ">" + n + (n === 1 ? " month" : " months") + "</option>"; });
+    return '<details class="wl-bonusf"' + (b ? " open" : "") + "><summary>Track a welcome bonus (optional)</summary>" +
+      '<div class="wl-bonusg"><label class="wl-lab">Spend needed<span class="wl-dollar">$<input id="wlBSpend" type="number" inputmode="decimal" min="0" step="1" placeholder="6000" value="' + (b ? b.spend : "") + '"></span></label>' +
+      '<label class="wl-lab">Within<select id="wlBMonths">' + opts + "</select></label>" +
+      '<label class="wl-lab">Spent so far<span class="wl-dollar">$<input id="wlBSpent" type="number" inputmode="decimal" min="0" step="1" placeholder="0" value="' + (b && b.spent ? b.spent : "") + '"></span></label>' +
+      '<label class="wl-lab">Bonus (optional)<input id="wlBReward" maxlength="40" placeholder="e.g. 100,000 points" value="' + esc(b && b.reward || "") + '"></label></div>' +
+      '<small class="wl-help">Counted from the day you opened the card. Leave Spend needed empty to stop tracking.</small></details>';
+  }
+  function readBonus() {
+    var sEl = $("wlBSpend");
+    if (!sEl) return { bonus: null };
+    var raw = sEl.value.trim(), spend = +raw, spent = +($("wlBSpent").value.trim() || 0);
+    if (!raw) return { bonus: null };
+    if (!(spend > 0) || spend > 1000000) return { err: "Enter the welcome bonus spend as a number, like 6000." };
+    if (!(spent >= 0) || spent > 10000000) return { err: "Enter what you have spent so far as a number." };
+    var out = { spend: Math.round(spend * 100) / 100, months: +$("wlBMonths").value, spent: Math.round(spent * 100) / 100 };
+    var rw = $("wlBReward").value.trim().slice(0, 40);
+    if (rw) out.reward = rw;
+    return { bonus: out };
+  }
   function readForm(entry) {
     var cardId = entry ? entry.cardId : $("wlCard").value;
     var m = +$("wlMonth").value, y = +$("wlYear").value, d = +$("wlDay").value;
@@ -565,7 +724,9 @@
     if (d && d > daysInMonth(y, m)) return { err: MONTHS[m - 1] + " " + y + " only has " + daysInMonth(y, m) + " days." };
     var opened = y + "-" + (m < 10 ? "0" : "") + m + (d ? "-" + (d < 10 ? "0" : "") + d : "");
     if (isFuture(opened)) return { err: "That date is in the future." };
-    return { cardId: cardId, opened: opened, nickname: $("wlNick").value.trim().slice(0, 40) };
+    var bn = readBonus();
+    if (bn.err) return { err: bn.err };
+    return { cardId: cardId, opened: opened, nickname: $("wlNick").value.trim().slice(0, 40), bonus: bn.bonus };
   }
 
   /* ----- list ----- */
@@ -657,6 +818,7 @@
       (r.hasFee ? '<span class="wl-when' + (soon ? " on" : "") + '">' + esc(whenText(rn)) + "</span>" : "") +
       '<span class="wl-rowacts"><button class="wl-link" data-wl="edit" data-id="' + esc(e.id) + '">Edit</button>' +
       '<button class="wl-link" data-wl="remove" data-id="' + esc(e.id) + '">Remove</button></span></div></div>';
+    html += bonusHtml(e) + (r.hasFee && rn && rn.days <= SOON_DAYS ? keepHtml(r) : "");
     var earnCount = earningFor(catalog(), c.id).length;
     if (mine.length || earnCount) {
       html += '<button class="wl-perkbtn" data-wl="perks" data-id="' + esc(e.id) + '" aria-expanded="' + open + '">' +
@@ -668,6 +830,32 @@
       html += '<p class="wl-pk-note wl-cardnote">' + esc(c.note) + "</p>";
     }
     return html + "</li>";
+  }
+
+  function bonusHtml(e) {
+    var bs = bonusState(e);
+    if (!bs) return "";
+    var line, cls = "";
+    if (bs.met) { line = "Spend reached: " + money(bs.spent) + " of " + money(bs.spend) + ". Banks usually post the bonus within a few statements."; cls = " done"; }
+    else if (bs.missed) { line = "The deadline was " + dayText(bs.by) + ", with " + money(bs.left) + " still to spend. Call the bank if you think you made it."; cls = " missed"; }
+    else line = money(bs.spent) + " of " + money(bs.spend) + " spent. <b>" + money(bs.left) + " to go</b> by " + (bs.approx ? "about " : "") +
+      dayText(bs.by) + ", " + bs.by.y + " (" + (bs.days === 0 ? "today" : bs.days === 1 ? "1 day" : bs.days + " days") + ").";
+    return '<div class="wl-bonus' + cls + '"><div class="wl-bonus-top"><b>Welcome bonus</b>' + (bs.reward ? "<span>" + esc(bs.reward) + "</span>" : "") + "</div>" +
+      '<div class="wl-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + bs.pct + '"><i style="width:' + bs.pct + '%"></i></div>' +
+      '<p class="wl-bonus-line">' + line.replace(/<(?!\/?b>)/g, "&lt;") + "</p>" +
+      (bs.met || bs.missed ? '<button class="wl-link" data-wl="bonus-remove" data-id="' + esc(e.id) + '">Stop tracking</button>' :
+        '<div class="wl-bonus-upd"><label>Spent so far <span class="wl-dollar">$<input type="number" inputmode="decimal" min="0" step="1" data-wl-spent value="' + bs.spent + '"></span></label>' +
+        '<button class="wl-btn" data-wl="bonus-save" data-id="' + esc(e.id) + '"' + (state.busy ? " disabled" : "") + ">Update</button></div>") + "</div>";
+  }
+  function keepHtml(r) {
+    var e = r.entry, c = r.card, u = usedThisCardYear(e, catalog()), fee = c.fee, pct = Math.min(100, Math.round(u.used / fee * 100));
+    var verdict = u.used >= fee ? "Your credits have already covered the fee." :
+      "That is " + money(fee - u.used) + " less than the fee" + (u.offered > fee ? ", though the card offers up to " + money(u.offered) + " a year if you use every credit." : ".");
+    return '<div class="wl-keep"><b class="wl-keep-h">Keep or cancel?</b>' +
+      '<p>This card year you marked <b>' + esc(money(u.used)) + "</b> of credits as used. The fee is <b>" + esc(money(fee)) + "</b>. " + esc(verdict) + "</p>" +
+      '<div class="wl-bar"><i style="width:' + pct + '%"></i></div>' +
+      "<p>Before it renews you can keep it, ask " + esc(c.issuer) + " for a retention offer, or ask to switch to a card with a lower fee and keep your account history. If you cancel, use or move your points first.</p>" +
+      '<p class="wl-dimtxt">Counts the credits you ticked. Lounges, points and other perks are not counted.</p></div>';
   }
 
   /* Dollar credits plus a count of the perks that are not dollars (passes,
@@ -733,6 +921,8 @@
       var pills = "";
       if (bf.activate) pills += '<span class="wl-tl-pill">Activate 5% by ' + esc(dayText(bf.activate.period.end)) + "</span>";
       if (bf.renewSoon) pills += '<span class="wl-tl-pill">Renews in ' + bf.renewal.days + (bf.renewal.days === 1 ? " day" : " days") + "</span>";
+      var bsT = bonusState(e);
+      if (bsT && !bsT.met && !bsT.missed) pills += '<span class="wl-tl-pill">Bonus: ' + esc(money(bsT.left)) + " to go</span>";
       if (bf.open > 1) pills += '<span class="wl-tl-pill soft">' + bf.open + " credits open</span>";
       return '<button class="wl-tile" data-wl="go-card" data-id="' + esc(e.id) + '">' + artHtml(c, "sm") +
         '<span class="wl-tl-body"><span class="wl-tl-name">' + esc(shortName(c.name)) + "</span>" +
@@ -766,34 +956,62 @@
   function whichHtml() {
     var cards = state.wallet && state.wallet.cards.length;
     if (!cards) return "";
-    var k = state.which || "";
+    var k = whichKey();
     var chips = SPEND.map(function (x) {
       return '<button class="wl-chip' + (x.key === k ? " on" : "") + '" data-wl="which" data-key="' + x.key + '" aria-pressed="' + (x.key === k) + '">' + esc(x.label) + "</button>";
     }).join("");
-    var res = "";
-    if (k) {
-      var sp = SPEND.filter(function (x) { return x.key === k; })[0];
-      var list = whichCard(state.wallet, catalog(), k);
-      if (list.length) {
-        var top = list[0];
-        res = '<div class="wl-wc-res" aria-live="polite"><div class="wl-wc-top">' + artHtml(top.card, "sm") + '<div class="wl-wc-best"><span class="wl-wc-tag">Use this card</span>' +
-          '<b class="wl-wc-name">' + esc(shortName(top.card.name)) + (top.entry.nickname ? ' <span class="wl-dim">(' + esc(top.entry.nickname) + ")</span>" : "") + "</b>" +
-          '<span class="wl-wc-why"><b>' + esc(top.rateText) + "</b> on " + esc(top.row.groups.indexOf("everyday") > -1 ? "everything" :
-            top.row.groups.indexOf("rotating") > -1 ? sp.label.toLowerCase() + " this quarter" : top.row.category.charAt(0).toLowerCase() + top.row.category.slice(1)) +
-          ", " + esc(valueText(top.value)) + "</span>" +
-          (top.notes.length ? '<span class="wl-wc-notes">' + top.notes.map(esc).join(". ") + "</span>" : "") + "</div></div>" +
-          (list.length > 1 ? '<ol class="wl-wc-rest" start="2">' + list.slice(1, 4).map(function (c) {
-            return "<li><b>" + esc(shortName(c.card.name)) + "</b> " + esc(c.rateText) + ", " + esc(valueText(c.value)) +
-              (c.notes.length ? ' <span class="wl-dim">(' + esc(c.notes[0]) + ")</span>" : "") + "</li>";
-          }).join("") + "</ol>" : "") +
-          (sp.tip ? '<p class="wl-wc-tip">' + esc(sp.tip) + "</p>" : "") + "</div>";
-      }
+    return '<div class="wl-wc"><h3 class="wl-h4 wl-wc-h">Which card should I use?</h3>' +
+      '<label class="wl-store"><span class="wl-sr">Where are you shopping?</span>' +
+      '<input type="search" data-wl-store autocomplete="off" enterkeyhint="search" spellcheck="false" placeholder="Type a store, like Foodland or Costco" value="' + esc(state.storeQ || "") + '"></label>' +
+      '<div class="wl-chips" role="group" aria-label="Or pick what you are buying">' + chips + "</div>" +
+      '<div class="wl-wc-out" aria-live="polite">' + whichOut() + "</div></div>";
+  }
+  /* The spend type in play: a recognised store wins over a tapped chip. */
+  function whichKey() {
+    var st = state.storeQ ? findStore(state.storeQ) : null;
+    return st ? st.spend : state.storeQ ? "" : state.which || "";
+  }
+  function whichOut() {
+    var st = state.storeQ ? findStore(state.storeQ) : null, k = whichKey();
+    if (state.storeQ && !st) {
+      return normStore(state.storeQ).length < 2 ? '<p class="wl-wc-foot">Keep typing a store name.</p>' :
+        '<p class="wl-wc-foot">We do not know that store yet. Tap what you are buying instead.</p>';
+    }
+    if (!k) return '<p class="wl-wc-foot">Type a store, or tap what you are buying.</p>';
+    var sp = SPEND.filter(function (x) { return x.key === k; })[0];
+    var list = whichCard(state.wallet, catalog(), k, null, null, { visaOnly: st && st.visaOnly });
+    var tip = st ? st.note : sp.tip, res = "";
+    if (!list.length) {
+      res = '<div class="wl-wc-res"><p class="wl-wc-why">' + (st && st.visaOnly ? "None of your cards are Visa, and " + esc(st.name) + " takes Visa only." : "None of your cards fit this.") + "</p></div>";
+    } else {
+      var top = list[0];
+      var on = top.row.groups.indexOf("everyday") > -1 ? "everything" :
+        top.row.groups.indexOf("rotating") > -1 ? sp.label.toLowerCase() + " this quarter" : top.row.category.charAt(0).toLowerCase() + top.row.category.slice(1);
+      res = '<div class="wl-wc-res"><div class="wl-wc-top">' + artHtml(top.card, "sm") + '<div class="wl-wc-best"><span class="wl-wc-tag">' + (st ? "At " + esc(st.name) + ", use" : "Use this card") + "</span>" +
+        '<b class="wl-wc-name">' + esc(shortName(top.card.name)) + (top.entry.nickname ? ' <span class="wl-dim">(' + esc(top.entry.nickname) + ")</span>" : "") + "</b>" +
+        '<span class="wl-wc-why"><b>' + esc(top.rateText) + "</b> on " + esc(on) + ", " + esc(valueText(top.value)) + "</span>" +
+        (top.notes.length ? '<span class="wl-wc-notes">' + top.notes.map(esc).join(". ") + "</span>" : "") + "</div></div>" +
+        (list.length > 1 ? '<ol class="wl-wc-rest" start="2">' + list.slice(1, 4).map(function (c) {
+          return "<li><b>" + esc(shortName(c.card.name)) + "</b> " + esc(c.rateText) + ", " + esc(valueText(c.value)) +
+            (c.notes.length ? ' <span class="wl-dim">(' + esc(c.notes[0]) + ")</span>" : "") + "</li>";
+        }).join("") + "</ol>" : "") + "</div>";
     }
     var upd = window.HRT_POINT_VALUES && window.HRT_POINT_VALUES.updated;
-    return '<div class="wl-wc"><h3 class="wl-h4 wl-wc-h">Which card should I use?</h3>' +
-      '<div class="wl-chips" role="group" aria-label="What are you buying?">' + chips + "</div>" + res +
-      (k ? '<p class="wl-wc-foot">Ranked by value using HRT point values' + (upd ? " (" + esc(upd) + ")" : "") + '. <a href="#values" data-route="values">How we value points</a></p>' : '<p class="wl-wc-foot">Tap what you are buying.</p>') +
-      "</div>";
+    return res + (tip ? '<p class="wl-wc-tip">' + esc(tip) + "</p>" : "") +
+      '<p class="wl-wc-foot">Ranked by value using HRT point values' + (upd ? " (" + esc(upd) + ")" : "") + '. <a href="#values" data-route="values">How we value points</a></p>';
+  }
+  /* Typing a store updates only the answer, so the keyboard stays open. */
+  function onInput(ev) {
+    var t = ev.target;
+    if (!t || !t.hasAttribute || !t.hasAttribute("data-wl-store")) return;
+    state.storeQ = t.value;
+    var wc = t.closest(".wl-wc"); if (!wc) return;
+    wc.querySelector(".wl-wc-out").innerHTML = whichOut();
+    var k = whichKey();
+    Array.prototype.forEach.call(wc.querySelectorAll(".wl-chip"), function (c) {
+      var on = c.getAttribute("data-key") === k;
+      c.classList.toggle("on", on); c.setAttribute("aria-pressed", String(on));
+    });
   }
 
   /* The wallet summary card: the first thing a member sees, on the Dashboard
@@ -906,10 +1124,10 @@
       var v = readForm(entry);
       if (v.err) { $("wlFormErr").textContent = v.err; return; }
       if (entry) {
-        save(function (w) { w.cards.forEach(function (c) { if (c.id === entry.id) { c.opened = v.opened; c.nickname = v.nickname; } }); },
+        save(function (w) { w.cards.forEach(function (c) { if (c.id === entry.id) { c.opened = v.opened; c.nickname = v.nickname; if (v.bonus) c.bonus = v.bonus; else delete c.bonus; } }); },
           function () { state.editing = null; });
       } else {
-        save(function (w) { w.cards.push({ id: store().newId(), cardId: v.cardId, opened: v.opened, nickname: v.nickname }); },
+        save(function (w) { var n = { id: store().newId(), cardId: v.cardId, opened: v.opened, nickname: v.nickname }; if (v.bonus) n.bonus = v.bonus; w.cards.push(n); },
           function () { state.editing = null; });
       }
     });
@@ -939,7 +1157,7 @@
     if (act === "retry") return load();
     if (act === "demo") { startExample(); if (location.hash !== "#home" && location.hash !== "#wallet") location.hash = "wallet"; return; }
     if (act === "demo-off") { endExample(); return; }
-    if (act === "which") { var k = b.getAttribute("data-key"); state.which = state.which === k ? "" : k; paint(); return; }
+    if (act === "which") { var k = b.getAttribute("data-key"); state.which = (state.which === k && !state.storeQ) ? "" : k; state.storeQ = ""; paint(); return; }
     if (act === "go-wallet") { location.hash = "wallet"; return; }
     if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; location.hash = "wallet"; return; }
     if ((act === "go-add" || act === "add") && state.demo) { endExample(); state.editing = "new"; if (act === "go-add") location.hash = "wallet"; return; }
@@ -948,6 +1166,14 @@
     if (act === "cancel") { state.editing = null; paint(); return; }
     if (act === "edit") { state.editing = id; state.msg = ""; paint(); return; }
     if (act === "perks") { state.open[id] = !state.open[id]; paint(); return; }
+    if (act === "bonus-save") {
+      var inp = b.parentNode.querySelector("[data-wl-spent]"), amt = inp ? +inp.value : NaN;
+      if (!(amt >= 0) || amt > 10000000) { if (inp) inp.focus(); return; }
+      amt = Math.round(amt * 100) / 100;
+      save(function (w) { w.cards.forEach(function (k) { if (k.id === id && k.bonus) k.bonus.spent = amt; }); });
+      return;
+    }
+    if (act === "bonus-remove") { save(function (w) { w.cards.forEach(function (k) { if (k.id === id) delete k.bonus; }); }); return; }
     if (act === "allsoon") { state.showAllSoon = !state.showAllSoon; paint(); return; }
     if (act === "remove") {
       var e = state.wallet.cards.filter(function (c) { return c.id === id; })[0];
@@ -1128,6 +1354,25 @@
       ".wl-art-md .wl-art-ph{font-size:9.5px}",
       ".wl-art-ph i{position:absolute;left:9%;top:30%;width:17%;height:21%;border-radius:2px;background:linear-gradient(135deg,#e8d39a,#b8954a);opacity:.9}",
       ".wl-wc-top{display:flex;gap:12px;align-items:flex-start}",
+      ".wl-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}",
+      ".wl-store{display:block;margin:10px 0 10px}",
+      ".wl-store input{box-sizing:border-box;width:100%;max-width:420px;min-height:44px;padding:0 14px;font:inherit;font-size:16px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:12px}",
+      ".wl-store input:focus{outline:2px solid var(--coral);outline-offset:1px;border-color:transparent}",
+      ".wl-bar{height:8px;border-radius:999px;background:var(--surface-2,rgba(0,0,0,.07));overflow:hidden;margin:8px 0}",
+      ".wl-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f2b84b,#e8824c)}",
+      ".wl-bonus,.wl-keep{margin:12px 0 4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(242,184,75,.55);background:rgba(242,184,75,.10)}",
+      ".wl-bonus.done{border-color:rgba(47,133,90,.4);background:rgba(63,206,127,.08)}.wl-bonus.done .wl-bar i{background:#2f855a}",
+      ".wl-bonus.missed{border-color:var(--line);background:var(--surface-2,rgba(0,0,0,.04))}",
+      ".wl-bonus-top{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;color:var(--text)}.wl-bonus-top span{font-weight:700;color:var(--muted)}",
+      ".wl-bonus-line,.wl-keep p{margin:0 0 6px;font-size:13px;line-height:1.5;color:var(--text)}",
+      ".wl-keep-h{display:block;font-size:13.5px;color:var(--text);margin-bottom:4px}",
+      ".wl-keep p.wl-dimtxt{font-size:12px;color:var(--muted);margin:0}",
+      ".wl-bonus-upd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.wl-bonus-upd label{font-size:12.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px}",
+      ".wl-dollar{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--muted)}",
+      ".wl-dollar input{box-sizing:border-box;width:120px;min-height:40px;padding:0 10px;font:inherit;font-size:16px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:10px}",
+      ".wl-bonusf{border:1px solid var(--line);border-radius:12px;padding:10px 12px}.wl-bonusf summary{cursor:pointer;font-size:13.5px;font-weight:800;color:var(--text);min-height:28px;display:flex;align-items:center}",
+      ".wl-bonusg{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:10px 0 6px}",
+      ".wl-bonusg .wl-dollar input{width:100%}.wl-bonusg .wl-dollar{display:flex}",
       ".wl-tile:hover{box-shadow:var(--shadow);transform:translateY(-1px)}",
       ".wl-tile:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
       ".wl-tl-name{font-size:14.5px;font-weight:800;color:var(--text)}",
@@ -1183,7 +1428,7 @@
   }
 
   window.HRT_WALLET = {
-    _test: { artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
+    _test: { findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
@@ -1197,6 +1442,7 @@
         host.setAttribute("data-ready", "1");
         host.addEventListener("click", onClick);
         host.addEventListener("change", onChange);
+        host.addEventListener("input", onInput);
       }
       if (!state.wallet && !state.loading) load(); else paint();
     },
@@ -1213,6 +1459,7 @@
         homeHost.setAttribute("data-ready", "1");
         homeHost.addEventListener("click", onClick);
         homeHost.addEventListener("change", onChange);
+        homeHost.addEventListener("input", onInput);
       }
       if (!state.wallet && !state.loading) load(); else paint();
     }
