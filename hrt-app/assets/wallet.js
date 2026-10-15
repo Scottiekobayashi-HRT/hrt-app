@@ -969,9 +969,10 @@
       '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
       '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
   }
-  function soonHtml(perks) {
+  function soonHtml(perks, home) {
     var groups = creditGroups(perks);
-    if (!groups.length) return "";
+    if (!groups.length) return home ? '<section class="wl-card wl-soonbox wl-soon-home"><h3 class="wl-cr-title">Credits to use</h3>' +
+      '<p class="wl-cr-sub">All caught up. You have used every credit that is open right now.</p></section>' : "";
     var total = groups.reduce(function (a, g) { return a + g.usd; }, 0);
     var sel = groups.filter(function (g) { return g.key === state.creditTab; })[0] || groups[0];
     var tabs = groups.length > 1 ? '<div class="wl-ctabs" role="tablist" aria-label="When they end">' + groups.map(function (g) {
@@ -979,12 +980,13 @@
       return '<button class="wl-ctab' + (on ? " on" : "") + '" role="tab" aria-selected="' + on + '" data-wl="ctab" data-key="' + g.key + '">' +
         "<b>" + esc(g.label) + "</b><span>" + (g.usd ? esc(money(g.usd)) : g.rows.length + (g.rows.length === 1 ? " perk" : " perks")) + "</span></button>";
     }).join("") + "</div>" : "";
-    var shown = state.showAllSoon ? sel.rows : sel.rows.slice(0, 6);
-    return '<section class="wl-card wl-soonbox"><div class="wl-cr-head"><div><h3 class="wl-cr-title">Credits to use</h3>' +
-      '<p class="wl-cr-sub">Everything you have not used yet, soonest first. Tick each one once you use it.</p></div>' +
+    var limit = home ? 4 : 6, shown = state.showAllSoon && !home ? sel.rows : sel.rows.slice(0, limit);
+    return '<section class="wl-card wl-soonbox' + (home ? " wl-soon-home" : "") + '"><div class="wl-cr-head"><div><h3 class="wl-cr-title">Credits to use</h3>' +
+      '<p class="wl-cr-sub">' + (home ? "Soonest first. Tick each one once you use it." : "Everything you have not used yet, soonest first. Tick each one once you use it.") + "</p></div>" +
       (total ? '<div class="wl-cr-total"><b>' + esc(money(total)) + "</b><span>left to use</span></div>" : "") + "</div>" + tabs +
       '<ul class="wl-pks wl-pks-soon">' + shown.map(creditItem).join("") + "</ul>" +
-      (sel.rows.length > 6 ? '<button class="wl-perkbtn" data-wl="allsoon">' + (state.showAllSoon ? "Show fewer" : "Show all " + sel.rows.length) + "</button>" : "") +
+      (home ? (sel.rows.length > limit ? '<a class="wl-hm-more" href="#wallet" data-route="wallet">See all ' + sel.rows.length + " in My Wallet</a>" : "") :
+        sel.rows.length > limit ? '<button class="wl-perkbtn" data-wl="allsoon">' + (state.showAllSoon ? "Show fewer" : "Show all " + sel.rows.length) + "</button>" : "") +
       "</section>";
   }
 
@@ -1005,7 +1007,7 @@
     if (!s.count) { homeHost.innerHTML = ""; return; } /* the summary card above invites them to start */
     var perks = perkRows(state.wallet, catalog());
     var soon = expiringSoon(perks, SOON_PERK_DAYS);
-    var html = '<div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' +
+    var html = '<div class="wl-hm-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' +
       '<a class="wl-link" href="#wallet" data-route="wallet">See all details</a></div>';
     html += '<div class="wl-tiles">' + s.rows.map(function (row) {
       var e = row.entry, c = row.card;
@@ -1027,23 +1029,9 @@
         (pills ? '<span class="wl-tl-pills">' + pills + "</span>" : "") + "</span></button>";
     }).join("") + "</div>";
     html += whichHtml();
-    soon = expiringSoon(perks, 100000);
-    if (soon.length) {
-      html += '<h3 class="wl-h4 wl-hm-h4">Credits to use</h3><ul class="wl-pks wl-hm-list">' + soon.slice(0, 3).map(function (r) {
-        var b = r.perk, p = r.period;
-        return '<li class="wl-pk"><div class="wl-pk-main"><div class="wl-pk-top"><b>' + esc(b.label) + "</b>" +
-          '<span class="wl-pk-amt">' + esc(b.unit === "usd" ? money(b.amount) : perkAmount(b)) + "</span></div>" +
-          '<div class="wl-pk-when">' + esc(shortName(r.card.name)) + " &middot; " + (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) +
-          ' <span class="wl-pk-days' + (p.days <= 14 ? " on" : "") + '">' + esc(daysLeft(p.days)) + "</span></div></div>" +
-          '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
-          '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
-      }).join("") + "</ul>";
-      if (soon.length > 3) html += '<a class="wl-hm-more" href="#wallet" data-route="wallet">' + (soon.length - 3) + " more credits to use</a>";
-    } else {
-      html += '<p class="wl-hm-ok">You have used every credit that is open right now.</p>';
-    }
     if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
-    homeHost.innerHTML = html + "</div>";
+    html += "</div>" + soonHtml(perks, true) + "</div>";
+    homeHost.innerHTML = html;
   }
 
   function exampleBanner() {
@@ -1482,6 +1470,10 @@
       ".wl-hm-sub{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}",
       ".wl-hm-list{margin-top:0}",
       ".wl-hm-h4{margin-top:18px}",
+      ".wl-hm-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}",
+      ".wl-hm-grid>.wl-card{margin-bottom:0}",
+      ".wl-soon-home .wl-cr-total b{font-size:24px}.wl-soon-home .wl-ctab{padding:7px 10px}",
+      "@media (max-width:1060px){.wl-hm-grid{grid-template-columns:minmax(0,1fr)}}",
       ".wl-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:16px}",
       ".wl-tile{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);transition:box-shadow .15s,transform .15s}",
       ".wl-tl-body{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}",
