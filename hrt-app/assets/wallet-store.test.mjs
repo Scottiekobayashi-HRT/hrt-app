@@ -125,5 +125,19 @@ f = fakeMs({ wallet: { v: 1, cards: [card('a')], points: [] } });
 w = await S.load(); w.cards = [];
 ok('load returns a copy', f.stored.wallet.cards.length === 1);
 
+
+// --- household fields ---
+{
+  const V = S._test.validate;
+  const good = (c) => { try { V({ v: 1, points: [], cards: [c] }); return true; } catch (e) { return false; } };
+  ok('blank open date is allowed', good({ id: 'x', cardId: 'amex-gold', opened: '' }));
+  ok('holder, status and note are allowed', good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', holder: 'Janice', status: 'keep-for-now', note: 'Call in Dec' }));
+  ok('unknown status is refused', !good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', status: 'maybe' }));
+  ok('note over 500 characters is refused', !good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', note: 'a'.repeat(501) }));
+  ok('other card needs a name', !good({ id: 'x', cardId: 'custom', opened: '2026-01', custom: { fee: 95 } }));
+  ok('other card with name and fee is allowed', good({ id: 'x', cardId: 'custom', opened: '2026-01', custom: { name: 'Ink Preferred', issuer: 'Chase', fee: 95 } }));
+  ok('other card fee must be a sane number', !good({ id: 'x', cardId: 'custom', opened: '', custom: { name: 'X', fee: -1 } }));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

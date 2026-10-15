@@ -330,5 +330,22 @@ ok('card without art shows a plain card in the issuer colour', !artB.includes('<
 const src = fs.readFileSync('./assets/wallet.js', 'utf8') + fs.readFileSync('./data/wallet-catalog.js', 'utf8');
 ok('no em or en dashes in member-facing code', !/[–—]/.test(src.replace(/\\u201[34]/g, '')));
 
+
+// --- household fields: whose card, status, next step, other cards, planned cards ---
+const hh = { v: 1, points: [], cards: [
+  { id: 'a', cardId: 'chase-sapphire-preferred', opened: '2025-10-18', holder: 'Daniel', status: 'keep', note: 'One Sapphire' },
+  { id: 'b', cardId: 'custom', opened: '2026-05-13', custom: { name: 'Chase Ink Business Preferred', issuer: 'Chase', fee: 95 }, holder: 'Daniel' },
+  { id: 'c', cardId: 'custom', opened: '', custom: { name: 'Chase Freedom', fee: 0 }, status: 'keep' },
+  { id: 'd', cardId: 'custom', opened: '2026-10-21', custom: { name: 'Atmos card' }, status: 'next' },
+  { id: 'e', cardId: 'amex-gold', opened: '2024-01-05', status: 'closed' }
+] };
+const HS = T.summarize(hh, CAT, { y: 2026, m: 10, d: 14 });
+ok('planned and closed cards are not counted', HS.count === 3 && HS.upcoming.length === 2);
+ok('other card fee counts toward annual fees', HS.yearly === 95 + 95);
+ok('other card gets a renewal from its open date', HS.rows.some(r => r.entry.id === 'b' && r.renewal && r.renewal.m === 5));
+ok('unknown open date has no renewal and does not break next renewal', HS.next && HS.next.entry.id === 'a');
+ok('closed Amex Gold credits are not listed', !T.perkRows(hh, CAT, { y: 2026, m: 10, d: 14 }).some(r => r.entry.id === 'e'));
+ok('Which card ignores planned and other cards', !T.whichCard(hh, CAT, 'dining').some(x => x.entry && (x.entry.id === 'd' || x.entry.id === 'b')));
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

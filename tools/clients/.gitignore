@@ -1,0 +1,3 @@
+# Client data never goes in this public repo
+*.csv
+*.json

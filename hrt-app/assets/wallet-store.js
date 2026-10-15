@@ -17,7 +17,10 @@
 
    Wallet shape (v1):
      { v:1,
-       cards:  [ { id, cardId, opened:"2024-03-15" or "2024-03", nickname,
+       cards:  [ { id, cardId, opened:"2024-03-15" or "2024-03" or "" (unknown), nickname,
+                   holder (whose card, e.g. "Janice"), status (see STATUSES),
+                   note (next step, free text), custom: { name, issuer, fee }
+                   when cardId is "custom" (a card not in our catalog),
                    used: { perkId: { periodKey: true or amount used } },
                    bonus: { spend, months, spent, reward } (optional welcome bonus),
                    ...future fields kept } ],
@@ -31,6 +34,8 @@
 
   var VERSION = 1;
   var MAX_BYTES = 900000; /* Memberstack allows 1MB per member; stop well short */
+  /* Card status, set by the member or by HRT. Labels live in wallet.js. */
+  var STATUSES = ["keep", "keep-for-now", "min-spend", "min-spend-almost", "downgrade", "cancel", "next", "closed"];
   var OPENED_RE = /^\d{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01]))?$/;
   var queue = Promise.resolve();
 
@@ -68,7 +73,18 @@
       if (ids[c.id]) throw fail("INVALID", "card id repeated: " + c.id);
       ids[c.id] = 1;
       if (typeof c.cardId !== "string" || !c.cardId) throw fail("INVALID", "card " + i + " cardId");
-      if (typeof c.opened !== "string" || !OPENED_RE.test(c.opened)) throw fail("INVALID", "card " + i + " opened date");
+      /* opened may be "" when the member (or HRT) does not know it yet */
+      if (typeof c.opened !== "string" || (c.opened !== "" && !OPENED_RE.test(c.opened))) throw fail("INVALID", "card " + i + " opened date");
+      if (c.holder != null && (typeof c.holder !== "string" || c.holder.length > 30)) throw fail("INVALID", "card " + i + " holder");
+      if (c.status != null && STATUSES.indexOf(c.status) < 0) throw fail("INVALID", "card " + i + " status");
+      if (c.note != null && (typeof c.note !== "string" || c.note.length > 500)) throw fail("INVALID", "card " + i + " note");
+      if (c.cardId === "custom" || c.custom != null) {
+        var cu = c.custom;
+        if (!cu || typeof cu !== "object" || Array.isArray(cu)) throw fail("INVALID", "card " + i + " custom card");
+        if (typeof cu.name !== "string" || !cu.name.trim() || cu.name.length > 60) throw fail("INVALID", "card " + i + " custom name");
+        if (cu.issuer != null && (typeof cu.issuer !== "string" || cu.issuer.length > 40)) throw fail("INVALID", "card " + i + " custom issuer");
+        if (cu.fee != null && !(typeof cu.fee === "number" && cu.fee >= 0 && cu.fee <= 10000)) throw fail("INVALID", "card " + i + " custom fee");
+      }
       if (c.nickname != null && (typeof c.nickname !== "string" || c.nickname.length > 40)) throw fail("INVALID", "card " + i + " nickname");
       if (c.bonus != null) {
         var bn = c.bonus;
@@ -140,6 +156,7 @@
     load: load,
     update: update,
     newId: newId,
+    STATUSES: STATUSES,
     _test: { validate: validate, normalize: normalize, unwrap: unwrap, MAX_BYTES: MAX_BYTES }
   };
 })(typeof window !== "undefined" ? window : globalThis);

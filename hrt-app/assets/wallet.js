@@ -84,14 +84,33 @@
     if (!o) return "";
     return o.d === null ? MONTHS[o.m - 1] + " " + o.y : MONTHS[o.m - 1].slice(0, 3) + " " + o.d + ", " + o.y;
   }
+  /* Status labels. Keys match HRT_WALLET_STORE.STATUSES. "next" = planned, not opened yet. */
+  var STATUS_LABEL = {
+    "keep": "Keep", "keep-for-now": "Keep for now", "min-spend": "Working on minimum spend",
+    "min-spend-almost": "Minimum spend almost done", "downgrade": "Plan to downgrade", "cancel": "Plan to cancel",
+    "next": "Next card", "closed": "Closed"
+  };
+  var STATUS_ORDER = ["keep", "keep-for-now", "min-spend", "min-spend-almost", "downgrade", "cancel", "next", "closed"];
+  /* A card counts toward fees, credits and "Which card" only once it is open and not closed. */
+  function isHeld(e) { return !e || (e.status !== "next" && e.status !== "closed"); }
+  /* The catalog card for an entry, or a stand-in for a card we do not catalog ("Other card"). */
+  function cardFor(e, byId) {
+    if (e && e.cardId === "custom" && e.custom) {
+      var fee = +e.custom.fee || 0;
+      return { id: "custom", custom: true, name: e.custom.name, issuer: e.custom.issuer || "", fee: fee, feeBasis: "anniversary", network: "" };
+    }
+    return (byId && byId[e.cardId]) || null;
+  }
   function money(n) { return "$" + (Math.round(n * 100) % 100 ? n.toFixed(2) : String(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
 
   /* Everything the screen shows, worked out from wallet + catalog. Pure. */
   function summarize(wallet, catalog, today) {
     var byId = {};
     (catalog && catalog.cards || []).forEach(function (c) { byId[c.id] = c; });
-    var rows = (wallet && wallet.cards || []).map(function (w) {
-      var c = byId[w.cardId] || null;
+    var all = wallet && wallet.cards || [];
+    var upcoming = all.filter(function (w) { return !isHeld(w); }).map(function (w) { return { entry: w, card: cardFor(w, byId) }; });
+    var rows = all.filter(isHeld).map(function (w) {
+      var c = cardFor(w, byId);
       var hasFee = !!(c && c.fee > 0 && c.feeBasis === "anniversary");
       return { entry: w, card: c, hasFee: hasFee, renewal: c ? nextRenewal(w.opened, today) : null };
     });
@@ -103,9 +122,10 @@
     var feeRows = rows.filter(function (r) { return r.hasFee; });
     return {
       rows: rows,
+      upcoming: upcoming,
       count: rows.length,
       yearly: feeRows.reduce(function (s, r) { return s + r.card.fee; }, 0),
-      next: feeRows.length ? feeRows[0] : null,
+      next: feeRows.filter(function (r) { return r.renewal; })[0] || null,
       soon: feeRows.filter(function (r) { return r.renewal && r.renewal.days <= SOON_DAYS; }).length
     };
   }
@@ -223,7 +243,7 @@
     (catalog && catalog.benefits || []).forEach(function (b) { (byCard[b.card] = byCard[b.card] || []).push(b); });
     var out = [];
     (wallet && wallet.cards || []).forEach(function (e) {
-      if (!cards[e.cardId]) return;
+      if (!cards[e.cardId] || !isHeld(e)) return;
       (byCard[e.cardId] || []).forEach(function (b) {
         var p = perkPeriod(b, e.opened, today);
         var next = b.type === "bonus" && b.resets === "anniversary" ? nextRenewal(e.opened, today) : null;
@@ -329,7 +349,8 @@
     });
     // 2b. welcome bonus spend due (30 days)
     (wallet && wallet.cards || []).forEach(function (e) {
-      var c = (catalog.cards || []).filter(function (k) { return k.id === e.cardId; })[0], bs = c && bonusState(e, t);
+      if (!isHeld(e)) return;
+      var c = cardFor(e, (catalog.cards || []).reduce(function (m, k) { m[k.id] = k; return m; }, {})), bs = c && bonusState(e, t);
       if (bs && !bs.met && bs.days >= 0 && bs.days <= 30) out.push({ level: bs.days <= 7 ? "hot" : "warn", id: e.id,
         text: "Spend " + money(bs.left) + " more on " + shortName(c.name) + " by " + dayText(bs.by) + " for the welcome bonus" });
     });
@@ -544,7 +565,7 @@
     if (!sp || !wallet) return [];
     var vals = values || pointValues(), cards = {}, seen = {};
     (catalog.cards || []).forEach(function (c) { cards[c.id] = c; });
-    var held = wallet.cards.filter(function (e) { return cards[e.cardId]; });
+    var held = wallet.cards.filter(function (e) { return cards[e.cardId] && isHeld(e); });
     var sapphire = held.some(function (e) { return /^chase-sapphire/.test(e.cardId); });
     if (opts && opts.visaOnly) held = held.filter(function (e) { return cards[e.cardId].network === "Visa"; });
     var perks = perkRows(wallet, catalog, today);
@@ -689,6 +710,10 @@
       return '<optgroup label="' + esc(iss) + '">' + groups[iss].map(function (c) {
         return '<option value="' + esc(c.id) + '"' + (entry && entry.cardId === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
       }).join("") + "</optgroup>";
+    }).join("") + '<option value="custom"' + (entry && entry.cardId === "custom" ? " selected" : "") + ">Other card (not on this list)</option>";
+    var cu = entry && entry.custom || {};
+    var stOpts = '<option value="">No status</option>' + STATUS_ORDER.map(function (k) {
+      return '<option value="' + k + '"' + (entry && entry.status === k ? " selected" : "") + ">" + esc(STATUS_LABEL[k]) + "</option>";
     }).join("");
     var months = '<option value="">Month</option>' + MONTHS.map(function (m, i) {
       return '<option value="' + (i + 1) + '"' + (o && o.m === i + 1 ? " selected" : "") + ">" + m + "</option>";
@@ -700,11 +725,18 @@
     return '<form class="wl-form" id="wlForm" novalidate>' +
       '<h3 class="wl-h3">' + (entry ? "Edit card" : "Add a card") + "</h3>" +
       '<label class="wl-lab">Card<select id="wlCard" required' + (entry ? " disabled" : "") + ">" + opts + "</select></label>" +
+      '<div class="wl-custom" id="wlCustom"' + (entry && entry.cardId === "custom" ? "" : " hidden") + ">" +
+      '<label class="wl-lab">Card name<input id="wlCName" maxlength="60" placeholder="e.g. Chase Ink Business Preferred" value="' + esc(cu.name || "") + '"></label>' +
+      '<label class="wl-lab">Bank (optional)<input id="wlCIssuer" maxlength="40" placeholder="e.g. Chase" value="' + esc(cu.issuer || "") + '"></label>' +
+      '<label class="wl-lab">Annual fee<span class="wl-dollar">$<input id="wlCFee" type="number" inputmode="decimal" min="0" step="1" placeholder="0" value="' + (cu.fee != null ? cu.fee : "") + '"></span></label></div>' +
+      '<div class="wl-two"><label class="wl-lab">Whose card (optional)<input id="wlHolder" maxlength="30" placeholder="e.g. Janice" value="' + esc(entry && entry.holder || "") + '"></label>' +
+      '<label class="wl-lab">Status (optional)<select id="wlStatus">' + stOpts + "</select></label></div>" +
       '<div class="wl-lab">When did you open it?<div class="wl-date">' +
       '<select id="wlMonth" aria-label="Month opened">' + months + "</select>" +
       '<select id="wlDay" aria-label="Day opened">' + days + "</select>" +
       '<select id="wlYear" aria-label="Year opened">' + years + "</select></div>" +
-      '<small class="wl-help">Month and year are enough. Add the day if you know it for an exact renewal date. It is on your first statement or in your issuer\'s app.</small></div>' +
+      '<small class="wl-help">Month and year are enough. Add the day for an exact renewal date. Not sure, or not opened yet? Leave it blank.</small></div>' +
+      '<label class="wl-lab">Next step (optional)<textarea id="wlNote" maxlength="500" rows="2" placeholder="e.g. Call Capital One in December to switch to the no-fee VentureOne">' + esc(entry && entry.note || "") + "</textarea></label>" +
       '<label class="wl-lab">Nickname (optional)<input id="wlNick" maxlength="40" placeholder="e.g. Business card, Spouse\'s card" value="' + esc(entry && entry.nickname || "") + '"></label>' +
       bonusFields(entry) +
       '<p class="wl-err" id="wlFormErr" role="alert"></p>' +
@@ -737,14 +769,33 @@
   function readForm(entry) {
     var cardId = entry ? entry.cardId : $("wlCard").value;
     var m = +$("wlMonth").value, y = +$("wlYear").value, d = +$("wlDay").value;
+    var status = $("wlStatus").value || "";
     if (!cardId) return { err: "Choose which card." };
-    if (!m || !y) return { err: "Choose the month and year you opened it." };
-    if (d && d > daysInMonth(y, m)) return { err: MONTHS[m - 1] + " " + y + " only has " + daysInMonth(y, m) + " days." };
-    var opened = y + "-" + (m < 10 ? "0" : "") + m + (d ? "-" + (d < 10 ? "0" : "") + d : "");
-    if (isFuture(opened)) return { err: "That date is in the future." };
+    var custom = null;
+    if (cardId === "custom") {
+      var nm = $("wlCName").value.trim().slice(0, 60), fr = $("wlCFee").value.trim(), fee = fr ? +fr : 0;
+      if (!nm) return { err: "Type the card's name." };
+      if (!(fee >= 0) || fee > 10000) return { err: "Enter the annual fee as a number, like 95. Use 0 for no fee." };
+      custom = { name: nm, fee: Math.round(fee * 100) / 100 };
+      var iss = $("wlCIssuer").value.trim().slice(0, 40);
+      if (iss) custom.issuer = iss;
+    }
+    if ((m && !y) || (y && !m)) return { err: "Choose both the month and the year, or leave both blank." };
+    var opened = "";
+    if (m && y) {
+      if (d && d > daysInMonth(y, m)) return { err: MONTHS[m - 1] + " " + y + " only has " + daysInMonth(y, m) + " days." };
+      opened = y + "-" + (m < 10 ? "0" : "") + m + (d ? "-" + (d < 10 ? "0" : "") + d : "");
+      if (status !== "next" && isFuture(opened)) return { err: "That date is in the future. For a card you have not opened yet, set Status to Next card." };
+    }
     var bn = readBonus();
     if (bn.err) return { err: bn.err };
-    return { cardId: cardId, opened: opened, nickname: $("wlNick").value.trim().slice(0, 40), bonus: bn.bonus };
+    return { cardId: cardId, opened: opened, nickname: $("wlNick").value.trim().slice(0, 40), bonus: bn.bonus, custom: custom,
+      holder: $("wlHolder").value.trim().slice(0, 30), status: status, note: $("wlNote").value.trim().slice(0, 500) };
+  }
+  /* Copy the optional fields onto a saved card, dropping empty ones. */
+  function applyExtras(c, v) {
+    ["holder", "status", "note"].forEach(function (k) { if (v[k]) c[k] = v[k]; else delete c[k]; });
+    if (v.custom) c.custom = v.custom;
   }
 
   /* ----- list ----- */
@@ -823,18 +874,20 @@
     var open = !!state.open[e.id];
     var rn = r.renewal, soon = r.hasFee && rn && rn.days <= SOON_DAYS;
     var feeLine = r.hasFee ? money(c.fee) + " a year" : "No annual fee";
-    var renewLine = r.hasFee ? "Renews " + esc(renewalText(rn)) : "Opened " + esc(openedText(e.opened));
+    var opTxt = openedText(e.opened);
+    var renewLine = r.hasFee && rn ? "Renews " + esc(renewalText(rn)) : r.hasFee ? "Add the date you opened it to see when the fee renews" : opTxt ? "Opened " + esc(opTxt) : "Open date not added";
     var html = '<li class="wl-row' + (soon ? " wl-soon" : "") + '" data-entry="' + esc(e.id) + '"><div class="wl-rowtop">' +
       artHtml(c, "md") + '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
-      '<span class="wl-sub">' + esc(c.issuer) + (e.nickname ? " &middot; " + esc(e.nickname) : "") + "</span>" +
-      '<span class="wl-meta">' + renewLine + (r.hasFee ? ' <span class="wl-dot">&middot;</span> Opened ' + esc(openedText(e.opened)) : "") + "</span>" +
+      '<span class="wl-sub">' + esc([e.holder ? e.holder + "\u2019s card" : "", c.issuer, e.nickname].filter(Boolean).join(" \u00b7 ")) + "</span>" +
+      '<span class="wl-meta">' + renewLine + (r.hasFee && rn && opTxt ? ' <span class="wl-dot">&middot;</span> Opened ' + esc(opTxt) : "") + "</span>" +
+      statusHtml(e) +
       valueLine(credits, other) +
       "</div>" +
       '<div class="wl-side"><span class="wl-fee">' + esc(feeLine) + "</span>" +
       (r.hasFee ? '<span class="wl-when' + (soon ? " on" : "") + '">' + esc(whenText(rn)) + "</span>" : "") +
       '<span class="wl-rowacts"><button class="wl-link" data-wl="edit" data-id="' + esc(e.id) + '">Edit</button>' +
       '<button class="wl-link" data-wl="remove" data-id="' + esc(e.id) + '">Remove</button></span></div></div>';
-    html += bonusHtml(e) + (r.hasFee && rn && rn.days <= SOON_DAYS ? keepHtml(r) : "");
+    html += noteHtml(e) + bonusHtml(e) + (r.hasFee && rn && rn.days <= SOON_DAYS ? keepHtml(r) : "");
     var earnCount = earningFor(catalog(), c.id).length;
     if (mine.length || earnCount) {
       html += '<button class="wl-perkbtn" data-wl="perks" data-id="' + esc(e.id) + '" aria-expanded="' + open + '">' +
@@ -846,6 +899,26 @@
       html += '<p class="wl-pk-note wl-cardnote">' + esc(c.note) + "</p>";
     }
     return html + "</li>";
+  }
+
+  function statusHtml(e) {
+    return e.status ? '<span class="wl-status st-' + esc(e.status) + '">' + esc(STATUS_LABEL[e.status] || e.status) + "</span>" : "";
+  }
+  function noteHtml(e) {
+    return e.note ? '<div class="wl-next"><b>Next step</b><span>' + esc(e.note) + "</span></div>" : "";
+  }
+  /* Planned cards (status "next") and closed cards: listed, never counted. */
+  function upcomingHtml(list) {
+    if (!list.length) return "";
+    return '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Next up and closed</h3></div><ul class="wl-list">' + list.map(function (u) {
+      var e = u.entry, c = u.card, name = c ? c.name : "A card we no longer track";
+      var op = openedText(e.opened);
+      return '<li class="wl-row wl-up" data-entry="' + esc(e.id) + '"><div class="wl-rowtop"><div class="wl-main"><b class="wl-name">' + esc(name) + "</b>" +
+        '<span class="wl-sub">' + esc([e.holder ? e.holder + "\u2019s card" : "", c && c.issuer, e.nickname].filter(Boolean).join(" \u00b7 ")) + "</span>" +
+        (op ? '<span class="wl-meta">' + (e.status === "next" ? "Planned for " : "Opened ") + esc(op) + "</span>" : "") + statusHtml(e) + "</div>" +
+        '<div class="wl-side"><span class="wl-rowacts"><button class="wl-link" data-wl="edit" data-id="' + esc(e.id) + '">Edit</button>' +
+        '<button class="wl-link" data-wl="remove" data-id="' + esc(e.id) + '">Remove</button></span></div></div>' + noteHtml(e) + "</li>";
+    }).join("") + "</ul></div>";
   }
 
   function bonusHtml(e) {
@@ -938,7 +1011,7 @@
       var e = row.entry, c = row.card;
       if (!c) return "";
       var bf = cardBrief(e, c, perks);
-      var lines = '<span class="wl-tl-fee">' + (bf.hasFee ? esc(money(c.fee)) + " fee &middot; renews " + esc(bf.renewal.exact ? dayText(bf.renewal) : MONTHS[bf.renewal.m - 1].slice(0, 3)) : "No annual fee") + "</span>";
+      var lines = '<span class="wl-tl-fee">' + (bf.hasFee && !bf.renewal ? esc(money(c.fee)) + " fee" : bf.hasFee ? esc(money(c.fee)) + " fee &middot; renews " + esc(bf.renewal.exact ? dayText(bf.renewal) : MONTHS[bf.renewal.m - 1].slice(0, 3)) : "No annual fee") + "</span>";
       if (bf.next) lines += '<span class="wl-tl-next">Next: ' + esc(bf.next.perk.label) + esc(shortAmount(bf.next.perk)) + ', <b class="' + (bf.next.period.days <= 14 ? "hot" : "") + '">' + esc(daysLeft(bf.next.period.days).replace(" left", "")) + "</b></span>";
       else if (perks.some(function (r) { return r.entry.id === e.id && r.period; })) lines += '<span class="wl-tl-next ok">All credits used this period</span>';
       var pills = "";
@@ -949,7 +1022,8 @@
       if (bf.open > 1) pills += '<span class="wl-tl-pill soft">' + bf.open + " credits open</span>";
       return '<button class="wl-tile" data-wl="go-card" data-id="' + esc(e.id) + '">' + artHtml(c, "sm") +
         '<span class="wl-tl-body"><span class="wl-tl-name">' + esc(shortName(c.name)) + "</span>" +
-        (e.nickname ? '<span class="wl-tl-nick">' + esc(e.nickname) + "</span>" : "") + lines +
+        (e.nickname || e.holder ? '<span class="wl-tl-nick">' + esc([e.holder, e.nickname].filter(Boolean).join(" · ")) + "</span>" : "") +
+        (e.status && e.status !== "keep" ? '<span class="wl-tl-status st-' + esc(e.status) + '">' + esc(STATUS_LABEL[e.status] || "") + "</span>" : "") + lines +
         (pills ? '<span class="wl-tl-pills">' + pills + "</span>" : "") + "</span></button>";
     }).join("") + "</div>";
     html += whichHtml();
@@ -1122,7 +1196,7 @@
     if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     if (state.editing) html += '<div class="wl-card">' + formHtml(editingEntry) + "</div>";
 
-    if (!s.count && !state.editing) {
+    if (!s.count && !(s.upcoming || []).length && !state.editing) {
       /* the summary card above invites them to add cards */
     } else if (s.count) {
       if (!state.editing) html += soonHtml(perks) + '<div class="wl-card">' + whichHtml() + "</div>";
@@ -1130,6 +1204,7 @@
         (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
         '<ul class="wl-list">' + s.rows.map(function (r) { return rowHtml(r, perks); }).join("") + "</ul></div>";
     }
+    html += upcomingHtml(s.upcoming || []);
     var checked = catalog().cards.length ? catalog().cards.map(function (c) { return c.checked; }).sort()[0] : "";
     html += '<p class="wl-foot">Fees and credits come from each issuer\'s own website' + (checked ? ", checked " + esc(fmtIso(checked)) : "") +
       '. Where an issuer does not say when a credit resets, we show calendar periods. Renewal is your card anniversary; most issuers bill the fee on the statement after it. Your wallet is private to your account.</p>';
@@ -1150,13 +1225,15 @@
       var v = readForm(entry);
       if (v.err) { $("wlFormErr").textContent = v.err; return; }
       if (entry) {
-        save(function (w) { w.cards.forEach(function (c) { if (c.id === entry.id) { c.opened = v.opened; c.nickname = v.nickname; if (v.bonus) c.bonus = v.bonus; else delete c.bonus; } }); },
+        save(function (w) { w.cards.forEach(function (c) { if (c.id === entry.id) { c.opened = v.opened; c.nickname = v.nickname; if (v.bonus) c.bonus = v.bonus; else delete c.bonus; applyExtras(c, v); } }); },
           function () { state.editing = null; });
       } else {
-        save(function (w) { var n = { id: store().newId(), cardId: v.cardId, opened: v.opened, nickname: v.nickname }; if (v.bonus) n.bonus = v.bonus; w.cards.push(n); },
+        save(function (w) { var n = { id: store().newId(), cardId: v.cardId, opened: v.opened, nickname: v.nickname }; if (v.bonus) n.bonus = v.bonus; applyExtras(n, v); w.cards.push(n); },
           function () { state.editing = null; });
       }
     });
+    var sel = $("wlCard"), box = $("wlCustom");
+    if (sel && box) sel.addEventListener("change", function () { box.hidden = sel.value !== "custom"; if (!box.hidden) $("wlCName").focus(); });
     var first = entry ? $("wlMonth") : $("wlCard");
     if (first) try { first.focus({ preventScroll: true }); } catch (e) {}
   }
@@ -1204,7 +1281,7 @@
     if (act === "allsoon") { state.showAllSoon = !state.showAllSoon; paint(); return; }
     if (act === "remove") {
       var e = state.wallet.cards.filter(function (c) { return c.id === id; })[0];
-      var c = e && catalog().cards.filter(function (k) { return k.id === e.cardId; })[0];
+      var c = e && cardFor(e, catalog().cards.reduce(function (m, k) { m[k.id] = k; return m; }, {}));
       if (!window.confirm("Remove " + (c ? c.name : "this card") + " from your wallet? Its ticked-off credits go too.")) return;
       save(function (w) { w.cards = w.cards.filter(function (k) { return k.id !== id; }); },
         function () { if (state.editing === id) state.editing = null; });
@@ -1225,6 +1302,19 @@
     s.id = "wl-css";
     s.textContent = [
       ".wl-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius,16px);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}",
+      ".wl-status{display:inline-block;align-self:flex-start;margin-top:6px;font-size:11.5px;font-weight:800;line-height:1;padding:5px 9px;border-radius:999px;background:rgba(47,133,90,.12);color:#2f855a}",
+      ".wl-status.st-keep-for-now,.wl-status.st-downgrade{background:rgba(242,184,75,.18);color:#8a5a10}",
+      ".wl-status.st-min-spend,.wl-status.st-min-spend-almost{background:rgba(232,130,76,.15);color:#b4541f}",
+      ".wl-status.st-cancel,.wl-status.st-closed{background:rgba(120,130,145,.16);color:var(--muted)}",
+      ".wl-status.st-next{background:rgba(28,61,90,.12);color:#1c3d5a}",
+      "[data-theme=dark] .wl-status{color:#8fe0b4}[data-theme=dark] .wl-status.st-keep-for-now,[data-theme=dark] .wl-status.st-downgrade{color:#f2c56b}[data-theme=dark] .wl-status.st-min-spend,[data-theme=dark] .wl-status.st-min-spend-almost{color:#f4a77c}[data-theme=dark] .wl-status.st-next{color:#9fc1d4;background:rgba(159,193,212,.14)}",
+      ".wl-next{display:flex;flex-direction:column;gap:2px;margin:10px 0 0;padding:9px 12px;border-left:3px solid var(--coral);border-radius:0 10px 10px 0;background:rgba(232,130,76,.07);font-size:13.5px;line-height:1.45;color:var(--text)}",
+      ".wl-next b{font-size:11.5px;font-weight:800;color:var(--coral-d,#d06a34)}",
+      ".wl-up .wl-name{color:var(--muted)}",
+      ".wl-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.wl-two{grid-template-columns:1fr}}",
+      ".wl-custom{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;padding:12px;border:1px dashed var(--line);border-radius:12px}.wl-custom[hidden]{display:none}@media(max-width:560px){.wl-custom{grid-template-columns:1fr}}",
+      ".wl-form textarea{font:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2,var(--surface));color:var(--text);resize:vertical;min-height:60px}",
+      ".wl-tl-status{display:inline-block;align-self:flex-start;font-size:11px;font-weight:800;color:#b4541f}",
       ".wl-h3{margin:0;font-size:19px;font-weight:800;line-height:1.25;color:var(--text)}",
       ".wl-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}",
       ".wl-empty{text-align:center;padding:28px 18px}.wl-empty p{color:var(--muted);max-width:520px;margin:10px auto 16px;line-height:1.55;font-size:14px}",
