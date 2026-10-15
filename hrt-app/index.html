@@ -24,12 +24,13 @@
 .ms-btn:hover{border-color:var(--muted,#8aa)}
 .ms-auth{display:flex;gap:8px;align-items:center}
 .atmos-gate{position:relative;border:1px solid var(--line);border-radius:var(--radius,16px);overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
-.atmos-prev{filter:blur(6px);opacity:.75;pointer-events:none;user-select:none;padding:18px}
-.atmos-prev .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.atmos-prev .cal i{display:block;height:46px;border-radius:8px;background:#cfe3ee}
-.atmos-prev .cal i.g{background:#3fce7f}.atmos-prev .cal i.y{background:#e8c15e}.atmos-prev .cal i.r{background:#f2726e}
-.atmos-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:rgba(255,255,255,.25)}
-:root[data-theme="dark"] .atmos-lock{background:rgba(10,18,28,.35)}
+/* Teaser: a real calendar screenshot, blurred just enough that the colors and layout show but dates and prices do not */
+.atmos-prev{pointer-events:none;user-select:none;height:440px;overflow:hidden}
+.atmos-prev img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center;filter:blur(3.5px) saturate(1.05);transform:scale(1.03)}
+@media(max-width:760px){.atmos-prev{height:380px}.atmos-prev img{object-position:top left}}
+.atmos-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:linear-gradient(180deg,rgba(14,27,44,.05),rgba(14,27,44,.28))}
+.atmos-lock .lk{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(460px,100%);padding:22px 22px 24px;border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 18px 50px rgba(14,27,44,.25);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+:root[data-theme="dark"] .atmos-lock .lk{background:rgba(14,27,44,.9)}
 .atmos-lock h3{margin:0;color:var(--text)}.atmos-lock p{margin:0;color:var(--muted);max-width:420px}
 .atmos-open{display:none;padding:28px;text-align:center;border:2px dashed #3fce7f;border-radius:var(--radius,16px);background:var(--surface);color:var(--text);font-weight:700;font-size:18px}
 html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
@@ -517,12 +518,12 @@ html.ms-ready .hrt-boot{display:none}
  </div>
  <!-- SANDBOX: Atmos paywall test (no live data) -->
  <div class="atmos-gate" id="atmosGate">
-  <div class="atmos-prev" aria-hidden="true"><div class="cal"><i class="g"></i><i class=""></i><i class="y"></i><i class="r"></i><i class=""></i><i class="g"></i><i class="y"></i><i class=""></i><i class="r"></i><i class="g"></i><i class=""></i><i class="y"></i><i class=""></i><i class="g"></i><i class="r"></i><i class=""></i><i class="y"></i><i class="g"></i><i class=""></i><i class=""></i><i class="r"></i><i class="g"></i><i class="y"></i><i class=""></i><i class="g"></i><i class=""></i><i class="r"></i><i class="y"></i></div></div>
-  <div class="atmos-lock">
+  <div class="atmos-prev" aria-hidden="true"><img src="https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/05d2099a-9a2d-4b82-90e2-6e8724ddcfb0/Screenshot+2026-10-14+at+9.09.29%E2%80%AFAM.png?content-type=image%2Fpng" alt="" loading="lazy" decoding="async"></div>
+  <div class="atmos-lock"><div class="lk">
    <h3>Atmos Award Calendar is a paid feature</h3>
    <p>Unlock every saver award date to and from Hawaiʻi, color coded by value.</p>
    <button type="button" class="btn coral" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock for $9.99/mo &rarr;</button>
-  </div>
+  </div></div>
  </div>
  <div class="atmos-open" id="atmosOpen">
   <div class="atmos-tabs" role="tablist" aria-label="Atmos tools">
