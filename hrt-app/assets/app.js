@@ -43,7 +43,8 @@
   resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex credit each quarter" },
   status:{ title:"Atmos Choose to Earn Calculator", hint:"Distance, price or segments" },
   communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
-  wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" }
+  wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
+  account:{ title:"My account", hint:"Photo, name, login and billing" }
  };
  var shown = {}, current = null;
  var onShow = {};

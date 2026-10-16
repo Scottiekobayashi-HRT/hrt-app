@@ -603,3 +603,67 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .lg-soon-note{display:inline-block;margin-top:4px;font-size:12.5px;font-weight:700;color:var(--muted)}
 
 .note.off .fdot{background:var(--muted)!important;box-shadow:none!important;animation:none!important}
+
+/* ===== Account page (#account, assets/account.js). Neutral colours on purpose,
+   built only from the theme tokens so light and dark both work. ===== */
+#ac-host .ac-wrap{display:flex;flex-direction:column;gap:16px;max-width:980px}
+#ac-host .ac-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+#ac-host .ac-head{display:flex;align-items:center;gap:20px}
+#ac-host .ac-photo{position:relative;flex:0 0 auto}
+#ac-host .ac-av{display:flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;background:var(--surface-2);border:1px solid var(--line);color:var(--text);font-weight:800}
+#ac-host .ac-av img{width:100%;height:100%;object-fit:cover;display:block}
+#ac-host .ac-av-lg{width:96px;height:96px;font-size:32px}
+#ac-host .ac-cam{position:absolute;right:-4px;bottom:-4px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--text);color:var(--surface);border:3px solid var(--surface);cursor:pointer}
+#ac-host .ac-cam input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#ac-host .ac-cam:focus-within{outline:2px solid var(--muted);outline-offset:2px}
+#ac-host .ac-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+#ac-host .ac-who{min-width:0;display:flex;flex-direction:column;gap:6px}
+#ac-host h2.ac-name{margin:0;font-size:22px;font-weight:800;color:var(--text);line-height:1.2}
+#ac-host p.ac-mail{margin:0;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+#ac-host .ac-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+#ac-host .ac-badge{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:800;white-space:nowrap}
+#ac-host .ac-pro{background:var(--text);color:var(--surface)}
+#ac-host .ac-client{background:var(--surface-2);color:var(--text);border:1.5px solid var(--text)}
+#ac-host .ac-free{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+#ac-host p.ac-hint,#ac-host p.ac-note{margin:0;font-size:13px;color:var(--muted)}
+#ac-host .ac-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+#ac-host .ac-grid>.ac-card:last-child{grid-column:1/-1}
+#ac-host h3.ac-h{margin:0 0 12px;font-size:17px;font-weight:800;color:var(--text)}
+#ac-host .ac-form{display:flex;flex-direction:column;gap:12px}
+#ac-host .ac-fold{padding:4px 0 14px;border-bottom:1px solid var(--line)}
+#ac-host .ac-row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+#ac-host .ac-lab{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+#ac-host .ac-in{height:46px;min-height:46px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:500 16px/1 inherit;font-family:inherit;color:var(--text);background:var(--surface-2);width:100%}
+#ac-host .ac-in:focus{outline:2px solid var(--muted);outline-offset:1px}
+#ac-host .ac-line{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;border-bottom:1px solid var(--line)}
+#ac-host .ac-line:last-of-type{border-bottom:0}
+#ac-host .ac-line>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+#ac-host .ac-k{font-size:13px;font-weight:700;color:var(--muted)}
+#ac-host .ac-v{font-size:15px;color:var(--text);overflow-wrap:anywhere}
+#ac-host .ac-strong{font-weight:800}
+#ac-host .ac-dots{letter-spacing:2px}
+#ac-host .ac-on{height:26px;padding:0 10px;border-radius:999px;background:var(--deal-bg);color:var(--deal);font-size:12.5px;font-weight:800;display:inline-flex;align-items:center}
+#ac-host .ac-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:4px 0}
+#ac-host .ac-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-weight:700;font-size:14px;cursor:pointer;flex:0 0 auto}
+#ac-host .ac-btn:hover{border-color:var(--muted)}
+#ac-host .ac-primary{background:var(--text);color:var(--surface);border-color:var(--text)}
+#ac-host .ac-link{background:none;border:0;padding:0;color:var(--text);font-weight:700;text-decoration:underline;cursor:pointer;font-size:13px}
+#ac-host .ac-msg{font-size:13px;color:var(--muted)}#ac-host .ac-msg.bad{color:var(--peak)}
+#ac-host .ac-foot{display:flex}
+#ac-host .ac-out{background:transparent}
+@media (max-width:760px){
+ #ac-host .ac-head{flex-direction:column;text-align:center}
+ #ac-host .ac-badges{justify-content:center}
+ #ac-host .ac-grid{grid-template-columns:minmax(0,1fr)}
+ #ac-host .ac-card{padding:16px}
+ #ac-host .ac-foot .ac-btn{width:100%}
+}
+/* top bar avatar: opens #account */
+.topbar .tb-av{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border-radius:50%;border:0;background:none;cursor:pointer;flex:0 0 auto}
+.topbar .tb-av[hidden]{display:none}
+.topbar .ac-av-sm{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;overflow:hidden;background:var(--surface-2);border:1px solid var(--line);color:var(--text);font-weight:800;font-size:13px}
+.topbar .ac-av-sm img{width:100%;height:100%;object-fit:cover;display:block}
+/* phones: Billing and Log out live on the Account page, so the top bar stays short */
+@media (max-width:560px){
+ .topbar .ms-btn[data-ms-action="customer-portal"],.topbar .ms-btn[data-ms-action="logout"]{display:none!important}
+}
