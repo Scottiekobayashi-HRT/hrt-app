@@ -39,5 +39,38 @@ ok('feed tile wins over extra', t.filter((x) => x.dest === 'LAX').length === 1 &
 ok('feed tiles first', t[0].dest === 'MNL');
 ok('hawaii today format', /^\d{4}-\d\d-\d\d$/.test(T.hawaiiToday()));
 
+/* PRO wall */
+const E = T.entriesFrom(feed);
+ok('free feed becomes economy entries', E.length === 4 && E.every((e) => e.cabin === 'economy'));
+const P = (o) => T.cleanPrefs(o);
+ok('bad prefs cleaned', JSON.stringify(P({ dests: ['LAX', 'x', 5], cabin: 'boat', max: -3, months: ['2026-1'] })) === JSON.stringify({ dests: ['LAX'], cabin: 'economy', max: 0, months: [] }));
+let r = T.applyPrefs(E, P({}), '2026-10-16');
+ok('defaults show every city with dates left', r.map((x) => x.dest).join() === 'LAX,JFK,LAS', r.map((x) => x.dest).join());
+r = T.applyPrefs(E, P({ dests: ['LAS', 'LAX'] }), '2026-10-16');
+ok('picked cities only, in picked order', r.map((x) => x.dest).join() === 'LAS,LAX');
+r = T.applyPrefs(E, P({ max: 25000 }), '2026-10-16');
+ok('max points drops pricier dates', !r.some((x) => x.dest === 'JFK'), r.map((x) => x.dest).join());
+r = T.applyPrefs(E, P({ months: ['2026-10'] }), '2026-10-01');
+ok('month filter keeps October', r.length === 4);
+r = T.applyPrefs(E, P({ months: ['2026-11'] }), '2026-10-01');
+ok('month with nothing gives empty', r.length === 0);
+r = T.applyPrefs(E, P({ cabin: 'business' }), '2026-10-16');
+ok('business with no data gives empty', r.length === 0);
+const jf = T.applyPrefs(E, P({}), '2026-10-16').find((x) => x.dest === 'JFK');
+ok('card recounted', jf.count === 2 && jf.miles === 30000 && jf.soonest === '2026-10-16');
+
+const full = { deals: [
+  { dest: 'NRT', city: 'Tokyo', cabin: 'Business', dates: [{ date: '2026-12-01', miles: 70000 }] },
+  { dest: 'LAX', city: 'Los Angeles', cabin: 'first', dates: [{ date: '2026-11-01', miles: 40000 }] },
+  { city: 'broken' }
+] };
+const EF = T.entriesFrom(full);
+ok('full feed read, broken row skipped', EF.length === 2 && EF[0].cabin === 'business');
+const C = T.choicesFor(EF, '2026-10-16');
+ok('cabins offered from data', C.cabins.business && C.cabins.first && !C.cabins.economy);
+ok('months offered from data', C.months.join() === '2026-11,2026-12');
+ok('points steps inside the range', C.steps.join() === '40000,50000,60000', C.steps.join());
+ok('first class cards', T.applyPrefs(EF, P({ cabin: 'first' }), '2026-10-16')[0].dest === 'LAX');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

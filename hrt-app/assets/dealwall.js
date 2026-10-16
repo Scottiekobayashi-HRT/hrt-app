@@ -408,7 +408,315 @@
     return wrap;
   }
 
+
+  /* =====================================================================
+     PRO deal wall. PRO members do not see the sales box; instead they get
+     their own wall at the top of the Dashboard and set it up with four taps:
+     destinations, cabin, max points and months.
+
+     Data: today it reads the free feed above (economy, next 30 days). When the
+     Mac's calendar build publishes PRO_FEED on the gated PRO project, this
+     reads that instead and the wall fills out by itself (all destinations,
+     the whole booking window, business and first). PRO_FEED contract:
+       { updated, hub, window_days,
+         deals: [ { origin, dest, city, cabin: "economy"|"business"|"first",
+                    image, dates: [ { date, miles, seats, nonstop } ] } ] }
+     It is written from the same morning pull: no extra API calls.
+
+     Settings live in this browser (localStorage), so they are per device.
+  ===================================================================== */
+  var PRO_FEED = "https://hrt-calendar-pro.pages.dev/pro_deals.json";
+  var PREF_KEY = "hrtProWall";
+  var CABINS = [["economy", "Economy"], ["business", "Business"], ["first", "First"]];
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  /* Normalize either feed into one list of { dest, city, cabin, image, dates }. */
+  function entriesFrom(feed) {
+    if (feed && Array.isArray(feed.deals)) {
+      return feed.deals.filter(function (d) { return d && d.dest && Array.isArray(d.dates); }).map(function (d) {
+        return { origin: d.origin || "HNL", dest: d.dest, city: d.city || d.dest, cabin: String(d.cabin || "economy").toLowerCase(), image: d.image || "", dates: d.dates };
+      });
+    }
+    return ((feed && feed.economy) || []).map(function (d) {
+      return { origin: d.origin || "HNL", dest: d.dest, city: d.city || d.dest, cabin: "economy", image: d.image || "", dates: d.dates || [] };
+    });
+  }
+
+  function readPrefs() {
+    var p = null;
+    try { p = JSON.parse(localStorage.getItem(PREF_KEY) || "null"); } catch (e) {}
+    return cleanPrefs(p);
+  }
+  function cleanPrefs(p) {
+    p = p && typeof p === "object" ? p : {};
+    var strs = function (a, re) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === "string" && re.test(x); }).slice(0, 40) : []; };
+    return {
+      dests: strs(p.dests, /^[A-Z]{3}$/),
+      cabin: /^(economy|business|first)$/.test(p.cabin) ? p.cabin : "economy",
+      max: typeof p.max === "number" && p.max > 0 && p.max < 1e6 ? p.max : 0,
+      months: strs(p.months, /^\d{4}-\d\d$/)
+    };
+  }
+  function savePrefs(p) { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {} }
+
+  /* Apply the member's settings. Pure. Drops past dates, then keeps the dates
+     that match, and recounts each card. Cards follow the member's own order of
+     picked cities, then the feed's order. */
+  function applyPrefs(entries, prefs, today) {
+    today = today || hawaiiToday();
+    var pick = prefs.dests || [], months = prefs.months || [];
+    var out = entries.filter(function (e) {
+      return e.cabin === prefs.cabin && (!pick.length || pick.indexOf(e.dest) >= 0);
+    }).map(function (e, i) {
+      var dates = e.dates.filter(function (t) {
+        var d = String(t && t.date || "");
+        return d >= today && (!prefs.max || (t.miles && t.miles <= prefs.max)) && (!months.length || months.indexOf(d.slice(0, 7)) >= 0);
+      });
+      if (!dates.length) return null;
+      var miles = Math.min.apply(null, dates.map(function (t) { return t.miles || Infinity; }));
+      return { origin: e.origin, dest: e.dest, city: e.city, cabin: e.cabin, image: e.image, dates: dates, i: i,
+        miles: isFinite(miles) ? miles : 0, count: dates.length, soonest: dates.map(function (t) { return t.date; }).sort()[0],
+        nonstop: dates.some(function (t) { return t.nonstop; }) };
+    }).filter(Boolean);
+    out.sort(function (a, b) {
+      var ia = pick.indexOf(a.dest), ib = pick.indexOf(b.dest);
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a.i - b.i;
+    });
+    return out;
+  }
+
+  /* What the settings panel can offer, from the data itself. Pure. */
+  function choicesFor(entries, today) {
+    today = today || hawaiiToday();
+    var cities = [], seen = {}, cab = {}, months = {}, miles = [];
+    entries.forEach(function (e) {
+      if (!seen[e.dest]) { seen[e.dest] = 1; cities.push({ dest: e.dest, city: e.city }); }
+      e.dates.forEach(function (t) {
+        if (String(t.date) < today) return;
+        cab[e.cabin] = 1; months[String(t.date).slice(0, 7)] = 1;
+        if (t.miles) miles.push(t.miles);
+      });
+    });
+    var lo = Math.min.apply(null, miles), hi = Math.max.apply(null, miles);
+    var steps = [10000, 12500, 15000, 17500, 20000, 25000, 30000, 40000, 50000, 60000, 75000, 100000]
+      .filter(function (v) { return miles.length && v >= lo && v < hi; });
+    return { cities: cities, cabins: cab, months: Object.keys(months).sort(), steps: steps };
+  }
+  function monthLabel(ym) { return MON[parseInt(ym.slice(5), 10) - 1] + (ym.slice(0, 4) !== hawaiiToday().slice(0, 4) ? " " + ym.slice(2, 4) : ""); }
+  function kpts(n) { return n % 1000 ? (n / 1000).toFixed(1) + "k" : n / 1000 + "k"; }
+
+  var proCss = document.createElement("style");
+  proCss.textContent = [
+    ".dwp{margin-top:22px}",
+    ".dwp-tune{appearance:none;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 13px;border-radius:999px;border:1px solid rgba(242,184,75,.6);background:linear-gradient(135deg,rgba(245,199,90,.18),rgba(217,112,64,.12));color:var(--text);font-size:12.5px;font-weight:800}",
+    ".dwp-tune:hover{border-color:#e8824c}.dwp-tune[aria-expanded=true]{background:#1b2430;color:#fff;border-color:#1b2430}",
+    "[data-theme=dark] .dwp-tune[aria-expanded=true]{background:#f2b84b;color:#14202e;border-color:#f2b84b}",
+    ".dwp-sum{width:100%;font-size:12px;color:var(--muted);font-weight:600;margin-top:-4px}",
+    ".dwp-panel{border:1px solid color-mix(in srgb,#f2b84b 45%,var(--line));border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);padding:14px 16px 12px;margin:0 0 12px;display:grid;gap:12px}",
+    ".dwp-row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:start}",
+    ".dwp-row>b{font-size:12.5px;color:var(--text);padding-top:8px}",
+    ".dwp-row>b small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}",
+    ".dwp-chips{display:flex;flex-wrap:wrap;gap:6px}",
+    ".dwp-chip{appearance:none;font:inherit;cursor:pointer;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px}",
+    ".dwp-chip:hover:not(:disabled){border-color:#e8824c}",
+    ".dwp-chip.on{background:#1b2430;border-color:#1b2430;color:#fff}",
+    "[data-theme=dark] .dwp-chip.on{background:#f2b84b;border-color:#f2b84b;color:#14202e}",
+    ".dwp-chip:disabled{opacity:.5;cursor:default}",
+    ".dwp-chip small{font-size:10px;font-weight:700;opacity:.8}",
+    ".dwp-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}",
+    ".dwp-reset{appearance:none;font:inherit;cursor:pointer;margin-left:auto;background:none;border:0;color:var(--coral);font-weight:800;font-size:12.5px;min-height:36px}",
+    ".dwp-done{appearance:none;font:inherit;cursor:pointer;min-height:36px;padding:0 16px;border-radius:999px;border:0;background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;font-weight:800;font-size:12.5px}",
+    ".dwp-empty{border:1px dashed var(--line);border-radius:var(--radius,16px);padding:18px;text-align:center;color:var(--muted);font-size:13px;background:var(--surface)}",
+    ".dwp-empty button{margin-top:8px}",
+    ".dwp-cal{margin-left:auto;font-size:12.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:8px 15px;text-decoration:none;white-space:nowrap}",
+    "@media (max-width:640px){.dwp-row{grid-template-columns:1fr;gap:6px}.dwp-row>b{padding-top:0}.dwp-chip{min-height:40px}}"
+  ].join("");
+  document.head.appendChild(proCss);
+
+  function renderPro(feed, full) {
+    var entries = entriesFrom(feed), prefs = readPrefs();
+    var win = feed.window_days || 30;
+    var wrap = el("div", "dwp pro-only");
+
+    var head = el("div", "dw-head");
+    head.appendChild(el("h2", null, "Your award deals"));
+    head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
+    if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
+    var tune = el("button", "dwp-tune", "Customize");
+    tune.type = "button"; tune.setAttribute("aria-expanded", "false");
+    tune.insertAdjacentHTML("afterbegin", '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>');
+    head.appendChild(tune);
+    var nav = el("div", "dw-nav"); head.appendChild(nav);
+    var sum = el("div", "dwp-sum"); head.appendChild(sum);
+    wrap.appendChild(head);
+
+    var panel = el("div", "dwp-panel"); panel.hidden = true;
+    var rail = el("div", "dw-rail");
+    var exp = el("div", "dw-exp");
+    var empty = el("div", "dwp-empty"); empty.hidden = true;
+    wrap.appendChild(panel); wrap.appendChild(rail); wrap.appendChild(exp); wrap.appendChild(empty);
+    wrap.appendChild(el("p", "dw-note", full
+      ? "From the HRT PRO calendar, refreshed every morning. Availability changes; confirm with the airline before booking."
+      : "Showing economy for the next " + win + " days for now. Business and first class, and the full booking window, are on the way. Availability changes; confirm with the airline before booking."));
+
+    var openKey = null;
+    function closeExp() { openKey = null; exp.innerHTML = ""; exp.classList.remove("on");
+      rail.querySelectorAll(".dw-card").forEach(function (c) { c.classList.remove("on"); c.setAttribute("aria-expanded", "false"); }); }
+
+    function fillExp(d) {
+      exp.innerHTML = ""; exp.classList.add("on");
+      var h = el("div", "dw-exph"), ht = el("div");
+      ht.appendChild(el("b", null, d.origin + " to " + d.city + (d.cabin !== "economy" ? ", " + d.cabin : "")));
+      ht.appendChild(el("span", null, d.count + (d.count === 1 ? " date matches" : " dates match") + " your settings, from " + num(d.miles) + " points one way"));
+      h.appendChild(ht);
+      var x = el("button", "dw-x", "×"); x.type = "button"; x.setAttribute("aria-label", "Close"); x.addEventListener("click", closeExp);
+      h.appendChild(x); exp.appendChild(h);
+      var grid = el("div", "dw-dates");
+      d.dates.forEach(function (t) {
+        var c = el("div", "dw-date" + (t.seats > 0 && t.seats <= 2 ? " low" : ""));
+        c.appendChild(el("b", null, shortDate(t.date)));
+        c.appendChild(el("span", "dw-dpts", num(t.miles)));
+        var tags = el("span", "dw-dtags");
+        if (t.seats) tags.appendChild(el("span", null, t.seats >= 9 ? "9+ seats" : (t.seats + (t.seats === 1 ? " seat" : " seats"))));
+        if (t.nonstop) tags.appendChild(el("span", "dw-ns", "nonstop"));
+        c.appendChild(tags); grid.appendChild(c);
+      });
+      exp.appendChild(grid);
+      var foot = el("div", "dw-expf");
+      foot.appendChild(el("span", null, "Book on the airline's site. Seats can go fast."));
+      var a = el("a", "dwp-cal", "Open the Deals Calendar →");
+      a.href = "#atmos"; a.setAttribute("data-route", "atmos"); a.setAttribute("data-cal", "calendar.html");
+      foot.appendChild(a); exp.appendChild(foot);
+      exp.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+
+    function drawCards() {
+      closeExp();
+      rail.innerHTML = "";
+      var list = applyPrefs(entries, prefs);
+      list.forEach(function (d) {
+        var card = el("button", "dw-card"); card.type = "button"; card.setAttribute("aria-expanded", "false");
+        card.addEventListener("click", function () {
+          var key = d.dest + d.cabin;
+          if (openKey === key) { closeExp(); return; }
+          openKey = key;
+          rail.querySelectorAll(".dw-card").forEach(function (c) { var on = c === card; c.classList.toggle("on", on); c.setAttribute("aria-expanded", on ? "true" : "false"); });
+          fillExp(d);
+        });
+        var ph = el("div", "dw-ph");
+        if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
+        ph.appendChild(el("span", "dw-rt", d.origin + "–" + d.dest));
+        ph.appendChild(el("span", "dw-city", d.city));
+        card.appendChild(ph);
+        var body = el("div", "dw-body");
+        var pts = el("div", "dw-pts", num(d.miles) + " pts");
+        pts.appendChild(el("small", null, "one way, " + d.cabin));
+        body.appendChild(pts);
+        var meta = el("div", "dw-meta");
+        meta.appendChild(el("span", "dw-chip ok", d.count + (d.count === 1 ? " date" : " dates")));
+        meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
+        if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
+        body.appendChild(meta); card.appendChild(body);
+        card.appendChild(el("span", "dw-more", "See the dates"));
+        rail.appendChild(card);
+      });
+      rail.hidden = !list.length;
+      empty.hidden = !!list.length;
+      if (!list.length) {
+        empty.innerHTML = "";
+        empty.appendChild(el("div", null, "No dates match your settings right now. Try a higher points limit, another month, or more cities."));
+        var b = el("button", "dwp-done", "Change settings"); b.type = "button";
+        b.addEventListener("click", function () { openPanel(true); });
+        empty.appendChild(b);
+      }
+      var C = choicesFor(entries);
+      var cab = CABINS.filter(function (c) { return c[0] === prefs.cabin; })[0][1];
+      sum.textContent = cab + ", " + (prefs.dests.length ? prefs.dests.length + (prefs.dests.length === 1 ? " city" : " cities") : "all cities") +
+        ", " + (prefs.max ? "up to " + num(prefs.max) + " pts" : "any points") +
+        ", " + (prefs.months.length ? prefs.months.map(monthLabel).join(", ") : (C.months.length > 1 ? monthLabel(C.months[0]) + " to " + monthLabel(C.months[C.months.length - 1]) : "next " + win + " days"));
+      if (rail.scrollLeft) rail.scrollLeft = 0;
+    }
+
+    function chip(label, on, onTap, disabled, note) {
+      var b = el("button", "dwp-chip" + (on ? " on" : ""), label); b.type = "button";
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      if (note) b.appendChild(el("small", null, note));
+      if (disabled) b.disabled = true; else b.addEventListener("click", onTap);
+      return b;
+    }
+    function row(title, hint, kids) {
+      var r = el("div", "dwp-row"), t = el("b", null, title);
+      if (hint) t.appendChild(el("small", null, hint));
+      var c = el("div", "dwp-chips"); kids.forEach(function (k) { c.appendChild(k); });
+      r.appendChild(t); r.appendChild(c); return r;
+    }
+    function change(fn) { fn(); prefs = cleanPrefs(prefs); savePrefs(prefs); drawPanel(); drawCards(); }
+    function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
+
+    function drawPanel() {
+      var C = choicesFor(entries);
+      panel.innerHTML = "";
+      panel.appendChild(row("Destinations", "Tap the ones you want", [chip("All", !prefs.dests.length, function () { change(function () { prefs.dests = []; }); })]
+        .concat(C.cities.map(function (c) { return chip(c.city, prefs.dests.indexOf(c.dest) >= 0, function () { change(function () { toggle(prefs.dests, c.dest); }); }); }))));
+      panel.appendChild(row("Cabin", "", CABINS.map(function (c) {
+        var has = !!C.cabins[c[0]];
+        return chip(c[1], prefs.cabin === c[0], function () { change(function () { prefs.cabin = c[0]; }); }, !has && prefs.cabin !== c[0], has ? "" : "soon");
+      })));
+      panel.appendChild(row("Max points", "One way", [chip("Any", !prefs.max, function () { change(function () { prefs.max = 0; }); })]
+        .concat(C.steps.map(function (v) { return chip(kpts(v), prefs.max === v, function () { change(function () { prefs.max = v; }); }); }))));
+      panel.appendChild(row("When", "Pick months", [chip("Any time", !prefs.months.length, function () { change(function () { prefs.months = []; }); })]
+        .concat(C.months.map(function (m) { return chip(monthLabel(m), prefs.months.indexOf(m) >= 0, function () { change(function () { toggle(prefs.months, m); }); }); }))));
+      var f = el("div", "dwp-foot");
+      f.appendChild(el("span", null, "Saved on this device. Changes show right away."));
+      var r = el("button", "dwp-reset", "Reset"); r.type = "button";
+      r.addEventListener("click", function () { change(function () { prefs = cleanPrefs(null); }); });
+      var d = el("button", "dwp-done", "Done"); d.type = "button";
+      d.addEventListener("click", function () { openPanel(false); });
+      f.appendChild(r); f.appendChild(d); panel.appendChild(f);
+    }
+    function openPanel(on) {
+      panel.hidden = !on; tune.setAttribute("aria-expanded", on ? "true" : "false");
+      if (on) { drawPanel(); panel.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+    }
+    tune.addEventListener("click", function () { openPanel(panel.hidden); });
+
+    drawCards();
+    attachNav(rail, nav);
+    return wrap;
+  }
+
+  /* The members-only file, once the Mac publishes it. Same token hand-off as
+     the calendar frame. Any failure just means "use the free feed". */
+  function proFeed() {
+    var t = "";
+    try { var ms = window.$memberstackDom; t = ms && ms.getMemberCookie && ms.getMemberCookie() || ""; } catch (e) {}
+    if (!t) return Promise.reject(new Error("no token"));
+    return fetch(PRO_FEED + "?mst=" + encodeURIComponent(t), { cache: "no-store", credentials: "include" })
+      .then(function (r) { if (!r.ok) throw new Error("pro feed " + r.status); return r.json(); })
+      .then(function (f) { if (!f || !Array.isArray(f.deals) || !f.deals.length) throw new Error("pro feed empty"); return f; });
+  }
+
   /* ---------- mount ---------- */
+  var proMounted = false;
+  function mountPro(freeFeed, after) {
+    function go() {
+      if (proMounted) return;
+      if (!document.documentElement.classList.contains("ms-pro")) return;
+      proMounted = true;
+      function put(feed, full) {
+        var n = renderPro(feed, full);
+        if (after.parentNode) after.parentNode.insertBefore(n, after);
+      }
+      proFeed().then(function (f) { put(f, true); }, function () { put(freeFeed, false); });
+    }
+    go();
+    /* membership is read after this script runs; watch for the PRO class */
+    if (!proMounted && window.MutationObserver) {
+      var mo = new MutationObserver(function () { go(); if (proMounted) mo.disconnect(); });
+      mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    }
+  }
+
   function mount() {
     var home = document.querySelector("#v-home .content");
     if (!home) return;
@@ -424,6 +732,9 @@
         var node = render(fresh);
         if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor.nextSibling);
         else home.appendChild(node);
+        /* PRO wall, right where the free one sits. Built only for PRO members:
+           the free wall is hidden for them by its free-only class. */
+        mountPro(feed, node);
       })
       .catch(function (e) {
         // Stay silent on the page. A broken feed should never show an error box
@@ -432,7 +743,7 @@
       });
   }
 
-  window.HRT_DEALWALL = { _test: { freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday } };
+  window.HRT_DEALWALL = { _test: { freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
