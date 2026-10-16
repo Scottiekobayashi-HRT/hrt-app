@@ -1009,7 +1009,16 @@
     var soon = expiringSoon(perks, SOON_PERK_DAYS);
     var html = '<div class="wl-hm-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' +
       '<a class="wl-link" href="#wallet" data-route="wallet">See all details</a></div>';
-    html += '<div class="wl-tiles">' + s.rows.map(function (row) {
+    html += tilesHtml(s, perks);
+    html += whichHtml();
+    if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
+    html += "</div>" + soonHtml(perks, true) + "</div>";
+    homeHost.innerHTML = html;
+  }
+
+  /* The swipeable card tiles, used on the Dashboard and the My Wallet page. */
+  function tilesHtml(s, perks) {
+    return '<div class="wl-tiles">' + s.rows.map(function (row) {
       var e = row.entry, c = row.card;
       if (!c) return "";
       var bf = cardBrief(e, c, perks);
@@ -1028,10 +1037,6 @@
         (e.status && e.status !== "keep" ? '<span class="wl-tl-status st-' + esc(e.status) + '">' + esc(STATUS_LABEL[e.status] || "") + "</span>" : "") + lines +
         (pills ? '<span class="wl-tl-pills">' + pills + "</span>" : "") + "</span></button>";
     }).join("") + "</div>";
-    html += whichHtml();
-    if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
-    html += "</div>" + soonHtml(perks, true) + "</div>";
-    homeHost.innerHTML = html;
   }
 
   function exampleBanner() {
@@ -1187,8 +1192,9 @@
     if (!s.count && !(s.upcoming || []).length && !state.editing) {
       /* the summary card above invites them to add cards */
     } else if (s.count) {
-      if (!state.editing) html += soonHtml(perks) + '<div class="wl-card">' + whichHtml() + "</div>";
-      html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Your cards</h3></div>' +
+      if (!state.editing) html += '<div class="wl-hm-grid wl-pg-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2></div>' +
+        tilesHtml(s, perks) + whichHtml() + "</div>" + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
+      html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Card details</h3></div>' +
         (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
         '<ul class="wl-list">' + s.rows.map(function (r) { return rowHtml(r, perks); }).join("") + "</ul></div>";
     }
@@ -1250,7 +1256,7 @@
     if (act === "demo-off") { endExample(); return; }
     if (act === "which") { var k = b.getAttribute("data-key"); state.which = (state.which === k && !state.storeQ) ? "" : k; state.storeQ = ""; paint(); return; }
     if (act === "go-wallet") { location.hash = "wallet"; return; }
-    if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; location.hash = "wallet"; return; }
+    if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; if (location.hash === "#wallet") paint(); else location.hash = "wallet"; return; }
     if ((act === "go-add" || act === "add") && state.demo) { endExample(); state.editing = "new"; if (act === "go-add") location.hash = "wallet"; return; }
     if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
     if (act === "add") { state.editing = "new"; state.msg = ""; paint(); host.scrollIntoView({ block: "nearest" }); return; }
@@ -1471,7 +1477,7 @@
       ".wl-hm-list{margin-top:0}",
       ".wl-hm-h4{margin-top:18px}",
       ".wl-hm-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}",
-      ".wl-hm-grid>.wl-card{margin-bottom:0}",
+      ".wl-hm-grid>.wl-card{margin-bottom:0}.wl-pg-grid{margin-bottom:14px}.wl-pg-grid .wl-hm-head{justify-content:flex-start;align-items:flex-start;text-align:left}",
       ".wl-soon-home .wl-cr-total b{font-size:24px}.wl-soon-home .wl-ctab{padding:7px 10px}",
       "@media (max-width:1060px){.wl-hm-grid{grid-template-columns:minmax(0,1fr)}}",
       ".wl-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:16px}",
