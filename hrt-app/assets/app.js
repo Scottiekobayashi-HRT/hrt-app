@@ -26,9 +26,9 @@
    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
  }
  function setHref(id, url){ var el = $(id); if(el) el.href = url; }
- ["navPro","topPro","homePro","atmosPro"].forEach(function(id){ setHref(id, PRO_URL); });
+ ["topPro","homePro","atmosPro"].forEach(function(id){ setHref(id, PRO_URL); });
  ["homeCal","atmosCal"].forEach(function(id){ setHref(id, ATMOS_URL); });
- setHref("navHome", SITE); setHref("navDisc", DISCLOSURE_URL); setHref("welcomeCoach", COACHING_URL);
+ setHref("navHome", SITE); setHref("navDisc", DISCLOSURE_URL); setHref("welcomeCoach", COACHING_URL); setHref("plansCoach", COACHING_URL);
  setTimeout(function(){ setHref("coachLink", COACHING_URL); }, 0);
 
  /* ============================== ROUTER ============================== */
@@ -44,7 +44,8 @@
   status:{ title:"Atmos Choose to Earn Calculator", hint:"Distance, price or segments" },
   communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
-  account:{ title:"My account", hint:"Photo, name, login and billing" }
+  account:{ title:"My account", hint:"Photo, name, login and billing" },
+  plans:{ title:"Plans", hint:"Free, ʻOhana and HRT PRO" }
  };
  var shown = {}, current = null;
  var onShow = {};
