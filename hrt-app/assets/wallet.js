@@ -1313,8 +1313,8 @@
   }
   function clientHtml() {
     return '<div class="wl-client" role="status"><span class="wl-live" aria-hidden="true"></span>' +
-      '<span class="wl-client-txt"><b>ʻOhana program &middot; managed by your HRT team</b><span>You are an ʻOhana client. We help pick your next best card for your travel goals, and we keep this wallet up to date for you. Opened a new card? Text Scottie and we will add it.</span></span>' +
-      '<span class="wl-client-pill">ʻOhana Client</span></div>';
+      '<span class="wl-client-txt"><b>ʻOhana program &middot; managed by your HRT team</b><span>You are an ʻOhana Member. We help pick your next best card for your travel goals, and we keep this wallet up to date for you. Opened a new card? Text Scottie and we will add it.</span></span>' +
+      '<span class="wl-client-pill">ʻOhana Member</span></div>';
   }
   function helpHtml(where) {
     var m = member();
