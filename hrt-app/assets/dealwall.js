@@ -49,20 +49,20 @@
     ".dw-card{appearance:none;font:inherit;text-align:left;cursor:pointer;padding:0;color:inherit;"+
       "flex:0 0 218px;scroll-snap-align:start;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column}",
     ".dw-ph{position:relative;height:104px;background:#d9e5ee center/cover no-repeat}",
-    ".dw-ph:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,27,44,0) 35%,rgba(14,27,44,.72))}",
+    ".dw-ph:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,27,36,0) 35%,rgba(20,27,36,.72))}",
     ".dw-city{position:absolute;left:12px;bottom:9px;z-index:1;color:#fff;font-weight:800;font-size:14.5px;text-shadow:0 1px 3px rgba(0,0,0,.45)}",
-    ".dw-rt{position:absolute;right:10px;top:9px;z-index:1;font-size:10.5px;font-weight:800;letter-spacing:.04em;color:#0e1b2c;background:rgba(255,255,255,.92);border-radius:999px;padding:3px 8px}",
+    ".dw-rt{position:absolute;right:10px;top:9px;z-index:1;font-size:10.5px;font-weight:800;letter-spacing:.04em;color:#141b24;background:rgba(255,255,255,.92);border-radius:999px;padding:3px 8px}",
     ".dw-body{padding:11px 12px 12px;display:flex;flex-direction:column;gap:7px}",
     ".dw-pts{font-weight:800;font-size:17px;color:var(--text);line-height:1}",
     ".dw-pts small{display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-top:3px}",
     ".dw-meta{display:flex;flex-wrap:wrap;gap:6px}",
     ".dw-chip{font-size:11px;font-weight:700;color:var(--text);background:var(--surface-2,#f7f9fb);border:1px solid var(--line);border-radius:999px;padding:3px 8px}",
     ".dw-chip.ok{color:#1c6b40;background:color-mix(in srgb,#3fce7f 16%,var(--surface));border-color:color-mix(in srgb,#3fce7f 38%,var(--line))}",
-    ".dw-pro{margin-top:14px;border:1px solid rgba(242,184,75,.45);border-radius:var(--radius,16px);background:linear-gradient(120deg,#0e1b2c 0%,#16294a 72%,#22304a 100%);padding:16px;box-shadow:var(--shadow)}",
+    ".dw-pro{margin-top:14px;border:1px solid rgba(242,184,75,.45);border-radius:var(--radius,16px);background:linear-gradient(120deg,#141b24 0%,#1f2a38 72%,#22304a 100%);padding:16px;box-shadow:var(--shadow)}",
     ".dw-pro-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}",
     ".dw-pro-h h3{margin:0;color:#fff;font-size:16px}",
     ".dw-pro-h p{margin:0;color:#c7d4e2;font-size:12.5px;flex:1;min-width:200px}",
-    ".dw-pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:5px 10px;white-space:nowrap}",
+    ".dw-pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:5px 10px;white-space:nowrap}",
     ".dw-rail.pro{padding-bottom:8px}",
     ".dw-rail.pro::-webkit-scrollbar-thumb{background:rgba(242,184,75,.35)}",
     ".dw-lock{flex:0 0 186px;scroll-snap-align:start;position:relative;overflow:hidden;border-radius:12px;border:1px solid rgba(242,184,75,.3);height:118px}",
@@ -98,7 +98,7 @@
     ".dw-dtags .dw-ns{color:var(--coral)}",
     ".dw-expf{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}",
     ".dw-expf>span{font-size:11.5px;color:var(--muted);font-weight:600}",
-    ".dw-unlock{margin-left:auto;font-size:12.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:8px 15px;text-decoration:none;white-space:nowrap}",
+    ".dw-unlock{margin-left:auto;font-size:12.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:8px 15px;text-decoration:none;white-space:nowrap}",
     "@media (max-width:520px){.dw-unlock{margin-left:0}}"
   ].join("");
   document.head.appendChild(css);

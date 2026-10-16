@@ -244,7 +244,7 @@
  function thumbStyle(d){
   var src = imgFor(d);
   if(src) return ' style="background-image:url(\'' + src + '\')"';
-  return ' style="background:linear-gradient(135deg,#0e1b2c,#1d3350)"';
+  return ' style="background:linear-gradient(135deg,#141b24,#1d3350)"';
  }
  function matchQ(d){
   if(!state.q) return true;
@@ -631,7 +631,7 @@
  function addDealLayers(){
   if(map.getSource("deals")) return;
   ["stay","act"].forEach(function(k){
-   var p = pillImage(k === "stay" ? "#e8824c" : "#2b5c86");
+   var p = pillImage(k === "stay" ? "#d97040" : "#2b5c86");
    if(!map.hasImage("pill-"+k)) map.addImage("pill-"+k, p.img, p.opts);
   });
   /* two copies of the same data: dots and labels are kept apart so a font hiccup can never hide the pins */
@@ -639,14 +639,14 @@
   map.addSource("dealsTxt", { type:"geojson", data:geojson(), cluster:true, clusterRadius:42, clusterMaxZoom:11 });
   var font = ["Noto Sans Bold"];
   map.addLayer({ id:"clusters", type:"circle", source:"deals", filter:["has","point_count"],
-   paint:{ "circle-color":"#0e1b2c", "circle-stroke-color":"#e8824c", "circle-stroke-width":3,
+   paint:{ "circle-color":"#141b24", "circle-stroke-color":"#d97040", "circle-stroke-width":3,
     "circle-radius":["step",["get","point_count"],16,10,20,30,25] } });
   map.addLayer({ id:"cluster-count", type:"symbol", source:"dealsTxt", filter:["has","point_count"],
    layout:{ "text-field":["get","point_count_abbreviated"], "text-font":font, "text-size":13, "text-allow-overlap":true },
    paint:{ "text-color":"#ffffff" } });
   map.addLayer({ id:"deal-dots", type:"circle", source:"deals", filter:["!",["has","point_count"]],
    paint:{ "circle-radius":["case",["==",["get","kind"],"stay"],6,5],
-    "circle-color":["case",["==",["get","kind"],"stay"],"#e8824c","#2b5c86"],
+    "circle-color":["case",["==",["get","kind"],"stay"],"#d97040","#2b5c86"],
     "circle-stroke-color":"#ffffff", "circle-stroke-width":2 } });
   map.addLayer({ id:"deal-pills", type:"symbol", source:"dealsTxt", filter:["!",["has","point_count"]],
    layout:{ "icon-image":["case",["==",["get","kind"],"stay"],"pill-stay","pill-act"], "icon-text-fit":"both",

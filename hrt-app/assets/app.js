@@ -231,7 +231,7 @@
   ["United MileagePlus","1.35¢","/ mi","Nonstops to HNL from mainland hubs and good partner space to Asia."],
   ["World of Hyatt","1.7¢","/ pt","Several Hyatt resorts in Hawaiʻi. The best hotel currency for island stays."]
  ];
- var CATC = { cc:"#e8824c", airline:"#3a7bb5", hotel:"#1f9d57" };
+ var CATC = { cc:"#d97040", airline:"#3a7bb5", hotel:"#1f9d57" };
  var vCat = "all";
  $("valUpd").textContent = VALUATIONS_UPDATED;
  function vOptions(){ return '<option value="">Select a program</option>' + VALS.map(function(v,i){ return '<option value="'+i+'">'+esc(v[0])+' ('+v[2].toFixed(2)+'¢)</option>'; }).join(""); }

@@ -12,7 +12,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Tools | Hawaii Reward Travel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
 <link href="assets/app.css" rel="stylesheet">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -28,9 +28,9 @@
 .atmos-prev{pointer-events:none;user-select:none;height:580px;overflow:hidden}
 .atmos-prev img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 40%;filter:blur(3.5px) saturate(1.05);transform:scale(1.03)}
 @media(max-width:760px){.atmos-prev{height:460px}.atmos-prev img{object-position:top left}}
-.atmos-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:linear-gradient(180deg,rgba(14,27,44,.05),rgba(14,27,44,.28))}
-.atmos-lock .lk{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(460px,100%);padding:22px 22px 24px;border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 18px 50px rgba(14,27,44,.25);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-:root[data-theme="dark"] .atmos-lock .lk{background:rgba(14,27,44,.9)}
+.atmos-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:linear-gradient(180deg,rgba(20,27,36,.05),rgba(20,27,36,.28))}
+.atmos-lock .lk{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(460px,100%);padding:22px 22px 24px;border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 18px 50px rgba(20,27,36,.25);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+:root[data-theme="dark"] .atmos-lock .lk{background:rgba(20,27,36,.9)}
 .atmos-lock h3{margin:0;color:var(--text)}.atmos-lock p{margin:0;color:var(--muted);max-width:420px}
 .atmos-open{display:none;padding:28px;text-align:center;border:2px dashed #3fce7f;border-radius:var(--radius,16px);background:var(--surface);color:var(--text);font-weight:700;font-size:18px}
 html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
@@ -38,7 +38,7 @@ html.ms-atmos .atmos-gate{display:none} html.ms-atmos .atmos-open{display:block}
 .atmos-open{padding:0;border:0;background:none;text-align:left;font-weight:inherit;font-size:inherit}
 .atmos-tabs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
 .atmos-tab{font:inherit;font-weight:700;font-size:13px;border-radius:10px;padding:8px 13px;cursor:pointer;background:var(--surface);color:var(--text);border:1px solid var(--line)}
-.atmos-tab.on{background:#0e1b2c;color:#fff;border-color:#0e1b2c}
+.atmos-tab.on{background:#141b24;color:#fff;border-color:#141b24}
 .atmos-sbx{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 .atmos-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);height:calc(100vh - 150px);min-height:640px}
 .atmos-frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
@@ -52,43 +52,43 @@ html.ms-named .hero .unnamed{display:none}html:not(.ms-named) .hero .named{displ
 /* ===== Phone navigation: bottom tab bar + "More" sheet with every tool ===== */
 .hrt-tabbar,.hrt-navback{display:none}
 @media(max-width:900px){
- .hrt-tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0e1b2c;border-top:1px solid #22344f;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+ .hrt-tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#141b24;border-top:1px solid #22344f;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
  html.ms-pro .hrt-tabbar{box-shadow:inset 0 1px 0 rgba(242,184,75,.35)}
  .hrt-tabbar a,.hrt-tabbar button{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:48px;padding:4px 2px;border:0;background:none;color:#9fb2c7;font:inherit;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
  .hrt-tabbar .on,.hrt-tabbar [aria-expanded="true"]{color:#fff}
  .hrt-tabbar .on svg{color:#f2b84b}
  .hrt-main{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
  .hrt-sb .hrt-nav{display:none}
- html.nav-open .hrt-sb .hrt-nav{display:flex;position:fixed;left:0;right:0;bottom:calc(61px + env(safe-area-inset-bottom));z-index:59;flex-direction:column;flex-wrap:nowrap;gap:2px;max-height:72vh;overflow-y:auto;padding:14px 12px 16px;background:#0e1b2c;border-radius:18px 18px 0 0;border-top:1px solid #22344f;box-shadow:0 -18px 40px rgba(0,0,0,.4)}
+ html.nav-open .hrt-sb .hrt-nav{display:flex;position:fixed;left:0;right:0;bottom:calc(61px + env(safe-area-inset-bottom));z-index:59;flex-direction:column;flex-wrap:nowrap;gap:2px;max-height:72vh;overflow-y:auto;padding:14px 12px 16px;background:#141b24;border-radius:18px 18px 0 0;border-top:1px solid #22344f;box-shadow:0 -18px 40px rgba(0,0,0,.4)}
  html.nav-open .hrt-sb .hrt-lbl{display:block;margin:12px 6px 4px}
  html.nav-open .hrt-sb .hrt-lbl:first-child{margin-top:0}
  html.nav-open .hrt-navi{white-space:normal;padding:11px 12px;min-height:44px}
- html.nav-open .hrt-navi.on{box-shadow:inset 3px 0 0 #e8824c}
+ html.nav-open .hrt-navi.on{box-shadow:inset 3px 0 0 #d97040}
  html.nav-open .hrt-navback{display:block;position:fixed;inset:0;z-index:58;background:rgba(5,10,16,.55)}
 }
 html:not(.ms-pro) .pro-only{display:none!important}
 html.ms-pro .free-only{display:none!important}
 html.ms-pro .atmos-tabs{display:none}
-.pro-grad{background:linear-gradient(135deg,#f2b84b,#e8824c)}
-.pro-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;letter-spacing:.5px;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:6px 12px;white-space:nowrap;box-shadow:0 6px 18px rgba(232,130,76,.35)}
-.hrt-bn .pro-word{background:linear-gradient(135deg,#f5c75a,#e8824c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pro-grad{background:linear-gradient(135deg,#f2b84b,#d97040)}
+.pro-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;letter-spacing:.5px;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:6px 12px;white-space:nowrap;box-shadow:0 6px 18px rgba(217,112,64,.35)}
+.hrt-bn .pro-word{background:linear-gradient(135deg,#f5c75a,#d97040);-webkit-background-clip:text;background-clip:text;color:transparent}
 html.ms-pro .hrt-sb{box-shadow:inset 0 3px 0 #f2b84b;border-right-color:rgba(242,184,75,.35)}
 html.ms-pro .hrt-mark{box-shadow:0 0 0 1.5px #f2b84b}
 .hrt-lbl.pro-lbl{color:#f2b84b}
 html.ms-pro .hrt-navi.protool .hic{color:#f2b84b;opacity:1}
 html.ms-pro .hrt-navi.protool.on{background:none;box-shadow:none;font-weight:inherit}
-html.ms-pro .hrt-navi.protool.on.calon{background:linear-gradient(135deg,rgba(232,130,76,.22),rgba(242,184,75,.10));color:#fff;font-weight:700;box-shadow:inset 3px 0 0 #f2b84b}
+html.ms-pro .hrt-navi.protool.on.calon{background:linear-gradient(135deg,rgba(217,112,64,.22),rgba(242,184,75,.10));color:#fff;font-weight:700;box-shadow:inset 3px 0 0 #f2b84b}
 html.ms-pro .hrt-navi.on{box-shadow:inset 3px 0 0 #f2b84b}
-.pro-member-chip{margin:8px 6px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(242,184,75,.45);background:linear-gradient(135deg,rgba(232,130,76,.16),rgba(242,184,75,.06));color:#fff;font-weight:700;font-size:13px;line-height:1.3}
+.pro-member-chip{margin:8px 6px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(242,184,75,.45);background:linear-gradient(135deg,rgba(217,112,64,.16),rgba(242,184,75,.06));color:#fff;font-weight:700;font-size:13px;line-height:1.3}
 .pro-member-chip small{display:block;color:#f2b84b;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;font-weight:800}
-.pro-welcome{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:16px 20px;border-radius:var(--radius,16px);background:linear-gradient(120deg,#0e1b2c 0%,#16294a 70%,#2a2f3a 100%);color:#fff;border:1px solid rgba(242,184,75,.45);box-shadow:var(--shadow)}
+.pro-welcome{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:16px 20px;border-radius:var(--radius,16px);background:linear-gradient(120deg,#141b24 0%,#1f2a38 70%,#2a2f3a 100%);color:#fff;border:1px solid rgba(242,184,75,.45);box-shadow:var(--shadow)}
 .pro-welcome h2{margin:0;font-size:20px}
 .pro-welcome p{margin:2px 0 0;color:#c7d4e2;font-size:13.5px}
 .pro-welcome .pw-text{flex:1;min-width:220px}
 .pro-welcome .pw-links{display:flex;flex-wrap:wrap;gap:8px}
 .pro-welcome .pw-links a{color:#fff;text-decoration:none;font-weight:700;font-size:13px;border:1px solid rgba(242,184,75,.55);border-radius:10px;padding:8px 12px}
 .pro-welcome .pw-links a:hover{background:rgba(242,184,75,.15)}
-.btn.gold{background:linear-gradient(135deg,#f5c75a,#e8824c);color:#1a1204;box-shadow:0 10px 26px rgba(232,130,76,.35)}
+.btn.gold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;box-shadow:0 10px 26px rgba(217,112,64,.35)}
 html.ms-pro .procard{border-color:rgba(242,184,75,.55)}
 
 /* ===== account wall: <html> carries ms-ready and ms-in ===== */
@@ -109,14 +109,14 @@ html.ms-ready:not(.ms-in),html.ms-ready:not(.ms-in) body{height:auto!important;o
 }
 .hrt-boot{position:fixed;inset:0;display:grid;place-items:center;background:#0a121c;z-index:60}
 html.ms-ready .hrt-boot{display:none}
-.hrt-boot i{width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.16);border-top-color:#e8824c;display:block;animation:hrtspin .8s linear infinite}
+.hrt-boot i{width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.16);border-top-color:#d97040;display:block;animation:hrtspin .8s linear infinite}
 @keyframes hrtspin{to{transform:rotate(360deg)}}
-.hrt-gate{min-height:100vh;box-sizing:border-box;background:radial-gradient(ellipse 70% 45% at 50% 0%,rgba(242,184,75,.16),transparent 70%),linear-gradient(180deg,rgba(10,18,28,.78) 0%,rgba(10,18,28,.9) 40%,#0a121c 92%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e1133fb8-9be7-499a-bbfd-bd5e0aa853b4/Screenshot+2026-10-14+at+12.06.48%E2%80%AFAM.png?content-type=image%2Fpng") center top/cover no-repeat,#0a121c;color:#e9eff6;display:flex;align-items:center;justify-content:center;padding:30px 18px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
+.hrt-gate{min-height:100vh;box-sizing:border-box;background:radial-gradient(ellipse 70% 45% at 50% 0%,rgba(242,184,75,.16),transparent 70%),linear-gradient(180deg,rgba(10,18,28,.78) 0%,rgba(10,18,28,.9) 40%,#0a121c 92%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e1133fb8-9be7-499a-bbfd-bd5e0aa853b4/Screenshot+2026-10-14+at+12.06.48%E2%80%AFAM.png?content-type=image%2Fpng") center top/cover no-repeat,#0a121c;color:#e9eff6;display:flex;align-items:center;justify-content:center;padding:30px 18px;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
 .hrt-gate .gt{width:100%;max-width:460px;text-align:center;background:rgba(10,18,28,.62);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:30px 26px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 30px 70px rgba(0,0,0,.45)}
 .hrt-gate .glab{margin:22px 0 10px;text-align:left;font-size:13px;font-weight:800;color:#fff}
-.hrt-gate .gpro{margin:0 0 4px;text-align:left;border-radius:16px;padding:16px 16px 14px;background:linear-gradient(160deg,rgba(242,184,75,.16),rgba(232,130,76,.06) 60%,rgba(255,255,255,.02));border:1px solid rgba(242,184,75,.55);box-shadow:0 10px 30px rgba(232,130,76,.12)}
+.hrt-gate .gpro{margin:0 0 4px;text-align:left;border-radius:16px;padding:16px 16px 14px;background:linear-gradient(160deg,rgba(242,184,75,.16),rgba(217,112,64,.06) 60%,rgba(255,255,255,.02));border:1px solid rgba(242,184,75,.55);box-shadow:0 10px 30px rgba(217,112,64,.12)}
 .hrt-gate .gpro-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
-.hrt-gate .gpro-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:4px 10px}
+.hrt-gate .gpro-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:4px 10px}
 .hrt-gate .gpro-price{font-size:13px;font-weight:800;color:#f5c75a;white-space:nowrap}
 .hrt-gate .gpro h2{margin:2px 0 4px;font-size:18px;line-height:1.25;font-weight:800;color:#fff}
 .hrt-gate .gpro p{margin:0 0 10px;font-size:13.5px;line-height:1.55;color:#cfdae6}
@@ -126,14 +126,14 @@ html.ms-ready .hrt-boot{display:none}
 @media(max-width:480px){.hrt-gate .gt{padding:24px 18px;border-radius:18px}}
 .hrt-gate .glogo{width:200px;max-width:68%;height:auto;display:block;margin:0 auto 24px}
 .hrt-gate h1{margin:0 0 10px;font-size:25px;line-height:1.22;font-weight:800;color:#fff}
-.hrt-gate h1 span{background:linear-gradient(135deg,#f5c75a,#e8824c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hrt-gate h1 span{background:linear-gradient(135deg,#f5c75a,#d97040);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hrt-gate .sub{margin:0 0 22px;font-size:14px;line-height:1.6;color:#9fb2c7}
 .hrt-gate ul{list-style:none;margin:0 0 24px;padding:0;text-align:left;display:grid;gap:10px}
 .hrt-gate li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.5;color:#cfdae6}
 .hrt-gate li svg{flex:0 0 auto;margin-top:2px;color:#3fce7f}
 .hrt-gate .btns{display:grid;gap:10px}
 .hrt-gate .btns button{font:inherit;cursor:pointer;border-radius:999px;padding:13px 20px;font-size:14.5px;font-weight:800;border:0}
-.hrt-gate .go{color:#1a1204;background:linear-gradient(135deg,#f5c75a,#e8824c);box-shadow:0 8px 22px rgba(232,130,76,.3)}
+.hrt-gate .go{color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);box-shadow:0 8px 22px rgba(217,112,64,.3)}
 .hrt-gate .alt{color:#e9eff6;background:transparent;border:1px solid rgba(255,255,255,.22)!important}
 .hrt-gate .fine{margin:20px 0 0;font-size:11.5px;line-height:1.65;color:#7f92a8}
 .hrt-gate .fine a{color:#9fb2c7}
@@ -338,7 +338,7 @@ html.ms-ready .hrt-boot{display:none}
   </div>
   <div class="hstats">
    <div class="hstat"><b class="tnum">2.2¢</b><span><i style="background:#9fc1d4"></i>Top card currency</span></div>
-   <div class="hstat"><b class="tnum">1.6¢</b><span><i style="background:#e8824c"></i>Top airline</span></div>
+   <div class="hstat"><b class="tnum">1.6¢</b><span><i style="background:#d97040"></i>Top airline</span></div>
    <div class="hstat"><b class="tnum">1.7¢</b><span><i style="background:#3fce7f"></i>Top hotel</span></div>
    <div class="hstat"><b class="tnum" id="valUpd">&ndash;</b><span><i style="background:#e8c15e"></i>Last updated</span></div>
   </div>
@@ -403,11 +403,11 @@ html.ms-ready .hrt-boot{display:none}
   <h3>$100 every quarter on the <span>Amex Platinum</span></h3>
   <p>The Platinum Card from American Express gives you up to $100 back in statement credits each quarter when you pay at a participating U.S. Resy restaurant, up to $400 a year. Enrollment is required, and anything you do not spend in a quarter is gone once that quarter ends. This page exists so you can find a qualifying spot in Hawaiʻi before that happens.</p>
   <ol style="list-style:none;margin:0 0 16px;padding:0;display:grid;gap:9px">
-   <li style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#dbe6f2;line-height:1.55"><b style="flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#e8824c;color:#1a1204;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">1</b><span>Enroll in the Resy benefit inside your American Express account. The credit does not pay out until you do.</span></li>
-   <li style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#dbe6f2;line-height:1.55"><b style="flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#e8824c;color:#1a1204;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">2</b><span>Pick a spot below marked credit eligible, then confirm the credit eligible badge on its own Resy page.</span></li>
-   <li style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#dbe6f2;line-height:1.55"><b style="flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#e8824c;color:#1a1204;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">3</b><span>Pay with your enrolled Platinum Card. You do not need a reservation, and Resy Pay counts.</span></li>
+   <li style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#dbe6f2;line-height:1.55"><b style="flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#d97040;color:#1a1204;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">1</b><span>Enroll in the Resy benefit inside your American Express account. The credit does not pay out until you do.</span></li>
+   <li style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#dbe6f2;line-height:1.55"><b style="flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#d97040;color:#1a1204;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">2</b><span>Pick a spot below marked credit eligible, then confirm the credit eligible badge on its own Resy page.</span></li>
+   <li style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#dbe6f2;line-height:1.55"><b style="flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#d97040;color:#1a1204;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">3</b><span>Pay with your enrolled Platinum Card. You do not need a reservation, and Resy Pay counts.</span></li>
   </ol>
-  <div id="rsClock" style="display:none;align-items:baseline;gap:10px;flex-wrap:wrap;background:rgba(232,130,76,.13);border:1px solid rgba(232,130,76,.38);border-radius:10px;padding:11px 14px;font-size:13px;color:#f3dccb"></div>
+  <div id="rsClock" style="display:none;align-items:baseline;gap:10px;flex-wrap:wrap;background:rgba(217,112,64,.13);border:1px solid rgba(217,112,64,.38);border-radius:10px;padding:11px 14px;font-size:13px;color:#f3dccb"></div>
   <p class="disc-small">Credit amounts, participating venues and enrollment rules are set by American Express and can change at any time. Check the current terms in your own American Express account before you rely on this. Three other American Express cards carry a Resy credit as well, in smaller amounts. They are listed just below.</p>
  </div>
 
@@ -469,7 +469,7 @@ html.ms-ready .hrt-boot{display:none}
   </div>
   <div class="hstats">
    <div class="hstat"><b class="tnum" id="lgS1">&ndash;</b><span><i style="background:#9fc1d4"></i>Open lounges</span></div>
-   <div class="hstat"><b class="tnum" id="lgS2">&ndash;</b><span><i style="background:#e8824c"></i>Priority Pass</span></div>
+   <div class="hstat"><b class="tnum" id="lgS2">&ndash;</b><span><i style="background:#d97040"></i>Priority Pass</span></div>
    <div class="hstat"><b class="tnum" id="lgS3">&ndash;</b><span><i style="background:#e8c15e"></i>Coming soon</span></div>
    <div class="hstat"><b class="tnum" id="lgS4">&ndash;</b><span><i style="background:#3fce7f"></i>Top rating</span></div>
   </div>
