@@ -43,7 +43,7 @@ ok('hawaii today format', /^\d{4}-\d\d-\d\d$/.test(T.hawaiiToday()));
 const E = T.entriesFrom(feed);
 ok('free feed becomes economy entries', E.length === 4 && E.every((e) => e.cabin === 'economy'));
 const P = (o) => T.cleanPrefs(o);
-ok('bad prefs cleaned', JSON.stringify(P({ dests: ['LAX', 'x', 5], cabin: 'boat', max: -3, months: ['2026-1'] })) === JSON.stringify({ dests: ['LAX'], cabin: 'economy', max: 0, months: [] }));
+ok('bad prefs cleaned', JSON.stringify(P({ dests: ['LAX', 'x', 5], cabin: 'boat', max: -3, months: ['2026-1'] })) === JSON.stringify({ origins: [], dests: ['LAX'], cabin: 'economy', max: 0, months: [] }));
 let r = T.applyPrefs(E, P({}), '2026-10-16');
 ok('defaults show every city with dates left', r.map((x) => x.dest).join() === 'LAX,JFK,LAS', r.map((x) => x.dest).join());
 r = T.applyPrefs(E, P({ dests: ['LAS', 'LAX'] }), '2026-10-16');
@@ -71,6 +71,24 @@ ok('cabins offered from data', C.cabins.business && C.cabins.first && !C.cabins.
 ok('months offered from data', C.months.join() === '2026-11,2026-12');
 ok('points steps inside the range', C.steps.join() === '40000,50000,60000', C.steps.join());
 ok('first class cards', T.applyPrefs(EF, P({ cabin: 'first' }), '2026-10-16')[0].dest === 'LAX');
+
+const multi = T.entriesFrom({ deals: [
+  { origin: 'HNL', dest: 'LAX', city: 'Los Angeles', cabin: 'economy', dates: [{ date: '2026-11-02', miles: 12500 }] },
+  { origin: 'OGG', dest: 'LAX', city: 'Los Angeles', cabin: 'economy', dates: [{ date: '2026-11-03', miles: 15000 }] },
+  { origin: 'HNL', dest: 'LAX', city: 'Los Angeles', cabin: 'business', dates: [{ date: '2026-11-04', miles: 45000 }] },
+  { origin: 'KOA', dest: 'SEA', city: 'Seattle', cabin: 'business', dates: [{ date: '2026-11-05', miles: 50000 }] }
+] });
+const MC = T.choicesFor(multi, '2026-10-16');
+ok('departure airports offered from data', MC.origins.join() === 'HNL,OGG,KOA', MC.origins.join());
+ok('bad origins cleaned', JSON.stringify(P({ origins: ['OGG', 'ogg', 7] }).origins) === '["OGG"]');
+r = T.applyPrefs(multi, P({ origins: ['OGG'] }), '2026-10-16');
+ok('route filter: OGG only', r.length === 1 && r[0].origin === 'OGG' && r[0].dest === 'LAX');
+r = T.applyPrefs(multi, P({ cabin: 'business' }), '2026-10-16');
+ok('business shows business routes only', r.map((x) => x.origin + x.dest).join() === 'HNLLAX,KOASEA', r.map((x) => x.origin + x.dest).join());
+r = T.applyPrefs(multi, P({ cabin: 'business', origins: ['KOA'], dests: ['SEA'] }), '2026-10-16');
+ok('route plus cabin together', r.length === 1 && r[0].dest === 'SEA' && r[0].miles === 50000);
+r = T.applyPrefs(multi, P({}), '2026-10-16');
+ok('same city from two islands = two cards', r.length === 2 && r[0].origin !== r[1].origin);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

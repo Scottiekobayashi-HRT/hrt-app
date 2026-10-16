@@ -451,6 +451,7 @@
     p = p && typeof p === "object" ? p : {};
     var strs = function (a, re) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === "string" && re.test(x); }).slice(0, 40) : []; };
     return {
+      origins: strs(p.origins, /^[A-Z]{3}$/),
       dests: strs(p.dests, /^[A-Z]{3}$/),
       cabin: /^(economy|business|first)$/.test(p.cabin) ? p.cabin : "economy",
       max: typeof p.max === "number" && p.max > 0 && p.max < 1e6 ? p.max : 0,
@@ -464,9 +465,9 @@
      picked cities, then the feed's order. */
   function applyPrefs(entries, prefs, today) {
     today = today || hawaiiToday();
-    var pick = prefs.dests || [], months = prefs.months || [];
+    var pick = prefs.dests || [], months = prefs.months || [], from = prefs.origins || [];
     var out = entries.filter(function (e) {
-      return e.cabin === prefs.cabin && (!pick.length || pick.indexOf(e.dest) >= 0);
+      return e.cabin === prefs.cabin && (!pick.length || pick.indexOf(e.dest) >= 0) && (!from.length || from.indexOf(e.origin) >= 0);
     }).map(function (e, i) {
       var dates = e.dates.filter(function (t) {
         var d = String(t && t.date || "");
@@ -488,9 +489,10 @@
   /* What the settings panel can offer, from the data itself. Pure. */
   function choicesFor(entries, today) {
     today = today || hawaiiToday();
-    var cities = [], seen = {}, cab = {}, months = {}, miles = [];
+    var cities = [], seen = {}, cab = {}, months = {}, miles = [], origins = [];
     entries.forEach(function (e) {
       if (!seen[e.dest]) { seen[e.dest] = 1; cities.push({ dest: e.dest, city: e.city }); }
+      if (origins.indexOf(e.origin) < 0) origins.push(e.origin);
       e.dates.forEach(function (t) {
         if (String(t.date) < today) return;
         cab[e.cabin] = 1; months[String(t.date).slice(0, 7)] = 1;
@@ -500,7 +502,7 @@
     var lo = Math.min.apply(null, miles), hi = Math.max.apply(null, miles);
     var steps = [10000, 12500, 15000, 17500, 20000, 25000, 30000, 40000, 50000, 60000, 75000, 100000]
       .filter(function (v) { return miles.length && v >= lo && v < hi; });
-    return { cities: cities, cabins: cab, months: Object.keys(months).sort(), steps: steps };
+    return { cities: cities, origins: origins, cabins: cab, months: Object.keys(months).sort(), steps: steps };
   }
   function monthLabel(ym) { return MON[parseInt(ym.slice(5), 10) - 1] + (ym.slice(0, 4) !== hawaiiToday().slice(0, 4) ? " " + ym.slice(2, 4) : ""); }
   function kpts(n) { return n % 1000 ? (n / 1000).toFixed(1) + "k" : n / 1000 + "k"; }
@@ -540,7 +542,7 @@
 
     var head = el("div", "dw-head");
     head.appendChild(el("h2", null, "Your award deals"));
-    head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
+    var subEl = el("span", "dw-sub", ""); head.appendChild(subEl);
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
     var tune = el("button", "dwp-tune", "Customize");
     tune.type = "button"; tune.setAttribute("aria-expanded", "false");
@@ -597,7 +599,7 @@
       list.forEach(function (d) {
         var card = el("button", "dw-card"); card.type = "button"; card.setAttribute("aria-expanded", "false");
         card.addEventListener("click", function () {
-          var key = d.dest + d.cabin;
+          var key = d.origin + d.dest + d.cabin;
           if (openKey === key) { closeExp(); return; }
           openKey = key;
           rail.querySelectorAll(".dw-card").forEach(function (c) { var on = c === card; c.classList.toggle("on", on); c.setAttribute("aria-expanded", on ? "true" : "false"); });
@@ -631,6 +633,8 @@
       }
       var C = choicesFor(entries);
       var cab = CABINS.filter(function (c) { return c[0] === prefs.cabin; })[0][1];
+      var allFrom = C.origins.length ? C.origins : [feed.hub || "HNL"];
+      subEl.textContent = (prefs.origins.length ? prefs.origins : allFrom).join(", ") + " departures";
       sum.textContent = cab + ", " + (prefs.dests.length ? prefs.dests.length + (prefs.dests.length === 1 ? " city" : " cities") : "all cities") +
         ", " + (prefs.max ? "up to " + num(prefs.max) + " pts" : "any points") +
         ", " + (prefs.months.length ? prefs.months.map(monthLabel).join(", ") : (C.months.length > 1 ? monthLabel(C.months[0]) + " to " + monthLabel(C.months[C.months.length - 1]) : "next " + win + " days"));
@@ -656,6 +660,8 @@
     function drawPanel() {
       var C = choicesFor(entries);
       panel.innerHTML = "";
+      if (C.origins.length > 1) panel.appendChild(row("From", "Departure airports", [chip("All", !prefs.origins.length, function () { change(function () { prefs.origins = []; }); })]
+        .concat(C.origins.map(function (o) { return chip(o, prefs.origins.indexOf(o) >= 0, function () { change(function () { toggle(prefs.origins, o); }); }); }))));
       panel.appendChild(row("Destinations", "Tap the ones you want", [chip("All", !prefs.dests.length, function () { change(function () { prefs.dests = []; }); })]
         .concat(C.cities.map(function (c) { return chip(c.city, prefs.dests.indexOf(c.dest) >= 0, function () { change(function () { toggle(prefs.dests, c.dest); }); }); }))));
       panel.appendChild(row("Cabin", "", CABINS.map(function (c) {
@@ -705,9 +711,11 @@
       proMounted = true;
       function put(feed, full) {
         var n = renderPro(feed, full);
-        if (after.parentNode) after.parentNode.insertBefore(n, after);
+        if (after && after.parentNode) { after.parentNode.insertBefore(n, after); return; }
+        var home = document.querySelector("#v-home .content"), top = home && home.querySelector(".toprow");
+        if (top && top.parentNode) top.parentNode.insertBefore(n, top.nextSibling); else if (home) home.appendChild(n);
       }
-      proFeed().then(function (f) { put(f, true); }, function () { put(freeFeed, false); });
+      proFeed().then(function (f) { put(f, true); }, function () { if (freeFeed) put(freeFeed, false); });
     }
     go();
     /* membership is read after this script runs; watch for the PRO class */
@@ -737,6 +745,8 @@
         mountPro(feed, node);
       })
       .catch(function (e) {
+        // PRO members can still get their wall from the PRO feed.
+        mountPro(null, null);
         // Stay silent on the page. A broken feed should never show an error box
         // to a visitor; it just means no wall today.
         if (window.console) console.warn("[dealwall] feed unavailable:", e && e.message);
