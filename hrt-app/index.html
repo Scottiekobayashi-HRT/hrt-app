@@ -225,19 +225,20 @@ html.ms-atmos #v-atmos .as-free{display:none!important}
 .pl .btn.line{background:var(--surface-2);color:var(--text);border-color:var(--line)}
 .pl .pl-tag{position:absolute;top:-11px;left:18px;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--ink);color:#fff;display:none}
 .pl .pl-on{display:none;text-align:center;font-weight:700;font-size:13px;color:var(--muted);padding:11px 0 0}
-.pl.ohana{border-color:rgba(242,184,75,.55)}
+.pl.ohana{border:2px solid #f2b84b;background:linear-gradient(180deg,#fff8ea,var(--surface) 55%);box-shadow:0 0 0 6px rgba(242,184,75,.16),0 22px 50px rgba(196,138,23,.22);transform:translateY(-8px)}
+:root[data-theme="dark"] .pl.ohana{background:linear-gradient(180deg,rgba(242,184,75,.14),var(--surface) 55%)}
 .pl.ohana li svg{color:#c48a17}
+.pl.ohana .pl-tag.pop{display:inline-block;background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204}
+html.ms-client .pl.ohana .pl-tag.pop{display:none}
 .pl.pro{background:linear-gradient(155deg,#141b24,#1d3350);border-color:rgba(242,184,75,.6);color:#eaf2f8;box-shadow:0 18px 44px rgba(16,32,54,.25)}
 .pl.pro h2,.pl.pro .pl-price,.pl.pro li{color:#fff}.pl.pro .pl-for,.pl.pro .pl-price small{color:#bccde0}
 .pl.pro li svg{color:#f2b84b}
 .pl.pro .pl-on{color:#bccde0}
-.pl.pro .pl-tag.pop{display:inline-block;background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204}
 html:not(.ms-pro):not(.ms-client) .pl.free .pl-tag.you,html.ms-client .pl.ohana .pl-tag.you,html.ms-pro .pl.pro .pl-tag.you{display:inline-block}
-html.ms-pro .pl.pro .pl-tag.pop{display:none}
 html:not(.ms-pro):not(.ms-client) .pl.free .pl-on,html.ms-client .pl.ohana .pl-on{display:block}
 html.ms-client .pl.ohana .btn{display:none}
 .pl-note{margin:0;color:var(--muted);font-size:13px;text-align:center}
-@media (max-width:980px){.pl-grid{grid-template-columns:1fr;max-width:560px;margin:0 auto;width:100%}.pl.pro{order:-1}}
+@media (max-width:980px){.pl-grid{grid-template-columns:1fr;max-width:560px;margin:0 auto;width:100%;gap:20px}.pl.ohana{order:-2;transform:none}.pl.pro{order:-1}}
 </style>
 </head>
 <body>
@@ -693,7 +694,7 @@ html.ms-client .pl.ohana .btn{display:none}
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#f2b84b" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".45"/></svg>
   <div class="hs-text">
    <h1>Pick how you travel <span class="wave">with HRT</span></h1>
-   <p>Every plan starts with our free tools. Add personal coaching, HRT PRO, or both.</p>
+   <p>Every plan starts with our free tools. Become an ʻOhana client for 1 to 1 coaching, add HRT PRO, or both.</p>
   </div>
  </div>
  <div class="pl-grid">
@@ -711,9 +712,9 @@ html.ms-client .pl.ohana .btn{display:none}
    <a class="btn line" href="#home" data-route="home">Open the free tools</a>
   </div>
   <div class="pl ohana">
-   <span class="pl-tag you">Your plan</span>
-   <h2>HRT ʻOhana</h2><p class="pl-for">Personal coaching from Scottie and the HRT team</p>
-   <div class="pl-price">$0<small>free coaching</small></div>
+   <span class="pl-tag pop">Personal &middot; 1 to 1</span><span class="pl-tag you">Your plan</span>
+   <h2>ʻOhana Client</h2><p class="pl-for">1 to 1 coaching with Scottie and the HRT team, for HRT clients</p>
+   <div class="pl-price">$0<small>no client fees</small></div>
    <ul>
     <li class="pl-inc"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Free Tools</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>One on one help picking your next best card, over text</span></li>
@@ -721,11 +722,11 @@ html.ms-client .pl.ohana .btn{display:none}
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>We keep your My Wallet up to date for you</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>ʻOhana Client badge on your account</span></li>
    </ul>
-   <a class="btn line" id="plansCoach" href="https://www.hawaiirewardtravel.com/our-accelerated-program" target="_blank" rel="noopener">Book a free strategy call &rarr;</a>
-   <div class="pl-on">You are in the ʻOhana program</div>
+   <a class="btn coral" id="plansCoach" href="https://www.hawaiirewardtravel.com/our-accelerated-program" target="_blank" rel="noopener">Book an onboarding call &rarr;</a>
+   <div class="pl-on">You are an ʻOhana client</div>
   </div>
   <div class="pl pro">
-   <span class="pl-tag pop">Most popular</span><span class="pl-tag you">Your plan</span>
+   <span class="pl-tag you">Your plan</span>
    <h2>HRT PRO</h2><p class="pl-for">For finding award seats out of Hawaiʻi</p>
    <div class="pl-price">$9.99<small>per month</small></div>
    <ul>
