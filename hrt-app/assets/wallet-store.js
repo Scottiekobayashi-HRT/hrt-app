@@ -19,7 +19,8 @@
      { v:1,
        cards:  [ { id, cardId, opened:"2024-03-15" or "2024-03" or "" (unknown), nickname,
                    holder (whose card, e.g. "Janice"), status (see STATUSES),
-                   note (next step, free text), custom: { name, issuer, fee }
+                   note (next step, free text), addedBy:"hrt" when our team added it,
+                   custom: { name, issuer, fee }
                    when cardId is "custom" (a card not in our catalog),
                    used: { perkId: { periodKey: true or amount used } },
                    bonus: { spend, months, spent, reward } (optional welcome bonus),
@@ -78,6 +79,7 @@
       if (c.holder != null && (typeof c.holder !== "string" || c.holder.length > 30)) throw fail("INVALID", "card " + i + " holder");
       if (c.status != null && STATUSES.indexOf(c.status) < 0) throw fail("INVALID", "card " + i + " status");
       if (c.note != null && (typeof c.note !== "string" || c.note.length > 500)) throw fail("INVALID", "card " + i + " note");
+      if (c.addedBy != null && c.addedBy !== "hrt") throw fail("INVALID", "card " + i + " addedBy");
       if (c.cardId === "custom" || c.custom != null) {
         var cu = c.custom;
         if (!cu || typeof cu !== "object" || Array.isArray(cu)) throw fail("INVALID", "card " + i + " custom card");

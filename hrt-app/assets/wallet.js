@@ -26,6 +26,7 @@
 
   var MONTHS = ["January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December"];
+  var COACH_URL = "https://www.hawaiirewardtravel.com/our-accelerated-program"; /* our 1:1 program */
   var SOON_DAYS = 45; /* renewals inside this window get a "coming up" flag */
 
   /* ============================ DATE MATH ============================ */
@@ -958,7 +959,7 @@
       artHtml(c, "md") + '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
       '<span class="wl-sub">' + esc([e.holder ? e.holder + "\u2019s card" : "", c.issuer, e.nickname].filter(Boolean).join(" \u00b7 ")) + "</span>" +
       '<span class="wl-meta">' + renewLine + (r.hasFee && rn && opTxt ? ' <span class="wl-dot">&middot;</span> Opened ' + esc(opTxt) : "") + "</span>" +
-      statusHtml(e) +
+      statusHtml(e) + (e.addedBy === "hrt" ? '<span class="wl-byhrt">Added by your ʻOhana team</span>' : "") +
       valueLine(credits, other) +
       "</div>" +
       '<div class="wl-side"><span class="wl-fee">' + esc(feeLine) + "</span>" +
@@ -1249,7 +1250,53 @@
 
   /* The wallet summary card: the first thing a member sees, on the Dashboard
      (under the Aloha greeting) and at the top of My Wallet. */
+  /* ----- HRT clients vs everyone else -----
+     Clients (HRT_MEMBER.client, set from a plan only HRT assigns) see that our
+     team keeps their wallet up to date. Everyone else sees one quiet offer of
+     help picking their next card; a yes is saved on their Memberstack profile
+     (custom field wants-card-help) so HRT can follow up. */
+  var HELP_KEY = "hrtCardHelpHidden", HELP_DAYS = 60;
+  function member() { return window.HRT_MEMBER || {}; }
+  function helpHidden() {
+    try { var t = +localStorage.getItem(HELP_KEY); return t && Date.now() - t < HELP_DAYS * 864e5; } catch (e) { return false; }
+  }
+  function clientHtml() {
+    return '<div class="wl-client" role="status"><span class="wl-live" aria-hidden="true"></span>' +
+      '<span class="wl-client-txt"><b>ʻOhana program &middot; managed by your HRT team</b><span>You are an ʻOhana client. We help pick your next best card for your travel goals, and we keep this wallet up to date for you. Opened a new card? Text Scottie and we will add it.</span></span>' +
+      '<span class="wl-client-pill">ʻOhana Client</span></div>';
+  }
+  function helpHtml(where) {
+    var m = member();
+    if (!m.signedIn || m.client || state.demo) return "";
+    if (state.helpSent || m.wantsHelp) {
+      return where === "home" ? "" : '<div class="wl-card wl-help done"><b>Thanks, we will be in touch.</b><span>Scottie or Eddie will reach out to welcome you to the ʻOhana program. ' +
+        '<a href="' + esc(COACH_URL) + '" target="_top">See how the program works &rarr;</a></span></div>';
+    }
+    if (helpHidden()) return "";
+    return '<div class="wl-card wl-help"><div><span class="wl-help-eyebrow">HRT ʻOhana program</span>' +
+      '<b>Join our ʻOhana: free, personal card coaching</b>' +
+      '<ul class="wl-help-pts"><li>We help pick your next best card for your travel goals</li>' +
+      '<li>Help hitting every welcome bonus</li>' +
+      '<li>We manage this wallet for you, so it is always up to date</li></ul></div>' +
+      '<div class="wl-help-acts"><button class="wl-btn wl-pri" data-wl="help-yes"' + (state.busy ? " disabled" : "") + '>Join the ʻOhana program</button>' +
+      '<button class="wl-link" data-wl="help-no">Not now</button></div></div>';
+  }
+  function askForHelp() {
+    var ms = window.$memberstackDom;
+    state.helpSent = true; paint();
+    if (ms && typeof ms.updateMember === "function") {
+      Promise.resolve(ms.updateMember({ customFields: { "wants-card-help": "yes" } })).catch(function () {});
+    }
+    try { window.open(COACH_URL, "_blank", "noopener"); } catch (e) {}
+  }
+
   function summaryHtml(where) {
+    var core = summaryCore(where);
+    if (!core) return "";
+    if (member().client) core = core.replace(/(<section[^>]*>)/, "$1" + clientHtml());
+    return core + helpHtml(where);
+  }
+  function summaryCore(where) {
     var home = where === "home";
     if (!state.wallet || state.error) return "";
     var V = view(), s = summarize(V, catalog());
@@ -1406,6 +1453,8 @@
     if (act === "use") return; /* handled on change */
     if (act === "clamp") { if (ev.target.closest("a")) return; b.classList.toggle("full"); return; }
     if (act === "retry") return load();
+    if (act === "help-yes") { askForHelp(); return; }
+    if (act === "help-no") { try { localStorage.setItem(HELP_KEY, String(Date.now())); } catch (e) {} paint(); return; }
     if (act === "demo") { startExample(); if (location.hash !== "#home" && location.hash !== "#wallet") location.hash = "wallet"; return; }
     if (act === "demo-off") { endExample(); return; }
     if (act === "which") { var k = b.getAttribute("data-key"); state.which = (state.which === k && !state.storeQ) ? "" : k; state.storeQ = ""; paint(); return; }
@@ -1474,6 +1523,20 @@
       ".wl-custom{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;padding:12px;border:1px dashed var(--line);border-radius:12px}.wl-custom[hidden]{display:none}@media(max-width:560px){.wl-custom{grid-template-columns:1fr}}",
       ".wl-form textarea{font:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2,var(--surface));color:var(--text);resize:vertical;min-height:60px}",
       ".wl-tl-status{display:inline-block;align-self:flex-start;font-size:11px;font-weight:800;color:#b4541f}",
+      ".wl-client{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:rgba(63,206,127,.10);border:1px solid rgba(63,206,127,.35);font-size:13px;line-height:1.45;color:#eef4fa}",
+      ".wl-client-txt{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}.wl-client-txt b{color:#a6e9c3;font-size:13.5px}.wl-client-txt span{color:#cfe0ee}",
+      ".wl-live{position:relative;flex:0 0 10px;width:10px;height:10px;border-radius:50%;background:#3fce7f;box-shadow:0 0 0 3px rgba(63,206,127,.25)}",
+      ".wl-live:after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid #3fce7f;opacity:0;animation:wlPulse 2s ease-out infinite}",
+      "@keyframes wlPulse{0%{transform:scale(.6);opacity:.8}100%{transform:scale(1.8);opacity:0}}@media(prefers-reduced-motion:reduce){.wl-live:after{animation:none}}",
+      "@media(max-width:560px){.wl-client .wl-client-pill{display:none}}",
+      ".wl-client-pill{flex:0 0 auto;font-size:11px;font-weight:800;color:#14202e;background:linear-gradient(135deg,#f5c75a,#e8824c);border-radius:999px;padding:4px 10px}",
+      ".wl-byhrt{display:inline-block;align-self:flex-start;margin-top:4px;font-size:11px;font-weight:700;color:#8a5a10}[data-theme=dark] .wl-byhrt{color:#f2c56b}",
+      ".wl-help{display:flex;align-items:center;justify-content:space-between;gap:12px 18px;flex-wrap:wrap;border-left:4px solid var(--coral)}",
+      ".wl-card.wl-help .wl-help-eyebrow,.wl-help-eyebrow{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d06a34}",
+      ".wl-help-pts{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:4px}.wl-help-pts li{position:relative;padding-left:20px;font-size:13.5px;color:var(--text);line-height:1.45}",
+      ".wl-help-pts li:before{content:'';position:absolute;left:2px;top:6px;width:9px;height:5px;border-left:2px solid #2f855a;border-bottom:2px solid #2f855a;transform:rotate(-45deg)}",
+      ".wl-help>div:first-child{display:flex;flex-direction:column;gap:3px;min-width:240px;flex:1}.wl-help b{font-size:15px;color:var(--text)}.wl-help span{font-size:13.5px;color:var(--muted);line-height:1.5}",
+      ".wl-help-acts{display:flex;align-items:center;gap:12px}.wl-help.done{display:flex;flex-direction:column;align-items:flex-start;gap:3px;border-left-color:#2f855a}.wl-help.done a{color:var(--coral-d,#d06a34);font-weight:700}",
       ".wl-h3{margin:0;font-size:19px;font-weight:800;line-height:1.25;color:var(--text)}",
       ".wl-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}",
       ".wl-empty{text-align:center;padding:28px 18px}.wl-empty p{color:var(--muted);max-width:520px;margin:10px auto 16px;line-height:1.55;font-size:14px}",
@@ -1759,6 +1822,8 @@
     ].join("");
     document.head.appendChild(s);
   }
+
+  if (window.addEventListener) window.addEventListener("hrt:member", function () { try { paint(); } catch (e) {} });
 
   window.HRT_WALLET = {
     _test: { importantDates: importantDates, nextFeeDate: nextFeeDate, holderList: holderList, valueTextX: function (v) { return valueText(v); }, creditGroups: creditGroups, findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,

@@ -142,6 +142,8 @@ ok('load returns a copy', f.stored.wallet.cards.length === 1);
   ok('note over 500 characters is refused', !good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', note: 'a'.repeat(501) }));
   ok('other card needs a name', !good({ id: 'x', cardId: 'custom', opened: '2026-01', custom: { fee: 95 } }));
   ok('other card with name and fee is allowed', good({ id: 'x', cardId: 'custom', opened: '2026-01', custom: { name: 'Ink Preferred', issuer: 'Chase', fee: 95 } }));
+  ok('added by HRT is allowed', good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', addedBy: 'hrt' }));
+  ok('only hrt can be the adder', !good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', addedBy: 'me' }));
   ok('other card fee must be a sane number', !good({ id: 'x', cardId: 'custom', opened: '', custom: { name: 'X', fee: -1 } }));
 }
 

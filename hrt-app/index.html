@@ -67,6 +67,13 @@ html.ms-named .hero .unnamed{display:none}html:not(.ms-named) .hero .named{displ
  html.nav-open .hrt-navback{display:block;position:fixed;inset:0;z-index:58;background:rgba(5,10,16,.55)}
 }
 html:not(.ms-pro) .pro-only{display:none!important}
+html:not(.ms-client) .client-only{display:none!important}
+/* HRT Client badge: navy with a gold edge, so it reads as a sibling of the gold PRO badge */
+.client-pill{display:inline-flex;align-items:center;font-size:11.5px;font-weight:800;letter-spacing:.3px;color:#f5c75a;background:#0e1b2c;border:1.5px solid #f2b84b;border-radius:999px;padding:5px 11px;white-space:nowrap}
+.topbar .client-pill{color:#8a5a10;background:#fff8ea}
+.hero-pills{display:inline-flex;flex-wrap:wrap;gap:8px;margin:0 0 10px;position:relative}
+html:not(.ms-pro):not(.ms-client) .hero-pills{display:none}
+.hrt-bn{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}.hrt-bn .client-pill{text-transform:none;letter-spacing:.3px;font-size:11px;padding:4px 10px}
 html.ms-pro .free-only{display:none!important}
 html.ms-pro .atmos-tabs{display:none}
 .pro-grad{background:linear-gradient(135deg,#f2b84b,#d97040)}
@@ -102,7 +109,7 @@ html.ms-ready:not(.ms-in),html.ms-ready:not(.ms-in) body{height:auto!important;o
  .topbar .crumb{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  .topbar .ms-auth{display:flex;gap:6px;flex:0 0 auto}
  .topbar .ms-btn{padding:0 11px;min-height:38px;font-size:13px;white-space:nowrap}
- .topbar .pro-pill{display:none!important}
+ .topbar .pro-pill,.topbar .client-pill{display:none!important}
  .topbar .ms-btn[data-ms-action="customer-portal"]{font-size:0}
  .topbar .ms-btn[data-ms-action="customer-portal"]:after{content:"Billing";font-size:13px}
  html.ms-pro .pro-member-chip{display:none!important}
@@ -174,7 +181,7 @@ html.ms-ready .hrt-boot{display:none}
  <p class="fine">Everything except HRT PRO is free, with no card needed.<br>
  <a href="https://www.hawaiirewardtravel.com" target="_top">Back to hawaiirewardtravel.com</a></p>
 </div></div>
-<div class="hrt-app"><aside class="hrt-sb"><a class="hrt-brand" href="#home" data-route="home"><img class="hrt-logo" src="https://images.squarespace-cdn.com/content/v1/67cfe44f78d8ac79bcf6ec19/2c17ba8e-8242-40f2-8981-d59fc98eda1c/Website+Wallpaper+TCH-6.png?format=750w" alt="Hawaii Reward Travel" width="750" height="234" decoding="async"><span class="hrt-bn"><span class="free-only">Free Tools</span><span class="pro-only pro-pill">&#9733; HRT PRO</span></span></a>
+<div class="hrt-app"><aside class="hrt-sb"><a class="hrt-brand" href="#home" data-route="home"><img class="hrt-logo" src="https://images.squarespace-cdn.com/content/v1/67cfe44f78d8ac79bcf6ec19/2c17ba8e-8242-40f2-8981-d59fc98eda1c/Website+Wallpaper+TCH-6.png?format=750w" alt="Hawaii Reward Travel" width="750" height="234" decoding="async"><span class="hrt-bn"><span class="free-only">Free Tools</span><span class="pro-only pro-pill">&#9733; HRT PRO</span><span class="client-only client-pill">ʻOhana Client</span></span></a>
 <nav class="hrt-nav" id="sideNav" aria-label="Free tools">
  <span class="hrt-lbl">Home</span>
  <a class="hrt-navi" href="#home" data-route="home"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="nm">Dashboard</span></a>
@@ -205,7 +212,7 @@ html.ms-ready .hrt-boot{display:none}
 
 <div class="topbar"><div class="tbin"><span class="crumb" id="crumb">Dashboard</span><span class="spacer"></span>
  <span class="ptshint" id="tbHint">Free tools for Hawaiʻi points travelers</span>
- <span class="pro-pill pro-only" title="Your HRT PRO membership is active">&#9733; PRO</span><button type="button" class="ms-btn pro-only" data-ms-action="customer-portal">Manage subscription</button><a class="btn coral topro free-only" id="topPro" href="#atmos" data-route="atmos"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg>Try HRT PRO</a>
+ <span class="client-pill client-only" title="You are in the HRT ʻOhana program. Our team helps manage your wallet.">ʻOhana Client</span><span class="pro-pill pro-only" title="Your HRT PRO membership is active">&#9733; PRO</span><button type="button" class="ms-btn pro-only" data-ms-action="customer-portal">Manage subscription</button><a class="btn coral topro free-only" id="topPro" href="#atmos" data-route="atmos"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg>Try HRT PRO</a>
  <span class="ms-auth"><button type="button" class="ms-btn" data-ms-content="!members" data-ms-modal="login">Log in</button><button type="button" class="ms-btn" data-ms-content="!members" data-ms-modal="signup" data-ms-plan:add="pln_free-member-09dc08yw">Sign up</button><button type="button" class="ms-btn" data-ms-action="logout">Log out</button></span>
 </div></div>
 
@@ -217,7 +224,7 @@ html.ms-ready .hrt-boot{display:none}
   <div class="hero">
    <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
    <span class="plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>
-   <span class="pro-pill pro-only hero-pro">&#9733; HRT PRO</span>
+   <span class="hero-pills"><span class="pro-pill pro-only">&#9733; HRT PRO</span><span class="client-pill client-only">ʻOhana Client</span></span>
    <h1><span class="named">Aloha, <span class="wave ms-first-name">friend</span></span><span class="unnamed">Aloha, welcome to <span class="wave">HRT</span></span></h1>
    <p class="free-only">The tools we use to plan points and miles trips from the islands, in one place and free for every Hawaiʻi traveler.</p><p class="pro-only">Your PRO tools are unlocked. Fresh Atmos award space lands every morning.</p>
    <div class="cta-row"><a class="btn coral" href="#wallet" data-route="wallet">Open My Wallet &rarr;</a><a class="btn ghost free-only" href="#atmos" data-route="atmos">Atmos tools</a><a class="btn ghost pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Atmos tools</a><a class="btn ghost" href="#kamaaina" data-route="kamaaina">Kamaʻāina deals</a></div>
@@ -781,6 +788,9 @@ html.ms-ready .hrt-boot{display:none}
 /* SANDBOX: unlock Atmos placeholder for Atmos Calendar or All Access members */
 (function(){
  var UNLOCK=["pln_atmos-calendar-irdd08f8","pln_all-access-xsc20cqf"];
+ /* HRT client: a free Memberstack plan that only HRT assigns (never offered on a button).
+    Paste its plan ID here once it exists in Memberstack. metaData.hrtClient = true also counts. */
+ var CLIENT_PLANS=[];
  function ready(){ document.documentElement.classList.add("ms-ready"); }
  /* if Memberstack never answers, fall back to the gate, never to the app */
  setTimeout(ready, 6000);
@@ -793,6 +803,12 @@ html.ms-ready .hrt-boot{display:none}
   var nm=(m&&m.customFields&&(m.customFields["first-name"]||m.customFields.firstName))||"";
   document.querySelectorAll(".ms-first-name").forEach(function(el){ if(nm) el.textContent=nm; });
   document.documentElement.classList.toggle("ms-named", !!nm);
+  var plans=(m&&m.planConnections||[]).filter(function(p){return String(p.status||"").toUpperCase()!=="CANCELED";}).map(function(p){return p.planId;});
+  var client=!!(m&&(plans.some(function(id){return CLIENT_PLANS.indexOf(id)>-1;})||(m.metaData&&m.metaData.hrtClient===true)));
+  var cf=(m&&m.customFields)||{};
+  document.documentElement.classList.toggle("ms-client", client);
+  window.HRT_MEMBER={ signedIn:!!m, client:client, wantsHelp:/^(yes|true|1)$/i.test(String(cf["wants-card-help"]||"")) };
+  try{ window.dispatchEvent(new Event("hrt:member")); }catch(e){}
   /* after a checkout, land on the unlocked Atmos page */
   try{ if(ok && localStorage.getItem("hrtGoAtmos")){ localStorage.removeItem("hrtGoAtmos"); location.hash="atmos"; } }catch(e){}
   var f=document.getElementById("atmosIframe");

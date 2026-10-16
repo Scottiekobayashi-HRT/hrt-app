@@ -115,7 +115,8 @@ export function toWallet(rows, catalogIds, household = "") {
     const entry = {
       id: stableId(household, r.who || "", key, opened || ""),
       cardId,
-      opened: opened || ""
+      opened: opened || "",
+      addedBy: "hrt"
     };
     if (cardId === "custom") {
       entry.custom = { name: name.replace(/\s*\(.*?\)\s*/g, " ").trim().slice(0, 60) };

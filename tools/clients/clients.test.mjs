@@ -39,7 +39,9 @@ const imp = buildImport(hh, () => csv, ids);
 eq("one household imported", imp.count, 1);
 eq("duplicate and bad email noted", imp.notes.filter((n) => /already used|bad or missing email/.test(n)).length, 2);
 const line = imp.csv.split("\n")[1];
-eq("email lowercased, free plan set", line.startsWith("pak@example.com,Janice,pln_free-member-09dc08yw,"), true);
+eq("email lowercased, free plan set, marked client", line.startsWith('pak@example.com,Janice,pln_free-member-09dc08yw,"{""hrtClient"":true}",'), true);
+eq("client plan added when given", buildImport(hh.slice(0, 1), () => csv, ids, "pln_hrt-client").csv.split("\n")[1].includes("pln_free-member-09dc08yw,pln_hrt-client"), true);
+eq("imported cards marked added by HRT", wallet.cards.every((c) => c.addedBy === "hrt"), true);
 eq("json cell quoted", /,"\{""wallet""/.test(line), true);
 eq("csv cell", csvCell('a,"b"'), '"a,""b"""');
 
