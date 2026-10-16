@@ -1,9 +1,9 @@
 /* Account page (#account): photo, name, badges, email, password, plan, log out.
    Everything goes through Memberstack's own browser API. Nothing here writes
-   Member JSON (wallet-store.js stays the only writer). Styles: #ac-host in app.css. */
+   Member JSON (wallet-store.js stays the only writer). Styles: #acct-host in app.css. */
 (function(){
  "use strict";
- var host = document.getElementById("ac-host");
+ var host = document.getElementById("acct-host");
  var member = null, busy = false;
 
  function ms(){ return window.$memberstackDom; }
