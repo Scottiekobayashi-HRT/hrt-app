@@ -1017,8 +1017,21 @@
   }
 
   /* The swipeable card tiles, used on the Dashboard and the My Wallet page. */
-  function tilesHtml(s, perks) {
-    return '<div class="wl-tiles">' + s.rows.map(function (row) {
+  /* Grid or list for the card tiles on the My Wallet tab, remembered per browser. */
+  function cardView() {
+    if (!state.cardView) { try { state.cardView = localStorage.getItem("hrt-wl-view") === "list" ? "list" : "grid"; } catch (e) { state.cardView = "grid"; } }
+    return state.cardView;
+  }
+  var GRID_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>';
+  var LIST_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg>';
+  function viewToggle() {
+    var v = cardView();
+    return '<div class="wl-view" role="group" aria-label="Show cards as">' +
+      '<button class="wl-view-b' + (v === "grid" ? " on" : "") + '" data-wl="view" data-key="grid" aria-pressed="' + (v === "grid") + '">' + GRID_ICON + "<span>Grid</span></button>" +
+      '<button class="wl-view-b' + (v === "list" ? " on" : "") + '" data-wl="view" data-key="list" aria-pressed="' + (v === "list") + '">' + LIST_ICON + "<span>List</span></button></div>";
+  }
+  function tilesHtml(s, perks, view) {
+    return '<div class="wl-tiles' + (view === "list" ? " wl-tiles-list" : "") + '">' + s.rows.map(function (row) {
       var e = row.entry, c = row.card;
       if (!c) return "";
       var bf = cardBrief(e, c, perks);
@@ -1192,8 +1205,8 @@
     if (!s.count && !(s.upcoming || []).length && !state.editing) {
       /* the summary card above invites them to add cards */
     } else if (s.count) {
-      if (!state.editing) html += '<div class="wl-hm-grid wl-pg-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2></div>' +
-        tilesHtml(s, perks) + whichHtml() + "</div>" + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
+      if (!state.editing) html += '<div class="wl-hm-grid wl-pg-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' + viewToggle() + "</div>" +
+        tilesHtml(s, perks, cardView()) + whichHtml() + "</div>" + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
       html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Card details</h3></div>' +
         (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
         '<ul class="wl-list">' + s.rows.map(function (r) { return rowHtml(r, perks); }).join("") + "</ul></div>";
@@ -1271,6 +1284,7 @@
       return;
     }
     if (act === "bonus-remove") { save(function (w) { w.cards.forEach(function (k) { if (k.id === id) delete k.bonus; }); }); return; }
+    if (act === "view") { state.cardView = b.getAttribute("data-key") === "list" ? "list" : "grid"; try { localStorage.setItem("hrt-wl-view", state.cardView); } catch (e) {} paint(); return; }
     if (act === "ctab") { state.creditTab = b.getAttribute("data-key"); state.showAllSoon = false; paint(); return; }
     if (act === "allsoon") { state.showAllSoon = !state.showAllSoon; paint(); return; }
     if (act === "remove") {
@@ -1477,7 +1491,17 @@
       ".wl-hm-list{margin-top:0}",
       ".wl-hm-h4{margin-top:18px}",
       ".wl-hm-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}",
-      ".wl-hm-grid>.wl-card{margin-bottom:0}.wl-pg-grid{margin-bottom:14px}.wl-pg-grid .wl-hm-head{justify-content:flex-start;align-items:flex-start;text-align:left}",
+      ".wl-view{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}",
+      ".wl-view-b{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 11px;border-radius:7px;font-size:12.5px;font-weight:800;color:var(--muted);-webkit-tap-highlight-color:transparent}",
+      ".wl-view-b:hover{color:var(--text)}.wl-view-b:focus-visible{outline:2px solid var(--coral);outline-offset:1px}",
+      ".wl-view-b.on{background:#1c3d5a;color:#fff}[data-theme=dark] .wl-view-b.on{background:#f2b84b;color:#14202e}",
+      ".wl-pg-grid .wl-hm-head{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:10px;text-align:left}",
+      ".wl-tiles.wl-tiles-list{display:flex;flex-direction:column;gap:8px;overflow:visible;margin:14px 0 0;padding:0;scroll-snap-type:none}",
+      ".wl-tiles-list .wl-tile{flex:none;width:100%;align-items:center;padding:10px 12px}",
+      ".wl-tiles-list .wl-tl-body{flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:14px;row-gap:3px}",
+      ".wl-tiles-list .wl-tl-name{flex:1 0 100%}.wl-tiles-list .wl-tl-pills{margin-top:0}",
+      ".wl-tiles-list .wl-art-sm{width:64px}",
+      ".wl-hm-grid>.wl-card{margin-bottom:0}.wl-pg-grid{margin-bottom:14px}",
       ".wl-soon-home .wl-cr-total b{font-size:24px}.wl-soon-home .wl-ctab{padding:7px 10px}",
       "@media (max-width:1060px){.wl-hm-grid{grid-template-columns:minmax(0,1fr)}}",
       ".wl-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:16px}",
