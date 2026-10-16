@@ -667,3 +667,47 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 @media (max-width:560px){
  .topbar .ms-btn[data-ms-action="customer-portal"],.topbar .ms-btn[data-ms-action="logout"]{display:none!important}
 }
+
+/* ---- Mini wallet: Dashboard top right tile (wallet.js miniHtml). Same navy photo card and gold edge
+   as the My Wallet page banner; the photo itself is set in wallet.js styles() next to SUMMARY_PHOTO. ---- */
+#wl-mini{padding:20px 22px 16px;gap:0;color:#eef4fa;border:1px solid rgba(242,184,75,.45);background-color:#1b2430;box-shadow:0 18px 40px -24px rgba(9,20,35,.75);min-height:206px}
+#wl-mini .wlm-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#wl-mini .wlm-title{margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#cfe0ee}
+#wl-mini .wlm-open{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);font-size:13px;font-weight:800;color:#fff;text-decoration:none;white-space:nowrap}
+#wl-mini .wlm-open:hover{background:rgba(255,255,255,.14)}
+#wl-mini .wlm-hero{display:flex;flex-direction:column;gap:3px;margin:12px 0 14px}
+#wl-mini .wlm-big{font-size:38px;font-weight:800;line-height:1.02;letter-spacing:-.015em;color:#fff;font-variant-numeric:tabular-nums}
+#wl-mini .wlm-big.wlm-ok{font-size:28px;color:#a6e9c3}
+#wl-mini .wlm-big-empty{display:block;margin:12px 0 10px;font-size:22px;line-height:1.25}
+#wl-mini .wlm-cap{font-size:13.5px;color:#b9cbdc}
+#wl-mini .wlm-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0;padding:11px 0 2px;border-top:1px solid rgba(255,255,255,.13)}
+#wl-mini .wlm-stats div{min-width:0}#wl-mini .wlm-stats div + div{padding-left:14px;border-left:1px solid rgba(255,255,255,.13)}
+#wl-mini .wlm-stats dt{margin:0 0 3px;font-size:12px;color:#9fb4c8}
+#wl-mini .wlm-stats dd{margin:0;font-size:18px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#wl-mini .wlm-sub{margin:14px 0 6px;font-size:12.5px;font-weight:700;color:#9fb4c8}
+#wl-mini .wlm-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}#wl-mini .wlm-list > li{min-width:0}
+#wl-mini .wlm-cr{box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;min-height:44px;padding:7px 8px 7px 12px;border-radius:12px;background:rgba(255,255,255,.07);font-size:13.5px;line-height:1.3;color:#fff}
+#wl-mini .wlm-row{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;min-height:44px;padding:7px 12px;border-radius:12px;background:rgba(255,255,255,.07);font-size:13.5px;font-weight:600;line-height:1.3;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#wl-mini .wlm-row:hover{background:rgba(255,255,255,.12)}#wl-mini .wlm-row:focus-visible{outline:2px solid #f2b84b;outline-offset:2px}
+#wl-mini .wlm-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:#9fc1d4}
+#wl-mini .warn .wlm-dot,#wl-mini .wlm-cr.warn .wlm-dot{background:#f2b84b}#wl-mini .hot .wlm-dot{background:#ff7a70}
+#wl-mini .wlm-txt{flex:1;min-width:0}
+#wl-mini .wlm-txt b{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-weight:700;overflow:hidden}
+#wl-mini .wlm-txt small{display:block;font-size:12px;color:#b9cbdc}
+#wl-mini .wlm-go{font-size:20px;line-height:1;color:#9fb4c8}
+#wl-mini .wlm-tick{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 11px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(255,255,255,.06);font-size:12.5px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap}
+#wl-mini .wlm-tick:hover{background:rgba(255,255,255,.14)}
+#wl-mini .wlm-tick input{margin:0;accent-color:#f2b84b}
+#wl-mini .wlm-points{list-style:none;margin:0 0 4px;padding:0;display:grid;gap:7px}
+#wl-mini .wlm-points li{position:relative;padding-left:18px;font-size:14px;color:#cfe0ee}
+#wl-mini .wlm-points li::before{content:"";position:absolute;left:2px;top:6px;width:7px;height:7px;border-radius:50%;background:#f2b84b}
+#wl-mini .wlm-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:16px}
+#wl-mini .wl-btn{min-height:44px;display:inline-flex;align-items:center}
+#wl-mini .wl-btn.wl-gold{background:linear-gradient(90deg,#f2b84b,#d97040);border-color:transparent;color:#14202e}
+#wl-mini .wl-btn.wl-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);color:#fff}
+#wl-mini .wlm-foot{margin:10px 0 0;font-size:12px;color:#9fb4c8}
+#wl-mini .wlm-lede{margin:10px 0 0;font-size:14px;color:#cfe0ee}
+#wl-mini .wlm-msg{margin:8px 0 0;font-size:13px;color:#ffb3a8}
+#wl-mini .wlm-demo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;margin:-4px 0 10px;padding:6px 10px;border-radius:10px;border:1px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.08);font-size:12.5px;color:#eef4fa}
+#wl-mini .wlm-x{all:unset;cursor:pointer;font-weight:700;color:#f2b84b;min-height:32px;display:inline-flex;align-items:center}
+@media (max-width:560px){#wl-mini{padding:18px 16px 14px;border-radius:18px}#wl-mini .wlm-big{font-size:32px}}

@@ -183,6 +183,51 @@
     }, 420);
   }
 
+  /* Today in Hawaii (no daylight saving, always UTC-10), as YYYY-MM-DD. */
+  function hawaiiToday() { return new Date(Date.now() - 10 * 3600e3).toISOString().slice(0, 10); }
+
+  /* The feed is built once each morning, so by evening (or before the next run)
+     some of its dates are already in the past. Drop those here and recount each
+     card from what is left, so a card never says "from Oct 15" on Oct 16. A city
+     with nothing left disappears for the day. Pure, so it can be tested. */
+  function freshen(feed, today) {
+    today = today || hawaiiToday();
+    var out = {};
+    for (var k in feed) if (Object.prototype.hasOwnProperty.call(feed, k)) out[k] = feed[k];
+    out.economy = (feed.economy || []).map(function (d) {
+      var dates = (d.dates || []).filter(function (t) { return t && String(t.date) >= today; });
+      if (!dates.length) return null;
+      var c = {};
+      for (var j in d) if (Object.prototype.hasOwnProperty.call(d, j)) c[j] = d[j];
+      c.dates = dates;
+      c.deal_dates = dates.length;
+      c.soonest = dates.map(function (t) { return t.date; }).sort()[0];
+      c.miles = Math.min.apply(null, dates.map(function (t) { return t.miles || Infinity; }));
+      if (!isFinite(c.miles)) c.miles = d.miles;
+      return c;
+    }).filter(Boolean);
+    return out;
+  }
+
+  /* Extra locked tiles for the PRO box, on top of the ones the feed sends.
+     Photos are borrowed from the matching free card. The feed's own list is
+     built on the Mac (~/award-tracker); move these there when it is next edited. */
+  var EXTRA_TEASERS = [
+    { origin: "HNL", dest: "LAX", city: "Los Angeles", cabin: "first class" },
+    { origin: "HNL", dest: "LAS", city: "Las Vegas", cabin: "first class" }
+  ];
+  function teasersFor(feed) {
+    var list = (feed.premium_teasers || []).slice();
+    var have = {}; list.forEach(function (t) { have[t.dest] = 1; });
+    var img = {}; (feed.economy || []).concat(feed.economy_all || []).forEach(function (d) { if (d.image) img[d.dest] = d.image; });
+    EXTRA_TEASERS.forEach(function (t) {
+      if (have[t.dest]) return;
+      var c = { origin: t.origin, dest: t.dest, city: t.city, cabin: t.cabin, image: img[t.dest] || "", locked: true };
+      list.push(c);
+    });
+    return list;
+  }
+
   function render(feed) {
     var wrap = el("div", "dw free-only");
     var win = feed.window_days || 30;
@@ -292,16 +337,17 @@
     nudge(rail);
 
     /* business class: locked, and genuinely empty behind the blur */
-    var teasers = feed.premium_teasers || [];
+    var teasers = feed._teasers || feed.premium_teasers || [];
     if (teasers.length) {
       var pro = el("div", "dw-pro");
       var ph2 = el("div", "dw-pro-h");
       ph2.appendChild(el("span", "dw-pill", "★ HRT PRO"));
-      ph2.appendChild(el("h3", null, "Business class award space"));
+      var hasFirst = teasers.some(function (t) { return /first/i.test(t.cabin || ""); });
+      ph2.appendChild(el("h3", null, hasFirst ? "Business and first class award space" : "Business class award space"));
       var cities = teasers.map(function (t) { return t.city; }).filter(Boolean);
       ph2.appendChild(el("p", null,
         cities.length
-          ? "We track business class award space to " + cities.join(", ") + ". PRO members see the dates and the points."
+          ? "We track " + (hasFirst ? "premium cabin" : "business class") + " award space to " + cities.join(", ") + ". PRO members see the dates and the points."
           : "PRO members see the dates and the points."));
       pro.appendChild(ph2);
 
@@ -313,7 +359,7 @@
         lock.appendChild(blur);
         var lc = el("div", "dw-lc");
         lc.appendChild(el("b", null, t.city || t.dest || ""));
-        lc.appendChild(el("span", null, (t.origin || "HNL") + "–" + (t.dest || "") + " · business"));
+        lc.appendChild(el("span", null, (t.origin || "HNL") + "–" + (t.dest || "") + " · " + (/first/i.test(t.cabin || "") ? "first class" : "business")));
         lc.appendChild(el("span", null, "🔒 PRO members only"));
         lock.appendChild(lc);
         prail.appendChild(lock);
@@ -371,8 +417,11 @@
     fetch(FEED, { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("feed " + r.status); return r.json(); })
       .then(function (feed) {
-        if (!feed || !(feed.economy || []).length) return; // nothing to show, show nothing
-        var node = render(feed);
+        if (!feed) return;
+        var fresh = freshen(feed);
+        fresh._teasers = teasersFor(feed);
+        if (!(fresh.economy || []).length) return; // nothing to show, show nothing
+        var node = render(fresh);
         if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor.nextSibling);
         else home.appendChild(node);
       })
@@ -382,6 +431,8 @@
         if (window.console) console.warn("[dealwall] feed unavailable:", e && e.message);
       });
   }
+
+  window.HRT_DEALWALL = { _test: { freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();

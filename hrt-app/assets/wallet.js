@@ -1094,7 +1094,58 @@
       (list.length > 7 ? '<button class="wl-perkbtn" data-wl="alldates">' + (state.showAllDates ? "Show fewer" : "Show all " + list.length) + "</button>" : "") + "</section>";
   }
 
-  function paint() { paintMain(); paintHome(); paintAlerts(); }
+
+  /* ===================== MINI WALLET (Dashboard top right tile) =====================
+     Small on purpose: one headline number, three facts, and the next three things
+     to act on. Everything else lives on the My Wallet page. */
+  var miniHost;
+  function miniHtml() {
+    var head = function (link) {
+      return '<div class="wlm-head"><h2 class="wlm-title">Your wallet</h2>' + (link ? '<a class="wlm-open" href="#wallet" data-route="wallet">Open My Wallet <span aria-hidden="true">&rsaquo;</span></a>' : "") + "</div>";
+    };
+    if (state.error) return head(true) + '<p class="wlm-lede">' + esc(errText(state.error)) + "</p>" +
+      (state.error.code === "READ_FAILED" ? '<div class="wlm-acts"><button class="wl-btn" data-wl="retry">Try again</button></div>' : "");
+    if (!state.wallet) return head(false) + '<p class="wlm-lede">Loading your wallet</p>';
+    var V = view(), s = summarize(V, catalog());
+    var demo = state.demo ? '<div class="wlm-demo"><span>Example wallet. Nothing is saved.</span><button class="wlm-x" data-wl="demo-off">Use my own cards</button></div>' : "";
+    if (!s.count) {
+      return head(false) +
+        '<p class="wlm-big wlm-big-empty">Never miss a card credit again</p>' +
+        '<ul class="wlm-points"><li>Every annual fee and renewal date</li><li>Credits to use before they reset</li><li>Which card to use at Foodland, Costco and more</li></ul>' +
+        '<div class="wlm-acts"><button class="wl-btn wl-gold" data-wl="go-add">Add your cards</button>' +
+        '<button class="wl-btn wl-ghost" data-wl="demo">See an example</button></div>' +
+        '<p class="wlm-foot">Free with your account. We never ask for card numbers.</p>';
+    }
+    var perks = perkRows(V, catalog());
+    var soon = expiringSoon(perks, SOON_PERK_DAYS);
+    var due = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
+    var nx = s.next;
+    var html = demo + head(true) + '<div class="wlm-hero">' +
+      (due ? '<span class="wlm-big">' + esc(money(due)) + '</span><span class="wlm-cap">in credits to use in the next ' + SOON_PERK_DAYS + " days</span>"
+           : '<span class="wlm-big wlm-ok">All caught up</span><span class="wlm-cap">No credits end in the next ' + SOON_PERK_DAYS + " days</span>") + "</div>" +
+      '<dl class="wlm-stats"><div><dt>Cards</dt><dd>' + s.count + "</dd></div>" +
+      "<div><dt>Annual fees</dt><dd>" + esc(money(s.yearly)) + "</dd></div>" +
+      "<div><dt>Next renewal</dt><dd>" + (nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None") + "</dd></div></dl>";
+    /* Up next: renewals, welcome bonus deadlines and activations first (they are not
+       in the credit list), then the soonest credits, three rows in all. */
+    var alerts = topAlerts(V, catalog(), null, 6).filter(function (a) { return a.level === "warn" || (a.level === "hot" && /welcome bonus/.test(a.text)); }).slice(0, 2);
+    var credits = soon.filter(function (r) { return r.perk.type !== "activation"; }).slice(0, Math.max(1, 3 - alerts.length));
+    var rows = alerts.map(function (a) {
+      return '<li><button class="wlm-row ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + '>' +
+        '<span class="wlm-dot" aria-hidden="true"></span><span class="wlm-txt">' + esc(a.text.replace(/ fee posts around .*$/, " fee")) + '</span><span class="wlm-go" aria-hidden="true">&rsaquo;</span></button></li>';
+    }).concat(credits.map(function (r) {
+      var b = r.perk, p = r.period, lvl = p.days <= 7 ? " hot" : p.days <= 14 ? " warn" : "";
+      return '<li class="wlm-cr' + lvl + '"><span class="wlm-dot" aria-hidden="true"></span><span class="wlm-txt"><b>' + esc(shortName(r.card.name)) + " " + esc(b.label) +
+        (b.unit === "usd" ? " " + esc(money(r.part ? r.left : b.amount)) : "") + "</b><small>" + esc(daysLeft(p.days)) + ", use by " + esc(dayText(p.end)) + "</small></span>" +
+        '<label class="wlm-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) + '" data-key="' + esc(p.key) + '"' +
+        (state.busy ? " disabled" : "") + "> Used</label></li>";
+    }));
+    if (rows.length) html += '<h3 class="wlm-sub">Up next</h3><ul class="wlm-list">' + rows.join("") + "</ul>";
+    if (state.msg) html += '<p class="wlm-msg" role="alert">' + esc(state.msg) + "</p>";
+    return html;
+  }
+  function paintMini() { if (miniHost) miniHost.innerHTML = miniHtml(); }
+  function paint() { paintMain(); paintHome(); paintAlerts(); paintMini(); }
 
   /* ----- Dashboard home panel: totals and the next credits to use ----- */
   var homeHost;
@@ -1448,7 +1499,7 @@
 
   function onClick(ev) {
     var b = ev.target.closest && ev.target.closest("[data-wl]");
-    if (!b || !((host && host.contains(b)) || (homeHost && homeHost.contains(b)) || (alertHost && alertHost.contains(b)))) return;
+    if (!b || !((host && host.contains(b)) || (homeHost && homeHost.contains(b)) || (alertHost && alertHost.contains(b)) || (miniHost && miniHost.contains(b)))) return;
     var act = b.getAttribute("data-wl"), id = b.getAttribute("data-id");
     if (act === "use") return; /* handled on change */
     if (act === "clamp") { if (ev.target.closest("a")) return; b.classList.toggle("full"); return; }
@@ -1662,6 +1713,10 @@
       ".wl-sum .wl-sum-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}",
       ".wl-sum .wl-demo{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);color:#eef4fa}",
       ".wl-hm .wl-hm-head{align-items:center}.wl-hm .wl-hm-h{font-size:17px}",
+      /* the Dashboard mini wallet wears the same photo card as the banner above */
+      "#wl-mini{background:radial-gradient(900px 300px at 88% -50%,rgba(159,193,212,.42),transparent 60%)," +
+        "linear-gradient(120deg,rgba(20,27,36,.93),rgba(27,36,48,.88) 52%,rgba(35,47,62,.84))," +
+        "url('" + SUMMARY_PHOTO + "') center 60%/cover no-repeat,#1b2430}",
       "@media (max-width:560px){.wl-sum{padding:18px 16px 16px;border-radius:18px}" +
         ".wl-sum .wl-sum-stats{grid-template-columns:1fr 1fr}" +
         ".wl-sum .wl-sum-stat:nth-child(odd){padding-left:0;border-left:0}" +
@@ -1849,6 +1904,12 @@
       styles();
       homeHost = document.getElementById("wl-home");
       alertHost = document.getElementById("wl-summary");
+      miniHost = document.getElementById("wl-mini");
+      if (miniHost && !miniHost.getAttribute("data-ready")) {
+        miniHost.setAttribute("data-ready", "1");
+        miniHost.addEventListener("click", onClick);
+        miniHost.addEventListener("change", onChange);
+      }
       if (alertHost && !alertHost.getAttribute("data-ready")) {
         alertHost.setAttribute("data-ready", "1");
         alertHost.addEventListener("click", onClick);

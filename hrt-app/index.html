@@ -103,7 +103,6 @@ html.ms-pro:not(.ms-client) .pmc-pro,html.ms-client:not(.ms-pro) .pmc-cl,html.ms
 .pro-welcome .pw-links a{color:#fff;text-decoration:none;font-weight:700;font-size:13px;border:1px solid rgba(242,184,75,.55);border-radius:10px;padding:8px 12px}
 .pro-welcome .pw-links a:hover{background:rgba(242,184,75,.15)}
 .btn.gold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;box-shadow:0 10px 26px rgba(217,112,64,.35)}
-html.ms-pro .procard{border-color:rgba(242,184,75,.55)}
 
 /* ===== account wall: <html> carries ms-ready and ms-in ===== */
 html:not(.ms-ready) .hrt-app,html:not(.ms-ready) .hrt-gate{display:none!important}
@@ -242,29 +241,9 @@ html.ms-ready .hrt-boot{display:none}
     <div class="hstat" id="hmFirstWrap" hidden><b class="tnum" id="hmFirst">&ndash;</b><span><i style="background:#f2b84b"></i>First class deals from Hawaiʻi</span></div>
    </div>
   </div>
-  <div class="spot procard">
-   <div class="pro-head">
-    <span class="eyebrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/></svg> HRT PRO &middot; Members</span>
-    <h3>Atmos Award Calendar</h3>
-    <p>Every saver award date to and from Hawaiʻi, color coded by value, so you can book the good ones first.</p>
-   </div>
-   <div class="sb2">
-    <ul class="pro-list">
-     <li>Deal calendar for Hawaiʻi routes, updated daily</li>
-     <li>Points Explorer: see where your balance can take you</li>
-     <li>Deals Search with every open date rated</li>
-    </ul>
-    <a class="btn coral free-only" id="homePro" href="#atmos" data-route="atmos">Try HRT PRO &rarr;</a><a class="btn gold pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Open Deals Calendar &rarr;</a>
-    <a class="pro-member free-only" id="homeCal" href="#atmos" data-route="atmos">Already a member? Open the calendar &rarr;</a>
-   </div>
-  </div>
+  <!-- Mini wallet: the top right tile. Filled by wallet.js (HRT_WALLET.home) -->
+  <div class="spot wlmini" id="wl-mini" aria-live="polite"></div>
  </div>
- <!-- My Wallet summary: secondary, under the greeting row -->
- <div id="wl-summary"></div>
-
- <!-- My Wallet: premier spot, under the Aloha banner and the Atmos box -->
- <div id="wl-home"></div>
-
  <div>
   <div class="sec-h" style="padding-left:2px;padding-right:2px"><h2>Your free tools</h2><span class="note">Pick one to open it</span></div>
   <div class="ttiles">
