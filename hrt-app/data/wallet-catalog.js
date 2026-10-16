@@ -2,7 +2,7 @@
    Do not hand-edit. Change the sheet, download it, run the script. */
 window.HRT_WALLET_CATALOG={
  "v": 1,
- "built": "2026-10-14",
+ "built": "2026-10-16",
  "cards": [
   {
    "id": "chase-sapphire-preferred",
@@ -26,7 +26,8 @@ window.HRT_WALLET_CATALOG={
    "note": "",
    "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/882a1d3e-639a-40ce-a7ef-c1efc4f2d46f/Chase+Freedom+Unlimited%C2%AE.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/882a1d3e-639a-40ce-a7ef-c1efc4f2d46f/Chase+Freedom+Unlimited%C2%AE.png?content-type=image%2Fpng",
+   "ftf": 3.0
   },
   {
    "id": "chase-freedom-flex",
@@ -38,7 +39,8 @@ window.HRT_WALLET_CATALOG={
    "note": "Rotating 5% categories need activating every quarter.",
    "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/85855236-dde8-415d-bcdc-1299e0a2fb78/Chase+Freedom+Flex%C2%AE.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/85855236-dde8-415d-bcdc-1299e0a2fb78/Chase+Freedom+Flex%C2%AE.png?content-type=image%2Fpng",
+   "ftf": 3.0
   },
   {
    "id": "atmos-summit",
