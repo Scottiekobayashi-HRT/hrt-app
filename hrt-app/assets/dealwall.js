@@ -509,12 +509,26 @@
 
   var proCss = document.createElement("style");
   proCss.textContent = [
-    ".dwp{margin-top:22px}",
+    ".dwp{margin-top:22px;position:relative;border-radius:var(--radius,16px);padding:16px 18px 14px;background:radial-gradient(700px 220px at 92% -30%,rgba(242,184,75,.22),transparent 60%),linear-gradient(120deg,#141b24,#1b2430 55%,#1d3350);border:1px solid rgba(242,184,75,.5);box-shadow:inset 0 3px 0 #f2b84b,0 14px 36px rgba(16,32,54,.18)}",
+    ".dwp .dw-head{margin-bottom:8px}.dwp .dw-head h2{color:#fff}.dwp .dw-sub,.dwp .dw-when,.dwp .dwp-sum{color:#bccde0}",
+    ".dwp .dw-note{color:#9fb3c8}",
+    ".dwp-pill{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:4px 9px}",
+    ".dwp .dwp-tune{color:#fff;background:rgba(242,184,75,.14)}",
+    ".dwp .dwp-tune[aria-expanded=true]{background:#f2b84b;color:#14202e;border-color:#f2b84b}",
+    ".dwp-fold{appearance:none;font:inherit;cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid rgba(159,193,212,.35);background:rgba(255,255,255,.06);color:#eaf2f8;display:grid;place-items:center}",
+    ".dwp .dw-nav{margin-left:0}.dwp-fold{margin-left:auto}",
+    ".dwp-fold:hover{border-color:#f2b84b}.dwp-fold svg{transition:transform .2s}.dwp-fold[aria-expanded=false] svg{transform:rotate(-90deg)}",
+    ".dwp.folded .dwp-body{display:none}.dwp.folded{padding-bottom:12px}.dwp.folded .dw-nav,.dwp.folded .dwp-tune{display:none}",
+    ".dwp-acc{display:flex;align-items:center;gap:10px;width:100%;appearance:none;font:inherit;cursor:pointer;background:none;border:0;padding:6px 0;color:var(--text);text-align:left;min-height:38px}",
+    ".dwp-acc b{font-size:12.5px;flex:0 0 110px}.dwp-acc span{flex:1;font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+    ".dwp-acc i{font-style:normal;font-size:12px;color:var(--muted);transition:transform .2s}.dwp-acc[aria-expanded=true] i{transform:rotate(180deg)}",
+    ".dwp-panel .dwp-chips{padding:2px 0 8px}",
+    ".dwp-panel>.dwp-sec+.dwp-sec{border-top:1px solid var(--line)}",
     ".dwp-tune{appearance:none;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 13px;border-radius:999px;border:1px solid rgba(242,184,75,.6);background:linear-gradient(135deg,rgba(245,199,90,.18),rgba(217,112,64,.12));color:var(--text);font-size:12.5px;font-weight:800}",
     ".dwp-tune:hover{border-color:#e8824c}.dwp-tune[aria-expanded=true]{background:#1b2430;color:#fff;border-color:#1b2430}",
     "[data-theme=dark] .dwp-tune[aria-expanded=true]{background:#f2b84b;color:#14202e;border-color:#f2b84b}",
     ".dwp-sum{width:100%;font-size:12px;color:var(--muted);font-weight:600;margin-top:-4px}",
-    ".dwp-panel{border:1px solid color-mix(in srgb,#f2b84b 45%,var(--line));border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);padding:14px 16px 12px;margin:0 0 12px;display:grid;gap:12px}",
+    ".dwp-panel{border:1px solid color-mix(in srgb,#f2b84b 45%,var(--line));border-radius:14px;background:var(--surface);box-shadow:var(--shadow);padding:6px 14px 10px;margin:0 0 12px;display:grid;gap:0}",
     ".dwp-row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:start}",
     ".dwp-row>b{font-size:12.5px;color:var(--text);padding-top:8px}",
     ".dwp-row>b small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}",
@@ -531,7 +545,7 @@
     ".dwp-empty{border:1px dashed var(--line);border-radius:var(--radius,16px);padding:18px;text-align:center;color:var(--muted);font-size:13px;background:var(--surface)}",
     ".dwp-empty button{margin-top:8px}",
     ".dwp-cal{margin-left:auto;font-size:12.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:8px 15px;text-decoration:none;white-space:nowrap}",
-    "@media (max-width:640px){.dwp-row{grid-template-columns:1fr;gap:6px}.dwp-row>b{padding-top:0}.dwp-chip{min-height:40px}}"
+    "@media (max-width:640px){.dwp{padding:14px 12px 12px}.dwp-acc b{flex-basis:92px}.dwp-chip{min-height:40px}}"
   ].join("");
   document.head.appendChild(proCss);
 
@@ -541,6 +555,7 @@
     var wrap = el("div", "dwp pro-only");
 
     var head = el("div", "dw-head");
+    head.appendChild(el("span", "dwp-pill", "★ PRO"));
     head.appendChild(el("h2", null, "Your award deals"));
     var subEl = el("span", "dw-sub", ""); head.appendChild(subEl);
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
@@ -549,15 +564,30 @@
     tune.insertAdjacentHTML("afterbegin", '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>');
     head.appendChild(tune);
     var nav = el("div", "dw-nav"); head.appendChild(nav);
+    var fold = el("button", "dwp-fold"); fold.type = "button";
+    fold.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+    head.appendChild(fold);
     var sum = el("div", "dwp-sum"); head.appendChild(sum);
     wrap.appendChild(head);
+    var body = el("div", "dwp-body");
 
     var panel = el("div", "dwp-panel"); panel.hidden = true;
     var rail = el("div", "dw-rail");
     var exp = el("div", "dw-exp");
     var empty = el("div", "dwp-empty"); empty.hidden = true;
-    wrap.appendChild(panel); wrap.appendChild(rail); wrap.appendChild(exp); wrap.appendChild(empty);
-    wrap.appendChild(el("p", "dw-note", full
+    body.appendChild(panel); body.appendChild(rail); body.appendChild(exp); body.appendChild(empty);
+    wrap.appendChild(body);
+    function setFold(f) {
+      wrap.classList.toggle("folded", f);
+      fold.setAttribute("aria-expanded", f ? "false" : "true");
+      fold.setAttribute("aria-label", f ? "Show your award deals" : "Hide your award deals");
+      fold.title = f ? "Show" : "Hide";
+      try { localStorage.setItem(PREF_KEY + "Fold", f ? "1" : "0"); } catch (e) {}
+    }
+    var folded = false; try { folded = localStorage.getItem(PREF_KEY + "Fold") === "1"; } catch (e) {}
+    setFold(folded);
+    fold.addEventListener("click", function () { setFold(!wrap.classList.contains("folded")); });
+    body.appendChild(el("p", "dw-note", full
       ? "From the HRT PRO calendar, refreshed every morning. Availability changes; confirm with the airline before booking."
       : "Showing economy for the next " + win + " days for now. Business and first class, and the full booking window, are on the way. Availability changes; confirm with the airline before booking."));
 
@@ -648,11 +678,14 @@
       if (disabled) b.disabled = true; else b.addEventListener("click", onTap);
       return b;
     }
-    function row(title, hint, kids) {
-      var r = el("div", "dwp-row"), t = el("b", null, title);
-      if (hint) t.appendChild(el("small", null, hint));
-      var c = el("div", "dwp-chips"); kids.forEach(function (k) { c.appendChild(k); });
-      r.appendChild(t); r.appendChild(c); return r;
+    var openSec = null;
+    function row(title, value, kids) {
+      var r = el("div", "dwp-sec"), on = openSec === title;
+      var h = el("button", "dwp-acc"); h.type = "button"; h.setAttribute("aria-expanded", on ? "true" : "false");
+      h.appendChild(el("b", null, title)); h.appendChild(el("span", null, value)); h.appendChild(el("i", null, "▾"));
+      h.addEventListener("click", function () { openSec = openSec === title ? null : title; drawPanel(); });
+      var c = el("div", "dwp-chips"); c.hidden = !on; kids.forEach(function (k) { c.appendChild(k); });
+      r.appendChild(h); r.appendChild(c); return r;
     }
     function change(fn) { fn(); prefs = cleanPrefs(prefs); savePrefs(prefs); drawPanel(); drawCards(); }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
@@ -660,17 +693,18 @@
     function drawPanel() {
       var C = choicesFor(entries);
       panel.innerHTML = "";
-      if (C.origins.length > 1) panel.appendChild(row("From", "Departure airports", [chip("All", !prefs.origins.length, function () { change(function () { prefs.origins = []; }); })]
+      var cityName = {}; C.cities.forEach(function (c) { cityName[c.dest] = c.city; });
+      if (C.origins.length > 1) panel.appendChild(row("From", prefs.origins.length ? prefs.origins.join(", ") : "All airports", [chip("All", !prefs.origins.length, function () { change(function () { prefs.origins = []; }); })]
         .concat(C.origins.map(function (o) { return chip(o, prefs.origins.indexOf(o) >= 0, function () { change(function () { toggle(prefs.origins, o); }); }); }))));
-      panel.appendChild(row("Destinations", "Tap the ones you want", [chip("All", !prefs.dests.length, function () { change(function () { prefs.dests = []; }); })]
+      panel.appendChild(row("Destinations", prefs.dests.length ? prefs.dests.map(function (d) { return cityName[d] || d; }).join(", ") : "All cities", [chip("All", !prefs.dests.length, function () { change(function () { prefs.dests = []; }); })]
         .concat(C.cities.map(function (c) { return chip(c.city, prefs.dests.indexOf(c.dest) >= 0, function () { change(function () { toggle(prefs.dests, c.dest); }); }); }))));
-      panel.appendChild(row("Cabin", "", CABINS.map(function (c) {
+      panel.appendChild(row("Cabin", CABINS.filter(function (c) { return c[0] === prefs.cabin; })[0][1], CABINS.map(function (c) {
         var has = !!C.cabins[c[0]];
         return chip(c[1], prefs.cabin === c[0], function () { change(function () { prefs.cabin = c[0]; }); }, !has && prefs.cabin !== c[0], has ? "" : "soon");
       })));
-      panel.appendChild(row("Max points", "One way", [chip("Any", !prefs.max, function () { change(function () { prefs.max = 0; }); })]
+      panel.appendChild(row("Max points", prefs.max ? "Up to " + kpts(prefs.max) + " one way" : "Any", [chip("Any", !prefs.max, function () { change(function () { prefs.max = 0; }); })]
         .concat(C.steps.map(function (v) { return chip(kpts(v), prefs.max === v, function () { change(function () { prefs.max = v; }); }); }))));
-      panel.appendChild(row("When", "Pick months", [chip("Any time", !prefs.months.length, function () { change(function () { prefs.months = []; }); })]
+      panel.appendChild(row("When", prefs.months.length ? prefs.months.map(monthLabel).join(", ") : "Any time", [chip("Any time", !prefs.months.length, function () { change(function () { prefs.months = []; }); })]
         .concat(C.months.map(function (m) { return chip(monthLabel(m), prefs.months.indexOf(m) >= 0, function () { change(function () { toggle(prefs.months, m); }); }); }))));
       var f = el("div", "dwp-foot");
       f.appendChild(el("span", null, "Saved on this device. Changes show right away."));
