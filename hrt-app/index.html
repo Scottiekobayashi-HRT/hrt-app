@@ -151,6 +151,51 @@ html.ms-ready .hrt-boot{display:none}
 .hrt-gate .fine{margin:20px 0 0;font-size:11.5px;line-height:1.65;color:#7f92a8}
 .hrt-gate .fine a{color:#9fb2c7}
 @media(max-width:420px){.hrt-gate h1{font-size:22px}}
+/* Atmos sales page for free members (Oct 16) */
+#v-atmos .as-hero{padding:30px 30px 26px;min-height:0;background:radial-gradient(900px 300px at 92% -40%,rgba(242,184,75,.28),transparent 60%),linear-gradient(120deg,#141b24,#1b2430 52%,#1d3350);border-color:rgba(242,184,75,.35)}
+#v-atmos .as-eye{position:relative;z-index:2;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#f2b84b;margin-bottom:10px}
+#v-atmos .as-hero h1{font-size:34px;max-width:26ch;line-height:1.12}
+#v-atmos .as-hero h1 .gold{background:linear-gradient(90deg,#f2b84b,#e8824c);-webkit-background-clip:text;background-clip:text;color:transparent}
+#v-atmos .as-hero p{font-size:15.5px;max-width:58ch;margin-top:12px}
+#v-atmos .as-hero .btn.coral{padding:13px 20px;font-size:15px}
+#v-atmos .as-fine{position:relative;z-index:2;margin-top:10px;font-size:12.5px;color:#9fb3c8}
+.as-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.as-stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.as-stat b{display:block;font-family:'Montserrat',sans-serif;font-size:30px;font-weight:800;line-height:1.05;color:var(--text);font-variant-numeric:tabular-nums}
+.as-stat b small{font-size:15px;font-weight:800;margin-left:3px;color:var(--muted)}
+.as-stat .as-k{display:block;margin-top:6px;font-weight:700;font-size:13.5px;color:var(--text)}
+.as-stat .as-d{display:block;margin-top:3px;font-size:12.5px;color:var(--muted)}
+.as-stat.gold{border-color:rgba(242,184,75,.55);box-shadow:inset 0 3px 0 #f2b84b,var(--shadow)}
+.as-sec{display:flex;flex-direction:column;gap:12px}
+.as-sec>h2{margin:0;font-size:21px;font-weight:800;color:var(--text)}
+.as-sec>.as-sub{margin:-6px 0 0;color:var(--muted);font-size:14px;max-width:70ch}
+.as-video{position:relative;width:100%;max-width:880px;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;background:#141b24;border:1px solid var(--line);box-shadow:var(--shadow-lift)}
+.as-video button{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;cursor:pointer;background:#141b24 center/cover no-repeat}
+.as-video button::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,27,36,.1),rgba(20,27,36,.55))}
+.as-video .as-play{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;padding:13px 20px 13px 16px;border-radius:999px;background:linear-gradient(160deg,#ef7833,#c25c26);color:#fff;font-weight:800;font-size:15px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.as-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.as-vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.as-col{border-radius:var(--radius);padding:20px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+.as-col h3{margin:0 0 12px;font-size:15.5px;font-weight:800}
+.as-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.as-col li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+.as-col li svg{flex:0 0 auto;margin-top:2px}
+.as-col.old{background:var(--surface-2)}
+.as-col.old h3,.as-col.old li{color:var(--muted)}
+.as-col.old li svg{color:var(--peak)}
+.as-col.new{background:linear-gradient(150deg,#141b24,#1d3350);border-color:rgba(242,184,75,.45);color:#eaf2f8}
+.as-col.new h3{color:#fff}.as-col.new li svg{color:#f2b84b}
+.as-close{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;border-radius:var(--radius);padding:24px 26px;background:linear-gradient(120deg,#141b24,#1d3350);border:1px solid rgba(242,184,75,.4);box-shadow:var(--shadow);color:#eaf2f8}
+.as-close h3{margin:0;color:#fff;font-size:20px;font-weight:800;line-height:1.25;max-width:32ch}
+.as-close p{margin:6px 0 0;color:#bccde0;font-size:13.5px;max-width:56ch}
+.as-close .btn{padding:13px 20px;font-size:15px}
+.atmos-lock .lk ul{list-style:none;margin:2px 0 4px;padding:0;display:flex;flex-direction:column;gap:6px;text-align:left;font-size:13.5px;color:var(--text)}
+.atmos-lock .lk li{display:flex;gap:8px;align-items:flex-start}.atmos-lock .lk li svg{flex:0 0 auto;margin-top:3px;color:var(--deal)}
+.atmos-lock .lk small{color:var(--muted);font-size:12px}
+html.ms-atmos #v-atmos .as-free{display:none!important}
+@media (max-width:1080px){.as-stats{grid-template-columns:1fr 1fr}}
+@media (max-width:720px){.as-vs{grid-template-columns:1fr}#v-atmos .as-hero{padding:24px 20px 22px}#v-atmos .as-hero h1{font-size:26px}.as-stat b{font-size:26px}.as-close{padding:20px}}
+@media (max-width:420px){.as-stats{grid-template-columns:1fr 1fr;gap:10px}.as-stat{padding:14px}.as-stat b{font-size:22px}.as-stat .as-d{display:none}}
 </style>
 </head>
 <body>
@@ -501,21 +546,54 @@ html.ms-ready .hrt-boot{display:none}
 <!-- ================= ATMOS (PRO) ================= -->
 <section class="view" data-page="atmos" id="v-atmos">
 <div class="content">
- <div class="hero slim">
+ <!-- PRO members: short header -->
+ <div class="hero slim pro-only">
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
   <div class="hs-text">
    <h1>Atmos Award <span class="wave">Calendar</span> <span class="pro-b big">PRO</span></h1>
-   <p>Saver award space to and from Hawaiʻi, color coded by value. Part of HRT PRO, $9.99/mo.</p>
+   <p>Fresh saver award space to and from Hawaiʻi, refreshed every morning.</p>
   </div>
-  <div class="cta-row" style="margin-top:0"><button type="button" class="btn coral" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock Atmos Calendar &middot; $9.99/mo &rarr;</button></div>
  </div>
- <!-- SANDBOX: Atmos paywall test (no live data) -->
+
+ <!-- Free members: the sales page -->
+ <div class="hero as-hero as-free">
+  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#f2b84b" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".45"/></svg>
+  <span class="as-eye"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/></svg>HRT PRO &middot; Atmos Award Calendar</span>
+  <h1>Every Atmos saver seat out of Hawaiʻi, <span class="gold">270 days out</span>, on one screen.</h1>
+  <p>Stop clicking through alaskaair.com one date at a time. The calendar checks about 270 days of award space every morning and color codes it, so the cheap dates jump out in seconds.</p>
+  <div class="cta-row"><button type="button" class="btn coral" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock HRT PRO &middot; $9.99/mo &rarr;</button><a class="btn ghost" href="#as-tour" data-astour hidden>Watch the tour</a></div>
+  <div class="as-fine">Cancel any time in one click. No contracts.</div>
+ </div>
+
+ <div class="as-stats as-free">
+  <div class="as-stat gold"><b>270<small>days</small></b><span class="as-k">Out ahead</span><span class="as-d">About nine months of award dates, so you can plan the big trip early.</span></div>
+  <div class="as-stat gold"><b>6<small>am</small></b><span class="as-k">Fresh every morning</span><span class="as-d">Refreshed daily by about 6am Hawaiʻi time, before most people check.</span></div>
+  <div class="as-stat"><b>1<small>screen</small></b><span class="as-k">Every Hawaiʻi route</span><span class="as-d">Saver space to and from the islands, laid out by date and value.</span></div>
+  <div class="as-stat"><b>Filter</b><span class="as-k">By who flies it</span><span class="as-d">See whether Alaska or Hawaiian operates the flight. Alaska's site will not show you that.</span></div>
+ </div>
+
+ <!-- Explainer video. Paste the unlisted YouTube link or ID into data-video and it appears. Empty = hidden. -->
+ <div class="as-sec as-free" id="as-tour" data-video="" hidden>
+  <h2>See it in action</h2>
+  <p class="as-sub">A quick walk through how I use the calendar to find saver seats out of Hawaiʻi.</p>
+  <div class="as-video"></div>
+ </div>
+
+ <div class="as-sec as-free">
+  <h2>This is what PRO members opened this morning</h2>
+ </div>
  <div class="atmos-gate" id="atmosGate">
   <div class="atmos-prev" aria-hidden="true"><img src="https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/05d2099a-9a2d-4b82-90e2-6e8724ddcfb0/Screenshot+2026-10-14+at+9.09.29%E2%80%AFAM.png?content-type=image%2Fpng" alt="" loading="lazy" decoding="async"></div>
   <div class="atmos-lock"><div class="lk">
-   <h3>Atmos Award Calendar is a paid feature</h3>
-   <p>Unlock every saver award date to and from Hawaiʻi, color coded by value.</p>
+   <h3>Unlock the full calendar</h3>
+   <ul>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>About 270 days of saver award dates, color coded by value</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Refreshed every morning by about 6am Hawaiʻi time</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Filter by the airline actually flying it</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deals Search and Points Explorer included</span></li>
+   </ul>
    <button type="button" class="btn coral" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock for $9.99/mo &rarr;</button>
+   <small>Cancel any time in one click.</small>
   </div></div>
  </div>
  <div class="atmos-open" id="atmosOpen">
@@ -528,11 +606,36 @@ html.ms-ready .hrt-boot{display:none}
   </div>
   <div class="atmos-frame" id="atmosFrame"><iframe id="atmosIframe" title="Atmos Award Calendar" loading="lazy"></iframe></div>
  </div>
+
+ <div class="as-sec as-free">
+  <h2>Why it saves you hours</h2>
+  <div class="as-vs">
+   <div class="as-col old"><h3>Searching on your own</h3><ul>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg><span>One date at a time, one route at a time</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg><span>No way to see which airline is really flying it</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg><span>Easy to miss the cheap day that opened overnight</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg><span>Hours of clicking to plan one family trip</span></li>
+   </ul></div>
+   <div class="as-col new"><h3>With HRT PRO</h3><ul>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>About 270 days of saver space on one screen</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Filter by operating airline in one tap</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Fresh every morning, so new openings show up fast</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Find the dates in minutes, then book on the airline's site</span></li>
+   </ul></div>
+  </div>
+ </div>
+
+ <div class="as-sec as-free"><h2>What you get</h2></div>
  <div class="tips">
   <div class="tool t1"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><h3>Deals Calendar</h3><p>Saver award space by date for Hawaiʻi routes, color coded so the best days jump out.</p></div>
   <div class="tool t2"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><h3>Deals Search</h3><p>Pick a route and see every open date rated great, decent or high at a glance.</p></div>
   <div class="tool t3"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/></svg></div><h3>Points Explorer</h3><p>Enter your balance and see where you can fly, plotted on the map.</p></div>
   <div class="tool t4"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div><h3>Updated daily</h3><p>Fresh award space every morning, so you see openings before they are gone.</p></div>
+ </div>
+
+ <div class="as-close as-free">
+  <div><h3>One good saver date can be worth more than a year of PRO.</h3><p>$9.99 a month, cancel any time. Award seats go fast, so the sooner you see them, the better your odds.</p></div>
+  <button type="button" class="btn coral" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock HRT PRO &rarr;</button>
  </div>
 </div>
 </section>
@@ -770,6 +873,23 @@ html.ms-ready .hrt-boot{display:none}
 
 <script src="assets/kamaaina.js"></script>
 <script src="assets/hrt-quiz.js"></script>
+<script>
+/* Atmos explainer video: loads YouTube only when tapped */
+(function(){
+ var box=document.getElementById("as-tour"); if(!box) return;
+ var raw=(box.getAttribute("data-video")||"").trim();
+ var m=raw.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); var id=m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(raw)?raw:"");
+ if(!id) return;
+ box.hidden=false; var link=document.querySelector("[data-astour]"); if(link) link.hidden=false;
+ var v=box.querySelector(".as-video");
+ var b=document.createElement("button"); b.type="button"; b.setAttribute("aria-label","Play the Atmos Award Calendar tour");
+ b.style.backgroundImage="url('https://i.ytimg.com/vi/"+id+"/hqdefault.jpg')";
+ b.innerHTML='<span class="as-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch the tour</span>';
+ b.addEventListener("click",function(){ v.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&modestbranding=1" title="Atmos Award Calendar tour" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>'; });
+ v.appendChild(b);
+ if(link) link.addEventListener("click",function(e){ e.preventDefault(); box.scrollIntoView({behavior:"smooth",block:"start"}); });
+})();
+</script>
 <script src="assets/atmos-status.js"></script>
 <script src="assets/atmos-communities.js"></script>
 <script src="data/wallet-catalog.js"></script>
