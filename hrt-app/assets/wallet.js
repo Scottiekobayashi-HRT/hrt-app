@@ -57,6 +57,15 @@
     var d = clampD(y);
     return { y: y, m: o.m, d: d, exact: true, days: dayNum(y, o.m, d) - dayNum(t.y, t.m, t.d) };
   }
+  /* Optional "fee posts on" date (MM-DD), when the bank bills the fee. Next one on or after today. */
+  function nextFeeDate(entry, today) {
+    var m = /^(\d{2})-(\d{2})$/.exec(entry && entry.feeDate || "");
+    if (!m) return null;
+    var t = today || todayParts(), mo = +m[1], d = +m[2], y = t.y;
+    var dd = function (yy) { return Math.min(d, daysInMonth(yy, mo)); };
+    if (dayNum(y, mo, dd(y)) < dayNum(t.y, t.m, t.d)) y++;
+    return { y: y, m: mo, d: dd(y), days: dayNum(y, mo, dd(y)) - dayNum(t.y, t.m, t.d) };
+  }
   function isFuture(opened, today) {
     var o = parseOpened(opened), t = today || todayParts();
     if (!o) return false;
@@ -202,8 +211,18 @@
     return p;
   }
 
+  /* A tick (true) or an amount at least the full credit means used. A smaller
+     amount means part used: still open, with the rest left to use. */
+  function usedValue(entry, b, period) {
+    return period && entry.used && entry.used[b.id] ? entry.used[b.id][period.key] : undefined;
+  }
   function isUsed(entry, b, period) {
-    return !!(period && entry.used && entry.used[b.id] && entry.used[b.id][period.key]);
+    var v = usedValue(entry, b, period);
+    return v === true || (typeof v === "number" && v > 0 && v >= b.amount);
+  }
+  function partUsed(entry, b, period) {
+    var v = usedValue(entry, b, period);
+    return typeof v === "number" && v > 0 && v < b.amount ? v : 0;
   }
 
   /* Drop ticks older than last year so the stored wallet stays small. */
@@ -247,7 +266,9 @@
       (byCard[e.cardId] || []).forEach(function (b) {
         var p = perkPeriod(b, e.opened, today);
         var next = b.type === "bonus" && b.resets === "anniversary" ? nextRenewal(e.opened, today) : null;
-        out.push({ entry: e, card: cards[e.cardId], perk: b, period: p, used: isUsed(e, b, p), nextArrives: next });
+        var part = partUsed(e, b, p);
+        out.push({ entry: e, card: cards[e.cardId], perk: b, period: p, used: isUsed(e, b, p), part: part,
+          left: Math.round((b.amount - part) * 100) / 100, nextArrives: next });
       });
     });
     return out;
@@ -275,8 +296,39 @@
     expiringSoon(perks, 100000).forEach(function (r) {
       (r.period.days <= SOON_PERK_DAYS ? g[0] : r.period.days <= qDays ? g[1] : g[2]).rows.push(r);
     });
-    g.forEach(function (x) { x.usd = x.rows.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0); });
+    g.forEach(function (x) { x.usd = x.rows.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.left : 0); }, 0); });
     return g.filter(function (x) { return x.rows.length; });
+  }
+
+  /* Everything with a date in the next `horizon` days, soonest first. Credits
+     ending the same day are grouped. Pure. */
+  function importantDates(wallet, catalog, today, horizon) {
+    var t = today || todayParts(), H = horizon || 90, out = [], s = summarize(wallet, catalog, t), perks = perkRows(wallet, catalog, t);
+    var add = function (date, days, kind, text, id, usd) { if (days >= 0 && days <= H) out.push({ date: date, days: days, kind: kind, text: text, id: id || null, usd: usd || 0 }); };
+    s.rows.forEach(function (r) {
+      if (!r.card) return;
+      if (r.hasFee && r.renewal) add({ y: r.renewal.y, m: r.renewal.m, d: r.renewal.d || 1 }, r.renewal.days, "renew",
+        shortName(r.card.name) + " renews, " + money(r.card.fee) + " fee" + (r.renewal.exact ? "" : " (some time this month)"), r.entry.id);
+      var fd = r.hasFee ? nextFeeDate(r.entry, t) : null;
+      if (fd) add(fd, fd.days, "fee", shortName(r.card.name) + " annual fee posts (" + money(r.card.fee) + ")", r.entry.id);
+      var bs = bonusState(r.entry, t);
+      if (bs && !bs.met && !bs.missed) add(bs.by, bs.days, "bonus", "Spend " + money(bs.left) + " more on " + shortName(r.card.name) + " for the welcome bonus", r.entry.id);
+    });
+    var byDay = {};
+    perks.forEach(function (r) {
+      if (!r.period || r.used || r.period.days < 0 || r.period.days > H) return;
+      if (r.perk.type === "activation") { add(r.period.end, r.period.days, "activate", "Activate " + shortName(r.card.name) + " 5% categories", r.entry.id); return; }
+      var k = r.period.end.y + "-" + r.period.end.m + "-" + r.period.end.d;
+      (byDay[k] = byDay[k] || { date: r.period.end, days: r.period.days, rows: [] }).rows.push(r);
+    });
+    Object.keys(byDay).forEach(function (k) {
+      var g = byDay[k], usd = g.rows.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.left : 0); }, 0);
+      var text = g.rows.length === 1 ? shortName(g.rows[0].card.name) + " " + g.rows[0].perk.label + " ends" :
+        g.rows.length + " credits end (" + g.rows.slice(0, 3).map(function (r) { return r.perk.label; }).join(", ") + (g.rows.length > 3 ? " and more" : "") + ")";
+      add(g.date, g.days, "credit", text, g.rows.length === 1 ? g.rows[0].entry.id : null, usd);
+    });
+    var rank = { bonus: 0, activate: 1, fee: 2, renew: 3, credit: 4 };
+    return out.sort(function (a, b) { return a.days - b.days || rank[a.kind] - rank[b.kind]; });
   }
 
   /* Short names for tight spaces: "American Express Gold Card" -> "Amex Gold" */
@@ -318,7 +370,7 @@
     return {
       hasFee: hasFee, renewal: rn, renewSoon: !!(rn && rn.days <= SOON_DAYS),
       next: credits[0] || null, open: credits.length,
-      openUsd: credits.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0),
+      openUsd: credits.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0),
       activate: act
     };
   }
@@ -337,7 +389,7 @@
       out.push({ level: "hot", id: u.entry.id, text: shortName(u.card.name) + " " + u.perk.label + shortAmount(u.perk) + " expires " +
         (u.period.days === 0 ? "today" : u.period.days === 1 ? "tomorrow" : "in " + u.period.days + " days") });
     } else if (urgent.length > 1) {
-      var usd = urgent.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
+      var usd = urgent.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.left : 0); }, 0);
       var d0 = urgent[0].period.days;
       out.push({ level: "hot", id: null, text: (usd ? money(usd) + " in credits" : urgent.length + " credits") + " expire" +
         (d0 === 0 ? " today" : d0 === 1 ? " by tomorrow" : " within " + urgent[urgent.length - 1].period.days + " days") });
@@ -345,7 +397,8 @@
     // 2. annual fees coming due (30 days)
     s.rows.filter(function (r) { return r.hasFee && r.renewal && r.renewal.days <= 30; }).forEach(function (r) {
       out.push({ level: "warn", id: r.entry.id, text: shortName(r.card.name) + " renews " +
-        (r.renewal.days === 0 ? "today" : "in " + r.renewal.days + (r.renewal.days === 1 ? " day" : " days")) + ", " + money(r.card.fee) + " fee" });
+        (r.renewal.days === 0 ? "today" : "in " + r.renewal.days + (r.renewal.days === 1 ? " day" : " days")) + ", " + money(r.card.fee) + " fee" +
+        (nextFeeDate(r.entry, t) ? " posts around " + dayText(nextFeeDate(r.entry, t)) : "") });
     });
     // 2b. welcome bonus spend due (30 days)
     (wallet && wallet.cards || []).forEach(function (e) {
@@ -361,7 +414,7 @@
     // 4. otherwise, what is left to use this month
     if (!urgent.length) {
       var month = credits.filter(function (r) { return r.period.days <= 31; });
-      var mUsd = month.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
+      var mUsd = month.reduce(function (a, r) { return a + (r.perk.unit === "usd" ? r.left : 0); }, 0);
       if (mUsd) out.push({ level: "info", id: null, text: money(mUsd) + " in credits to use in the next " + (month[month.length - 1] ? "31 days" : "month") });
     }
     return out.slice(0, max || 3);
@@ -471,6 +524,8 @@
     { key: "drugstores", label: "Drugstores", groups: ["drugstores"], words: ["drugstore"] },
     { key: "ev", label: "EV charging", groups: ["ev"], words: ["ev charging"] },
     { key: "foreign", label: "Shopping abroad", groups: ["foreign"], words: [] },
+    { key: "online", label: "Online shopping", groups: ["online"], words: [],
+      tip: "Clicking through a shopping portal first, like Shop through Chase or Rakuten, can add extra points on top." },
     { key: "everyday", label: "Everything else", groups: ["everyday"], words: [] }
   ];
   /* Stores members type into "Which card should I use?". Each points at a
@@ -600,11 +655,18 @@
         var base = rows.filter(function (r) { return r.groups.indexOf("everyday") > -1; })[0];
         if (base) consider(base.rate, base);
       }
+      if (best && spendKey === "foreign" && card.ftf > 0) {
+        best.value -= card.ftf;
+        best.notes.unshift("Charges a " + card.ftf + "% foreign transaction fee, so it costs more than it earns abroad");
+      }
       if (best) out.push(best);
     });
     return out.sort(function (a, b) { return b.value - a.value || a.card.name.localeCompare(b.card.name); });
   }
-  function valueText(v) { var n = Math.round(v * 10) / 10; return "worth about " + (n % 1 ? n.toFixed(1) : n) + "% back"; }
+  function valueText(v) {
+    var n = Math.round(v * 10) / 10, a = Math.abs(n), t = a % 1 ? a.toFixed(1) : a;
+    return n < 0 ? "costs you about " + t + "% after the fee" : "worth about " + t + "% back";
+  }
 
   /* ============================== VIEW ============================== */
   var host, state = { wallet: null, error: null, editing: null, busy: false, msg: "", open: {}, showAllSoon: false };
@@ -664,8 +726,10 @@
       c("plat", "amex-platinum", "2024-03-15"), c("gold", "amex-gold", "2023-06-08"),
       c("csp", "chase-sapphire-preferred", "2021-11-20"), c("flex", "chase-freedom-flex", "2020-01"),
       c("vx", "capone-venture-x", "2022-11-02"), c("summit", "atmos-summit", "2025-08-20"),
-      c("ascent", "atmos-ascent", "2019-02", "Spouse's card")
+      c("ascent", "atmos-ascent", "2019-02")
     ] };
+    w.cards.forEach(function (k) { if (k.id === "ex-ascent" || k.id === "ex-flex") k.holder = "Leilani"; });
+    w.cards.forEach(function (k) { if (k.id === "ex-vx") k.feeDate = "11-28"; });
     var t = todayParts(), o = addDays(t, -40), csr = c("csr", "chase-sapphire-reserve", o.y + "-" + (o.m < 10 ? "0" : "") + o.m + "-" + (o.d < 10 ? "0" : "") + o.d);
     csr.bonus = { spend: 6000, months: 3, spent: 2350, reward: "100,000 points" };
     w.cards.splice(2, 0, csr);
@@ -737,6 +801,7 @@
       '<select id="wlYear" aria-label="Year opened">' + years + "</select></div>" +
       '<small class="wl-help">Month and year are enough. Add the day for an exact renewal date. Not sure, or not opened yet? Leave it blank.</small></div>' +
       '<label class="wl-lab">Next step (optional)<textarea id="wlNote" maxlength="500" rows="2" placeholder="e.g. Call Capital One in December to switch to the no-fee VentureOne">' + esc(entry && entry.note || "") + "</textarea></label>" +
+      feeDateFields(entry) +
       '<label class="wl-lab">Nickname (optional)<input id="wlNick" maxlength="40" placeholder="e.g. Business card, Spouse\'s card" value="' + esc(entry && entry.nickname || "") + '"></label>' +
       bonusFields(entry) +
       '<p class="wl-err" id="wlFormErr" role="alert"></p>' +
@@ -744,6 +809,15 @@
       '<button class="wl-btn" type="button" data-wl="cancel">Cancel</button></div></form>';
   }
 
+  function feeDateFields(entry) {
+    var m = /^(\d{2})-(\d{2})$/.exec(entry && entry.feeDate || ""), fm = m ? +m[1] : 0, fd = m ? +m[2] : 0;
+    var mo = '<option value="">Month</option>' + MONTHS.map(function (x, i) { return '<option value="' + (i + 1) + '"' + (fm === i + 1 ? " selected" : "") + ">" + x + "</option>"; }).join("");
+    var dy = '<option value="">Day</option>';
+    for (var d = 1; d <= 31; d++) dy += '<option value="' + d + '"' + (fd === d ? " selected" : "") + ">" + d + "</option>";
+    return '<div class="wl-lab">Annual fee posts on (optional)<div class="wl-date wl-date2"><select id="wlFMonth" aria-label="Fee month">' + mo + "</select>" +
+      '<select id="wlFDay" aria-label="Fee day">' + dy + "</select></div>" +
+      "<small class=\"wl-help\">Banks usually bill the fee on the first statement after your card's anniversary. Add it from last year's statement if you know it.</small></div>";
+  }
   function bonusFields(entry) {
     var b = entry && entry.bonus || null, mo = b ? b.months : 3, opts = "";
     [1, 2, 3, 4, 5, 6, 9, 12].forEach(function (n) { opts += '<option value="' + n + '"' + (n === mo ? " selected" : "") + ">" + n + (n === 1 ? " month" : " months") + "</option>"; });
@@ -789,12 +863,15 @@
     }
     var bn = readBonus();
     if (bn.err) return { err: bn.err };
+    var fm = +($("wlFMonth") ? $("wlFMonth").value : 0), fdy = +($("wlFDay") ? $("wlFDay").value : 0), fd = { val: "" };
+    if ((fm && !fdy) || (fdy && !fm)) return { err: "For the fee date, choose both the month and the day, or leave both blank." };
+    if (fm && fdy) { if (fdy > daysInMonth(2024, fm)) return { err: MONTHS[fm - 1] + " does not have " + fdy + " days." }; fd.val = (fm < 10 ? "0" : "") + fm + "-" + (fdy < 10 ? "0" : "") + fdy; }
     return { cardId: cardId, opened: opened, nickname: $("wlNick").value.trim().slice(0, 40), bonus: bn.bonus, custom: custom,
-      holder: $("wlHolder").value.trim().slice(0, 30), status: status, note: $("wlNote").value.trim().slice(0, 500) };
+      holder: $("wlHolder").value.trim().slice(0, 30), status: status, note: $("wlNote").value.trim().slice(0, 500), feeDate: fd.val };
   }
   /* Copy the optional fields onto a saved card, dropping empty ones. */
   function applyExtras(c, v) {
-    ["holder", "status", "note"].forEach(function (k) { if (v[k]) c[k] = v[k]; else delete c[k]; });
+    ["holder", "status", "note", "feeDate"].forEach(function (k) { if (v[k]) c[k] = v[k]; else delete c[k]; });
     if (v.custom) c.custom = v.custom;
   }
 
@@ -832,7 +909,7 @@
     var foot = b.note ? '<p class="wl-pk-note wl-clamp" data-wl="clamp">' + esc(b.note) + src + "</p>" :
       (src ? '<p class="wl-pk-note">' + src + "</p>" : "");
     return '<li class="wl-pk' + (r.used ? " done" : "") + '"><div class="wl-pk-main">' + head + when +
-      '<div class="wl-tags">' + perkTags(b, p) + "</div>" + foot + "</div>" + tick + "</li>";
+      partHtml(r) + '<div class="wl-tags">' + perkTags(b, p) + "</div>" + foot + "</div>" + tick + "</li>";
   }
   function rotatingLine(cardId) {
     var qs = quartersFor(catalog(), cardId), t = "";
@@ -875,7 +952,8 @@
     var rn = r.renewal, soon = r.hasFee && rn && rn.days <= SOON_DAYS;
     var feeLine = r.hasFee ? money(c.fee) + " a year" : "No annual fee";
     var opTxt = openedText(e.opened);
-    var renewLine = r.hasFee && rn ? "Renews " + esc(renewalText(rn)) : r.hasFee ? "Add the date you opened it to see when the fee renews" : opTxt ? "Opened " + esc(opTxt) : "Open date not added";
+    var fdx = r.hasFee ? nextFeeDate(e) : null;
+    var renewLine = r.hasFee && rn ? "Renews " + esc(renewalText(rn)) + (fdx ? ", fee posts around " + esc(dayText(fdx)) : "") : r.hasFee ? "Add the date you opened it to see when the fee renews" : opTxt ? "Opened " + esc(opTxt) : "Open date not added";
     var html = '<li class="wl-row' + (soon ? " wl-soon" : "") + '" data-entry="' + esc(e.id) + '"><div class="wl-rowtop">' +
       artHtml(c, "md") + '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
       '<span class="wl-sub">' + esc([e.holder ? e.holder + "\u2019s card" : "", c.issuer, e.nickname].filter(Boolean).join(" \u00b7 ")) + "</span>" +
@@ -957,14 +1035,25 @@
     return '<span class="wl-value">' + esc(t) + "</span>";
   }
 
+  /* "Used part of it": a small amount box under a dollar credit. */
+  function partHtml(r) {
+    var b = r.perk, p = r.period;
+    if (!p || r.used || b.unit !== "usd" || !(b.amount >= 5) || !{ credit: 1, discount: 1 }[b.type]) return "";
+    var key = r.entry.id + "|" + b.id + "|" + p.key, open = state.partOpen === key;
+    var line = r.part ? '<div class="wl-pk-part">Used ' + esc(money(r.part)) + " of " + esc(money(b.amount)) + ", <b>" + esc(money(r.left)) + " left</b></div>" : "";
+    if (!open) return line + '<button class="wl-partbtn" data-wl="part" data-k="' + esc(key) + '">' + (r.part ? "Change amount used" : "Used part of it") + "</button>";
+    return line + '<div class="wl-partform"><label>Amount used <span class="wl-dollar">$<input type="number" inputmode="decimal" min="0" step="0.01" data-wl-part value="' + (r.part || "") + '" placeholder="' + esc(String(Math.round(b.amount / 2))) + '"></span></label>' +
+      '<button class="wl-btn" data-wl="part-save" data-k="' + esc(key) + '" data-max="' + b.amount + '"' + (state.busy ? " disabled" : "") + ">Save</button>" +
+      '<button class="wl-link" data-wl="part-cancel">Cancel</button></div>';
+  }
   function creditItem(r) {
     var b = r.perk, p = r.period, lvl = p.days <= 7 ? " hot" : p.days <= 14 ? " warm" : "";
     return '<li class="wl-pk' + lvl + '"><div class="wl-pk-main"><div class="wl-pk-top"><b>' + esc(b.label) + "</b>" +
-      '<span class="wl-pk-amt">' + esc(b.unit === "usd" ? money(b.amount) : perkAmount(b)) + "</span></div>" +
+      '<span class="wl-pk-amt">' + esc(b.unit === "usd" ? money(r.part ? r.left : b.amount) + (r.part ? " left" : "") : perkAmount(b)) + "</span></div>" +
       '<div class="wl-pk-when">' + esc(shortName(r.card.name)) + (r.entry.nickname ? " (" + esc(r.entry.nickname) + ")" : "") + " &middot; " +
       (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) + (p.approx ? " or earlier" : "") +
       ' <span class="wl-pk-days' + lvl + '">' + esc(daysLeft(p.days)) + "</span></div>" +
-      (b.type === "activation" ? rotatingLine(b.card) : "") +
+      (b.type === "activation" ? rotatingLine(b.card) : "") + partHtml(r) +
       '<div class="wl-tags">' + perkTags(b, p) + "</div></div>" +
       '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
       '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
@@ -990,6 +1079,20 @@
       "</section>";
   }
 
+  function datesHtml(list) {
+    if (!list.length) return "";
+    var shown = state.showAllDates ? list : list.slice(0, 7);
+    var KIND = { renew: "Renewal", fee: "Annual fee", bonus: "Welcome bonus", activate: "Activate", credit: "Credits" };
+    return '<section class="wl-card wl-dates"><div class="wl-head"><h3 class="wl-h3">Important dates</h3><span class="wl-dimtxt">Next 90 days</span></div>' +
+      '<ol class="wl-dl">' + shown.map(function (x) {
+        return '<li class="wl-dli k-' + x.kind + '"><span class="wl-dlday"><b>' + x.date.d + "</b><span>" + SHORT_MONTHS[x.date.m - 1] + "</span></span>" +
+          '<span class="wl-dlbody"><span class="wl-dlkind">' + KIND[x.kind] + "</span><span class=\"wl-dltext\">" + esc(x.text) +
+          (x.usd ? ' <b class="wl-dlusd">' + esc(money(x.usd)) + "</b>" : "") + "</span></span>" +
+          '<span class="wl-dlwhen' + (x.days <= 7 ? " hot" : x.days <= 14 ? " warm" : "") + '">' + (x.days === 0 ? "Today" : x.days === 1 ? "Tomorrow" : "In " + x.days + " days") + "</span></li>";
+      }).join("") + "</ol>" +
+      (list.length > 7 ? '<button class="wl-perkbtn" data-wl="alldates">' + (state.showAllDates ? "Show fewer" : "Show all " + list.length) + "</button>" : "") + "</section>";
+  }
+
   function paint() { paintMain(); paintHome(); paintAlerts(); }
 
   /* ----- Dashboard home panel: totals and the next credits to use ----- */
@@ -1003,9 +1106,9 @@
       return;
     }
     if (!state.wallet) { homeHost.innerHTML = '<div class="wl-card wl-hm">' + head + '<p class="wl-hm-sub">Loading your wallet</p></div></div></div>'; return; }
-    var s = summarize(state.wallet, catalog());
+    var V = view(), s = summarize(V, catalog());
     if (!s.count) { homeHost.innerHTML = ""; return; } /* the summary card above invites them to start */
-    var perks = perkRows(state.wallet, catalog());
+    var perks = perkRows(V, catalog());
     var soon = expiringSoon(perks, SOON_PERK_DAYS);
     var html = '<div class="wl-hm-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' +
       '<a class="wl-link" href="#wallet" data-route="wallet">See all details</a></div>';
@@ -1052,6 +1155,32 @@
     }).join("") + "</div>";
   }
 
+  /* Family filter: show one person's cards, using "Whose card". Cards with no
+     name are the member's own ("You"). Only shown when 2 or more people. */
+  function holderOf(e) { return (e.holder || "").trim(); }
+  function holderList(w) {
+    var seen = {}, out = [];
+    (w && w.cards || []).forEach(function (e) { var h = holderOf(e); if (!seen[h]) { seen[h] = 1; out.push(h); } });
+    return out.sort(function (a, b) { return a === "" ? -1 : b === "" ? 1 : a.localeCompare(b); });
+  }
+  function view() {
+    var w = state.wallet;
+    if (!w || state.holder == null) return w;
+    if (holderList(w).indexOf(state.holder) < 0) { state.holder = null; return w; }
+    var o = {}; Object.keys(w).forEach(function (k) { o[k] = w[k]; });
+    o.cards = w.cards.filter(function (e) { return holderOf(e) === state.holder; });
+    return o;
+  }
+  function famHtml() {
+    var hs = holderList(state.wallet);
+    if (hs.length < 2) return "";
+    var chip = function (key, label) {
+      var on = key === null ? state.holder == null : state.holder === key;
+      return '<button class="wl-fam-b' + (on ? " on" : "") + '" data-wl="fam"' + (key === null ? "" : ' data-key="' + esc(key) + '"') + ' aria-pressed="' + on + '">' + esc(label) + "</button>";
+    };
+    return '<div class="wl-fam" role="group" aria-label="Whose cards">' + chip(null, "Everyone") +
+      hs.map(function (h) { return chip(h, h || "You"); }).join("") + "</div>";
+  }
   function exampleBanner() {
     return state.demo ? '<div class="wl-demo"><span><b>Example wallet.</b> Try anything; nothing here is saved.</span>' +
       '<button class="wl-btn" data-wl="demo-off">Use my own cards</button></div>' : "";
@@ -1083,7 +1212,7 @@
     }
     if (!k) return '<p class="wl-wc-foot">Type a store, or tap what you are buying.</p>';
     var sp = SPEND.filter(function (x) { return x.key === k; })[0];
-    var list = whichCard(state.wallet, catalog(), k, null, null, { visaOnly: st && st.visaOnly });
+    var list = whichCard(view(), catalog(), k, null, null, { visaOnly: st && st.visaOnly });
     var tip = st ? st.note : sp.tip, res = "";
     if (!list.length) {
       res = '<div class="wl-wc-res"><p class="wl-wc-why">' + (st && st.visaOnly ? "None of your cards are Visa, and " + esc(st.name) + " takes Visa only." : "None of your cards fit this.") + "</p></div>";
@@ -1123,7 +1252,7 @@
   function summaryHtml(where) {
     var home = where === "home";
     if (!state.wallet || state.error) return "";
-    var s = summarize(state.wallet, catalog());
+    var V = view(), s = summarize(V, catalog());
     var title = home ? "Your wallet" : "My Wallet";
     if (!s.count) {
       return '<section class="wl-sum wl-sum-empty" aria-label="' + title + '">' + exampleBanner() +
@@ -1132,13 +1261,13 @@
         '<div class="wl-sum-acts"><button class="wl-btn wl-gold" data-wl="' + (home ? "go-add" : "add") + '">Add your cards</button>' +
         '<button class="wl-btn wl-ghost" data-wl="demo">See an example</button></div></section>';
     }
-    var perks = perkRows(state.wallet, catalog());
+    var perks = perkRows(V, catalog());
     var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
     var soon = expiringSoon(perks, SOON_PERK_DAYS);
-    var due = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.perk.amount : 0); }, 0);
+    var due = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
     var later = expiringSoon(perks, 100000).filter(function (r) { return r.perk.unit === "usd"; });
-    var laterUsd = later.reduce(function (t, r) { return t + r.perk.amount; }, 0);
-    var alerts = topAlerts(state.wallet, catalog()).filter(function (a) { return a.level !== "info"; });
+    var laterUsd = later.reduce(function (t, r) { return t + r.left; }, 0);
+    var alerts = topAlerts(V, catalog()).filter(function (a) { return a.level !== "info"; });
     var nx = s.next;
     var stat = function (label, value, sub) {
       return '<div class="wl-sum-stat"><dt>' + label + "</dt><dd>" + value + (sub ? "<small>" + sub + "</small>" : "") + "</dd></div>";
@@ -1146,7 +1275,7 @@
     var html = '<section class="wl-sum" aria-label="' + title + '">' + exampleBanner() +
       '<div class="wl-sum-top"><h2 class="wl-sum-title">' + title + "</h2>" +
       (home ? '<a class="wl-btn wl-ghost" href="#wallet" data-route="wallet">Open My Wallet</a>'
-            : (state.editing ? "" : '<button class="wl-btn wl-ghost" data-wl="add">Add a card</button>')) + "</div>" +
+            : (state.editing ? "" : '<button class="wl-btn wl-ghost" data-wl="add">Add a card</button>')) + "</div>" + famHtml() +
       '<div class="wl-sum-hero">' +
       (due ? '<span class="wl-sum-big">' + esc(money(due)) + '</span><span class="wl-sum-cap">in credits to use in the next ' + SOON_PERK_DAYS + " days</span>"
            : laterUsd ? '<span class="wl-sum-big">' + esc(money(laterUsd)) + '</span><span class="wl-sum-cap">in credits left to use. Nothing ends in the next ' + SOON_PERK_DAYS + " days; the next one ends " + esc(dayText(later[0].period.end)) + "</span>"
@@ -1192,8 +1321,8 @@
       return;
     }
     if (!state.wallet) { host.innerHTML = '<div class="wl-card wl-empty"><p>Loading your wallet</p></div>'; return; }
-    var s = summarize(state.wallet, catalog());
-    var perks = perkRows(state.wallet, catalog());
+    var s = summarize(view(), catalog());
+    var perks = perkRows(view(), catalog());
     s.credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
     setStats(s);
     var editingEntry = state.editing && state.editing !== "new" ?
@@ -1207,6 +1336,7 @@
     } else if (s.count) {
       if (!state.editing) html += '<div class="wl-hm-grid wl-pg-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' + viewToggle() + "</div>" +
         tilesHtml(s, perks, cardView()) + whichHtml() + "</div>" + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
+      if (!state.editing) html += datesHtml(importantDates(view(), catalog()));
       html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Card details</h3></div>' +
         (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
         '<ul class="wl-list">' + s.rows.map(function (r) { return rowHtml(r, perks); }).join("") + "</ul></div>";
@@ -1246,6 +1376,17 @@
   }
 
   /* Tick or untick a perk for the current period. Uses the same safe save. */
+  function setUsedAmount(entryId, perkId, key, amt, full) {
+    save(function (w) {
+      w.cards.forEach(function (c) {
+        if (c.id !== entryId) return;
+        c.used = c.used || {};
+        c.used[perkId] = c.used[perkId] || {};
+        if (amt >= full) c.used[perkId][key] = true; else if (amt > 0) c.used[perkId][key] = Math.round(amt * 100) / 100; else delete c.used[perkId][key];
+        pruneUsed(c);
+      });
+    }, function () { state.partOpen = null; }, true);
+  }
   function setUsed(entryId, perkId, key, on) {
     save(function (w) {
       w.cards.forEach(function (c) {
@@ -1285,6 +1426,16 @@
     }
     if (act === "bonus-remove") { save(function (w) { w.cards.forEach(function (k) { if (k.id === id) delete k.bonus; }); }); return; }
     if (act === "view") { state.cardView = b.getAttribute("data-key") === "list" ? "list" : "grid"; try { localStorage.setItem("hrt-wl-view", state.cardView); } catch (e) {} paint(); return; }
+    if (act === "fam") { state.holder = b.hasAttribute("data-key") ? b.getAttribute("data-key") : null; state.showAllSoon = false; paint(); return; }
+    if (act === "alldates") { state.showAllDates = !state.showAllDates; paint(); return; }
+    if (act === "part") { state.partOpen = b.getAttribute("data-k"); paint(); var pi = document.querySelector("[data-wl-part]"); if (pi) try { pi.focus(); } catch (x) {} return; }
+    if (act === "part-cancel") { state.partOpen = null; paint(); return; }
+    if (act === "part-save") {
+      var inp2 = b.parentNode.querySelector("[data-wl-part]"), amt2 = inp2 ? +inp2.value : NaN, kk = (b.getAttribute("data-k") || "").split("|");
+      if (!(amt2 >= 0) || kk.length !== 3) { if (inp2) inp2.focus(); return; }
+      setUsedAmount(kk[0], kk[1], kk[2], amt2, +b.getAttribute("data-max"));
+      return;
+    }
     if (act === "ctab") { state.creditTab = b.getAttribute("data-key"); state.showAllSoon = false; paint(); return; }
     if (act === "allsoon") { state.showAllSoon = !state.showAllSoon; paint(); return; }
     if (act === "remove") {
@@ -1501,6 +1652,26 @@
       ".wl-tiles-list .wl-tl-body{flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:14px;row-gap:3px}",
       ".wl-tiles-list .wl-tl-name{flex:1 0 100%}.wl-tiles-list .wl-tl-pills{margin-top:0}",
       ".wl-tiles-list .wl-art-sm{width:64px}",
+      ".wl-fam{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}",
+      ".wl-sum .wl-fam-b{all:unset;box-sizing:border-box;cursor:pointer;min-height:36px;padding:0 14px;display:inline-flex;align-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.28);color:#e6eef6;font-size:13px;font-weight:700;-webkit-tap-highlight-color:transparent}",
+      ".wl-sum .wl-fam-b:hover{background:rgba(255,255,255,.1)}.wl-sum .wl-fam-b:focus-visible{outline:2px solid #f2b84b;outline-offset:2px}",
+      ".wl-sum .wl-fam-b.on{background:#f2b84b;border-color:#f2b84b;color:#14202e}",
+      ".wl-pk-part{font-size:12.5px;color:var(--text)}",
+      ".wl-partbtn{all:unset;cursor:pointer;align-self:flex-start;font-size:12px;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:2px;padding:2px 0}.wl-partbtn:hover{color:var(--text)}",
+      ".wl-partform{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px}.wl-partform label{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted)}",
+      ".wl-partform .wl-dollar input{width:96px}",
+      ".wl-date.wl-date2{grid-template-columns:1fr 1fr}",
+      ".wl-dates .wl-dimtxt{font-size:12.5px;color:var(--muted)}",
+      ".wl-dl{list-style:none;margin:0;padding:0}",
+      ".wl-dli{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.wl-dli:first-child{border-top:0}",
+      ".wl-dlday{flex:0 0 46px;height:46px;border-radius:10px;background:#1c3d5a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}",
+      ".wl-dlday b{font-size:17px;font-weight:800}.wl-dlday span{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#f2c766;margin-top:3px}",
+      ".wl-dlbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}",
+      ".wl-dlkind{font-size:11.5px;font-weight:800;color:var(--muted)}.wl-dltext{font-size:13.5px;line-height:1.4;color:var(--text)}.wl-dlusd{font-weight:800}",
+      ".k-bonus .wl-dlday,.k-activate .wl-dlday{background:#b4580f}",
+      ".wl-dlwhen{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}",
+      ".wl-dlwhen.warm{color:#8a4a10}.wl-dlwhen.hot{color:#a3410f}",
+      "[data-theme=dark] .wl-dlwhen.warm,[data-theme=dark] .wl-dlwhen.hot{color:#f2b84b}",
       ".wl-hm-grid>.wl-card{margin-bottom:0}.wl-pg-grid{margin-bottom:14px}",
       ".wl-soon-home .wl-cr-total b{font-size:24px}.wl-soon-home .wl-ctab{padding:7px 10px}",
       "@media (max-width:1060px){.wl-hm-grid{grid-template-columns:minmax(0,1fr)}}",
@@ -1590,7 +1761,7 @@
   }
 
   window.HRT_WALLET = {
-    _test: { creditGroups: creditGroups, findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
+    _test: { importantDates: importantDates, nextFeeDate: nextFeeDate, holderList: holderList, valueTextX: function (v) { return valueText(v); }, creditGroups: creditGroups, findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,

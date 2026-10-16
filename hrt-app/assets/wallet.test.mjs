@@ -321,6 +321,46 @@ const vxOnly = { v: 1, points: [], cards: [{ id: 'v', cardId: 'capone-venture-x'
 const cg2 = T.creditGroups(T.perkRows(vxOnly, CAT, { y: 2026, m: 10, d: 13 }), { y: 2026, m: 10, d: 13 });
 ok('a credit ending next year is under Later', cg2.some(g => g.key === 'later' && g.rows.some(r => r.perk.id === 'travel')));
 
+// --- partial use ---
+const pd = { y: 2026, m: 10, d: 15 };
+const partW = { v: 1, points: [], cards: [{ id: 'p', cardId: 'amex-platinum', opened: '2024-03-15', used: { resy: { '2026-Q4': 40 }, uber: { '2026-10': 15 } } }] };
+const pr = T.perkRows(partW, CAT, pd);
+const resyR = pr.find(r => r.perk.id === 'resy'), uberR = pr.find(r => r.perk.id === 'uber');
+ok('part used credit stays open with the rest left', !resyR.used && resyR.part === 40 && resyR.left === 60);
+ok('an amount equal to the credit counts as used', uberR.used);
+const pg2 = T.creditGroups(pr, pd).find(g => g.key === 'quarter');
+ok('credits left total counts only what is left', pg2.rows.some(r => r.perk.id === 'resy') && pg2.usd === pg2.rows.reduce((a, r) => a + (r.perk.unit === 'usd' ? r.left : 0), 0));
+
+// --- fee date ---
+ok('fee date later this year', JSON.stringify(T.nextFeeDate({ feeDate: '11-28' }, pd)) === '{"y":2026,"m":11,"d":28,"days":44}');
+ok('fee date already passed rolls to next year', T.nextFeeDate({ feeDate: '01-05' }, pd).y === 2027);
+ok('no fee date, nothing', T.nextFeeDate({}, pd) === null);
+
+// --- important dates ---
+const idW = { v: 1, points: [], cards: [
+  { id: 'vx', cardId: 'capone-venture-x', opened: '2022-11-02', feeDate: '11-28' },
+  { id: 'r', cardId: 'chase-sapphire-reserve', opened: '2026-09-03', bonus: { spend: 6000, months: 3, spent: 2350 } },
+  { id: 'f', cardId: 'chase-freedom-flex', opened: '2020-01' }] };
+const idl = T.importantDates(idW, CAT, pd);
+ok('dates are in order', idl.every((x, i) => !i || idl[i - 1].days <= x.days));
+ok('renewal, fee, bonus and activation all appear', ['renew', 'fee', 'bonus', 'activate', 'credit'].every(k => idl.some(x => x.kind === k)), idl.map(x => x.kind).join());
+ok('credits ending the same day are grouped', idl.filter(x => x.kind === 'credit' && x.date.m === 10 && x.date.d === 31).length === 1);
+ok('nothing beyond 90 days', idl.every(x => x.days <= 90));
+
+// --- foreign fees and online shopping ---
+const ffW = { v: 1, points: [], cards: [{ id: 'f', cardId: 'chase-freedom-unlimited', opened: '2020-01' }, { id: 'v', cardId: 'capone-venture', opened: '2020-01' }] };
+const CATF = { ...CAT, cards: CAT.cards.map(c => c.id === 'chase-freedom-unlimited' ? { ...c, ftf: 3 } : c) };
+const fw = T.whichCard(ffW, CATF, 'foreign');
+const fu = fw.find(x => x.card.id === 'chase-freedom-unlimited');
+ok('Freedom Unlimited abroad is marked down for its fee', fu && /foreign transaction fee/.test(fu.notes[0]) && fw[0].card.id === 'capone-venture');
+ok('a negative value reads as a cost', T.valueTextX(-1.5) === 'costs you about 1.5% after the fee');
+ok('online shopping is a choice', T.SPEND.some(x => x.key === 'online') && T.whichCard(ffW, CAT, 'online').length === 2);
+
+// --- family filter ---
+ok('people are listed, You first', JSON.stringify(T.holderList({ cards: [{ holder: 'Leilani' }, {}, { holder: ' Leilani ' }] })) === '["","Leilani"]');
+const exW = T.exampleWallet();
+ok('example wallet has two people', T.holderList(exW).length === 2);
+
 // --- card art ---
 ok('card art links are https only', CAT.cards.every(c => !c.art || /^https:\/\/[^\s"'<>()\\]+$/.test(c.art)));
 const artA = T.artHtml({ issuer: 'Chase', name: 'X', art: 'https://img.example/a.png?x=1&y=2' }, 'sm');

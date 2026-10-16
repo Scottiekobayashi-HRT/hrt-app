@@ -40,7 +40,7 @@ RESETS = {"calendar", "anniversary", "unclear", "application date", "n/a"}
 CONFIDENCE = {"confirmed", "assumed", "unverified"}
 UNITS = {"usd", "points", "passes", "certificates"}
 FEE_BASIS = {"anniversary", "n/a"}
-GROUPS = {"everyday", "dining", "grocery", "gas", "ev", "transit", "streaming", "drugstores", "flights",
+GROUPS = {"online", "everyday", "dining", "grocery", "gas", "ev", "transit", "streaming", "drugstores", "flights",
           "hotels", "car-rental", "travel", "foreign", "entertainment", "business", "promo", "rotating", "status"}
 QUARTER_RE = re.compile(r"^\d{4}-Q[1-4]$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -132,6 +132,16 @@ def build_cards(ws):
         }
         if art:
             card["art"] = art
+        ff = text(r.get("foreign_fee", "")).replace("%", "").strip()
+        if ff:
+            try:
+                ffv = float(ff)
+            except ValueError:
+                raise SheetError(f"{where}: foreign_fee '{ff}' must be a percent like 3 or 0")
+            if not 0 <= ffv <= 10:
+                raise SheetError(f"{where}: foreign_fee must be between 0 and 10")
+            if ffv:
+                card["ftf"] = ffv
         cards.append(card)
     if not cards:
         raise SheetError("Cards tab has no cards")

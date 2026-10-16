@@ -86,6 +86,7 @@
         if (cu.fee != null && !(typeof cu.fee === "number" && cu.fee >= 0 && cu.fee <= 10000)) throw fail("INVALID", "card " + i + " custom fee");
       }
       if (c.nickname != null && (typeof c.nickname !== "string" || c.nickname.length > 40)) throw fail("INVALID", "card " + i + " nickname");
+      if (c.feeDate != null && (typeof c.feeDate !== "string" || !/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(c.feeDate))) throw fail("INVALID", "card " + i + " feeDate");
       if (c.bonus != null) {
         var bn = c.bonus;
         if (typeof bn !== "object" || Array.isArray(bn)) throw fail("INVALID", "card " + i + " bonus");

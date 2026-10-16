@@ -112,6 +112,12 @@ ok('bonus with negative spent refused', await code(S.update(d => { d.cards[0].bo
 ok('bonus with long reward refused', await code(S.update(d => { d.cards[0].bonus.reward = 'x'.repeat(41); })) === 'INVALID');
 ok('refused bonus writes nothing', f.writes === 1);
 
+// 11d. fee date
+f = fakeMs({ wallet: { v: 1, cards: [card('a')], points: [] } });
+await S.update(d => { d.cards[0].feeDate = '11-28'; });
+ok('fee date saves', f.stored.wallet.cards[0].feeDate === '11-28');
+ok('bad fee date refused', await code(S.update(d => { d.cards[0].feeDate = '13-01'; })) === 'INVALID');
+
 // 12. size limit
 f = fakeMs({ big: 'x'.repeat(S._test.MAX_BYTES), wallet: { v: 1, cards: [], points: [] } });
 ok('over the size limit refused', await code(S.update(d => { d.cards.push(card('a')); })) === 'TOO_BIG' && f.writes === 0);
