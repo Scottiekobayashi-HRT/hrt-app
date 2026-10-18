@@ -129,5 +129,15 @@ const MG = T.migratePrefs(P({ dests: ['LAX', 'NRT'], cabin: 'business' }));
 ok('old city picks become routes', JSON.stringify(MG.routes) === JSON.stringify([{ o: 'HNL', d: 'LAX', cabins: ['business'] }, { o: 'HNL', d: 'NRT', cabins: ['business'] }]), JSON.stringify(MG.routes));
 ok('saved routes survive cleaning', P({ routes: [{ o: 'HNL', d: 'LAX', cabins: ['first'] }] }).routes[0].cabins[0] === 'first');
 
+// ---- nonstop filter ----
+const nsE = T.entriesFrom({ deals: [{ origin: 'HNL', dest: 'SEA', city: 'Seattle', cabin: 'economy', dates: [{ date: '2026-11-01', miles: 12500, nonstop: false }, { date: '2026-11-05', miles: 15000, nonstop: true }, { date: '2026-11-09', miles: 17500, nonstop: true }] }] });
+const nsA = T.applyRoutes(nsE, T.cleanRoutes([{ o: 'HNL', d: 'SEA', cabins: ['economy'], nonstop: true }]), '2026-10-16');
+ok('nonstop only keeps nonstop dates', nsA[0].count === 2 && nsA[0].miles === 15000 && nsA[0].nonstopOnly === true, JSON.stringify(nsA[0].dates));
+const nsB = T.applyRoutes(nsE, T.cleanRoutes([{ o: 'HNL', d: 'SEA', cabins: ['economy'] }]), '2026-10-16');
+ok('without the filter all dates count', nsB[0].count === 3 && nsB[0].miles === 12500 && !nsB[0].nonstopOnly);
+ok('nonstop flag saved only when true', JSON.stringify(T.cleanRoutes([{ o: 'HNL', d: 'SEA', nonstop: 'yes' }])) === JSON.stringify([{ o: 'HNL', d: 'SEA', cabins: ['economy'] }]));
+const nsC = T.applyRoutes(T.entriesFrom({ deals: [{ origin: 'HNL', dest: 'SEA', city: 'Seattle', cabin: 'economy', dates: [{ date: '2026-11-01', miles: 12500 }] }] }), T.cleanRoutes([{ o: 'HNL', d: 'SEA', nonstop: true }]), '2026-10-16');
+ok('nonstop only with no nonstop dates shows the empty card', nsC[0].none === true);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

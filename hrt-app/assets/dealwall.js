@@ -554,7 +554,9 @@
       var k = r.o + r.d; if (seen[k]) return; seen[k] = 1;
       var cabins = (Array.isArray(r.cabins) ? r.cabins : []).filter(function (c) { return /^(economy|business|first)$/.test(c); });
       cabins = CABINS.map(function (c) { return c[0]; }).filter(function (c) { return cabins.indexOf(c) >= 0; });
-      out.push({ o: r.o, d: r.d, cabins: cabins.length ? cabins : ["economy"] });
+      var keep = { o: r.o, d: r.d, cabins: cabins.length ? cabins : ["economy"] };
+      if (r.nonstop === true) keep.nonstop = true;
+      out.push(keep);
     });
     return out.slice(0, 24);
   }
@@ -566,11 +568,11 @@
     routes.forEach(function (r) {
       r.cabins.forEach(function (cab) {
         var e = entries.filter(function (x) { return x.origin === r.o && x.dest === r.d && x.cabin === cab; })[0];
-        var dates = e ? e.dates.filter(function (t) { return String(t && t.date || "") >= today; }) : [];
+        var dates = e ? e.dates.filter(function (t) { return String(t && t.date || "") >= today && (!r.nonstop || t.nonstop); }) : [];
         var miles = Math.min.apply(null, dates.map(function (t) { return t.miles || Infinity; }));
         out.push({ origin: r.o, dest: r.d, city: e ? e.city : placeName(r.d, entries), cabin: cab,
           image: e ? e.image : (entries.filter(function (x) { return x.dest === r.d && x.image; })[0] || {}).image || "",
-          dates: dates, count: dates.length, none: !dates.length,
+          dates: dates, count: dates.length, none: !dates.length, nonstopOnly: !!r.nonstop,
           miles: isFinite(miles) ? miles : 0, soonest: dates.map(function (t) { return t.date; }).sort()[0],
           nonstop: dates.some(function (t) { return t.nonstop; }) });
       });
@@ -605,6 +607,10 @@
     ".dwp-route{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2,#f7f9fb)}",
     ".dwp-rname{display:flex;flex-direction:column;min-width:150px;flex:1}.dwp-rname b{font-size:14px;color:var(--text)}.dwp-rname span{font-size:11.5px;color:var(--muted)}",
     ".dwp-cabs{display:flex;flex-wrap:wrap;gap:6px}",
+    ".dwp-chip.dwp-ns{margin-left:6px;border-style:dashed}.dwp-chip.dwp-ns.on{border-style:solid;background:#1f6b45;border-color:#1f6b45;color:#fff}",
+    "[data-theme=dark] .dwp-chip.dwp-ns.on{background:#3fce7f;border-color:#3fce7f;color:#0a1a12}",
+    ".dw-chip.ns{color:#1c6b40;border-color:color-mix(in srgb,#3fce7f 38%,var(--line))}",
+    "@media (max-width:640px){.dwp-chip.dwp-ns{margin-left:0}}",
     ".dwp-rm{appearance:none;font:inherit;cursor:pointer;background:none;border:0;color:var(--muted);font-size:12px;font-weight:700;min-height:36px;padding:0 4px}.dwp-rm:hover{color:var(--peak,#d64541)}",
     ".dwp-addrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}",
     ".dwp-field{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:700;color:var(--muted)}",
@@ -689,7 +695,7 @@
       exp.innerHTML = ""; exp.classList.add("on");
       var h = el("div", "dw-exph"), ht = el("div");
       ht.appendChild(el("b", null, d.origin + " → " + d.city + ", " + (CAB_NAME[d.cabin] || d.cabin)));
-      ht.appendChild(el("span", null, d.count + (d.count === 1 ? " deal date" : " deal dates") + ", from " + num(d.miles) + " points one way"));
+      ht.appendChild(el("span", null, d.count + (d.count === 1 ? " deal date" : " deal dates") + (d.nonstopOnly ? " (nonstop only)" : "") + ", from " + num(d.miles) + " points one way"));
       h.appendChild(ht);
       var x = el("button", "dw-x", "×"); x.type = "button"; x.setAttribute("aria-label", "Close"); x.addEventListener("click", closeExp);
       h.appendChild(x); exp.appendChild(h);
@@ -741,7 +747,7 @@
         card.appendChild(ph);
         var body = el("div", "dw-body");
         if (d.none) {
-          body.appendChild(el("div", "dwp-none", "No deal dates right now"));
+          body.appendChild(el("div", "dwp-none", d.nonstopOnly ? "No nonstop deal dates right now" : "No deal dates right now"));
           body.appendChild(el("div", "dwp-none-s", "We check every morning. It shows up here when space opens."));
         } else {
           var pts = el("div", "dw-pts", num(d.miles) + " pts");
@@ -750,7 +756,8 @@
           var meta = el("div", "dw-meta");
           meta.appendChild(el("span", "dw-chip ok", d.count + (d.count === 1 ? " date" : " dates")));
           meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
-          if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
+          if (d.nonstopOnly) meta.appendChild(el("span", "dw-chip ns", "nonstop only"));
+          else if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
           body.appendChild(meta);
         }
         card.appendChild(body);
@@ -769,7 +776,7 @@
       var n = prefs.routes.length;
       subEl.textContent = tracking ? "Tracking " + n + (n === 1 ? " route" : " routes") : "Top deals today";
       sum.textContent = tracking
-        ? prefs.routes.map(function (r) { return r.o + "→" + r.d + " " + r.cabins.map(function (c) { return CAB_NAME[c]; }).join("/"); }).join(" · ")
+        ? prefs.routes.map(function (r) { return r.o + "→" + r.d + " " + r.cabins.map(function (c) { return CAB_NAME[c]; }).join("/") + (r.nonstop ? ", nonstop" : ""); }).join(" · ")
         : "Showing today's best economy deals. Tap Customize to track your own routes.";
       if (rail.scrollLeft) rail.scrollLeft = 0;
     }
@@ -783,7 +790,7 @@
     }
     function change(fn) { fn(); prefs = cleanPrefs(prefs); savePrefs(prefs); drawPanel(); drawCards(); }
 
-    var pickFrom = null, pickTo = null, pickCabins = null;
+    var pickFrom = null, pickTo = null, pickCabins = null, pickNonstop = false;
     function drawPanel() {
       var RC = routeChoices(entries);
       panel.innerHTML = "";
@@ -805,6 +812,8 @@
             if (k >= 0) { if (rr.cabins.length > 1) rr.cabins.splice(k, 1); } else rr.cabins.push(c[0]);
           }); }));
         });
+        var ns = chip("Nonstop only", !!r.nonstop, function () { change(function () { var rr = prefs.routes[idx]; if (rr.nonstop) delete rr.nonstop; else rr.nonstop = true; }); });
+        ns.classList.add("dwp-ns"); cabs.appendChild(ns);
         row.appendChild(cabs);
         var x = el("button", "dwp-rm", "Remove"); x.type = "button"; x.setAttribute("aria-label", "Stop tracking " + r.o + " to " + r.d);
         x.addEventListener("click", function () { change(function () { prefs.routes.splice(idx, 1); }); });
@@ -847,11 +856,13 @@
               drawPanel();
             }, false, info.cabins[c[0]] ? "" : "no deals now"));
           });
+          var nsc = chip("Nonstop only", pickNonstop, function () { pickNonstop = !pickNonstop; drawPanel(); });
+          nsc.classList.add("dwp-ns"); cr.appendChild(nsc);
           add.appendChild(cr);
           var have = prefs.routes.some(function (r) { return r.o === pickFrom && r.d === pickTo; });
           var go = el("button", "dwp-done dwp-addbtn", have ? "Already tracking" : "Track " + pickFrom + " → " + pickTo);
           go.type = "button"; if (have) go.disabled = true;
-          go.addEventListener("click", function () { var cabs = pickCabins.slice(); pickCabins = cabs; change(function () { prefs.routes.push({ o: pickFrom, d: pickTo, cabins: cabs }); }); });
+          go.addEventListener("click", function () { var cabs = pickCabins.slice(); pickCabins = cabs; change(function () { prefs.routes.push(pickNonstop ? { o: pickFrom, d: pickTo, cabins: cabs, nonstop: true } : { o: pickFrom, d: pickTo, cabins: cabs }); }); });
           add.appendChild(go);
           var back = (RC.byOrigin[pickTo] || []).some(function (d) { return d.dest === pickFrom; });
           var haveBack = prefs.routes.some(function (r) { return r.o === pickTo && r.d === pickFrom; });
@@ -860,7 +871,8 @@
             rb.addEventListener("click", function () {
               var mineR = prefs.routes.filter(function (r) { return r.o === pickFrom && r.d === pickTo; })[0];
               var cabs = (mineR ? mineR.cabins : (pickCabins || ["economy"])).slice();
-              change(function () { prefs.routes.push({ o: pickTo, d: pickFrom, cabins: cabs }); });
+              var nsr = mineR ? !!mineR.nonstop : pickNonstop;
+              change(function () { prefs.routes.push(nsr ? { o: pickTo, d: pickFrom, cabins: cabs, nonstop: true } : { o: pickTo, d: pickFrom, cabins: cabs }); });
             });
             add.appendChild(rb);
           }
