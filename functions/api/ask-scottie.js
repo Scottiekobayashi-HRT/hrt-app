@@ -122,6 +122,147 @@ async function loadCatalog(env, request) {
   return catalogCache;
 }
 
+/* ------------------- transfer partners, bonuses, booking ------------------- */
+
+/* The transfer partner table lives in the dashboard (assets/app.js, the
+   Transfer Bonuses calculator) so there is one source of truth. Read it from
+   the deployed file. Cached per isolate. */
+let partnersCache = null;
+async function loadPartners(env, request) {
+  if (partnersCache) return partnersCache;
+  try {
+    const t = await (await env.ASSETS.fetch(new URL("/assets/app.js", request.url))).text();
+    const a = t.indexOf("var PROGRAMS = {");
+    const b = t.indexOf("\n };", a);
+    if (a < 0 || b < 0) throw new Error("partner table not found");
+    const body = t.slice(a + "var PROGRAMS = ".length, b + 3).replace(/([{,]\s*)(name|p):/g, '$1"$2":');
+    partnersCache = JSON.parse(body);
+  } catch (e) {
+    console.log("ask-scottie partners", e && e.message);
+    partnersCache = {};
+  }
+  return partnersCache;
+}
+
+/* Live transfer bonuses from the daily bonus tracker. Cached about an hour. */
+const BONUS_FEED = "https://raw.githubusercontent.com/Scottiekobayashi-HRT/hrt-bonuses/main/bonuses.json";
+let bonusCache = null, bonusAt = 0;
+async function loadBonuses() {
+  if (bonusCache && Date.now() - bonusAt < 3600000) return bonusCache;
+  try {
+    const r = await fetch(BONUS_FEED, { cf: { cacheTtl: 1800 } });
+    const d = await r.json();
+    const today = hawaiiDate();
+    bonusCache = (d.bonuses || []).filter((x) => !x.expiresDate || x.expiresDate >= today);
+    bonusAt = Date.now();
+  } catch (e) {
+    bonusCache = bonusCache || [];
+  }
+  return bonusCache;
+}
+
+/* seats.aero program keys: the name to show, where to book, and how to find
+   the same program in the transfer partner table. */
+const SOURCES = {
+  alaska: { name: "Atmos Rewards (Alaska Airlines)", url: "https://www.alaskaair.com", match: /atmos/i, direct: "atmos" },
+  aeroplan: { name: "Air Canada Aeroplan", url: "https://www.aircanada.com/aeroplan", match: /aeroplan/i },
+  american: { name: "American AAdvantage", url: "https://www.aa.com", match: /aadvantage/i },
+  united: { name: "United MileagePlus", url: "https://www.united.com", match: /mileageplus/i },
+  delta: { name: "Delta SkyMiles", url: "https://www.delta.com", match: /skymiles/i },
+  virginatlantic: { name: "Virgin Atlantic Flying Club", url: "https://www.virginatlantic.com", match: /virgin atlantic/i },
+  flyingblue: { name: "Air France KLM Flying Blue", url: "https://www.flyingblue.com", match: /flying blue/i },
+  qantas: { name: "Qantas Frequent Flyer", url: "https://www.qantas.com", match: /qantas/i },
+  emirates: { name: "Emirates Skywards", url: "https://www.emirates.com", match: /emirates/i },
+  etihad: { name: "Etihad Guest", url: "https://www.etihad.com", match: /etihad/i },
+  qatar: { name: "Qatar Airways Privilege Club", url: "https://www.qatarairways.com", match: /qatar/i },
+  turkish: { name: "Turkish Airlines Miles&Smiles", url: "https://www.turkishairlines.com", match: /turkish/i },
+  singapore: { name: "Singapore KrisFlyer", url: "https://www.singaporeair.com", match: /krisflyer/i },
+  lifemiles: { name: "Avianca LifeMiles", url: "https://www.lifemiles.com", match: /lifemiles/i },
+  jetblue: { name: "JetBlue TrueBlue", url: "https://www.jetblue.com", match: /trueblue/i },
+  aeromexico: { name: "Aeromexico Rewards", url: "https://www.aeromexico.com", match: /aeromexico/i },
+  finnair: { name: "Finnair Plus", url: "https://www.finnair.com", match: /finnair/i },
+  velocity: { name: "Virgin Australia Velocity", url: "https://www.velocityfrequentflyer.com" },
+  eurobonus: { name: "SAS EuroBonus", url: "https://www.flysas.com" },
+  smiles: { name: "GOL Smiles", url: "https://www.smiles.com.br" },
+  azul: { name: "Azul Fidelidade", url: "https://www.voeazul.com.br" },
+  connectmiles: { name: "Copa ConnectMiles", url: "https://www.copaair.com" },
+  ethiopian: { name: "Ethiopian ShebaMiles", url: "https://www.ethiopianairlines.com" },
+  saudia: { name: "Saudia AlFursan", url: "https://www.saudia.com" },
+  spirit: { name: "Spirit Free Spirit", url: "https://www.spirit.com" }
+};
+const BANK_PAGES = {
+  chase: "https://ultimaterewards.chase.com",
+  amex: "https://global.americanexpress.com/rewards",
+  "capital-one": "https://www.capitalone.com",
+  citi: "https://www.thankyou.com",
+  bilt: "https://www.biltrewards.com"
+};
+
+/* Which transferable points (and Atmos points) this member holds, from My Wallet. */
+function memberBanks(wallet, catalog) {
+  const cards = (wallet && Array.isArray(wallet.cards)) ? wallet.cards.filter((c) => c && c.status !== "closed") : [];
+  const byId = {};
+  (catalog.cards || []).forEach((c) => { byId[c.cardId || c.id] = c; });
+  const held = {};
+  let chaseTransfer = false, chaseAny = false;
+  cards.forEach((c) => {
+    const cat = byId[c.cardId];
+    const issuer = String((cat && cat.issuer) || (c.custom && c.custom.issuer) || "").toLowerCase();
+    const name = String((cat && cat.name) || (c.custom && c.custom.name) || c.cardId || "").toLowerCase();
+    if (issuer.indexOf("chase") > -1) { chaseAny = true; if (/sapphire|ink/.test(name)) chaseTransfer = true; }
+    else if (issuer.indexOf("american express") > -1 || issuer === "amex") held.amex = "yes";
+    else if (issuer.indexOf("capital one") > -1) { if (/venture|spark/.test(name)) held["capital-one"] = "yes"; }
+    else if (issuer.indexOf("citi") > -1) held.citi = "yes";
+    else if (issuer.indexOf("bilt") > -1 || name.indexOf("bilt") > -1) held.bilt = "yes";
+    if (/atmos|alaska|hawaiian/.test(name)) held.atmos = "yes";
+  });
+  if (chaseAny) held.chase = chaseTransfer ? "yes" : "cashback";
+  ((wallet && wallet.points) || []).forEach((p) => { if (/atmos|alaska|hawaiian/i.test(p.program || "")) held.atmos = "yes"; });
+  return held;
+}
+
+/* How to book one seats.aero result, using the member's own points. */
+function bookingFor(source, held, partners, bonuses) {
+  const info = SOURCES[source] || { name: source, url: "" };
+  const paths = [];
+  if (info.match) {
+    Object.keys(partners).forEach((bank) => {
+      const p = ((partners[bank] || {}).p || []).find((x) => info.match.test(x[0]));
+      if (!p) return;
+      const bonus = bonuses.find((b) => b.bank === bank && info.match.test(b.partner || ""));
+      paths.push({
+        from: partners[bank].name,
+        ratio: p[2] === 1 && p[3] === 1 ? "1:1" : p[2] + ":" + p[3],
+        yours: held[bank] === "yes",
+        note: held[bank] === "cashback" ? "Their Chase Freedom points only transfer when combined with a Sapphire or Ink card." : undefined,
+        bonus: bonus ? "+" + bonus.bonusPct + "% transfer bonus" + (bonus.expiresDate ? " until " + new Date(bonus.expiresDate + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }) : "") : undefined,
+        transferAt: BANK_PAGES[bank]
+      });
+    });
+  }
+  paths.sort((a, b) => (b.yours ? 1 : 0) - (a.yours ? 1 : 0));
+  return {
+    program: info.name,
+    bookAt: info.url,
+    direct: info.direct && held[info.direct] ? "Their Atmos Rewards points book this directly, no transfer needed." : undefined,
+    transferFrom: paths.filter((p) => p.yours || p.note).concat(paths.filter((p) => !p.yours && !p.note).slice(0, 2))
+  };
+}
+
+/* The member's own transfer options, for answers that don't need a search. */
+function describePartners(held, partners) {
+  const lines = [];
+  Object.keys(partners).forEach((bank) => {
+    if (held[bank] !== "yes") return;
+    const list = ((partners[bank] || {}).p || []).filter((x) => x[1] === "airline")
+      .map((x) => x[0] + " " + (x[2] === 1 && x[3] === 1 ? "1:1" : x[2] + ":" + x[3]));
+    if (list.length) lines.push("- " + partners[bank].name + " transfers to: " + list.join(", "));
+  });
+  if (held.chase === "cashback") lines.push("- Chase: their Freedom cards earn points that only transfer when combined with a Sapphire or Ink card.");
+  if (held.atmos === "yes") lines.push("- Atmos Rewards: they earn Atmos points directly (book Alaska, Hawaiian and partners like JAL on alaskaair.com).");
+  return lines.length ? lines.join("\n") : "None of their saved cards earn transferable points.";
+}
+
 /* Turn the member's saved wallet into a short, plain description. */
 function describeWallet(wallet, catalog) {
   const cards = (wallet && Array.isArray(wallet.cards)) ? wallet.cards : [];
@@ -192,7 +333,7 @@ function checkSearch(input) {
   return { origin, destination, start: input.start_date, end: input.end_date, cabin, travelers };
 }
 
-async function searchSeats(env, q) {
+async function searchSeats(env, q, ctx) {
   const url = new URL(SEATS_API);
   url.searchParams.set("origin_airport", q.origin);
   url.searchParams.set("destination_airport", q.destination);
@@ -226,12 +367,13 @@ async function searchSeats(env, q) {
     .filter((r) => r.miles && (r.seats === null || r.seats >= q.travelers))
     .sort((a, b) => a.miles - b.miles || a.date.localeCompare(b.date))
     .slice(0, 12);
+  if (ctx) rows.forEach((r) => { r.book = bookingFor(r.program, ctx.held, ctx.partners, ctx.bonuses); });
   return { results: rows, travelers: q.travelers };
 }
 
 /* ----------------------------- prompts ----------------------------- */
 
-function memberContext(m, walletText, opts) {
+function memberContext(m, walletText, opts, partnerText) {
   const lines = [
     "MEMBER CONTEXT (from the HRT dashboard, not from the member):",
     "- Today in Hawaii: " + hawaiiDate(),
@@ -242,6 +384,15 @@ function memberContext(m, walletText, opts) {
     "",
     "Their cards in My Wallet:",
     walletText,
+    "",
+    "Where their card points can go (HRT's transfer partner table; ratios can change):",
+    partnerText,
+    "",
+    "BOOKING HELP:",
+    "- Each search result includes \"book\": the program to book with (bookAt is its website), whether their own points book it directly, and which of their points can transfer there (ratio, any live transfer bonus, transferAt is the bank's site).",
+    "- When they ask how to book, give 3 short steps: 1) find the same seat on the program's site, 2) only then transfer from their bank (say which one, the ratio, and any bonus), 3) book. Link the sites as plain URLs.",
+    "- Prefer paths where yours is true. If none of their cards transfer there, say so plainly and suggest a result they can book with their own points.",
+    "- If they entered a points balance, say whether it looks like enough for everyone traveling, and note taxes and fees are extra.",
     "",
     "HOW YOUR ANSWER IS SHOWN:",
     "- Plain text in a phone chat bubble. Keep it short. You may use **bold** and short lists with '- '. No headings, no tables.",
@@ -329,11 +480,14 @@ export async function onRequestPost({ request, env }) {
   const left = await spend(env, "msg", m.id, msgLimit);
   if (left < 0) return json({ error: "daily_limit" }, 429);
 
-  const [rulebook, knowledge, catalog] = await Promise.all([
+  const [rulebook, knowledge, catalog, partners, bonuses] = await Promise.all([
     env.ASK_SCOTTIE.get("rulebook"),
     env.ASK_SCOTTIE.get("knowledge"),
-    loadCatalog(env, request)
+    loadCatalog(env, request),
+    loadPartners(env, request),
+    loadBonuses()
   ]);
+  const wallet = (m.member.json || {}).wallet;
   if (!rulebook) return json({ error: "not_configured", missing: ["rulebook in KV"] }, 503);
 
   const searchLimit = parseInt(env.DAILY_SEARCHES || "15", 10);
@@ -343,9 +497,11 @@ export async function onRequestPost({ request, env }) {
   const system = [
     { type: "text", text: rulebook },
     { type: "text", text: "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
-    { type: "text", text: memberContext(m, describeWallet((m.member.json || {}).wallet, catalog), { searchesLeft }) }
+    { type: "text", text: "" }
   ];
   const tools = canSearch ? [SEARCH_TOOL] : undefined;
+  const ctx = { held: memberBanks(wallet, catalog), partners, bonuses };
+  system[2].text = memberContext(m, describeWallet(wallet, catalog), { searchesLeft }, describePartners(ctx.held, partners));
 
   let convo = messages.slice();
   let seats = null;
@@ -372,7 +528,7 @@ export async function onRequestPost({ request, env }) {
           if (q.error) result = q;
           else if ((await spend(env, "search", m.id, searchLimit)) < 0) result = { error: "Daily search limit reached." };
           else {
-            try { result = await searchSeats(env, q); }
+            try { result = await searchSeats(env, q, ctx); }
             catch (e) { result = { error: "The award search service did not answer." }; }
             if (result.error) console.log("ask-scottie search problem", result.error);
             if (result.results) seats = result.results.slice(0, 3);

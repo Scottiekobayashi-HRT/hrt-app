@@ -32,7 +32,9 @@
   function fmt(text) {
     var lines = esc(text).split(/\n/), out = [], list = false;
     lines.forEach(function (ln) {
-      var b = ln.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+      var b = ln.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+        /* plain https links become tappable; trailing punctuation stays outside */
+        .replace(/(https:\/\/[^\s<]+?)([.,;:!?)]*)(?=\s|$)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>$2');
       if (/^\s*[-*]\s+/.test(ln)) {
         if (!list) { out.push("<ul>"); list = true; }
         out.push("<li>" + b.replace(/^\s*[-*]\s+/, "") + "</li>");
@@ -174,6 +176,21 @@
     return String(codes || "").split(/\s*,\s*/).filter(Boolean).map(function (c) { return AIRLINES[c] || c; }).join(", ");
   }
 
+  /* "Your Amex points transfer 1:1" plus a button to the program's site. */
+  function howToBook(b) {
+    if (!b) return "";
+    var line = "";
+    if (b.direct) line = "Your Atmos points book this directly.";
+    else {
+      var mine = (b.transferFrom || []).filter(function (p) { return p.yours; })[0];
+      if (mine) line = "Your " + mine.from + " transfer " + mine.ratio + (mine.bonus ? ", " + mine.bonus : "") + ".";
+      else if ((b.transferFrom || []).length) line = "None of your cards transfer here. " + b.transferFrom[0].from + " does, " + b.transferFrom[0].ratio + ".";
+    }
+    var safe = /^https:\/\//.test(b.bookAt || "") ? b.bookAt : "";
+    return (line ? '<div class="asc-seat-you">' + esc(line) + "</div>" : "") +
+      (safe ? '<a class="asc-book" href="' + esc(safe) + '" target="_blank" rel="noopener">Book with ' + esc(b.program) + "</a>" : "");
+  }
+
   function seatCards(seats) {
     if (!seats || !seats.length) return "";
     return '<div class="asc-seats">' + seats.map(function (s) {
@@ -186,7 +203,8 @@
         '<div class="asc-seat-sub">' + esc(airlines(s.airlines)) + (s.direct ? " nonstop" : "") + " · Book with " + esc(PROGRAMS[s.program] || s.program || "") + "</div>" +
         '<div class="asc-seat-row"><span class="asc-miles">' + (s.miles ? Number(s.miles).toLocaleString() + " miles" : "") + "</span>" +
         "<span>" + esc(s.cabin) + (s.seats ? ", " + s.seats + " seats" : "") + "</span></div>" +
-        '<div class="asc-seat-sub">' + esc(seenTxt) + ". Plus taxes and fees.</div></div>";
+        '<div class="asc-seat-sub">' + esc(seenTxt) + ". Plus taxes and fees.</div>" +
+        howToBook(s.book) + "</div>";
     }).join("") + "</div>";
   }
 
