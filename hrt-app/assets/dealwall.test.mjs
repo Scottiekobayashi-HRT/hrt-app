@@ -90,5 +90,20 @@ ok('route plus cabin together', r.length === 1 && r[0].dest === 'SEA' && r[0].mi
 r = T.applyPrefs(multi, P({}), '2026-10-16');
 ok('same city from two islands = two cards', r.length === 2 && r[0].origin !== r[1].origin);
 
+const mix = T.entriesFrom({ deals: [
+  { origin: 'HNL', dest: 'LAX', city: 'Los Angeles', cabin: 'economy', dates: [{ date: '2026-11-02', miles: 12500 }, { date: '2026-12-02', miles: 15000 }] },
+  { origin: 'HNL', dest: 'NRT', city: 'Tokyo', cabin: 'business', dates: [{ date: '2027-03-10', miles: 60000 }, { date: '2027-06-20', miles: 120000 }] },
+  { origin: 'OGG', dest: 'SEA', city: 'Seattle', cabin: 'business', dates: [{ date: '2027-01-05', miles: 45000 }] }
+] });
+const ce = T.choicesFor(mix, '2026-10-16', P({ cabin: 'economy' }));
+const cb = T.choicesFor(mix, '2026-10-16', P({ cabin: 'business' }));
+ok('economy months only economy', ce.months.join() === '2026-11,2026-12', ce.months.join());
+ok('business months reach 2027', cb.months.join() === '2027-01,2027-03,2027-06', cb.months.join());
+ok('business points steps are business sized', cb.steps[0] >= 50000 && cb.steps.indexOf(100000) >= 0 && ce.steps.indexOf(100000) < 0, cb.steps.join() + ' / ' + ce.steps.join());
+ok('business cities only business', cb.cities.map((c) => c.dest).join() === 'NRT,SEA');
+ok('all cabins still offered', cb.cabins.economy && cb.cabins.business);
+const cbo = T.choicesFor(mix, '2026-10-16', P({ cabin: 'business', origins: ['OGG'] }));
+ok('airport narrows cities and months', cbo.cities.length === 1 && cbo.months.join() === '2027-01');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

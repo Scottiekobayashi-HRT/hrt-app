@@ -487,20 +487,27 @@
   }
 
   /* What the settings panel can offer, from the data itself. Pure. */
-  function choicesFor(entries, today) {
+  /* Cities, points steps and months follow the chosen cabin and departure
+     airports, so Business shows business prices and business months. */
+  function choicesFor(entries, today, prefs) {
     today = today || hawaiiToday();
+    var cabin = prefs && prefs.cabin, from = (prefs && prefs.origins) || [];
     var cities = [], seen = {}, cab = {}, months = {}, miles = [], origins = [];
     entries.forEach(function (e) {
-      if (!seen[e.dest]) { seen[e.dest] = 1; cities.push({ dest: e.dest, city: e.city }); }
       if (origins.indexOf(e.origin) < 0) origins.push(e.origin);
+      var live = e.dates.some(function (t) { return String(t.date) >= today; });
+      if (live) cab[e.cabin] = 1;
+      if (cabin && e.cabin !== cabin) return;
+      if (from.length && from.indexOf(e.origin) < 0) return;
+      if (live && !seen[e.dest]) { seen[e.dest] = 1; cities.push({ dest: e.dest, city: e.city }); }
       e.dates.forEach(function (t) {
         if (String(t.date) < today) return;
-        cab[e.cabin] = 1; months[String(t.date).slice(0, 7)] = 1;
+        months[String(t.date).slice(0, 7)] = 1;
         if (t.miles) miles.push(t.miles);
       });
     });
     var lo = Math.min.apply(null, miles), hi = Math.max.apply(null, miles);
-    var steps = [10000, 12500, 15000, 17500, 20000, 25000, 30000, 40000, 50000, 60000, 75000, 100000]
+    var steps = [10000, 12500, 15000, 17500, 20000, 25000, 30000, 40000, 50000, 60000, 75000, 100000, 125000, 150000, 200000, 250000]
       .filter(function (v) { return miles.length && v >= lo && v < hi; });
     return { cities: cities, origins: origins, cabins: cab, months: Object.keys(months).sort(), steps: steps };
   }
@@ -589,7 +596,7 @@
     fold.addEventListener("click", function () { setFold(!wrap.classList.contains("folded")); });
     body.appendChild(el("p", "dw-note", full
       ? "From the HRT PRO calendar, refreshed every morning. Availability changes; confirm with the airline before booking."
-      : "Showing economy for the next " + win + " days for now. Business and first class, and the full booking window, are on the way. Availability changes; confirm with the airline before booking."));
+      : "Showing economy deals for the next " + win + " days. For business, first and the full 270 days, open the Deals Calendar. Availability changes; confirm with the airline before booking."));
 
     var openKey = null;
     function closeExp() { openKey = null; exp.innerHTML = ""; exp.classList.remove("on");
@@ -661,7 +668,7 @@
         b.addEventListener("click", function () { openPanel(true); });
         empty.appendChild(b);
       }
-      var C = choicesFor(entries);
+      var C = choicesFor(entries, null, prefs);
       var cab = CABINS.filter(function (c) { return c[0] === prefs.cabin; })[0][1];
       var allFrom = C.origins.length ? C.origins : [feed.hub || "HNL"];
       subEl.textContent = (prefs.origins.length ? prefs.origins : allFrom).join(", ") + " departures";
@@ -687,11 +694,17 @@
       var c = el("div", "dwp-chips"); c.hidden = !on; kids.forEach(function (k) { c.appendChild(k); });
       r.appendChild(h); r.appendChild(c); return r;
     }
-    function change(fn) { fn(); prefs = cleanPrefs(prefs); savePrefs(prefs); drawPanel(); drawCards(); }
+    function change(fn) {
+      fn(); prefs = cleanPrefs(prefs);
+      var C = choicesFor(entries, null, prefs);
+      if (prefs.max && C.steps.indexOf(prefs.max) < 0) prefs.max = 0;
+      prefs.months = prefs.months.filter(function (m) { return C.months.indexOf(m) >= 0; });
+      savePrefs(prefs); drawPanel(); drawCards();
+    }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
 
     function drawPanel() {
-      var C = choicesFor(entries);
+      var C = choicesFor(entries, null, prefs);
       panel.innerHTML = "";
       var cityName = {}; C.cities.forEach(function (c) { cityName[c.dest] = c.city; });
       if (C.origins.length > 1) panel.appendChild(row("From", prefs.origins.length ? prefs.origins.join(", ") : "All airports", [chip("All", !prefs.origins.length, function () { change(function () { prefs.origins = []; }); })]
