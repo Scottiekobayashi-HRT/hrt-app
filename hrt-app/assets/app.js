@@ -45,7 +45,8 @@
   communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
   account:{ title:"My account", hint:"Photo, name, login and billing" },
-  plans:{ title:"Plans", hint:"Free, ʻOhana and HRT PRO" }
+  plans:{ title:"Plans", hint:"Free, ʻOhana and HRT PRO" },
+  ask:{ title:"Ask Scottie", hint:"ʻOhana Members \u00b7 your points coach" }
  };
  var shown = {}, current = null;
  var onShow = {};
