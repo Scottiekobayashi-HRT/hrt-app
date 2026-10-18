@@ -445,12 +445,22 @@
   function readPrefs() {
     var p = null;
     try { p = JSON.parse(localStorage.getItem(PREF_KEY) || "null"); } catch (e) {}
-    return cleanPrefs(p);
+    return migratePrefs(cleanPrefs(p));
+  }
+  /* Older saved settings picked cities, not routes. Turn those into routes once. */
+  function migratePrefs(p) {
+    if (!p.routes.length && p.dests.length) {
+      var from = p.origins.length ? p.origins : ["HNL"];
+      from.forEach(function (o) { p.dests.forEach(function (d) { p.routes.push({ o: o, d: d, cabins: [p.cabin] }); }); });
+      p.routes = cleanRoutes(p.routes);
+    }
+    return p;
   }
   function cleanPrefs(p) {
     p = p && typeof p === "object" ? p : {};
     var strs = function (a, re) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === "string" && re.test(x); }).slice(0, 40) : []; };
     return {
+      routes: cleanRoutes(p.routes),
       origins: strs(p.origins, /^[A-Z]{3}$/),
       dests: strs(p.dests, /^[A-Z]{3}$/),
       cabin: /^(economy|business|first)$/.test(p.cabin) ? p.cabin : "economy",
@@ -514,6 +524,60 @@
   function monthLabel(ym) { return MON[parseInt(ym.slice(5), 10) - 1] + (ym.slice(0, 4) !== hawaiiToday().slice(0, 4) ? " " + ym.slice(2, 4) : ""); }
   function kpts(n) { return n % 1000 ? (n / 1000).toFixed(1) + "k" : n / 1000 + "k"; }
 
+
+  /* ---------- Route tracking (Oct 17): members pick routes + cabins ---------- */
+  var AIRPORT = { HNL: "Honolulu", OGG: "Maui", KOA: "Kona", LIH: "Kauaʻi", ITO: "Hilo" };
+  function placeName(code, entries) {
+    if (AIRPORT[code]) return AIRPORT[code];
+    for (var i = 0; i < entries.length; i++) if (entries[i].dest === code) return entries[i].city;
+    return code;
+  }
+  /* What can be tracked, straight from the data. Pure. */
+  function routeChoices(entries, today) {
+    today = today || hawaiiToday();
+    var origins = [], by = {};
+    entries.forEach(function (e) {
+      if (origins.indexOf(e.origin) < 0) { origins.push(e.origin); by[e.origin] = []; }
+      var row = by[e.origin].filter(function (r) { return r.dest === e.dest; })[0];
+      if (!row) { row = { dest: e.dest, city: e.city, cabins: {} }; by[e.origin].push(row); }
+      if (e.dates.some(function (t) { return String(t.date) >= today; })) row.cabins[e.cabin] = 1;
+    });
+    origins.sort(function (a, b) { return (AIRPORT[a] ? 0 : 1) - (AIRPORT[b] ? 0 : 1) || (a < b ? -1 : 1); });
+    Object.keys(by).forEach(function (o) { by[o].sort(function (a, b) { return a.city < b.city ? -1 : 1; }); });
+    return { origins: origins, byOrigin: by };
+  }
+  function cleanRoutes(a) {
+    if (!Array.isArray(a)) return [];
+    var out = [], seen = {};
+    a.forEach(function (r) {
+      if (!r || !/^[A-Z]{3}$/.test(r.o) || !/^[A-Z]{3}$/.test(r.d) || r.o === r.d) return;
+      var k = r.o + r.d; if (seen[k]) return; seen[k] = 1;
+      var cabins = (Array.isArray(r.cabins) ? r.cabins : []).filter(function (c) { return /^(economy|business|first)$/.test(c); });
+      cabins = CABINS.map(function (c) { return c[0]; }).filter(function (c) { return cabins.indexOf(c) >= 0; });
+      out.push({ o: r.o, d: r.d, cabins: cabins.length ? cabins : ["economy"] });
+    });
+    return out.slice(0, 24);
+  }
+  /* One card per tracked route and cabin, in the member's order. A tracked
+     route with no deal dates today still gets a card, so it never vanishes. Pure. */
+  function applyRoutes(entries, routes, today) {
+    today = today || hawaiiToday();
+    var out = [];
+    routes.forEach(function (r) {
+      r.cabins.forEach(function (cab) {
+        var e = entries.filter(function (x) { return x.origin === r.o && x.dest === r.d && x.cabin === cab; })[0];
+        var dates = e ? e.dates.filter(function (t) { return String(t && t.date || "") >= today; }) : [];
+        var miles = Math.min.apply(null, dates.map(function (t) { return t.miles || Infinity; }));
+        out.push({ origin: r.o, dest: r.d, city: e ? e.city : placeName(r.d, entries), cabin: cab,
+          image: e ? e.image : (entries.filter(function (x) { return x.dest === r.d && x.image; })[0] || {}).image || "",
+          dates: dates, count: dates.length, none: !dates.length,
+          miles: isFinite(miles) ? miles : 0, soonest: dates.map(function (t) { return t.date; }).sort()[0],
+          nonstop: dates.some(function (t) { return t.nonstop; }) });
+      });
+    });
+    return out;
+  }
+
   var proCss = document.createElement("style");
   proCss.textContent = [
     ".dwp{margin-top:22px;position:relative;border-radius:var(--radius,16px);padding:16px 18px 14px;background:radial-gradient(700px 220px at 92% -30%,rgba(242,184,75,.22),transparent 60%),linear-gradient(120deg,#141b24,#1b2430 55%,#1d3350);border:1px solid rgba(242,184,75,.5);box-shadow:inset 0 3px 0 #f2b84b,0 14px 36px rgba(16,32,54,.18)}",
@@ -531,11 +595,30 @@
     ".dwp-acc i{font-style:normal;font-size:12px;color:var(--muted);transition:transform .2s}.dwp-acc[aria-expanded=true] i{transform:rotate(180deg)}",
     ".dwp-panel .dwp-chips{padding:2px 0 8px}",
     ".dwp-panel>.dwp-sec+.dwp-sec{border-top:1px solid var(--line)}",
+    ".dwp-cab{position:absolute;left:10px;top:9px;z-index:1;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 8px;color:#fff;background:rgba(20,27,36,.78)}",
+    ".dwp-cab.business{background:#1d3350;color:#f5c75a;box-shadow:inset 0 0 0 1px #f2b84b}.dwp-cab.first{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204}",
+    ".dw-card.none{cursor:default;opacity:.92}.dw-card.none .dw-ph{filter:grayscale(.6)}",
+    ".dwp-none{font-weight:800;font-size:14px;color:var(--text)}.dwp-none-s{font-size:11.5px;color:var(--muted);line-height:1.4}",
+    ".dwp-block{padding:12px 0;display:grid;gap:8px}.dwp-block+.dwp-block{border-top:1px solid var(--line)}",
+    ".dwp-block h4{margin:0;font-size:13.5px;font-weight:800;color:var(--text)}",
+    ".dwp-hint{margin:0;font-size:12.5px;color:var(--muted)}",
+    ".dwp-route{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2,#f7f9fb)}",
+    ".dwp-rname{display:flex;flex-direction:column;min-width:150px;flex:1}.dwp-rname b{font-size:14px;color:var(--text)}.dwp-rname span{font-size:11.5px;color:var(--muted)}",
+    ".dwp-cabs{display:flex;flex-wrap:wrap;gap:6px}",
+    ".dwp-rm{appearance:none;font:inherit;cursor:pointer;background:none;border:0;color:var(--muted);font-size:12px;font-weight:700;min-height:36px;padding:0 4px}.dwp-rm:hover{color:var(--peak,#d64541)}",
+    ".dwp-addrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}",
+    ".dwp-field{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:700;color:var(--muted)}",
+    ".dwp-field select{font:inherit;font-size:14px;font-weight:600;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:42px;padding:0 10px}",
+    ".dwp-addcab{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.dwp-lbl{font-size:11.5px;font-weight:700;color:var(--muted);margin-right:4px}",
+    ".dwp-addbtn{justify-self:start;min-height:40px}.dwp-addbtn:disabled{opacity:.5;cursor:default}",
+    ".dwp-ret{appearance:none;font:inherit;cursor:pointer;justify-self:start;background:none;border:0;padding:0;color:var(--coral);font-weight:800;font-size:12.5px;min-height:32px}",
+    "@media (max-width:640px){.dwp-addrow{grid-template-columns:1fr}.dwp-rname{min-width:100%}}",
+
     ".dwp-tune{appearance:none;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 13px;border-radius:999px;border:1px solid rgba(242,184,75,.6);background:linear-gradient(135deg,rgba(245,199,90,.18),rgba(217,112,64,.12));color:var(--text);font-size:12.5px;font-weight:800}",
     ".dwp-tune:hover{border-color:#e8824c}.dwp-tune[aria-expanded=true]{background:#1b2430;color:#fff;border-color:#1b2430}",
     "[data-theme=dark] .dwp-tune[aria-expanded=true]{background:#f2b84b;color:#14202e;border-color:#f2b84b}",
     ".dwp-sum{width:100%;font-size:12px;color:var(--muted);font-weight:600;margin-top:-4px}",
-    ".dwp-panel{border:1px solid color-mix(in srgb,#f2b84b 45%,var(--line));border-radius:14px;background:var(--surface);box-shadow:var(--shadow);padding:6px 14px 10px;margin:0 0 12px;display:grid;gap:0}",
+    ".dwp-panel{border:1px solid color-mix(in srgb,#f2b84b 45%,var(--line));border-radius:14px;background:var(--surface);box-shadow:var(--shadow);padding:4px 16px 10px;margin:0 0 12px;display:grid;gap:0}",
     ".dwp-row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:start}",
     ".dwp-row>b{font-size:12.5px;color:var(--text);padding-top:8px}",
     ".dwp-row>b small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}",
@@ -605,8 +688,8 @@
     function fillExp(d) {
       exp.innerHTML = ""; exp.classList.add("on");
       var h = el("div", "dw-exph"), ht = el("div");
-      ht.appendChild(el("b", null, d.origin + " to " + d.city + (d.cabin !== "economy" ? ", " + d.cabin : "")));
-      ht.appendChild(el("span", null, d.count + (d.count === 1 ? " date matches" : " dates match") + " your settings, from " + num(d.miles) + " points one way"));
+      ht.appendChild(el("b", null, d.origin + " → " + d.city + ", " + (CAB_NAME[d.cabin] || d.cabin)));
+      ht.appendChild(el("span", null, d.count + (d.count === 1 ? " deal date" : " deal dates") + ", from " + num(d.miles) + " points one way"));
       h.appendChild(ht);
       var x = el("button", "dw-x", "×"); x.type = "button"; x.setAttribute("aria-label", "Close"); x.addEventListener("click", closeExp);
       h.appendChild(x); exp.appendChild(h);
@@ -629,52 +712,65 @@
       exp.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
 
+    var CAB_NAME = { economy: "Economy", business: "Business", first: "First" };
+    function routeLabel(o, d) { return o + " → " + placeName(d, entries) + " (" + d + ")"; }
+
     function drawCards() {
       closeExp();
       rail.innerHTML = "";
-      var list = applyPrefs(entries, prefs);
+      var tracking = prefs.routes.length > 0;
+      var list = tracking ? applyRoutes(entries, prefs.routes)
+        : applyPrefs(entries, cleanPrefs({ cabin: "economy" })).slice(0, 12);
       list.forEach(function (d) {
-        var card = el("button", "dw-card"); card.type = "button"; card.setAttribute("aria-expanded", "false");
-        card.addEventListener("click", function () {
-          var key = d.origin + d.dest + d.cabin;
-          if (openKey === key) { closeExp(); return; }
-          openKey = key;
-          rail.querySelectorAll(".dw-card").forEach(function (c) { var on = c === card; c.classList.toggle("on", on); c.setAttribute("aria-expanded", on ? "true" : "false"); });
-          fillExp(d);
-        });
+        var card = el(d.none ? "div" : "button", "dw-card" + (d.none ? " none" : ""));
+        if (!d.none) {
+          card.type = "button"; card.setAttribute("aria-expanded", "false");
+          card.addEventListener("click", function () {
+            var key = d.origin + d.dest + d.cabin;
+            if (openKey === key) { closeExp(); return; }
+            openKey = key;
+            rail.querySelectorAll(".dw-card").forEach(function (c) { var on = c === card; c.classList.toggle("on", on); c.setAttribute("aria-expanded", on ? "true" : "false"); });
+            fillExp(d);
+          });
+        }
         var ph = el("div", "dw-ph");
         if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
-        ph.appendChild(el("span", "dw-rt", d.origin + "–" + d.dest));
+        ph.appendChild(el("span", "dw-rt", d.origin + " → " + d.dest));
+        ph.appendChild(el("span", "dwp-cab " + d.cabin, CAB_NAME[d.cabin] || d.cabin));
         ph.appendChild(el("span", "dw-city", d.city));
         card.appendChild(ph);
         var body = el("div", "dw-body");
-        var pts = el("div", "dw-pts", num(d.miles) + " pts");
-        pts.appendChild(el("small", null, "one way, " + d.cabin));
-        body.appendChild(pts);
-        var meta = el("div", "dw-meta");
-        meta.appendChild(el("span", "dw-chip ok", d.count + (d.count === 1 ? " date" : " dates")));
-        meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
-        if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
-        body.appendChild(meta); card.appendChild(body);
-        card.appendChild(el("span", "dw-more", "See the dates"));
+        if (d.none) {
+          body.appendChild(el("div", "dwp-none", "No deal dates right now"));
+          body.appendChild(el("div", "dwp-none-s", "We check every morning. It shows up here when space opens."));
+        } else {
+          var pts = el("div", "dw-pts", num(d.miles) + " pts");
+          pts.appendChild(el("small", null, "one way, lowest"));
+          body.appendChild(pts);
+          var meta = el("div", "dw-meta");
+          meta.appendChild(el("span", "dw-chip ok", d.count + (d.count === 1 ? " date" : " dates")));
+          meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
+          if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
+          body.appendChild(meta);
+        }
+        card.appendChild(body);
+        if (!d.none) card.appendChild(el("span", "dw-more", "See the dates"));
         rail.appendChild(card);
       });
       rail.hidden = !list.length;
       empty.hidden = !!list.length;
       if (!list.length) {
         empty.innerHTML = "";
-        empty.appendChild(el("div", null, "No dates match your settings right now. Try a higher points limit, another month, or more cities."));
-        var b = el("button", "dwp-done", "Change settings"); b.type = "button";
+        empty.appendChild(el("div", null, "No deals to show yet. Pick the routes you want to track."));
+        var b = el("button", "dwp-done", "Pick my routes"); b.type = "button";
         b.addEventListener("click", function () { openPanel(true); });
         empty.appendChild(b);
       }
-      var C = choicesFor(entries, null, prefs);
-      var cab = CABINS.filter(function (c) { return c[0] === prefs.cabin; })[0][1];
-      var allFrom = C.origins.length ? C.origins : [feed.hub || "HNL"];
-      subEl.textContent = (prefs.origins.length ? prefs.origins : allFrom).join(", ") + " departures";
-      sum.textContent = cab + ", " + (prefs.dests.length ? prefs.dests.length + (prefs.dests.length === 1 ? " city" : " cities") : "all cities") +
-        ", " + (prefs.max ? "up to " + num(prefs.max) + " pts" : "any points") +
-        ", " + (prefs.months.length ? prefs.months.map(monthLabel).join(", ") : (C.months.length > 1 ? monthLabel(C.months[0]) + " to " + monthLabel(C.months[C.months.length - 1]) : "next " + win + " days"));
+      var n = prefs.routes.length;
+      subEl.textContent = tracking ? "Tracking " + n + (n === 1 ? " route" : " routes") : "Top deals today";
+      sum.textContent = tracking
+        ? prefs.routes.map(function (r) { return r.o + "→" + r.d + " " + r.cabins.map(function (c) { return CAB_NAME[c]; }).join("/"); }).join(" · ")
+        : "Showing today's best economy deals. Tap Customize to track your own routes.";
       if (rail.scrollLeft) rail.scrollLeft = 0;
     }
 
@@ -685,44 +781,97 @@
       if (disabled) b.disabled = true; else b.addEventListener("click", onTap);
       return b;
     }
-    var openSec = null;
-    function row(title, value, kids) {
-      var r = el("div", "dwp-sec"), on = openSec === title;
-      var h = el("button", "dwp-acc"); h.type = "button"; h.setAttribute("aria-expanded", on ? "true" : "false");
-      h.appendChild(el("b", null, title)); h.appendChild(el("span", null, value)); h.appendChild(el("i", null, "▾"));
-      h.addEventListener("click", function () { openSec = openSec === title ? null : title; drawPanel(); });
-      var c = el("div", "dwp-chips"); c.hidden = !on; kids.forEach(function (k) { c.appendChild(k); });
-      r.appendChild(h); r.appendChild(c); return r;
-    }
-    function change(fn) {
-      fn(); prefs = cleanPrefs(prefs);
-      var C = choicesFor(entries, null, prefs);
-      if (prefs.max && C.steps.indexOf(prefs.max) < 0) prefs.max = 0;
-      prefs.months = prefs.months.filter(function (m) { return C.months.indexOf(m) >= 0; });
-      savePrefs(prefs); drawPanel(); drawCards();
-    }
-    function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
+    function change(fn) { fn(); prefs = cleanPrefs(prefs); savePrefs(prefs); drawPanel(); drawCards(); }
 
+    var pickFrom = null, pickTo = null, pickCabins = null;
     function drawPanel() {
-      var C = choicesFor(entries, null, prefs);
+      var RC = routeChoices(entries);
       panel.innerHTML = "";
-      var cityName = {}; C.cities.forEach(function (c) { cityName[c.dest] = c.city; });
-      if (C.origins.length > 1) panel.appendChild(row("From", prefs.origins.length ? prefs.origins.join(", ") : "All airports", [chip("All", !prefs.origins.length, function () { change(function () { prefs.origins = []; }); })]
-        .concat(C.origins.map(function (o) { return chip(o, prefs.origins.indexOf(o) >= 0, function () { change(function () { toggle(prefs.origins, o); }); }); }))));
-      panel.appendChild(row("Destinations", prefs.dests.length ? prefs.dests.map(function (d) { return cityName[d] || d; }).join(", ") : "All cities", [chip("All", !prefs.dests.length, function () { change(function () { prefs.dests = []; }); })]
-        .concat(C.cities.map(function (c) { return chip(c.city, prefs.dests.indexOf(c.dest) >= 0, function () { change(function () { toggle(prefs.dests, c.dest); }); }); }))));
-      panel.appendChild(row("Cabin", CABINS.filter(function (c) { return c[0] === prefs.cabin; })[0][1], CABINS.map(function (c) {
-        var has = !!C.cabins[c[0]];
-        return chip(c[1], prefs.cabin === c[0], function () { change(function () { prefs.cabin = c[0]; }); }, !has && prefs.cabin !== c[0], has ? "" : "soon");
-      })));
-      panel.appendChild(row("Max points", prefs.max ? "Up to " + kpts(prefs.max) + " one way" : "Any", [chip("Any", !prefs.max, function () { change(function () { prefs.max = 0; }); })]
-        .concat(C.steps.map(function (v) { return chip(kpts(v), prefs.max === v, function () { change(function () { prefs.max = v; }); }); }))));
-      panel.appendChild(row("When", prefs.months.length ? prefs.months.map(monthLabel).join(", ") : "Any time", [chip("Any time", !prefs.months.length, function () { change(function () { prefs.months = []; }); })]
-        .concat(C.months.map(function (m) { return chip(monthLabel(m), prefs.months.indexOf(m) >= 0, function () { change(function () { toggle(prefs.months, m); }); }); }))));
+
+      /* 1. the routes they track */
+      var mine = el("div", "dwp-block");
+      mine.appendChild(el("h4", null, "Your routes"));
+      if (!prefs.routes.length) mine.appendChild(el("p", "dwp-hint", "None yet. Add a route below and it shows on your home page every day."));
+      prefs.routes.forEach(function (r, idx) {
+        var row = el("div", "dwp-route");
+        var name = el("div", "dwp-rname"); name.appendChild(el("b", null, r.o + " → " + r.d));
+        name.appendChild(el("span", null, placeName(r.o, entries) + " to " + placeName(r.d, entries)));
+        row.appendChild(name);
+        var cabs = el("div", "dwp-cabs");
+        CABINS.forEach(function (c) {
+          var on = r.cabins.indexOf(c[0]) >= 0;
+          cabs.appendChild(chip(c[1], on, function () { change(function () {
+            var rr = prefs.routes[idx]; var k = rr.cabins.indexOf(c[0]);
+            if (k >= 0) { if (rr.cabins.length > 1) rr.cabins.splice(k, 1); } else rr.cabins.push(c[0]);
+          }); }));
+        });
+        row.appendChild(cabs);
+        var x = el("button", "dwp-rm", "Remove"); x.type = "button"; x.setAttribute("aria-label", "Stop tracking " + r.o + " to " + r.d);
+        x.addEventListener("click", function () { change(function () { prefs.routes.splice(idx, 1); }); });
+        row.appendChild(x);
+        mine.appendChild(row);
+      });
+      panel.appendChild(mine);
+
+      /* 2. add a route */
+      var add = el("div", "dwp-block dwp-add");
+      add.appendChild(el("h4", null, "Add a route"));
+      if (!RC.origins.length) { add.appendChild(el("p", "dwp-hint", "Routes appear here once today's deals load.")); }
+      else {
+        if (RC.origins.indexOf(pickFrom) < 0) pickFrom = RC.origins.indexOf("HNL") >= 0 ? "HNL" : RC.origins[0];
+        var dests = RC.byOrigin[pickFrom] || [];
+        if (!dests.some(function (d) { return d.dest === pickTo; })) { pickTo = dests.length ? dests[0].dest : null; pickCabins = null; }
+        var row2 = el("div", "dwp-addrow");
+        function sel(label, opts, val, onPick) {
+          var w = el("label", "dwp-field"); w.appendChild(el("span", null, label));
+          var s = document.createElement("select");
+          opts.forEach(function (o) { var op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; if (o[0] === val) op.selected = true; s.appendChild(op); });
+          s.addEventListener("change", function () { onPick(s.value); });
+          w.appendChild(s); return w;
+        }
+        row2.appendChild(sel("From", RC.origins.map(function (o) { return [o, placeName(o, entries) + " (" + o + ")"]; }), pickFrom,
+          function (v) { pickFrom = v; pickTo = null; drawPanel(); }));
+        row2.appendChild(sel("To", dests.map(function (d) { return [d.dest, d.city + " (" + d.dest + ")"]; }), pickTo,
+          function (v) { pickTo = v; pickCabins = null; drawPanel(); }));
+        add.appendChild(row2);
+        var info = dests.filter(function (d) { return d.dest === pickTo; })[0];
+        if (info) {
+          var avail = CABINS.map(function (c) { return c[0]; }).filter(function (c) { return info.cabins[c]; });
+          if (!pickCabins) pickCabins = avail.length ? avail.slice() : ["economy"];
+          var cr = el("div", "dwp-addcab"); cr.appendChild(el("span", "dwp-lbl", "Cabins"));
+          CABINS.forEach(function (c) {
+            var on = pickCabins.indexOf(c[0]) >= 0;
+            cr.appendChild(chip(c[1], on, function () {
+              var k = pickCabins.indexOf(c[0]);
+              if (k >= 0) { if (pickCabins.length > 1) pickCabins.splice(k, 1); } else pickCabins.push(c[0]);
+              drawPanel();
+            }, false, info.cabins[c[0]] ? "" : "no deals now"));
+          });
+          add.appendChild(cr);
+          var have = prefs.routes.some(function (r) { return r.o === pickFrom && r.d === pickTo; });
+          var go = el("button", "dwp-done dwp-addbtn", have ? "Already tracking" : "Track " + pickFrom + " → " + pickTo);
+          go.type = "button"; if (have) go.disabled = true;
+          go.addEventListener("click", function () { var cabs = pickCabins.slice(); pickCabins = cabs; change(function () { prefs.routes.push({ o: pickFrom, d: pickTo, cabins: cabs }); }); });
+          add.appendChild(go);
+          var back = (RC.byOrigin[pickTo] || []).some(function (d) { return d.dest === pickFrom; });
+          var haveBack = prefs.routes.some(function (r) { return r.o === pickTo && r.d === pickFrom; });
+          if (back && !haveBack) {
+            var rb = el("button", "dwp-ret", "Also track the return, " + pickTo + " → " + pickFrom); rb.type = "button";
+            rb.addEventListener("click", function () {
+              var mineR = prefs.routes.filter(function (r) { return r.o === pickFrom && r.d === pickTo; })[0];
+              var cabs = (mineR ? mineR.cabins : (pickCabins || ["economy"])).slice();
+              change(function () { prefs.routes.push({ o: pickTo, d: pickFrom, cabins: cabs }); });
+            });
+            add.appendChild(rb);
+          }
+        }
+      }
+      panel.appendChild(add);
+
       var f = el("div", "dwp-foot");
-      f.appendChild(el("span", null, "Saved on this device. Changes show right away."));
-      var r = el("button", "dwp-reset", "Reset"); r.type = "button";
-      r.addEventListener("click", function () { change(function () { prefs = cleanPrefs(null); }); });
+      f.appendChild(el("span", null, "Saved on this device."));
+      var r = el("button", "dwp-reset", "Clear all"); r.type = "button";
+      r.addEventListener("click", function () { change(function () { prefs.routes = []; prefs.dests = []; }); });
       var d = el("button", "dwp-done", "Done"); d.type = "button";
       d.addEventListener("click", function () { openPanel(false); });
       f.appendChild(r); f.appendChild(d); panel.appendChild(f);
@@ -800,7 +949,7 @@
       });
   }
 
-  window.HRT_DEALWALL = { _test: { freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs } };
+  window.HRT_DEALWALL = { _test: { freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs, routeChoices: routeChoices, cleanRoutes: cleanRoutes, applyRoutes: applyRoutes, migratePrefs: migratePrefs } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();

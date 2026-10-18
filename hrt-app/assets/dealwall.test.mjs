@@ -43,7 +43,7 @@ ok('hawaii today format', /^\d{4}-\d\d-\d\d$/.test(T.hawaiiToday()));
 const E = T.entriesFrom(feed);
 ok('free feed becomes economy entries', E.length === 4 && E.every((e) => e.cabin === 'economy'));
 const P = (o) => T.cleanPrefs(o);
-ok('bad prefs cleaned', JSON.stringify(P({ dests: ['LAX', 'x', 5], cabin: 'boat', max: -3, months: ['2026-1'] })) === JSON.stringify({ origins: [], dests: ['LAX'], cabin: 'economy', max: 0, months: [] }));
+ok('bad prefs cleaned', JSON.stringify(P({ dests: ['LAX', 'x', 5], cabin: 'boat', max: -3, months: ['2026-1'] })) === JSON.stringify({ routes: [], origins: [], dests: ['LAX'], cabin: 'economy', max: 0, months: [] }));
 let r = T.applyPrefs(E, P({}), '2026-10-16');
 ok('defaults show every city with dates left', r.map((x) => x.dest).join() === 'LAX,JFK,LAS', r.map((x) => x.dest).join());
 r = T.applyPrefs(E, P({ dests: ['LAS', 'LAX'] }), '2026-10-16');
@@ -104,6 +104,30 @@ ok('business cities only business', cb.cities.map((c) => c.dest).join() === 'NRT
 ok('all cabins still offered', cb.cabins.economy && cb.cabins.business);
 const cbo = T.choicesFor(mix, '2026-10-16', P({ cabin: 'business', origins: ['OGG'] }));
 ok('airport narrows cities and months', cbo.cities.length === 1 && cbo.months.join() === '2027-01');
+
+// ---- route tracking ----
+const rt = T.entriesFrom({ deals: [
+  { origin: 'HNL', dest: 'LAX', city: 'Los Angeles', cabin: 'economy', image: 'lax.jpg', dates: [{ date: '2026-11-02', miles: 12500 }, { date: '2026-10-01', miles: 9000 }] },
+  { origin: 'HNL', dest: 'LAX', city: 'Los Angeles', cabin: 'business', dates: [{ date: '2027-02-02', miles: 45000, nonstop: true }] },
+  { origin: 'LAX', dest: 'HNL', city: 'Honolulu', cabin: 'economy', dates: [{ date: '2026-12-02', miles: 15000 }] },
+  { origin: 'OGG', dest: 'SEA', city: 'Seattle', cabin: 'first', dates: [{ date: '2027-03-02', miles: 70000 }] },
+  { origin: 'HNL', dest: 'NRT', city: 'Tokyo', cabin: 'business', dates: [{ date: '2026-09-02', miles: 60000 }] }
+] });
+const RC = T.routeChoices(rt, '2026-10-16');
+ok('route choices: Hawaii airports first', RC.origins.join() === 'HNL,OGG,LAX', RC.origins.join());
+ok('route choices: every destination from HNL, even with no deals now', RC.byOrigin.HNL.map((d) => d.dest).join() === 'LAX,NRT', RC.byOrigin.HNL.map((d) => d.dest).join());
+ok('route choices: cabins with live dates', RC.byOrigin.HNL[0].cabins.economy && RC.byOrigin.HNL[0].cabins.business && !RC.byOrigin.HNL[1].cabins.business);
+ok('return route is offered', RC.byOrigin.LAX.some((d) => d.dest === 'HNL'));
+const CR = T.cleanRoutes([{ o: 'HNL', d: 'LAX', cabins: ['business', 'economy', 'boat'] }, { o: 'HNL', d: 'LAX', cabins: ['first'] }, { o: 'hnl', d: 'LAX' }, { o: 'HNL', d: 'HNL' }, { o: 'KOA', d: 'SEA', cabins: [] }]);
+ok('routes cleaned, deduped, cabins ordered', JSON.stringify(CR) === JSON.stringify([{ o: 'HNL', d: 'LAX', cabins: ['economy', 'business'] }, { o: 'KOA', d: 'SEA', cabins: ['economy'] }]), JSON.stringify(CR));
+const AR = T.applyRoutes(rt, [{ o: 'HNL', d: 'LAX', cabins: ['economy', 'business', 'first'] }, { o: 'LAX', d: 'HNL', cabins: ['economy'] }], '2026-10-16');
+ok('one card per route and cabin, in order', AR.map((c) => c.origin + c.dest + c.cabin[0]).join() === 'HNLLAXe,HNLLAXb,HNLLAXf,LAXHNLe', AR.map((c) => c.origin + c.dest + c.cabin[0]).join());
+ok('past dates dropped on tracked route', AR[0].count === 1 && AR[0].miles === 12500);
+ok('tracked cabin with no deals still shows, marked none', AR[2].none === true && AR[2].city === 'Los Angeles' && AR[2].image === 'lax.jpg');
+ok('business card carries nonstop', AR[1].nonstop === true && AR[1].miles === 45000);
+const MG = T.migratePrefs(P({ dests: ['LAX', 'NRT'], cabin: 'business' }));
+ok('old city picks become routes', JSON.stringify(MG.routes) === JSON.stringify([{ o: 'HNL', d: 'LAX', cabins: ['business'] }, { o: 'HNL', d: 'NRT', cabins: ['business'] }]), JSON.stringify(MG.routes));
+ok('saved routes survive cleaning', P({ routes: [{ o: 'HNL', d: 'LAX', cabins: ['first'] }] }).routes[0].cabins[0] === 'first');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
