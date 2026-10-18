@@ -252,7 +252,7 @@ function memberContext(m, walletText, opts) {
   return lines.join("\n");
 }
 
-async function callClaude(env, system, messages, tools) {
+async function callClaude(env, system, messages, tools, toolChoice) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -265,7 +265,8 @@ async function callClaude(env, system, messages, tools) {
       max_tokens: 900,
       system,
       messages,
-      tools
+      tools,
+      tool_choice: tools && toolChoice ? toolChoice : undefined
     })
   });
   if (!res.ok) {
@@ -350,8 +351,12 @@ export async function onRequestPost({ request, env }) {
   let seats = null;
   let reply = "";
   try {
-    for (let round = 0; round < 3; round++) {
-      const out = await callClaude(env, system, convo, tools);
+    const ROUNDS = 4;
+    for (let round = 0; round < ROUNDS; round++) {
+      /* The last round may not search again: it has to answer with what it has. */
+      const last = round === ROUNDS - 1;
+      const out = await callClaude(env, system, convo, tools, last ? { type: "none" } : null);
+      console.log("ask-scottie round", round, "stop", out.stop_reason, "blocks", (out.content || []).map((b) => b.type).join(","));
       const uses = (out.content || []).filter((b) => b.type === "tool_use");
       const text = (out.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
       if (out.stop_reason !== "tool_use" || !uses.length) { reply = text; break; }
@@ -369,9 +374,11 @@ export async function onRequestPost({ request, env }) {
           else {
             try { result = await searchSeats(env, q); }
             catch (e) { result = { error: "The award search service did not answer." }; }
+            if (result.error) console.log("ask-scottie search problem", result.error);
             if (result.results) seats = result.results.slice(0, 3);
           }
         }
+        if (result.error) result.note = "Do not retry the same search. Answer the member with what you know, or suggest other dates.";
         results.push({ type: "tool_result", tool_use_id: u.id, content: JSON.stringify(result) });
       }
       convo.push({ role: "user", content: results });
