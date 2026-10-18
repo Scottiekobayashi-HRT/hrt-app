@@ -404,22 +404,35 @@ function memberContext(m, walletText, opts, partnerText) {
 }
 
 async function callClaude(env, system, messages, tools, toolChoice) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
+  /* Sonnet 5.5 thinks up front by default, and thinking counts against
+     max_tokens. A chat answer doesn't need it: "between_tools" turns off the
+     up-front thinking. If a model ever rejects that setting, retry without it. */
+  async function once(withThinking) {
+    const body = {
       model: env.ASK_MODEL || "claude-sonnet-5-5",
-      max_tokens: 900,
+      max_tokens: 4000,
       system,
       messages,
       tools,
       tool_choice: tools && toolChoice ? toolChoice : undefined
-    })
-  });
+    };
+    if (withThinking) body.thinking = { type: "between_tools" };
+    return fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+  }
+  let res = await once(true);
+  if (res.status === 400) {
+    const t = await res.text();
+    if (/thinking/i.test(t)) { console.log("ask-scottie thinking setting rejected, retrying", t.slice(0, 200)); res = await once(false); }
+    else throw new Error("claude 400 " + t.slice(0, 300));
+  }
   if (!res.ok) {
     const t = await res.text();
     throw new Error("claude " + res.status + " " + t.slice(0, 300));
