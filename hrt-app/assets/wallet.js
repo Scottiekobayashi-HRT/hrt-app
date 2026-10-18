@@ -1311,16 +1311,33 @@
   function helpHidden() {
     try { var t = +localStorage.getItem(HELP_KEY); return t && Date.now() - t < HELP_DAYS * 864e5; } catch (e) { return false; }
   }
+  /* ʻOhana header (Oct 17): navy with a gold edge and star. "Member since", "Your strategy" and
+     "Last review" come from Member metaData that only HRT edits (see HRT_MEMBER.ohana in index.html);
+     each line is left out when it is blank. Never name team members other than Scottie here. */
+  var OH_STAR = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7.5-6.5-4-6.5 4 2-7.5L2 9.5 9 9z" fill="currentColor"/></svg>';
+  function ohanaDate(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || "");
+    if (!m) return v || "";
+    var d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return isNaN(d) ? v : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
   function clientHtml() {
-    return '<div class="wl-client" role="status"><span class="wl-live" aria-hidden="true"></span>' +
-      '<span class="wl-client-txt"><b>ʻOhana program &middot; managed by your HRT team</b><span>You are an ʻOhana Member. We help pick your next best card for your travel goals, and we keep this wallet up to date for you. Opened a new card? Text Scottie and we will add it.</span></span>' +
-      '<span class="wl-client-pill">ʻOhana Member</span></div>';
+    var m = member(), o = m.ohana || {};
+    var name = String(m.firstName || "").trim();
+    return '<div class="wl-oh" role="note">' +
+      '<div class="wl-oh-top"><span class="wl-oh-star">' + OH_STAR + '</span>' +
+      '<span class="wl-oh-eyebrow">ʻOhana Member' + (o.since ? " since " + esc(o.since) : "") + "</span></div>" +
+      '<p class="wl-oh-hi">' + (name ? "Aloha, " + esc(name) : "Aloha") + "</p>" +
+      '<p class="wl-oh-txt">Your wallet is guided by Scottie and the HRT team. We help manage your cards and build your strategy with you. Opened a new card? Text Scottie and we will add it.</p>' +
+      (o.strategy ? '<div class="wl-oh-box"><span>Your strategy</span><b>' + esc(o.strategy) + "</b></div>" : "") +
+      (o.review ? '<p class="wl-oh-rev">Last review: ' + esc(ohanaDate(o.review)) + "</p>" : "") +
+      "</div>";
   }
   function helpHtml(where) {
     var m = member();
     if (!m.signedIn || m.client || state.demo) return "";
     if (state.helpSent || m.wantsHelp) {
-      return where === "home" ? "" : '<div class="wl-card wl-help done"><b>Thanks, we will be in touch.</b><span>Scottie or Eddie will reach out to welcome you to the ʻOhana program. ' +
+      return where === "home" ? "" : '<div class="wl-card wl-help done"><b>Thanks, we will be in touch.</b><span>Scottie will reach out to welcome you to the ʻOhana program. ' +
         '<a href="' + esc(COACH_URL) + '" target="_top">See how the program works &rarr;</a></span></div>';
     }
     if (helpHidden()) return "";
@@ -1344,7 +1361,9 @@
   function summaryHtml(where) {
     var core = summaryCore(where);
     if (!core) return "";
-    if (member().client) core = core.replace(/(<section[^>]*>)/, "$1" + clientHtml());
+    if (member().client) core = core.replace(/<section([^>]*)>/, function (all, attrs) {
+      return "<section" + attrs.replace(/class="/, 'class="wl-sum-oh ') + ">" + clientHtml();
+    });
     return core + helpHtml(where);
   }
   function summaryCore(where) {
@@ -1574,6 +1593,15 @@
       ".wl-custom{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;padding:12px;border:1px dashed var(--line);border-radius:12px}.wl-custom[hidden]{display:none}@media(max-width:560px){.wl-custom{grid-template-columns:1fr}}",
       ".wl-form textarea{font:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2,var(--surface));color:var(--text);resize:vertical;min-height:60px}",
       ".wl-tl-status{display:inline-block;align-self:flex-start;font-size:11px;font-weight:800;color:#b4541f}",
+      ".wl-sum.wl-sum-oh{border:1.5px solid #f2b84b}",
+      ".wl-oh{margin:0 0 16px;padding:0 0 16px;border-bottom:1px solid rgba(242,184,75,.28)}",
+      ".wl-oh .wl-oh-top{display:flex;align-items:center;gap:8px}.wl-oh .wl-oh-star{display:inline-flex;color:#f2b84b}",
+      ".wl-oh .wl-oh-eyebrow{font-size:12px;font-weight:700;letter-spacing:.03em;color:#f5c75a}",
+      ".wl-oh .wl-oh-hi{margin:8px 0 4px;font-size:21px;font-weight:800;line-height:1.25;color:#fff}",
+      ".wl-oh .wl-oh-txt{margin:0;font-size:14px;line-height:1.55;color:#c9d6e3;max-width:62ch}",
+      ".wl-oh .wl-oh-box{display:flex;flex-direction:column;gap:2px;margin:12px 0 0;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.06)}",
+      ".wl-oh .wl-oh-box span{font-size:12px;font-weight:700;color:#f5c75a}.wl-oh .wl-oh-box b{font-size:14.5px;font-weight:600;color:#fff;line-height:1.4}",
+      ".wl-oh .wl-oh-rev{margin:10px 0 0;font-size:12.5px;color:#a9bccf}",
       ".wl-client{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:rgba(63,206,127,.10);border:1px solid rgba(63,206,127,.35);font-size:13px;line-height:1.45;color:#eef4fa}",
       ".wl-client-txt{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}.wl-client-txt b{color:#a6e9c3;font-size:13.5px}.wl-client-txt span{color:#cfe0ee}",
       ".wl-live{position:relative;flex:0 0 10px;width:10px;height:10px;border-radius:50%;background:#3fce7f;box-shadow:0 0 0 3px rgba(63,206,127,.25)}",
