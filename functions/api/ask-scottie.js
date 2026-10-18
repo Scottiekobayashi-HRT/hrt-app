@@ -231,6 +231,8 @@ function bookingFor(source, held, partners, bonuses) {
       if (!p) return;
       const bonus = bonuses.find((b) => b.bank === bank && info.match.test(b.partner || ""));
       paths.push({
+        bank,
+        a: p[2], b: p[3], bonusPct: bonus ? Number(bonus.bonusPct) || 0 : 0,
         from: partners[bank].name,
         ratio: p[2] === 1 && p[3] === 1 ? "1:1" : p[2] + ":" + p[3],
         yours: held[bank] === "yes",
@@ -366,9 +368,167 @@ async function searchSeats(env, q, ctx) {
     /* seats.aero gives 0 when it does not know the count: keep those, flag them */
     .filter((r) => r.miles && (r.seats === null || r.seats >= q.travelers))
     .sort((a, b) => a.miles - b.miles || a.date.localeCompare(b.date))
-    .slice(0, 12);
+    .slice(0, q.keep || 12);
   if (ctx) rows.forEach((r) => { r.book = bookingFor(r.program, ctx.held, ctx.partners, ctx.bonuses); });
   return { results: rows, travelers: q.travelers };
+}
+
+/* ---------------------------- trip planner ---------------------------- */
+
+const PLAN_TOOL = {
+  name: "plan_trip",
+  description:
+    "Plan a round trip on points: searches seats.aero for the way out and the way back, pairs them by trip length, " +
+    "optionally tries West Coast gateways (LAX, SFO, SEA) when Hawaii has few seats, and works out how many points " +
+    "the whole group needs from which of the member's cards. Use this for round trips or trip planning; use " +
+    "search_award_seats for a one-way or a single date. Ask for missing details first (where, roughly when, how long, cabin, how many people).",
+  input_schema: {
+    type: "object",
+    properties: {
+      origin: { type: "string", description: "Home airport code(s), usually HNL. Comma separated allowed." },
+      destination: { type: "string", description: "Destination airport code(s), e.g. HND,NRT for Tokyo" },
+      depart_start: { type: "string", description: "Earliest departure, YYYY-MM-DD" },
+      depart_end: { type: "string", description: "Latest departure, YYYY-MM-DD, at most 31 days after depart_start" },
+      nights_min: { type: "integer", minimum: 1, maximum: 30 },
+      nights_max: { type: "integer", minimum: 1, maximum: 30 },
+      cabin: { type: "string", enum: ["economy", "premium", "business", "first"] },
+      travelers: { type: "integer", minimum: 1, maximum: 9 },
+      include_west_coast: { type: "boolean", description: "Also try LAX, SFO and SEA as gateways. Uses more searches." },
+      points: {
+        type: "object",
+        description: "Point balances the member told you in this chat, by program: chase, amex, capital-one, citi, bilt, atmos",
+        additionalProperties: { type: "integer" }
+      }
+    },
+    required: ["origin", "destination", "depart_start", "depart_end", "nights_min", "nights_max", "cabin", "travelers"]
+  }
+};
+
+const GATEWAYS = "LAX,SFO,SEA";
+const BANK_LABEL = { chase: "Chase Ultimate Rewards", amex: "Amex Membership Rewards", "capital-one": "Capital One miles", citi: "Citi ThankYou Points", bilt: "Bilt Rewards", atmos: "Atmos Rewards points" };
+
+function addDays(day, n) {
+  const d = new Date(day + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function daysBetween(a, b) { return Math.round((new Date(b + "T12:00:00Z") - new Date(a + "T12:00:00Z")) / 86400000); }
+
+function checkPlan(input) {
+  const out = checkSearch({ origin: input.origin, destination: input.destination, start_date: input.depart_start, end_date: input.depart_end, cabin: input.cabin, travelers: input.travelers });
+  if (out.error) return out;
+  if (daysBetween(out.start, out.end) > 31) return { error: "Keep the departure window to about a month." };
+  let lo = parseInt(input.nights_min, 10), hi = parseInt(input.nights_max, 10);
+  if (!(lo >= 1) || !(hi >= 1)) return { error: "Say how many nights, roughly." };
+  if (hi < lo) { const t = lo; lo = hi; hi = t; }
+  lo = Math.min(lo, 30); hi = Math.min(hi, 30);
+  return Object.assign(out, { nightsMin: lo, nightsMax: hi, westCoast: !!input.include_west_coast });
+}
+
+/* Balances: what the member said in chat wins over what My Wallet has. */
+function budgetFrom(wallet, said) {
+  const b = {};
+  ((wallet && wallet.points) || []).forEach((p) => {
+    const k = String(p.program || "").toLowerCase();
+    const key = /chase|ultimate/.test(k) ? "chase" : /amex|membership/.test(k) ? "amex" : /capital/.test(k) ? "capital-one"
+      : /citi|thankyou/.test(k) ? "citi" : /bilt/.test(k) ? "bilt" : /atmos|alaska|hawaiian/.test(k) ? "atmos" : null;
+    if (key && Number(p.balance) > 0) b[key] = Number(p.balance);
+  });
+  Object.keys(said || {}).forEach((k) => { const v = parseInt(said[k], 10); if (BANK_LABEL[k] && v > 0) b[k] = v; });
+  return b;
+}
+
+/* The member's best way to pay for one leg. */
+function payFor(leg) {
+  const bk = leg.book || {};
+  if (bk.direct) return { bank: "atmos", a: 1, b: 1, bonusPct: 0 };
+  const mine = (bk.transferFrom || []).find((p) => p.yours);
+  return mine ? { bank: mine.bank, a: mine.a, b: mine.b, bonusPct: mine.bonusPct || 0 } : null;
+}
+
+/* Points to move from a bank for a leg. Transfers go in 1,000s. */
+function bankPoints(miles, travelers, pay) {
+  const raw = miles * travelers * (pay.a / pay.b) / (1 + (pay.bonusPct || 0) / 100);
+  return Math.ceil(raw / 1000) * 1000;
+}
+
+function pairTrips(outs, backs, q, budget) {
+  const combos = [];
+  outs.forEach((o) => backs.forEach((r) => {
+    const nights = daysBetween(o.date, r.date);
+    if (nights < q.nightsMin || nights > q.nightsMax) return;
+    const gateway = o.from !== q.origin.split(",")[0] || r.to !== q.origin.split(",")[0];
+    const po = payFor(o), pr = payFor(r);
+    const plan = {};
+    [[o, po], [r, pr]].forEach(([leg, pay]) => {
+      if (!pay) return;
+      plan[pay.bank] = (plan[pay.bank] || 0) + bankPoints(leg.miles, q.travelers, pay);
+    });
+    const planList = Object.keys(plan).map((bank) => ({
+      from: BANK_LABEL[bank] || bank,
+      points: plan[bank],
+      have: budget[bank] || null,
+      enough: budget[bank] ? budget[bank] >= plan[bank] : null
+    }));
+    const covered = !!(po && pr);
+    const short = planList.some((x) => x.enough === false);
+    combos.push({
+      nights, gateway,
+      out: o, back: r,
+      milesPerPerson: o.miles + r.miles,
+      milesTotal: (o.miles + r.miles) * q.travelers,
+      transferPlan: planList,
+      usesYourCards: covered,
+      fitsYourBalance: covered && !short && planList.every((x) => x.enough !== null) ? true : (short ? false : null),
+      score: (o.miles + r.miles) + (covered ? 0 : 400000) + (short ? 200000 : 0) + (gateway ? 30000 : 0)
+    });
+  }));
+  combos.sort((a, b) => a.score - b.score);
+  /* keep variety: no two plans with the same pair of dates and programs */
+  const seen = {}, top = [];
+  combos.forEach((c) => {
+    const k = c.out.date + c.out.program + c.back.date + c.back.program;
+    if (!seen[k] && top.length < 3) { seen[k] = 1; top.push(c); }
+  });
+  top.forEach((c) => { delete c.score; });
+  return top;
+}
+
+async function planTrip(env, q, ctx, takeSearch) {
+  const runs = [];
+  async function run(origin, destination, start, end) {
+    if (!(await takeSearch())) return { error: "Daily search limit reached." };
+    try {
+      return await searchSeats(env, { origin, destination, start, end, cabin: q.cabin, travelers: q.travelers, keep: 40 }, ctx);
+    } catch (e) { return { error: "The award search service did not answer." }; }
+  }
+  const backStart = addDays(q.start, q.nightsMin), backEnd = addDays(q.end, q.nightsMax);
+  const out = await run(q.origin, q.destination, q.start, q.end);
+  const back = await run(q.destination, q.origin, backStart, backEnd);
+  if (out.error && back.error) return { error: out.error };
+  let outs = out.results || [], backs = back.results || [];
+  runs.push("Way out " + q.origin + " to " + q.destination + ": " + outs.length + " options");
+  runs.push("Way back: " + backs.length + " options");
+
+  let trips = pairTrips(outs, backs, q, ctx.budget);
+  if (q.westCoast || trips.length < 2) {
+    const gOut = await run(GATEWAYS, q.destination, q.start, q.end);
+    const gBack = await run(q.destination, GATEWAYS, backStart, backEnd);
+    const go = gOut.results || [], gb = gBack.results || [];
+    runs.push("West Coast gateways: " + go.length + " out, " + gb.length + " back");
+    if (go.length || gb.length) {
+      trips = pairTrips(outs.concat(go), backs.concat(gb), q, ctx.budget);
+    }
+  }
+  return {
+    trips,
+    travelers: q.travelers,
+    searched: runs,
+    notes: [
+      "Results are cached from seats.aero, not live.",
+      "A gateway trip needs a separate flight between Hawaii and the West Coast (Atmos points, Southwest or cash), booked on its own ticket with time to spare.",
+      "Transfer points only after the seat is confirmed on the program's site."
+    ]
+  };
 }
 
 /* ----------------------------- prompts ----------------------------- */
@@ -393,6 +553,13 @@ function memberContext(m, walletText, opts, partnerText) {
     "- When they ask how to book, give 3 short steps: 1) find the same seat on the program's site, 2) only then transfer from their bank (say which one, the ratio, and any bonus), 3) book. Link the sites as plain URLs.",
     "- Prefer paths where yours is true. If none of their cards transfer there, say so plainly and suggest a result they can book with their own points.",
     "- If they entered a points balance, say whether it looks like enough for everyone traveling, and note taxes and fees are extra.",
+    "",
+    "TRIP PLANNING:",
+    "- For a round trip or \"help me plan a trip\", use plan_trip (it uses 2 to 4 searches). Ask first for anything missing: destination, rough dates, how many nights, cabin, how many people. Default origin HNL.",
+    "- If they mention point balances in the chat, pass them in points (keys: chase, amex, capital-one, citi, bilt, atmos).",
+    "- The app shows the best plan as a trip card (both flights, total points, transfer plan). In your message: say why it is the best fit in a sentence or two, mention one alternative if it is meaningfully different, then the booking order: confirm both seats, transfer, book the way out and the way back.",
+    "- If a plan uses a West Coast gateway, say plainly they need a separate Hawaii to West Coast flight and should leave a buffer.",
+    "- If a plan is short on points, say by how much and suggest the closest fix (a different date, a cheaper cabin one way, or another card's points). Never suggest applying for a new card: that is a handoff.",
     "",
     "HOW YOUR ANSWER IS SHOWN:",
     "- Plain text in a phone chat bubble. Keep it short. You may use **bold** and short lists with '- '. No headings, no tables.",
@@ -512,12 +679,13 @@ export async function onRequestPost({ request, env }) {
     { type: "text", text: "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
     { type: "text", text: "" }
   ];
-  const tools = canSearch ? [SEARCH_TOOL] : undefined;
-  const ctx = { held: memberBanks(wallet, catalog), partners, bonuses };
+  const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL] : undefined;
+  const ctx = { held: memberBanks(wallet, catalog), partners, bonuses, budget: budgetFrom(wallet, null) };
   system[2].text = memberContext(m, describeWallet(wallet, catalog), { searchesLeft }, describePartners(ctx.held, partners));
 
   let convo = messages.slice();
   let seats = null;
+  let trip = null;
   let reply = "";
   try {
     const ROUNDS = 4;
@@ -534,7 +702,17 @@ export async function onRequestPost({ request, env }) {
       const results = [];
       for (const u of uses) {
         let result;
-        if (u.name !== "search_award_seats") {
+        if (u.name === "plan_trip") {
+          const q = checkPlan(u.input || {});
+          if (q.error) result = q;
+          else {
+            const said = (u.input && u.input.points) || null;
+            const planCtx = Object.assign({}, ctx, { budget: budgetFrom(wallet, said) });
+            result = await planTrip(env, q, planCtx, async () => (await spend(env, "search", m.id, searchLimit)) >= 0);
+            if (result.trips && result.trips.length) { trip = { travelers: result.travelers, cabin: q.cabin, options: result.trips }; seats = null; }
+            if (result.error) console.log("ask-scottie plan problem", result.error);
+          }
+        } else if (u.name !== "search_award_seats") {
           result = { error: "Unknown tool." };
         } else {
           const q = checkSearch(u.input || {});
@@ -566,6 +744,7 @@ export async function onRequestPost({ request, env }) {
     handoff,
     textNumber: handoff ? (env.SCOTTIE_TEXT_NUMBER || "") : "",
     seats,
+    trip,
     remaining: left
   });
 }

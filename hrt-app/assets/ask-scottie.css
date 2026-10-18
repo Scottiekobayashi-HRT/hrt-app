@@ -85,3 +85,22 @@ html.asc-open .asc-fab{padding:5px}
 }
 .asc-pop .asc-b a:not(.asc-book):not(.asc-textbtn){color:var(--asc-navy);text-decoration:underline;text-underline-offset:2px;font-weight:600;overflow-wrap:anywhere}
 :root[data-theme="dark"] .asc-pop .asc-b a:not(.asc-book):not(.asc-textbtn){color:var(--asc-gold-t)}
+/* Trip plan card */
+.asc-trip{margin-top:10px;background:var(--asc-cream);border:1px solid rgba(242,184,75,.45);border-radius:14px;padding:11px;display:flex;flex-direction:column;gap:8px}
+.asc-trip-head{display:flex;flex-direction:column;gap:1px}
+.asc-trip-head b{font-family:'Sofia Pro','Sofia Sans','Inter',sans-serif;font-weight:900;font-size:16px;color:var(--asc-text)}
+.asc-trip-head span{font-size:12px;color:var(--asc-muted)}
+.asc-leg{background:var(--asc-bubble);border:1px solid var(--asc-hair);border-radius:11px;padding:9px 10px;display:flex;flex-direction:column;gap:3px}
+.asc-leg-k{font-family:'DM Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--asc-muted)}
+.asc-trip-note{font-size:12.5px;line-height:1.4;color:var(--asc-text);background:rgba(242,184,75,.16);border-radius:9px;padding:7px 9px}
+.asc-trip-total{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13.5px;color:var(--asc-text);border-top:1px solid var(--asc-hair);padding-top:8px}
+.asc-trip-total b{font-family:'Sofia Pro','Sofia Sans','Inter',sans-serif;font-weight:900;font-size:18px;color:var(--asc-navy)}
+:root[data-theme="dark"] .asc-trip-total b{color:var(--asc-gold-t)}
+.asc-plan,.asc-others{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.asc-plan li{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;line-height:1.35;color:var(--asc-text)}
+.asc-others li{font-size:12.5px;color:var(--asc-body)}
+.asc-ok,.asc-short{flex-shrink:0;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px}
+.asc-ok{background:#e3f3ea;color:#16663b}
+.asc-short{background:#fbe6dc;color:#9a3d14}
+:root[data-theme="dark"] .asc-ok{background:#123125;color:#7fdba6}
+:root[data-theme="dark"] .asc-short{background:#3a2015;color:#f7b08c}

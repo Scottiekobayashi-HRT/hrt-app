@@ -208,10 +208,52 @@
     }).join("") + "</div>";
   }
 
+  function shortDay(day) {
+    var d = new Date(day + "T12:00:00");
+    return isNaN(d) ? day : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }
+  function num(n) { return Number(n || 0).toLocaleString(); }
+
+  function tripLeg(label, leg) {
+    var safe = leg.book && /^https:\/\//.test(leg.book.bookAt || "") ? leg.book.bookAt : "";
+    var prog = (leg.book && leg.book.program) || PROGRAMS[leg.program] || leg.program;
+    return '<div class="asc-leg">' +
+      '<div class="asc-leg-k">' + esc(label) + "</div>" +
+      '<div class="asc-seat-row"><b>' + esc(shortDay(leg.date)) + "</b><span>" + esc(leg.from) + " to " + esc(leg.to) + "</span></div>" +
+      '<div class="asc-seat-sub">' + esc(airlines(leg.airlines)) + (leg.direct ? " nonstop" : "") + " · " + esc(prog) + "</div>" +
+      '<div class="asc-seat-row"><span class="asc-miles">' + num(leg.miles) + ' miles</span><span>per person</span></div>' +
+      (safe ? '<a class="asc-book" href="' + esc(safe) + '" target="_blank" rel="noopener">Book with ' + esc(prog) + "</a>" : "") +
+      "</div>";
+  }
+
+  /* The best round trip, its transfer plan, and the other options in one line each. */
+  function tripCard(trip) {
+    if (!trip || !trip.options || !trip.options.length) return "";
+    var t = trip.options[0], n = trip.travelers || 1;
+    var plan = (t.transferPlan || []).map(function (p) {
+      var status = p.enough === true ? '<span class="asc-ok">Enough</span>'
+        : p.enough === false ? '<span class="asc-short">Short ' + num(p.points - p.have) + "</span>" : "";
+      return '<li><span>Move <b>' + num(p.points) + "</b> " + esc(p.from) + (p.have ? " (you have " + num(p.have) + ")" : "") + "</span>" + status + "</li>";
+    }).join("");
+    var others = trip.options.slice(1).map(function (o) {
+      return "<li>" + esc(shortDay(o.out.date)) + " to " + esc(shortDay(o.back.date)) + ", " + num(o.milesTotal) + " miles total" + (o.gateway ? " (West Coast)" : "") + "</li>";
+    }).join("");
+    return '<div class="asc-trip">' +
+      '<div class="asc-trip-head"><b>Your trip plan</b><span>' + n + (n === 1 ? " traveler" : " travelers") + " · " + esc(trip.cabin || t.out.cabin) + " · " + t.nights + " nights</span></div>" +
+      tripLeg("Way out", t.out) + tripLeg("Way back", t.back) +
+      (t.gateway ? '<div class="asc-trip-note">This plan uses a West Coast gateway. Add a separate Hawaii flight, with time to spare.</div>' : "") +
+      '<div class="asc-trip-total"><span>Total for ' + n + "</span><b>" + num(t.milesTotal) + " miles</b></div>" +
+      '<div class="asc-seat-sub">Plus taxes and fees. Cached results: confirm both seats before you transfer.</div>' +
+      (plan ? '<div class="asc-leg-k">Transfer plan</div><ul class="asc-plan">' + plan + "</ul>"
+        : '<div class="asc-trip-note">None of your saved cards transfer to these programs.</div>') +
+      (others ? '<div class="asc-leg-k">Other options</div><ul class="asc-others">' + others + "</ul>" : "") +
+      "</div>";
+  }
+
   function bubble(m) {
     if (m.role === "user") return '<div class="asc-msg me"><div class="asc-b">' + esc(m.content) + "</div></div>";
     return '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28">' +
-      '<div class="asc-b' + (m.error ? " err" : "") + '">' + fmt(m.content) + seatCards(m.seats) +
+      '<div class="asc-b' + (m.error ? " err" : "") + '">' + fmt(m.content) + tripCard(m.trip) + seatCards(m.seats) +
       (m.handoff ? textBtn("asc-textbtn inline") : "") + "</div></div>";
   }
 
@@ -266,7 +308,7 @@
       } else {
         if (res.b.textNumber && info) info.textNumber = res.b.textNumber;
         if (info && typeof res.b.remaining === "number") info.remaining = res.b.remaining;
-        state.msgs.push({ role: "assistant", content: res.b.reply, handoff: !!res.b.handoff, seats: res.b.seats || null });
+        state.msgs.push({ role: "assistant", content: res.b.reply, handoff: !!res.b.handoff, seats: res.b.seats || null, trip: res.b.trip || null });
       }
     }).catch(function () {
       state.msgs.push({ role: "assistant", error: true, content: ERRORS.ai_unavailable });
