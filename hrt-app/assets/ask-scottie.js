@@ -18,9 +18,8 @@
      (Scottie, Oct 18). Alerts still work in the chat. Set to true to bring it back. */
   var HOME_CARD = false;
   var SUGGEST = [
-    "How should I use my points for Japan?",
-    "Which of my cards should I use at Foodland?",
-    "Where are my credits to use?"
+    "I need help redeeming my points",
+    "Help me plan my next trip with points"
   ];
 
   var fab = null, pop = null, host = null;
@@ -286,7 +285,7 @@
     var log = document.getElementById("ascLog"); if (!log) return;
     var hello = {
       role: "assistant",
-      content: "Aloha" + (info && info.firstName ? " " + info.firstName : "") + "! I can see the cards in your My Wallet. What are we working on today?"
+      content: "Aloha" + (info && info.firstName ? " " + info.firstName : "") + "! Need help redeeming your points or planning your next trip? I can see the cards in your My Wallet, so tell me where you want to go."
     };
     log.innerHTML =
       '<p class="asc-note">Ask Scottie is the AI version of me, trained on my tips. It can make mistakes, so double check before you transfer points. For anything personal, text the real me.</p>' +
