@@ -546,8 +546,7 @@ const MAX_ALERTS = 3;
 const WATCH_TOOL = {
   name: "watch_seats",
   description:
-    "Save a seat alert: HRT checks this route a few times a day and shows newly opened award seats on the member's dashboard " +
-    "and in this chat. Use only when the member asks you to watch, track or alert them about a route. Max 3 alerts per member. " +
+    "Save a seat alert: HRT checks this route a few times a day and shows newly opened award seats in this chat. Use only when the member asks you to watch, track or alert them about a route. Max 3 alerts per member. " +
     "Ask for anything missing first.",
   input_schema: {
     type: "object",
@@ -562,6 +561,12 @@ const WATCH_TOOL = {
     },
     required: ["origin", "destination", "start_date", "end_date", "cabin", "travelers"]
   }
+};
+
+const UNWATCH_TOOL = {
+  name: "stop_watching",
+  description: "Delete one of the member's seat alerts when they ask you to stop watching a route. Use the id from their alert list.",
+  input_schema: { type: "object", properties: { alert_id: { type: "string" } }, required: ["alert_id"] }
 };
 
 function checkWatch(w) {
@@ -669,7 +674,7 @@ async function addAlerts(env, request, m, inputs) {
   const list = (await loadAlerts(env, m.id)).filter((a) => a.end >= today);
   const fresh = qs.filter((q) => !list.some((a) => sameRoute(a, q)));
   if (list.length + fresh.length > MAX_ALERTS) {
-    return { error: "full", note: "You can watch " + MAX_ALERTS + " routes at a time. Remove one on your Dashboard first." };
+    return { error: "full", note: "You can watch " + MAX_ALERTS + " routes at a time. Ask me to stop watching one first." };
   }
   const ctx = fresh.length ? await alertCtx(env, request, m) : null;
   for (const q of fresh) {
@@ -698,7 +703,7 @@ function watchFromPlan(q) {
 
 function describeAlerts(list) {
   if (!list.length) return "(none yet)";
-  return list.map((a) => "- " + a.origin + " to " + a.destination + ", " + a.cabin + " for " + a.travelers + ", departing " + a.start + " to " + a.end +
+  return list.map((a) => "- [id " + a.id + "] " + a.origin + " to " + a.destination + ", " + a.cabin + " for " + a.travelers + ", departing " + a.start + " to " + a.end +
     (a.maxMiles ? ", under " + a.maxMiles + " miles" : "") + (a.best ? ". Cheapest seen: " + a.best.miles + " miles on " + a.best.date : ". Nothing seen yet")).join("\n");
 }
 
@@ -732,11 +737,11 @@ function memberContext(m, walletText, opts, partnerText) {
     "- If a plan uses a West Coast gateway, say plainly they need a separate Hawaii to West Coast flight and should leave a buffer.",
     "- If a plan is short on points, say by how much and suggest the closest fix (a different date, a cheaper cabin one way, or another card's points). Never suggest applying for a new card: that is a handoff.",
     "",
-    "SEAT ALERTS (" + MAX_ALERTS + " at a time; HRT checks a few times a day and shows new seats on their Dashboard and in this chat; email alerts are not ready yet):",
+    "SEAT ALERTS (" + MAX_ALERTS + " at a time; HRT checks a few times a day and shows new seats in this chat, with a badge on the Ask Scottie button; email alerts are not ready yet):",
     "- Their alerts now:",
     opts.alertsText || "(none yet)",
     "- After a search or trip plan, if nothing fits, too few seats, or the miles are high, offer to watch it: add " + OFFER + " on its own line at the end and ask in one short sentence if they want you to watch it. The app shows Yes and No buttons. Do not offer every time, and never when they already watch that route or have " + MAX_ALERTS + " alerts.",
-    "- If they ask you to watch a route, use watch_seats. They remove alerts on the My Seat Alerts card on their Dashboard.",
+    "- If they ask you to watch a route, use watch_seats. If they ask what you're watching, list it from above (never show the ids). To stop one, use stop_watching.",
     "",
     "HOW YOUR ANSWER IS SHOWN:",
     "- Plain text in a phone chat bubble. Keep it short. You may use **bold** and short lists with '- '. No headings, no tables.",
@@ -862,7 +867,7 @@ export async function onRequestPost({ request, env }) {
     { type: "text", text: "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
     { type: "text", text: "" }
   ];
-  const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL, WATCH_TOOL] : undefined;
+  const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL, WATCH_TOOL, UNWATCH_TOOL] : undefined;
   const ctx = { held: memberBanks(wallet, catalog), partners, bonuses, budget: budgetFrom(wallet, null) };
   const alerts = canSearch ? (await loadAlerts(env, m.id)).filter((a) => a.end >= hawaiiDate()) : [];
   system[2].text = memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners));
@@ -901,7 +906,13 @@ export async function onRequestPost({ request, env }) {
           }
         } else if (u.name === "watch_seats") {
           result = await addAlerts(env, request, m, [u.input || {}]);
-          if (result.ok) { watched = result.alerts; result = { ok: true, added: result.added, note: "Saved. Tell them you will show new seats on their Dashboard and here in the chat." }; }
+          if (result.ok) { watched = result.alerts; result = { ok: true, added: result.added, note: "Saved. Tell them you will show new seats here in the chat, with a badge on the Ask Scottie button." }; }
+        } else if (u.name === "stop_watching") {
+          const id = String((u.input || {}).alert_id || "");
+          const before = await loadAlerts(env, m.id);
+          const kept = before.filter((a) => a.id !== id);
+          if (kept.length === before.length) result = { error: "No alert with that id." };
+          else { await saveAlerts(env, m.id, kept); result = { ok: true, note: "Stopped. Confirm in one short sentence." }; }
         } else if (u.name !== "search_award_seats") {
           result = { error: "Unknown tool." };
         } else {

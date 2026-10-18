@@ -14,6 +14,9 @@
   var API = "/api/ask-scottie";
   var PHOTO = "assets/scottie.jpg";
   var STORE = "hrtAskScottie.v1";
+  /* The My Seat Alerts card on the Dashboard home is switched off for now
+     (Scottie, Oct 18). Alerts still work in the chat. Set to true to bring it back. */
+  var HOME_CARD = false;
   var SUGGEST = [
     "How should I use my points for Japan?",
     "Which of my cards should I use at Foodland?",
@@ -264,7 +267,7 @@
     if (!m.watch || !m.watch.length) return "";
     var st = m.watchState || "";
     if (st === "no") return "";
-    if (st === "done") return '<div class="asc-watched">&#10003; Watching' + (m.watch.length > 1 ? " both flights" : " this route") + ". New seats will show on your Dashboard and here.</div>";
+    if (st === "done") return '<div class="asc-watched">&#10003; Watching' + (m.watch.length > 1 ? " both flights" : " this route") + ". New seats will show here in the chat.</div>";
     if (st.indexOf("err:") === 0) return '<div class="asc-watched err">' + esc(st.slice(4)) + "</div>";
     var saving = st === "saving";
     return '<div class="asc-watch">' +
@@ -443,6 +446,7 @@
       fab.setAttribute("aria-label", n ? "Ask Scottie, " + n + " new seat alerts" : "Ask Scottie");
     }
     var home = document.querySelector("#v-home .content"); if (!home || !alerts) return;
+    if (!HOME_CARD) { var old = document.getElementById("ascAlerts"); if (old) old.remove(); return; }
     var card = document.getElementById("ascAlerts");
     if (!card) {
       card = document.createElement("div");
