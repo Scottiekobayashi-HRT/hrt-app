@@ -15,6 +15,7 @@
      ASK_MODEL              variable optional, defaults to claude-sonnet-5-5
      DAILY_MESSAGES         variable optional, messages per member per day (default 40)
      DAILY_SEARCHES         variable optional, award searches per member per day (default 15)
+     ALERT_EVERY_HOURS      variable optional, hours between seat alert checks (default 6)
 
    Who gets what (see the rulebook):
      ʻOhana (HRT Client plan)  coach mode, My Wallet, seats.aero when asked
@@ -531,6 +532,176 @@ async function planTrip(env, q, ctx, takeSearch) {
   };
 }
 
+/* ---------------------------- seat alerts ----------------------------
+   ʻOhana only. A member's alerts live in KV under "alerts:<memberId>".
+   There is no timer yet: alerts are checked when the member opens the
+   dashboard, at most once every ALERT_EVERY_HOURS (default 6) per alert.
+   The first check of a new alert only records what is already there, so
+   the member hears about seats that open up AFTER they asked.
+   Email comes later (a timer Worker plus Resend). */
+
+const OFFER = "[[OFFER_WATCH]]";
+const MAX_ALERTS = 3;
+
+const WATCH_TOOL = {
+  name: "watch_seats",
+  description:
+    "Save a seat alert: HRT checks this route a few times a day and shows newly opened award seats on the member's dashboard " +
+    "and in this chat. Use only when the member asks you to watch, track or alert them about a route. Max 3 alerts per member. " +
+    "Ask for anything missing first.",
+  input_schema: {
+    type: "object",
+    properties: {
+      origin: { type: "string", description: "Origin airport code(s), comma separated" },
+      destination: { type: "string", description: "Destination airport code(s), comma separated" },
+      start_date: { type: "string", description: "First departure date to watch, YYYY-MM-DD" },
+      end_date: { type: "string", description: "Last departure date to watch, YYYY-MM-DD, at most 60 days after start_date" },
+      cabin: { type: "string", enum: ["economy", "premium", "business", "first"] },
+      travelers: { type: "integer", minimum: 1, maximum: 9 },
+      max_miles: { type: "integer", description: "Optional: only alert at or under this many miles per person" }
+    },
+    required: ["origin", "destination", "start_date", "end_date", "cabin", "travelers"]
+  }
+};
+
+function checkWatch(w) {
+  const q = checkSearch({
+    origin: w.origin, destination: w.destination,
+    start_date: w.start_date || w.start, end_date: w.end_date || w.end,
+    cabin: w.cabin, travelers: w.travelers
+  });
+  if (q.error) return q;
+  const max = parseInt(w.max_miles || w.maxMiles, 10);
+  q.maxMiles = max > 0 ? max : null;
+  return q;
+}
+
+async function loadAlerts(env, id) {
+  try {
+    const v = JSON.parse((await env.ASK_SCOTTIE.get("alerts:" + id)) || "[]");
+    return Array.isArray(v) ? v : [];
+  } catch (e) { return []; }
+}
+async function saveAlerts(env, id, list) {
+  await env.ASK_SCOTTIE.put("alerts:" + id, JSON.stringify(list));
+}
+
+function seatKey(r) { return [r.date, r.program, r.from, r.to].join("|"); }
+function sameRoute(a, q) {
+  return a.origin === q.origin && a.destination === q.destination && a.start === q.start && a.end === q.end && a.cabin === q.cabin && a.travelers === q.travelers;
+}
+
+/* Search once for an alert. New = a seat not in the last snapshot, or the same
+   seat for fewer miles. Returns how many new seats were found. */
+async function checkAlert(env, a, ctx, baseline) {
+  const today = hawaiiDate();
+  a.checked = Date.now();
+  let res;
+  try {
+    res = await searchSeats(env, { origin: a.origin, destination: a.destination, start: a.start < today ? today : a.start, end: a.end, cabin: a.cabin, travelers: a.travelers, keep: 60 }, ctx);
+  } catch (e) { return 0; }
+  if (res.error) return 0;
+  const before = a.seen || {}, now = {}, fresh = [];
+  res.results.forEach((r) => {
+    const k = seatKey(r);
+    now[k] = Math.min(now[k] || Infinity, r.miles);
+    const was = before[k];
+    if (!baseline && (was === undefined || r.miles < was) && (!a.maxMiles || r.miles <= a.maxMiles)) fresh.push(r);
+  });
+  a.seen = now;
+  a.best = res.results.length ? { miles: res.results[0].miles, date: res.results[0].date, count: res.results.length } : null;
+  if (fresh.length) {
+    const stamp = new Date().toISOString();
+    fresh.forEach((r) => { r.foundAt = stamp; });
+    const keys = fresh.map(seatKey);
+    a.hits = fresh.concat((a.hits || []).filter((h) => keys.indexOf(seatKey(h)) < 0))
+      .filter((h) => h.date >= today).slice(0, 6);
+    a.unread = (a.unread || 0) + fresh.length;
+  }
+  return fresh.length;
+}
+
+function publicAlert(a) {
+  return {
+    id: a.id, origin: a.origin, destination: a.destination, start: a.start, end: a.end,
+    cabin: a.cabin, travelers: a.travelers, maxMiles: a.maxMiles || null,
+    checked: a.checked ? new Date(a.checked).toISOString() : null,
+    best: a.best || null, hits: a.hits || [], unread: a.unread || 0
+  };
+}
+
+async function alertCtx(env, request, m) {
+  const [catalog, partners, bonuses] = await Promise.all([loadCatalog(env, request), loadPartners(env, request), loadBonuses()]);
+  return { held: memberBanks((m.member.json || {}).wallet, catalog), partners, bonuses };
+}
+
+/* Drop past alerts and check the ones that are due. */
+async function refreshAlerts(env, request, m) {
+  const today = hawaiiDate();
+  const list = await loadAlerts(env, m.id);
+  const live = list.filter((a) => a.end >= today);
+  const every = (parseFloat(env.ALERT_EVERY_HOURS || "6") || 6) * 3600000;
+  const due = live.filter((a) => Date.now() - (a.checked || 0) >= every);
+  let changed = live.length !== list.length;
+  if (due.length && env.SEATS_AERO_KEY) {
+    const ctx = await alertCtx(env, request, m);
+    for (const a of due) {
+      if ((await spend(env, "alertcheck", m.id, MAX_ALERTS * 6)) < 0) break;
+      await checkAlert(env, a, ctx, !a.checked);
+      changed = true;
+    }
+  }
+  if (changed) await saveAlerts(env, m.id, live);
+  return live;
+}
+
+/* Add up to 2 alerts (a trip watches the way out and the way back).
+   Each new alert gets its first, silent check right away. */
+async function addAlerts(env, request, m, inputs) {
+  const qs = [];
+  for (const w of inputs.slice(0, 2)) {
+    const q = checkWatch(w || {});
+    if (q.error) return { error: q.error };
+    qs.push(q);
+  }
+  if (!qs.length) return { error: "Nothing to watch." };
+  const today = hawaiiDate();
+  const list = (await loadAlerts(env, m.id)).filter((a) => a.end >= today);
+  const fresh = qs.filter((q) => !list.some((a) => sameRoute(a, q)));
+  if (list.length + fresh.length > MAX_ALERTS) {
+    return { error: "full", note: "You can watch " + MAX_ALERTS + " routes at a time. Remove one on your Dashboard first." };
+  }
+  const ctx = fresh.length ? await alertCtx(env, request, m) : null;
+  for (const q of fresh) {
+    const a = {
+      id: crypto.randomUUID().slice(0, 8), origin: q.origin, destination: q.destination, start: q.start, end: q.end,
+      cabin: q.cabin, travelers: q.travelers, maxMiles: q.maxMiles, created: Date.now(), checked: 0, seen: {}, hits: [], unread: 0
+    };
+    await checkAlert(env, a, ctx, true);
+    list.push(a);
+  }
+  await saveAlerts(env, m.id, list);
+  return { ok: true, added: fresh.length, alerts: list.map(publicAlert) };
+}
+
+/* What the "Yes, watch it" button would save, from the last search or trip plan. */
+function watchFromSearch(q) {
+  return [{ origin: q.origin, destination: q.destination, start: q.start, end: q.end, cabin: q.cabin, travelers: q.travelers }];
+}
+function watchFromPlan(q) {
+  const backEnd = addDays(q.end, q.nightsMax);
+  return [
+    { origin: q.origin, destination: q.destination, start: q.start, end: q.end, cabin: q.cabin, travelers: q.travelers },
+    { origin: q.destination, destination: q.origin, start: addDays(q.start, q.nightsMin), end: backEnd, cabin: q.cabin, travelers: q.travelers }
+  ];
+}
+
+function describeAlerts(list) {
+  if (!list.length) return "(none yet)";
+  return list.map((a) => "- " + a.origin + " to " + a.destination + ", " + a.cabin + " for " + a.travelers + ", departing " + a.start + " to " + a.end +
+    (a.maxMiles ? ", under " + a.maxMiles + " miles" : "") + (a.best ? ". Cheapest seen: " + a.best.miles + " miles on " + a.best.date : ". Nothing seen yet")).join("\n");
+}
+
 /* ----------------------------- prompts ----------------------------- */
 
 function memberContext(m, walletText, opts, partnerText) {
@@ -560,6 +731,12 @@ function memberContext(m, walletText, opts, partnerText) {
     "- The app shows the best plan as a trip card (both flights, total points, transfer plan). In your message: say why it is the best fit in a sentence or two, mention one alternative if it is meaningfully different, then the booking order: confirm both seats, transfer, book the way out and the way back.",
     "- If a plan uses a West Coast gateway, say plainly they need a separate Hawaii to West Coast flight and should leave a buffer.",
     "- If a plan is short on points, say by how much and suggest the closest fix (a different date, a cheaper cabin one way, or another card's points). Never suggest applying for a new card: that is a handoff.",
+    "",
+    "SEAT ALERTS (" + MAX_ALERTS + " at a time; HRT checks a few times a day and shows new seats on their Dashboard and in this chat; email alerts are not ready yet):",
+    "- Their alerts now:",
+    opts.alertsText || "(none yet)",
+    "- After a search or trip plan, if nothing fits, too few seats, or the miles are high, offer to watch it: add " + OFFER + " on its own line at the end and ask in one short sentence if they want you to watch it. The app shows Yes and No buttons. Do not offer every time, and never when they already watch that route or have " + MAX_ALERTS + " alerts.",
+    "- If they ask you to watch a route, use watch_seats. They remove alerts on the My Seat Alerts card on their Dashboard.",
     "",
     "HOW YOUR ANSWER IS SHOWN:",
     "- Plain text in a phone chat bubble. Keep it short. You may use **bold** and short lists with '- '. No headings, no tables.",
@@ -631,6 +808,11 @@ export async function onRequestGet({ request, env }) {
   if (missing) return json({ ok: false, error: "not_configured", missing }, 503);
   const m = await loadMember(env, bearer(request));
   if (m.error) return json({ ok: false, error: m.error }, 401);
+  if (new URL(request.url).searchParams.get("alerts")) {
+    if (!m.client || !env.SEATS_AERO_KEY) return json({ ok: true, client: m.client, alerts: [], unread: 0 });
+    const list = await refreshAlerts(env, request, m);
+    return json({ ok: true, client: true, max: MAX_ALERTS, alerts: list.map(publicAlert), unread: list.reduce((n, a) => n + (a.unread || 0), 0) });
+  }
   const limit = parseInt(env.DAILY_MESSAGES || "40", 10);
   return json({
     ok: true,
@@ -649,6 +831,7 @@ export async function onRequestPost({ request, env }) {
 
   let body;
   try { body = await request.json(); } catch (e) { return json({ error: "bad_request" }, 400); }
+  if (body && body.action) return alertAction(request, env, body);
   const messages = cleanHistory(body && body.messages);
   if (!messages) return json({ error: "bad_request" }, 400);
 
@@ -679,13 +862,16 @@ export async function onRequestPost({ request, env }) {
     { type: "text", text: "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
     { type: "text", text: "" }
   ];
-  const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL] : undefined;
+  const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL, WATCH_TOOL] : undefined;
   const ctx = { held: memberBanks(wallet, catalog), partners, bonuses, budget: budgetFrom(wallet, null) };
-  system[2].text = memberContext(m, describeWallet(wallet, catalog), { searchesLeft }, describePartners(ctx.held, partners));
+  const alerts = canSearch ? (await loadAlerts(env, m.id)).filter((a) => a.end >= hawaiiDate()) : [];
+  system[2].text = memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners));
 
   let convo = messages.slice();
   let seats = null;
   let trip = null;
+  let watch = null;
+  let watched = null;
   let reply = "";
   try {
     const ROUNDS = 4;
@@ -710,8 +896,12 @@ export async function onRequestPost({ request, env }) {
             const planCtx = Object.assign({}, ctx, { budget: budgetFrom(wallet, said) });
             result = await planTrip(env, q, planCtx, async () => (await spend(env, "search", m.id, searchLimit)) >= 0);
             if (result.trips && result.trips.length) { trip = { travelers: result.travelers, cabin: q.cabin, options: result.trips }; seats = null; }
+            if (!result.error) watch = watchFromPlan(q);
             if (result.error) console.log("ask-scottie plan problem", result.error);
           }
+        } else if (u.name === "watch_seats") {
+          result = await addAlerts(env, request, m, [u.input || {}]);
+          if (result.ok) { watched = result.alerts; result = { ok: true, added: result.added, note: "Saved. Tell them you will show new seats on their Dashboard and here in the chat." }; }
         } else if (u.name !== "search_award_seats") {
           result = { error: "Unknown tool." };
         } else {
@@ -723,6 +913,7 @@ export async function onRequestPost({ request, env }) {
             catch (e) { result = { error: "The award search service did not answer." }; }
             if (result.error) console.log("ask-scottie search problem", result.error);
             if (result.results) seats = result.results.slice(0, 3);
+            if (!result.error) watch = watchFromSearch(q);
           }
         }
         if (result.error) result.note = "Do not retry the same search. Answer the member with what you know, or suggest other dates.";
@@ -737,7 +928,8 @@ export async function onRequestPost({ request, env }) {
 
   if (!reply) reply = "Sorry, I got tangled up on that one. Could you ask it a different way?";
   const handoff = reply.indexOf(HANDOFF) > -1;
-  reply = noDashes(reply.split(HANDOFF).join("").trim());
+  const offer = reply.indexOf(OFFER) > -1 && watch && !watched && alerts.length + watch.length <= MAX_ALERTS;
+  reply = noDashes(reply.split(HANDOFF).join("").split(OFFER).join("").trim());
 
   return json({
     reply,
@@ -745,6 +937,33 @@ export async function onRequestPost({ request, env }) {
     textNumber: handoff ? (env.SCOTTIE_TEXT_NUMBER || "") : "",
     seats,
     trip,
+    watch: offer ? watch : null,
+    watched: watched ? true : false,
     remaining: left
   });
+}
+
+/* POST { action: "watch" | "unwatch" | "read", ... } from the chat buttons and
+   the Dashboard card. No AI involved, so these don't count as messages. */
+async function alertAction(request, env, body) {
+  const m = await loadMember(env, bearer(request));
+  if (m.error) return json({ error: m.error }, 401);
+  if (!m.client) return json({ error: "ohana_only" }, 403);
+  if (!env.SEATS_AERO_KEY) return json({ error: "not_configured" }, 503);
+  if (body.action === "watch") {
+    const r = await addAlerts(env, request, m, Array.isArray(body.watch) ? body.watch : [body.watch]);
+    return json(r, r.error ? 400 : 200);
+  }
+  const list = await loadAlerts(env, m.id);
+  if (body.action === "unwatch") {
+    const left = list.filter((a) => a.id !== String(body.id || ""));
+    await saveAlerts(env, m.id, left);
+    return json({ ok: true, alerts: left.map(publicAlert) });
+  }
+  if (body.action === "read") {
+    list.forEach((a) => { a.unread = 0; });
+    await saveAlerts(env, m.id, list);
+    return json({ ok: true });
+  }
+  return json({ error: "bad_request" }, 400);
 }

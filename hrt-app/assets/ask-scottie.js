@@ -22,6 +22,7 @@
 
   var fab = null, pop = null, host = null;
   var state = null, info = null, busy = false, loading = false, isOpen = false;
+  var alerts = null, alertsLoading = false;
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/\s*[–—]\s*/g, ", ")
@@ -78,7 +79,7 @@
     fab.className = "asc-fab";
     fab.setAttribute("aria-haspopup", "dialog");
     fab.setAttribute("aria-expanded", "false");
-    fab.innerHTML = '<img src="' + PHOTO + '" alt="" width="44" height="44"><span>Ask Scottie</span>';
+    fab.innerHTML = '<img src="' + PHOTO + '" alt="" width="44" height="44"><span>Ask Scottie</span><b class="asc-dot" hidden></b>';
     fab.addEventListener("click", function () { toggle(!isOpen); });
 
     pop = document.createElement("div");
@@ -114,6 +115,8 @@
     if (show) build();
     if (fab) fab.hidden = !show;
     if (!show && isOpen) toggle(false);
+    if (show && !alerts) loadAlerts();
+    if (!show) { var c = document.getElementById("ascAlerts"); if (c) c.remove(); }
   }
 
   /* ------------------------------ screens ------------------------------ */
@@ -154,10 +157,16 @@
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); }
     });
     input.addEventListener("input", function () { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 120) + "px"; });
+    document.getElementById("ascLog").addEventListener("click", function (e) {
+      var y = e.target.closest("[data-watch-yes]"), n = e.target.closest("[data-watch-no]");
+      if (y) watchIt(parseInt(y.getAttribute("data-watch-yes"), 10));
+      if (n) { var mm = state.msgs[parseInt(n.getAttribute("data-watch-no"), 10)]; if (mm) { mm.watchState = "no"; save(); draw(); } }
+    });
     document.getElementById("ascChips").addEventListener("click", function (e) {
       var b = e.target.closest("[data-q]"); if (b) send(b.getAttribute("data-q"));
       if (e.target.closest("[data-reset]")) { state = { msgs: [] }; save(); draw(); }
     });
+    showNewSeats();
     draw();
   }
 
@@ -250,11 +259,24 @@
       "</div>";
   }
 
-  function bubble(m) {
+  /* "Want me to watch this?" Yes / No under a reply. */
+  function watchOffer(m, i) {
+    if (!m.watch || !m.watch.length) return "";
+    var st = m.watchState || "";
+    if (st === "no") return "";
+    if (st === "done") return '<div class="asc-watched">&#10003; Watching' + (m.watch.length > 1 ? " both flights" : " this route") + ". New seats will show on your Dashboard and here.</div>";
+    if (st.indexOf("err:") === 0) return '<div class="asc-watched err">' + esc(st.slice(4)) + "</div>";
+    var saving = st === "saving";
+    return '<div class="asc-watch">' +
+      '<button type="button" class="asc-wbtn yes" data-watch-yes="' + i + '"' + (saving ? " disabled" : "") + ">" + (saving ? "Saving..." : (m.watch.length > 1 ? "Yes, watch both flights" : "Yes, watch it")) + "</button>" +
+      (saving ? "" : '<button type="button" class="asc-wbtn" data-watch-no="' + i + '">No thanks</button>') + "</div>";
+  }
+
+  function bubble(m, i) {
     if (m.role === "user") return '<div class="asc-msg me"><div class="asc-b">' + esc(m.content) + "</div></div>";
     return '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28">' +
-      '<div class="asc-b' + (m.error ? " err" : "") + '">' + fmt(m.content) + tripCard(m.trip) + seatCards(m.seats) +
-      (m.handoff ? textBtn("asc-textbtn inline") : "") + "</div></div>";
+      '<div class="asc-b' + (m.error ? " err" : "") + (m.alert ? " alert" : "") + '">' + fmt(m.content) + tripCard(m.trip) + seatCards(m.seats) +
+      watchOffer(m, i) + (m.handoff ? textBtn("asc-textbtn inline") : "") + "</div></div>";
   }
 
   function draw() {
@@ -265,9 +287,8 @@
     };
     log.innerHTML =
       '<p class="asc-note">Ask Scottie is the AI version of me, trained on my tips. It can make mistakes, so double check before you transfer points. For anything personal, text the real me.</p>' +
-      bubble(hello) + state.msgs.map(bubble).join("") +
+      bubble(hello, -1) + state.msgs.map(bubble).join("") +
       (busy ? '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28"><div class="asc-b asc-typing" aria-label="Scottie is typing"><i></i><i></i><i></i></div></div>' : "");
-    log.scrollTop = log.scrollHeight;
     var chips = document.getElementById("ascChips");
     chips.innerHTML = (state.msgs.length ? "" : SUGGEST.map(function (q) {
       return '<button type="button" class="asc-chip" data-q="' + esc(q) + '">' + esc(q) + "</button>";
@@ -275,6 +296,8 @@
     var left = document.getElementById("ascLeft");
     if (left) left.textContent = info && typeof info.remaining === "number" && info.remaining <= 10 ? info.remaining + " messages left today" : "";
     var btn = host.querySelector(".asc-send"); if (btn) btn.disabled = busy;
+    /* scroll last, after the chips row has changed the log's height */
+    log.scrollTop = log.scrollHeight;
   }
 
   var ERRORS = {
@@ -308,7 +331,8 @@
       } else {
         if (res.b.textNumber && info) info.textNumber = res.b.textNumber;
         if (info && typeof res.b.remaining === "number") info.remaining = res.b.remaining;
-        state.msgs.push({ role: "assistant", content: res.b.reply, handoff: !!res.b.handoff, seats: res.b.seats || null, trip: res.b.trip || null });
+        state.msgs.push({ role: "assistant", content: res.b.reply, handoff: !!res.b.handoff, seats: res.b.seats || null, trip: res.b.trip || null, watch: res.b.watch || null });
+        if (res.b.watched) loadAlerts(true);
       }
     }).catch(function () {
       state.msgs.push({ role: "assistant", error: true, content: ERRORS.ai_unavailable });
@@ -330,6 +354,123 @@
         info = b; state = load(); chat();
       })
       .catch(function () { loading = false; notice(ERRORS.ai_unavailable); });
+  }
+
+  /* ------------------------------ seat alerts ------------------------------ */
+
+  function routeName(a) { return a.origin.replace(/,/g, "/") + " to " + a.destination.replace(/,/g, "/"); }
+  function unreadCount() { return alerts ? alerts.alerts.reduce(function (n, a) { return n + (a.unread || 0); }, 0) : 0; }
+
+  /* Ask the server for this member's alerts. It checks any that are due. */
+  function loadAlerts(force) {
+    if (alertsLoading || (alerts && !force)) return;
+    alertsLoading = true;
+    fetch(API + "?alerts=1", { headers: { authorization: "Bearer " + token() }, cache: "no-store" })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (b) {
+        alertsLoading = false;
+        if (!b.ok || !b.client) return;
+        alerts = { alerts: b.alerts || [], max: b.max || 3 };
+        paintAlerts();
+        if (isOpen && document.getElementById("ascLog")) { showNewSeats(); draw(); }
+      })
+      .catch(function () { alertsLoading = false; });
+  }
+
+  function post(body) {
+    return fetch(API, { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + token() }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (b) { b.httpOk = r.ok; return b; }); });
+  }
+
+  function watchIt(i) {
+    var m = state.msgs[i]; if (!m || !m.watch || m.watchState === "saving") return;
+    m.watchState = "saving"; draw();
+    post({ action: "watch", watch: m.watch }).then(function (b) {
+      if (b.httpOk && b.ok) { m.watchState = "done"; alerts = { alerts: b.alerts || [], max: (alerts && alerts.max) || 3 }; paintAlerts(); }
+      else m.watchState = "err:" + (b.error === "full" ? (b.note || "You're already watching 3 routes.") : "I couldn't save that alert. Try again in a bit.");
+    }).catch(function () { m.watchState = "err:I couldn't save that alert. Try again in a bit."; })
+      .then(function () { save(); draw(); });
+  }
+
+  /* New seats become a message from Scottie the next time the chat opens. */
+  function showNewSeats() {
+    if (!alerts || !state || !unreadCount()) return;
+    alerts.alerts.forEach(function (a) {
+      if (!a.unread) return;
+      var fresh = a.hits.slice(0, Math.min(a.unread, 3));
+      state.msgs.push({
+        role: "assistant", alert: true,
+        content: "Good news! " + (a.unread === 1 ? "A seat opened up" : a.unread + " new seats opened up") + " on **" + routeName(a) + "** in " + a.cabin + " for " + a.travelers + ". These are cached results, so confirm on the airline's site before you transfer points.",
+        seats: fresh
+      });
+      a.unread = 0;
+    });
+    save(); paintAlerts();
+    post({ action: "read" }).catch(function () {});
+  }
+
+  function openAlert(id) {
+    var a = alerts && alerts.alerts.filter(function (x) { return x.id === id; })[0];
+    if (!a) return;
+    toggle(true);
+    var go = function () {
+      if (!state) return setTimeout(go, 200);
+      if (a.unread) return;
+      state.msgs.push({
+        role: "assistant", alert: true,
+        content: a.hits.length ? "Here's what I've found on **" + routeName(a) + "** since you asked me to watch it:"
+          : "Nothing new on **" + routeName(a) + "** yet" + (a.best ? ". The cheapest I can see is " + num(a.best.miles) + " miles on " + shortDay(a.best.date) : "") + ". I'll keep checking and show you here when seats open up.",
+        seats: a.hits.slice(0, 3)
+      });
+      save(); draw();
+    };
+    go();
+  }
+
+  function removeAlert(id, btn) {
+    if (btn) btn.disabled = true;
+    post({ action: "unwatch", id: id }).then(function (b) {
+      if (b.ok) { alerts.alerts = b.alerts || []; paintAlerts(); } else if (btn) btn.disabled = false;
+    }).catch(function () { if (btn) btn.disabled = false; });
+  }
+
+  /* The red dot on the button and the My Seat Alerts card on the Dashboard home. */
+  function paintAlerts() {
+    var n = unreadCount();
+    if (fab) {
+      var dot = fab.querySelector(".asc-dot");
+      if (dot) { dot.hidden = !n; dot.textContent = n > 9 ? "9+" : String(n || ""); }
+      fab.setAttribute("aria-label", n ? "Ask Scottie, " + n + " new seat alerts" : "Ask Scottie");
+    }
+    var home = document.querySelector("#v-home .content"); if (!home || !alerts) return;
+    var card = document.getElementById("ascAlerts");
+    if (!card) {
+      card = document.createElement("div");
+      card.id = "ascAlerts"; card.className = "card asc-al";
+      var top = home.querySelector(".toprow");
+      if (top && top.nextSibling) home.insertBefore(card, top.nextSibling); else home.appendChild(card);
+      card.addEventListener("click", function (e) {
+        var o = e.target.closest("[data-al-open]"), x = e.target.closest("[data-al-rm]"), ask = e.target.closest("[data-al-ask]");
+        if (o) openAlert(o.getAttribute("data-al-open"));
+        if (x) removeAlert(x.getAttribute("data-al-rm"), x);
+        if (ask) toggle(true);
+      });
+    }
+    var list = alerts.alerts;
+    var rows = list.map(function (a) {
+      var status = a.unread ? '<span class="asc-al-new">' + a.unread + " new</span>"
+        : a.best ? '<span class="asc-al-best">From ' + num(a.best.miles) + " miles</span>" : '<span class="asc-al-none">Nothing yet</span>';
+      return '<li class="asc-al-row">' +
+        '<button type="button" class="asc-al-main" data-al-open="' + esc(a.id) + '"><b>' + esc(routeName(a)) + "</b>" +
+        "<small>" + esc(a.cabin.charAt(0).toUpperCase() + a.cabin.slice(1)) + " · " + a.travelers + (a.travelers === 1 ? " traveler" : " travelers") + " · " + esc(shortDay(a.start)) + " to " + esc(shortDay(a.end)) +
+        (a.maxMiles ? " · under " + num(a.maxMiles) : "") + "</small></button>" + status +
+        '<button type="button" class="asc-al-x" data-al-rm="' + esc(a.id) + '" aria-label="Stop watching ' + esc(routeName(a)) + '">' + ICON_X + "</button></li>";
+    }).join("");
+    card.innerHTML =
+      '<div class="sec-h"><h2>My Seat Alerts</h2><span class="note">' + (list.length ? "Checked a few times a day · " + list.length + " of " + alerts.max : "ʻOhana Members") + "</span></div>" +
+      (list.length ? '<ul class="asc-al-list">' + rows + "</ul>"
+        : '<div class="asc-al-empty"><p>Want to know when award seats open up? Ask me to watch a route and I\'ll show new seats right here.</p>' +
+          '<button type="button" class="asc-al-ask" data-al-ask><img src="' + PHOTO + '" alt="" width="26" height="26">Ask Scottie</button></div>');
   }
 
   window.addEventListener("hrt:member", sync);
