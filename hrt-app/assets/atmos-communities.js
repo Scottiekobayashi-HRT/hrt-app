@@ -631,6 +631,11 @@
       wrap.appendChild(answerChips());
       wrap.appendChild(hero(r));
       wrap.appendChild(rankCard(r));
+      wrap.appendChild(Q.next([
+        ["status", "Atmos Choose to Earn Calculator", "Distance, price or segments: which earns you more"],
+        ["atmos", "Atmos Award Calendar", "Find award seats to use your points (HRT PRO)"],
+        ["wallet", "My Wallet", "Track your Atmos card's perks and renewal date"]
+      ]));
       wrap.appendChild(Q.more("ac-math", "See the math", "Your top two, line by line", function () { return compareBody(compute()); }));
       wrap.appendChild(Q.more("ac-tune", "Fine tune", "Your card, bags, how you earn, what matters most", fineTuneBody));
       wrap.appendChild(Q.more("ac-six", "Meet the six Communities", "What each one gives you", function () { return sixBody(compute()); }));

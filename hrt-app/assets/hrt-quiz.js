@@ -197,10 +197,29 @@
       ".qz-mt{display:flex;flex-direction:column;gap:2px}",
       ".qz-mt b{font-size:15px;color:var(--text)}",
       ".qz-mt span{font-size:12.5px;color:var(--muted)}",
-      ".qz-mb{padding:0 18px 18px}"
+      ".qz-mb{padding:0 18px 18px}",
+      ".qz-go{display:grid;gap:8px;margin:4px 0 12px}.qz-go-h{font-size:13px;font-weight:800;color:var(--muted)}",
+      ".qz-go-a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;min-height:52px;box-sizing:border-box;border:1px solid var(--line);border-radius:14px;background:var(--surface);text-decoration:none}",
+      ".qz-go-a b{font-size:14.5px;color:var(--text)}.qz-go-a b:after{content:' \\2192';color:var(--coral)}.qz-go-a span{font-size:12.5px;color:var(--muted)}",
+      ".qz-go-a:hover{border-color:var(--coral)}"
     ].join("\n");
     document.head.appendChild(s);
   }
 
-  window.HRT_QUIZ = { el: el, icon: icon, question: question, answers: answers, more: more, whyList: whyList, css: css };
+  /* "Keep going": links from a calculator result to the next useful tool, so no result is a dead end.
+     items: [[route, title, line]] */
+  function next(items) {
+    var w = el("div", "qz-go");
+    w.appendChild(el("b", "qz-go-h", "Keep going"));
+    items.forEach(function (it) {
+      var a = el("a", "qz-go-a");
+      a.href = "#" + it[0]; a.setAttribute("data-route", it[0]);
+      a.appendChild(el("b", null, it[1]));
+      if (it[2]) a.appendChild(el("span", null, it[2]));
+      w.appendChild(a);
+    });
+    return w;
+  }
+
+  window.HRT_QUIZ = { el: el, icon: icon, question: question, answers: answers, more: more, whyList: whyList, next: next, css: css };
 })();

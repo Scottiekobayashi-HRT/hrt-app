@@ -262,7 +262,7 @@
       });
       var ph = el("div", "dw-ph");
       if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
-      ph.appendChild(el("span", "dw-rt", (d.origin || "") + "–" + (d.dest || "")));
+      ph.appendChild(el("span", "dw-rt", (d.origin || "") + " → " + (d.dest || "")));
       ph.appendChild(el("span", "dw-city", d.city || d.dest || ""));
       card.appendChild(ph);
 
@@ -359,7 +359,7 @@
         lock.appendChild(blur);
         var lc = el("div", "dw-lc");
         lc.appendChild(el("b", null, t.city || t.dest || ""));
-        lc.appendChild(el("span", null, (t.origin || "HNL") + "–" + (t.dest || "") + " · " + (/first/i.test(t.cabin || "") ? "first class" : "business")));
+        lc.appendChild(el("span", null, (t.origin || "HNL") + " → " + (t.dest || "") + " · " + (/first/i.test(t.cabin || "") ? "first class" : "business")));
         lc.appendChild(el("span", null, "🔒 PRO members only"));
         lock.appendChild(lc);
         prail.appendChild(lock);

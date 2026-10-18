@@ -1055,6 +1055,7 @@
       (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) + (p.approx ? " or earlier" : "") +
       ' <span class="wl-pk-days' + lvl + '">' + esc(daysLeft(p.days)) + "</span></div>" +
       (b.type === "activation" ? rotatingLine(b.card) : "") + partHtml(r) +
+      (b.id === "resy" ? '<a class="wl-pk-link" href="#resy" data-route="resy">Find a Hawaiʻi Resy spot &rarr;</a>' : "") +
       '<div class="wl-tags">' + perkTags(b, p) + "</div></div>" +
       '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
       '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
@@ -1144,8 +1145,62 @@
     if (state.msg) html += '<p class="wlm-msg" role="alert">' + esc(state.msg) + "</p>";
     return html;
   }
-  function paintMini() { if (miniHost) miniHost.innerHTML = miniHtml(); }
-  function paint() { paintMain(); paintHome(); paintAlerts(); paintMini(); }
+  function paintMini() {
+    if (miniHost) miniHost.innerHTML = miniHtml();
+    var th = document.getElementById("wl-tips-home");
+    if (th) th.innerHTML = state.wallet && !state.error ? tipsHtml(true) : "";
+  }
+  function paint() {
+    paintMain(); paintHome(); paintAlerts(); paintMini();
+    /* tell the other tools (Transfer Bonuses, Resy, Lounges) the wallet changed; see connect.js */
+    try { window.dispatchEvent(new Event("hrt:wallet")); } catch (e) {}
+  }
+
+  /* ----- Links to the other tools (connect.js) ----- */
+  /* The member's held cards and their open perks, as plain data for connect.js. */
+  function connectData() {
+    if (!state.wallet) return null;
+    var V = view(), cat = catalog();
+    var held = summarize(V, cat).rows.filter(function (r) { return r.card && !r.card.custom; }).map(function (r) {
+      return { cardId: r.entry.cardId, name: r.card.name, short: shortName(r.card.name) };
+    });
+    var perks = perkRows(V, cat).filter(function (r) { return r.period; }).map(function (r) {
+      return { cardId: r.entry.cardId, cardShort: shortName(r.card.name), perkId: r.perk.id, label: r.perk.label,
+        amount: r.part ? r.left : r.perk.amount, unit: r.perk.unit, used: !!r.used, endText: dayText(r.period.end), days: r.period.days };
+    });
+    return { demo: !!state.demo, held: held, perks: perks, client: !!member().client };
+  }
+  var TIP_ICON = {
+    transfer: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
+    resy: '<path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 3c-2 2-2 6 0 8v10"/>',
+    lounge: '<path d="M4 18v-5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v5M4 18h16M7 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3"/>',
+    atmos: '<path d="M3 15l7-2 4-8 2 1-2 7 6 1 1 2-8 1-5 5-2-1 2-4-5-1z"/>'
+  };
+  function connectTips() {
+    var C = window.HRT_CONNECT, d = connectData();
+    if (!C || !d) return [];
+    return C.tips(d, catalog().earning, window.HRT_TB_LIVE || [], window.HRT_LOUNGES || []);
+  }
+  /* "For your cards": where this wallet meets the other tools. Home shows the top 3. */
+  function tipsHtml(home) {
+    var all = connectTips(), list = all;
+    if (home) { /* a mix on the Dashboard: one of each kind first, then the rest, in order */
+      var seen = {}, first = all.filter(function (t) { if (seen[t.kind]) return false; seen[t.kind] = 1; return true; });
+      list = first.concat(all.filter(function (t) { return first.indexOf(t) < 0; })).slice(0, 3);
+      list.sort(function (a, b) { return all.indexOf(a) - all.indexOf(b); });
+    }
+    if (!list.length) return "";
+    return '<section class="wl-card wl-tips"><div class="wl-head"><h3 class="wl-h3">For your cards</h3>' +
+      '<span class="wl-dimtxt">From our other tools</span></div><ul class="wl-tiplist">' + list.map(function (t) {
+        var a = t.action || {};
+        return '<li class="wl-tip k-' + esc(t.kind) + '"><span class="wl-tip-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          (TIP_ICON[t.kind] || "") + '</svg></span><span class="wl-tip-body"><b>' + esc(t.title) + "</b><span>" + esc(t.text) + "</span>" +
+          '<a class="wl-tip-go" href="#' + esc(a.route) + '" data-cx-go="' + esc(a.route) + '"' +
+          (a.bank ? ' data-cx-bank="' + esc(a.bank) + '"' : "") + (a.bonus ? ' data-cx-bonus="' + esc(a.bonus) + '"' : "") +
+          (a.lounges ? ' data-cx-lounges="' + esc(a.lounges.join(",")) + '"' : "") + ">" + esc(a.label) + " &rarr;</a></span></li>";
+      }).join("") + "</ul>" + (home && all.length > 3 ? '<a class="wl-hm-more" href="#wallet" data-route="wallet">See all ' + all.length + " in My Wallet</a>" : "") + "</section>";
+  }
+  if (window.addEventListener) window.addEventListener("hrt:bonuses", function () { try { paintMain(); paintHome(); paintMini(); } catch (e) {} });
 
   /* ----- Dashboard home panel: totals and the next credits to use ----- */
   var homeHost;
@@ -1453,7 +1508,7 @@
     } else if (s.count) {
       if (!state.editing) html += '<div class="wl-hm-grid wl-pg-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' + viewToggle() + "</div>" +
         tilesHtml(s, perks, cardView()) + whichHtml() + "</div>" + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
-      if (!state.editing) html += datesHtml(importantDates(view(), catalog()));
+      if (!state.editing) html += tipsHtml(false) + datesHtml(importantDates(view(), catalog()));
       html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Card details</h3></div>' +
         (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
         '<ul class="wl-list">' + s.rows.map(function (r) { return rowHtml(r, perks); }).join("") + "</ul></div>";
@@ -1594,6 +1649,15 @@
       ".wl-form textarea{font:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2,var(--surface));color:var(--text);resize:vertical;min-height:60px}",
       ".wl-tl-status{display:inline-block;align-self:flex-start;font-size:11px;font-weight:800;color:#b4541f}",
       ".wl-sum.wl-sum-oh{border:1.5px solid #f2b84b}",
+      ".wl-tiplist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px}",
+      ".wl-tip{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2,var(--surface))}",
+      ".wl-tip-ic{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(217,112,64,.12);color:#c25c26}",
+      ".wl-tip.k-lounge .wl-tip-ic,.wl-tip.k-atmos .wl-tip-ic{background:rgba(58,123,181,.12);color:#2f6aa3}",
+      "[data-theme=dark] .wl-tip-ic{color:#f0a070}[data-theme=dark] .wl-tip.k-lounge .wl-tip-ic,[data-theme=dark] .wl-tip.k-atmos .wl-tip-ic{color:#8cc0ee}",
+      ".wl-tip-body{display:flex;flex-direction:column;gap:3px;min-width:0}.wl-tip-body b{font-size:14.5px;color:var(--text);line-height:1.35}.wl-tip-body span{font-size:13.5px;color:var(--muted);line-height:1.5}",
+      ".wl-tips .wl-tip-go,.wl-pk .wl-pk-link,.wl-tip-go,.wl-pk-link{align-self:flex-start;margin-top:4px;font-size:13.5px;font-weight:700;color:#c05f32;text-decoration:none;min-height:30px;display:inline-flex;align-items:center}",
+      ".wl-tip-go:hover,.wl-pk-link:hover{text-decoration:underline}[data-theme=dark] .wl-tips .wl-tip-go,[data-theme=dark] .wl-pk .wl-pk-link{color:#f0a070}",
+      "#wl-tips-home .wl-tips{margin:0}@media(min-width:900px){#wl-tips-home .wl-tiplist{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}",
       ".wl-oh{margin:0 0 16px;padding:0 0 16px;border-bottom:1px solid rgba(242,184,75,.28)}",
       ".wl-oh .wl-oh-top{display:flex;align-items:center;gap:8px}.wl-oh .wl-oh-star{display:inline-flex;color:#f2b84b}",
       ".wl-oh .wl-oh-eyebrow{font-size:12px;font-weight:700;letter-spacing:.03em;color:#f5c75a}",
@@ -1909,6 +1973,9 @@
   if (window.addEventListener) window.addEventListener("hrt:member", function () { try { paint(); } catch (e) {} });
 
   window.HRT_WALLET = {
+    connectData: connectData,
+    /* load the wallet without showing it, so other tools can use it (called by app.js once signed in) */
+    ensure: function () { if (!state.wallet && !state.loading) load(); },
     _test: { importantDates: importantDates, nextFeeDate: nextFeeDate, holderList: holderList, valueTextX: function (v) { return valueText(v); }, creditGroups: creditGroups, findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,

@@ -52,7 +52,7 @@
   if(!member){ host.innerHTML = '<div class="ac-card"><p class="ac-note">Log in to see your account.</p></div>'; return; }
   var name = (first() + " " + last()).trim();
   var badges = (isPro() ? '<span class="ac-badge ac-pro">' + ICON_STAR + 'HRT PRO</span>' : '')
-   + (isClient() ? '<span class="ac-badge ac-client"><span class="ac-bstar">' + OH_STAR + '</span>ʻOhana Member</span>' : '')
+   + (isClient() ? '<span class="ac-badge ac-client"><span class="ac-bstar">' + OH_STAR + '</span>ʻOhana</span>' : '')
    + (!isPro() && !isClient() ? '<span class="ac-badge ac-free">Free account</span>' : '');
 
   host.innerHTML =

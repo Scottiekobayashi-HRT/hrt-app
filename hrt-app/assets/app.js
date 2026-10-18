@@ -40,7 +40,7 @@
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
   values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
-  resy:{ title:"Resy Hawaiʻi Map", hint:"$100 Amex credit each quarter" },
+  resy:{ title:"Resy Hawaiʻi Map", hint:"Amex Resy credits in Hawaiʻi" },
   status:{ title:"Atmos Choose to Earn Calculator", hint:"Distance, price or segments" },
   communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
@@ -115,6 +115,8 @@
    TB.loaded = true;
    var d = new Date(data.lastUpdated);
    $("tbUpdated").textContent = isNaN(d) ? "Updated daily" : "Updated " + d.toLocaleString("en-US",{ month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+   window.HRT_TB_LIVE = TB.list; /* shared with My Wallet through connect.js */
+   try{ window.dispatchEvent(new Event("hrt:bonuses")); }catch(e){}
    tbStats(); tbRender(); homeTb();
    if(raw.length && !TB.list.length) tbState("Bonus data looks out of date", "The file loaded but every entry has expired. The daily check may not have run.");
   }
@@ -140,16 +142,19 @@
   $("tbBanks").innerHTML = '<button type="button" class="chipf'+(TB.bank==="all"?'':' plain')+'" data-t-bank="all" aria-pressed="'+(TB.bank==="all")+'">All banks<span class="n">'+TB.list.length+'</span></button>'
    + BANK_ORDER.map(function(k){ var on = TB.bank === k; return '<button type="button" class="chipf'+(on?'':' plain')+'" data-t-bank="'+k+'" aria-pressed="'+on+'">'+BANK_SHORT[k]+'<span class="n">'+(counts[k]||0)+'</span></button>'; }).join("");
  }
+ /* ===== Links with My Wallet (connect.js). Real wallets only, never the example. ===== */
+ function myWallet(){ var W = window.HRT_WALLET, d = W && W.connectData && W.connectData(); return d && !d.demo && d.held.length ? d : null; }
+ function myBonusCards(b){ var d = myWallet(), C = window.HRT_CONNECT; if(!d || !C) return null; var cat = window.HRT_WALLET_CATALOG || {}; return C.bonusCards(b, C.banks(d, cat.earning)); }
  function tbRow(b){
   var d = daysUntil(b.expiresDate), u = d <= 3 ? "critical" : d <= 7 ? "soon" : "";
   var x = xfer(b.bonusRatio || b.transferRatio);
   var icon = b.partnerType === "hotel" ? "&#127976;" : "&#9992;&#65039;";
   return '<div class="tb-row">'
-   + '<div class="tb-p"><span class="tb-ic">'+icon+'</span><div><b>'+esc(b.partner)+'</b><small>'+(b.partnerType === "hotel" ? "Hotel" : "Airline")+(b.method === "manual" ? ' <span class="tb-ver">Verified by HRT</span>' : '')+'</small></div></div>'
+   + '<div class="tb-p"><span class="tb-ic">'+icon+'</span><div><b>'+esc(b.partner)+'</b><small>'+(b.partnerType === "hotel" ? "Hotel" : "Airline")+(b.method === "manual" ? ' <span class="tb-ver">Verified by HRT</span>' : '')+(function(){ var c = myBonusCards(b); return c ? ' <span class="tb-mine" title="Your '+esc(c.join(", "))+' earn these points">Your points</span>' : ''; })()+'</small></div></div>'
    + '<span class="tb-pill'+(b.bonusPct >= 40 ? " hot" : "")+'">+'+esc(b.bonusPct)+'%</span>'
    + '<div class="tb-x">'+(x ? x.from + ' &rarr; ' + x.to : '&ndash;')+'<small>pts to '+(b.partnerType === "hotel" ? "points" : "miles")+'</small></div>'
    + '<div class="tb-e '+u+'">'+esc(fmtDate(b.expiresDate))+'<small>'+esc(daysLabel(d))+'</small></div>'
-   + '<button type="button" class="tb-calc" data-t-use="'+esc(b.bank)+'|'+esc(b.bonusPct)+'">Calculate</button>'
+   + (PROGRAMS[b.bank] ? '<button type="button" class="tb-calc" data-t-use="'+esc(b.bank)+'|'+esc(b.bonusPct)+'">Calculate</button>' : '<span class="tb-calc-none"></span>')
    + '</div>';
  }
  function tbRender(){
@@ -160,7 +165,8 @@
   else {
    var g = {}; vis.forEach(function(b){ (g[b.bank] = g[b.bank] || []).push(b); });
    var order = BANK_ORDER.filter(function(k){ return g[k]; }); Object.keys(g).forEach(function(k){ if(order.indexOf(k) < 0) order.push(k); });
-   $("tbBody").innerHTML = order.map(function(k){
+   var mineN = vis.filter(function(b){ return myBonusCards(b); }).length;
+   $("tbBody").innerHTML = (mineN ? '<div class="tb-minenote"><b>'+mineN+(mineN === 1 ? ' bonus works' : ' bonuses work')+' with the cards in your wallet.</b> Look for the <span class="tb-mine">Your points</span> tag.</div>' : '') + order.map(function(k){
     return '<div class="tb-group"><div class="tb-gh"><b>'+esc(BANK_NAMES[k] || g[k][0].bankName || k)+'</b><span>'+g[k].length+' active</span></div>'+g[k].map(tbRow).join("")+'</div>';
    }).join("");
   }
@@ -363,17 +369,27 @@
   $("navResy").textContent = V.length; $("ttResy").textContent = c.eligible + " credit eligible spots";
   rsChips(); rsRender(false);
  })();
- /* Live reminder of how long the current quarter's $100 has left. */
- (function(){ var el = $("rsClock"); if(!el) return;
+ /* Live reminder of how long Resy credits have left. With a wallet, it shows the
+    member's own Resy credits (Gold, Platinum...) from My Wallet; otherwise the Platinum's quarter. */
+ function rsClock(){ var el = $("rsClock"); if(!el) return;
+  var C = window.HRT_CONNECT, d = myWallet(), mine = d && C ? C.resyPerks(d) : [];
+  var hd = function(t){ return '<b style="color:#fff;font-weight:800">' + esc(t) + '</b>'; };
+  if(mine.length){
+   el.innerHTML = hd(mine.length === 1 ? "Your Resy credit" : "Your Resy credits") + '<span>' + mine.map(function(p){
+    return esc(p.cardShort) + ": " + (p.used ? "marked used for this period" : "$" + esc(p.amount) + " to use by " + esc(p.endText) + " (" + p.days + (p.days === 1 ? " day" : " days") + " left)");
+   }).join(". ") + '. Unused credit does not roll over.</span>';
+   el.style.display = "flex"; return;
+  }
   var now = new Date(), y = now.getFullYear(), q = Math.floor(now.getMonth() / 3);
   var end = new Date(y, q * 3 + 3, 0);
   var days = Math.max(0, Math.round((end - new Date(y, now.getMonth(), now.getDate())) / 86400000));
   var MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  el.innerHTML = '<b style="color:#fff;font-weight:800">Q' + (q + 1) + ' ' + y + '</b>'
-   + '<span>Your $100 for this quarter expires in ' + days + ' day' + (days === 1 ? "" : "s") + ', on '
-   + MN[end.getMonth()] + ' ' + end.getDate() + '. It does not roll over.</span>';
+  el.innerHTML = hd("Q" + (q + 1) + " " + y)
+   + '<span>The Platinum\'s $100 for this quarter expires in ' + days + ' day' + (days === 1 ? "" : "s") + ', on '
+   + MN[end.getMonth()] + ' ' + end.getDate() + '. It does not roll over. <a href="#wallet" data-route="wallet" style="color:#fff;font-weight:700">Add your cards to My Wallet</a> to see your own Resy credits here.</span>';
   el.style.display = "flex";
- })();
+ }
+ rsClock();
 
  /* ========================== HNL LOUNGES ========================== */
  var LOUNGES = [
@@ -393,7 +409,10 @@
   { id:"southwest", name:"Southwest VIP Lounge", op:"Southwest Airlines", t:"t2", gate:"T2 · Building 342", r:null, x:50, y:35, url:"/hnl-lounges/southwest-lounge", access:["Coming soon, access to be announced"], tags:["coming-soon"], soon:true, blurb:"A historic first. Southwest has never run an airport lounge anywhere, and HNL is its debut.", note:"Lease approved October 2025." },
   { id:"alaskahawaiian", name:"New Alaska/Hawaiian Premium Lounge", op:"Alaska Air Group", t:"t1", gate:"T1 · Mauka Concourse entrance", r:null, x:84, y:73, url:"/hnl-lounges/alaska-hawaiian-premium-lounge", access:["Opening late 2027"], tags:["coming-soon"], soon:true, blurb:"15,000 sq ft, five times larger than the current Plumeria. Expected to rival Delta One and United Polaris lounges.", note:"May carry the Atmos brand and will serve both Alaska and Hawaiian guests." }
  ];
- var LG_F = [ ["all","All lounges",function(){ return true; }], ["t1","Terminal 1",function(l){ return l.t === "t1"; }], ["t2","Terminal 2",function(l){ return l.t === "t2"; }], ["pp","Priority Pass",function(l){ return l.tags.indexOf("priority-pass") > -1; }], ["soon","Coming soon",function(l){ return !!l.soon; }] ];
+ /* lounges the member's own cards open (connect.js); empty without a real wallet */
+ function myLounges(){ var d = myWallet(), C = window.HRT_CONNECT, m = {}; if(!d || !C) return m;
+  C.loungeAccess(d, LOUNGES).list.forEach(function(x){ m[x.id] = x; }); return m; }
+ var LG_F = [ ["all","All lounges",function(){ return true; }], ["mine","Open to you",function(l){ return !!myLounges()[l.id]; }], ["t1","Terminal 1",function(l){ return l.t === "t1"; }], ["t2","Terminal 2",function(l){ return l.t === "t2"; }], ["pp","Priority Pass",function(l){ return l.tags.indexOf("priority-pass") > -1; }], ["soon","Coming soon",function(l){ return !!l.soon; }] ];
  var LG_TAG = { "priority-pass":["Priority Pass","pp"], "star-alliance":["Star Alliance",""], "oneworld":["Oneworld",""], "skyteam":["SkyTeam",""], "amex":["Amex",""], "chase":["Chase",""], "day-pass":["Day Pass",""], "resort-only":["Resort only","resort"], "coming-soon":["Coming soon","soon"] };
  var LG = { f:"all", active:null };
  /* Only lounges with a published review page get the button. Add the path to url to switch one on. */
@@ -401,23 +420,26 @@
  function lgNum(l){ return l.soon ? "&#10022;" : (LOUNGES.indexOf(l) + 1); }
  function lgStars(r){ if(r == null) return '<span class="lg-rate none">No rating</span>'; return '<span class="lg-rate">'+"★".repeat(Math.floor(r))+(r % 1 >= .5 ? "½" : "")+" "+r.toFixed(1)+'</span>'; }
  function lgTags(l){ return l.tags.map(function(t){ var x = LG_TAG[t] || [t,""]; return '<span class="lg-tag '+x[1]+'">'+x[0]+'</span>'; }).join(""); }
+ function lgMine(l){ var x = myLounges()[l.id]; if(!x) return "";
+  return '<p class="lg-mine"><b>Open to you</b> with your '+esc(x.cards.join(" or "))+' ('+esc(x.how)+(x.how === "Priority Pass" ? ', enroll first' : '')+').</p>'; }
  function lgMatch(l){ return LG_F.filter(function(f){ return f[0] === LG.f; })[0][2](l); }
  function lgRender(){
-  $("lgFilters").innerHTML = LG_F.map(function(f){ var on = LG.f === f[0]; return '<button type="button" class="chipf'+(on?'':' plain')+'" data-l-f="'+f[0]+'">'+f[1]+'<span class="n">'+LOUNGES.filter(f[2]).length+'</span></button>'; }).join("");
+  if(LG.f === "mine" && !LOUNGES.some(LG_F[1][2])) LG.f = "all";
+  $("lgFilters").innerHTML = LG_F.filter(function(f){ return f[0] !== "mine" || LOUNGES.some(f[2]); }).map(function(f){ var on = LG.f === f[0]; return '<button type="button" class="chipf'+(on?'':' plain')+'" data-l-f="'+f[0]+'">'+f[1]+'<span class="n">'+LOUNGES.filter(f[2]).length+'</span></button>'; }).join("");
   $("lgMarkers").innerHTML = LOUNGES.map(function(l){ return '<button type="button" class="lg-mk'+(l.soon?' soon':'')+(lgMatch(l)?'':' off')+(LG.active === l.id ? ' on' : '')+'" data-l-id="'+l.id+'" style="left:'+l.x+'%;top:'+l.y+'%" aria-label="'+esc(l.name)+'"><span>'+lgNum(l)+'</span></button>'; }).join("");
   var n = LOUNGES.filter(lgMatch).length; $("lgCount").textContent = n + (n === 1 ? " lounge" : " lounges");
   $("lgList").innerHTML = LOUNGES.map(function(l){
    return '<div role="button" tabindex="0" class="lg-card'+(l.soon?' soon':'')+(lgMatch(l)?'':' off')+(LG.active === l.id ? ' on' : '')+'" data-l-id="'+l.id+'">'
     + '<div class="lg-top"><span class="lg-num">'+lgNum(l)+'</span><span class="lg-name">'+esc(l.name)+'</span>'+lgStars(l.r)+'</div>'
     + '<div class="lg-meta">'+esc(l.gate)+' &middot; '+esc(l.op)+'</div><div class="lg-tags">'+lgTags(l)+'</div>'
-    + '<div class="lg-det"><p>'+esc(l.blurb)+'</p>'+(l.note ? '<p class="nt">'+esc(l.note)+'</p>' : '')+'<p><b>Access:</b> '+esc(l.access.join(" · "))+'</p>'+lgReview(l)+'</div></div>';
+    + '<div class="lg-det"><p>'+esc(l.blurb)+'</p>'+(l.note ? '<p class="nt">'+esc(l.note)+'</p>' : '')+lgMine(l)+'<p><b>Access:</b> '+esc(l.access.join(" · "))+'</p>'+lgReview(l)+'</div></div>';
   }).join("");
  }
  function lgPop(){
   var pop = $("lgPop"), l = LOUNGES.filter(function(x){ return x.id === LG.active; })[0];
   if(!l){ pop.hidden = true; return; }
   pop.innerHTML = '<button type="button" class="x" data-l-close aria-label="Close">&times;</button><b>'+esc(l.name)+'</b><small>'+esc(l.gate)+' &middot; '+esc(l.op)+'</small><div class="lg-tags" style="margin:0">'+lgTags(l)+'</div>'
-   + (l.note ? '<div style="color:#c25c26;margin-top:6px;font-style:italic">'+esc(l.note)+'</div>' : '') + '<div style="margin-top:6px"><b style="display:inline;font-size:12px">Access:</b> '+esc(l.access.join(" · "))+'</div>'
+   + (l.note ? '<div style="color:#c25c26;margin-top:6px;font-style:italic">'+esc(l.note)+'</div>' : '') + lgMine(l) + '<div style="margin-top:6px"><b style="display:inline;font-size:12px">Access:</b> '+esc(l.access.join(" · "))+'</div>'
    + lgReview(l);
   pop.hidden = false;
   var w = pop.parentElement.offsetWidth, h = pop.parentElement.offsetHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
@@ -441,6 +463,24 @@
   $("navLounge").textContent = LOUNGES.length; $("ttLounge").textContent = open.length + " open, " + pp.length + " with Priority Pass";
   lgRender();
  })();
+
+ window.HRT_LOUNGES = LOUNGES; /* shared with My Wallet through connect.js */
+
+ /* ===== When the wallet or member changes, refresh the pages that use it ===== */
+ window.addEventListener("hrt:wallet", function(){ try{ if(TB.loaded) tbRender(); lgRender(); if(LG.active) lgPop(); rsClock(); }catch(e){} });
+ window.addEventListener("hrt:member", function(){ var m = window.HRT_MEMBER; if(m && m.signedIn && window.HRT_WALLET && window.HRT_WALLET.ensure) window.HRT_WALLET.ensure(); });
+ /* "For your cards" links in My Wallet: open the tool already set up for this member */
+ document.addEventListener("click", function(ev){
+  var a = ev.target.closest && ev.target.closest("[data-cx-go]"); if(!a) return;
+  ev.preventDefault();
+  var to = a.getAttribute("data-cx-go"), bank = a.getAttribute("data-cx-bank"), bonus = a.getAttribute("data-cx-bonus");
+  route(to);
+  if(to === "transfers" && bank){
+   TB.bank = bank; TB.type = "all"; tbStats(); tbRender();
+   if(bonus && PROGRAMS[bank]){ $("tcProg").value = bank; $("tcBonus").value = bonus; if(!$("tcPts").value) $("tcPts").value = "50,000"; tcRender(); }
+  }
+  if(to === "lounges"){ LG.f = LOUNGES.some(LG_F[1][2]) ? "mine" : "all"; LG.active = null; lgRender(); lgPop(); }
+ });
 
  /* ============================== HOME ============================== */
  function homeTb(){
