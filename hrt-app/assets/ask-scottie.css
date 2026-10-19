@@ -83,8 +83,8 @@ html.asc-open .asc-fab{padding:5px}
  .asc-card{border-radius:0;border:0;padding-bottom:env(safe-area-inset-bottom)}
  .asc-head{padding-top:calc(14px + env(safe-area-inset-top))}
 }
-.asc-pop .asc-b a:not(.asc-book):not(.asc-textbtn){color:var(--asc-navy);text-decoration:underline;text-underline-offset:2px;font-weight:600;overflow-wrap:anywhere}
-:root[data-theme="dark"] .asc-pop .asc-b a:not(.asc-book):not(.asc-textbtn){color:var(--asc-gold-t)}
+.asc-pop .asc-b a:not(.asc-book):not(.asc-textbtn):not(.asc-atmos){color:var(--asc-navy);text-decoration:underline;text-underline-offset:2px;font-weight:600;overflow-wrap:anywhere}
+:root[data-theme="dark"] .asc-pop .asc-b a:not(.asc-book):not(.asc-textbtn):not(.asc-atmos){color:var(--asc-gold-t)}
 /* Trip plan card */
 .asc-trip{margin-top:10px;background:var(--asc-cream);border:1px solid rgba(242,184,75,.45);border-radius:14px;padding:11px;display:flex;flex-direction:column;gap:8px}
 .asc-trip-head{display:flex;flex-direction:column;gap:1px}
@@ -137,3 +137,6 @@ html.asc-open .asc-fab{padding:5px}
 .asc-al-ask{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:4px 16px 4px 5px;border-radius:999px;border:1.5px solid #f2b84b;background:#1B2840;color:#fff;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
 .asc-al-ask img{border-radius:50%;object-fit:cover}
 @media (max-width:560px){.asc-al-main small{white-space:normal}.asc-al-best,.asc-al-none{display:none}}
+.asc-pop .asc-b a.asc-atmos{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;min-height:44px;padding:0 14px;border-radius:10px;
+ background:linear-gradient(135deg,#f5c75a,#f2b84b 55%,#D97040);color:#1a1204;font-size:14px;font-weight:800;text-decoration:none}
+.asc-pop .asc-b a.asc-atmos:hover{filter:brightness(1.05);color:#1a1204}

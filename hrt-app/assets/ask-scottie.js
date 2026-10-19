@@ -160,6 +160,7 @@
     });
     input.addEventListener("input", function () { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 120) + "px"; });
     document.getElementById("ascLog").addEventListener("click", function (e) {
+      if (e.target.closest("[data-asc-close]")) { toggle(false); return; }
       var y = e.target.closest("[data-watch-yes]"), n = e.target.closest("[data-watch-no]");
       if (y) watchIt(parseInt(y.getAttribute("data-watch-yes"), 10));
       if (n) { var mm = state.msgs[parseInt(n.getAttribute("data-watch-no"), 10)]; if (mm) { mm.watchState = "no"; save(); draw(); } }
@@ -278,7 +279,8 @@
     if (m.role === "user") return '<div class="asc-msg me"><div class="asc-b">' + esc(m.content) + "</div></div>";
     return '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28">' +
       '<div class="asc-b' + (m.error ? " err" : "") + (m.alert ? " alert" : "") + '">' + fmt(m.content) + tripCard(m.trip) + seatCards(m.seats) +
-      watchOffer(m, i) + (m.handoff ? textBtn("asc-textbtn inline") : "") + "</div></div>";
+      watchOffer(m, i) + (m.atmos ? '<a class="asc-atmos" href="#atmos" data-route="atmos" data-asc-close>&#9733; Unlock the Atmos Award Calendar</a>' : "") +
+      (m.handoff ? textBtn("asc-textbtn inline") : "") + "</div></div>";
   }
 
   function draw() {
@@ -333,7 +335,7 @@
       } else {
         if (res.b.textNumber && info) info.textNumber = res.b.textNumber;
         if (info && typeof res.b.remaining === "number") info.remaining = res.b.remaining;
-        state.msgs.push({ role: "assistant", content: res.b.reply, handoff: !!res.b.handoff, seats: res.b.seats || null, trip: res.b.trip || null, watch: res.b.watch || null });
+        state.msgs.push({ role: "assistant", content: res.b.reply, handoff: !!res.b.handoff, seats: res.b.seats || null, trip: res.b.trip || null, watch: res.b.watch || null, atmos: !!res.b.atmosPitch });
         if (res.b.watched) loadAlerts(true);
       }
     }).catch(function () {

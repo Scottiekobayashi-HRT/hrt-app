@@ -28,6 +28,15 @@ const PRO_PLANS = ["pln_atmos-calendar-irdd08f8", "pln_all-access-xsc20cqf"];
 const MS_API = "https://admin.memberstack.com";
 const SEATS_API = "https://seats.aero/partnerapi/search";
 const HANDOFF = "[[TEXT_SCOTTIE]]";
+const ATMOS_PITCH = "[[ATMOS_CALENDAR]]";
+
+/* Atmos Rewards award space on Alaska and Hawaiian flights is what the Atmos
+   Award Calendar (HRT PRO) sells, so Ask Scottie leaves it out for members
+   without PRO (Scottie, Oct 18). Atmos partner awards (JAL, Qatar and so on)
+   still show. To undo: make this return false. */
+function hideForNonPro(r) {
+  return r.program === "alaska" && /\b(AS|HA)\b/.test(String(r.airlines || ""));
+}
 const MAX_TURNS = 20;
 const MAX_CHARS = 2000;
 
@@ -367,11 +376,16 @@ async function searchSeats(env, q, ctx) {
       };
     })
     /* seats.aero gives 0 when it does not know the count: keep those, flag them */
-    .filter((r) => r.miles && (r.seats === null || r.seats >= q.travelers))
+    .filter((r) => r.miles && (r.seats === null || r.seats >= q.travelers));
+  const shown = ctx && ctx.hideAtmos ? rows.filter((r) => !hideForNonPro(r)) : rows;
+  const atmosHidden = shown.length < rows.length;
+  const out = shown
     .sort((a, b) => a.miles - b.miles || a.date.localeCompare(b.date))
     .slice(0, q.keep || 12);
-  if (ctx) rows.forEach((r) => { r.book = bookingFor(r.program, ctx.held, ctx.partners, ctx.bonuses); });
-  return { results: rows, travelers: q.travelers };
+  if (ctx) out.forEach((r) => { r.book = bookingFor(r.program, ctx.held, ctx.partners, ctx.bonuses); });
+  const found = { results: out, travelers: q.travelers };
+  if (atmosHidden) found.atmosHidden = "Atmos Rewards award seats on Alaska and Hawaiian flights were found but are not shown. They are in the Atmos Award Calendar (HRT PRO).";
+  return found;
 }
 
 /* ---------------------------- trip planner ---------------------------- */
@@ -522,6 +536,7 @@ async function planTrip(env, q, ctx, takeSearch) {
   }
   return {
     trips,
+    atmosHidden: out.atmosHidden || back.atmosHidden || undefined,
     travelers: q.travelers,
     searched: runs,
     notes: [
@@ -637,7 +652,7 @@ function publicAlert(a) {
 
 async function alertCtx(env, request, m) {
   const [catalog, partners, bonuses] = await Promise.all([loadCatalog(env, request), loadPartners(env, request), loadBonuses()]);
-  return { held: memberBanks((m.member.json || {}).wallet, catalog), partners, bonuses };
+  return { held: memberBanks((m.member.json || {}).wallet, catalog), partners, bonuses, hideAtmos: !m.pro };
 }
 
 /* Drop past alerts and check the ones that are due. */
@@ -729,6 +744,14 @@ function memberContext(m, walletText, opts, partnerText) {
     "- When they ask how to book, give 3 short steps: 1) find the same seat on the program's site, 2) only then transfer from their bank (say which one, the ratio, and any bonus), 3) book. Link the sites as plain URLs.",
     "- Prefer paths where yours is true. If none of their cards transfer there, say so plainly and suggest a result they can book with their own points.",
     "- If they entered a points balance, say whether it looks like enough for everyone traveling, and note taxes and fees are extra.",
+    "",
+    "ATMOS REWARDS AWARD SEATS:",
+    m.pro
+      ? "- This member has HRT PRO, so searches include Atmos Rewards seats on Alaska and Hawaiian flights. For browsing Atmos dates, the Atmos Award Calendar in the sidebar is the best tool."
+      : "- This member does not have HRT PRO. Searches leave out Atmos Rewards award seats on Alaska and Hawaiian flights (Atmos partner awards like JAL still show). " +
+        "If they ask about Atmos award seats, Alaska or Hawaiian award flights, or booking with Atmos points on Alaska or Hawaiian, do not search for them. " +
+        "Tell them warmly, in your own words, that this is exactly what your Atmos Award Calendar is for: every Atmos saver date from Hawaiʻi, updated every morning, part of HRT PRO for $9.99 a month. " +
+        "Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. If a search result says atmosHidden, mention it the same way. Do not pitch it otherwise, and never more than once in a chat.",
     "",
     "TRAVEL PORTAL FIRST (Scottie's rule):",
     "- Whenever the member mentions Chase, Amex or Capital One points, or your answer, search or trip plan would use them, always tell them to first check that bank's travel portal and compare it with transferring to an airline. One short sentence is enough. Name only the banks that apply:",
@@ -875,7 +898,7 @@ export async function onRequestPost({ request, env }) {
     { type: "text", text: "" }
   ];
   const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL, WATCH_TOOL, UNWATCH_TOOL] : undefined;
-  const ctx = { held: memberBanks(wallet, catalog), partners, bonuses, budget: budgetFrom(wallet, null) };
+  const ctx = { held: memberBanks(wallet, catalog), partners, bonuses, budget: budgetFrom(wallet, null), hideAtmos: !m.pro };
   const alerts = canSearch ? (await loadAlerts(env, m.id)).filter((a) => a.end >= hawaiiDate()) : [];
   system[2].text = memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners));
 
@@ -946,8 +969,9 @@ export async function onRequestPost({ request, env }) {
 
   if (!reply) reply = "Sorry, I got tangled up on that one. Could you ask it a different way?";
   const handoff = reply.indexOf(HANDOFF) > -1;
+  const atmosPitch = !m.pro && reply.indexOf(ATMOS_PITCH) > -1;
   const offer = reply.indexOf(OFFER) > -1 && watch && !watched && alerts.length + watch.length <= MAX_ALERTS;
-  reply = noDashes(reply.split(HANDOFF).join("").split(OFFER).join("").trim());
+  reply = noDashes(reply.split(HANDOFF).join("").split(OFFER).join("").split(ATMOS_PITCH).join("").trim());
 
   return json({
     reply,
@@ -957,6 +981,7 @@ export async function onRequestPost({ request, env }) {
     trip,
     watch: offer ? watch : null,
     watched: watched ? true : false,
+    atmosPitch,
     remaining: left
   });
 }
