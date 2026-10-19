@@ -622,7 +622,7 @@
     var vals = values || pointValues(), cards = {}, seen = {};
     (catalog.cards || []).forEach(function (c) { cards[c.id] = c; });
     var held = wallet.cards.filter(function (e) { return cards[e.cardId] && isHeld(e); });
-    var sapphire = held.some(function (e) { return /^chase-sapphire/.test(e.cardId); });
+    var sapphire = held.some(function (e) { return /^chase-(sapphire|ink-business-preferred)/.test(e.cardId) && e.status !== "next" && e.status !== "closed"; });
     if (opts && opts.visaOnly) held = held.filter(function (e) { return cards[e.cardId].network === "Visa"; });
     var perks = perkRows(wallet, catalog, today);
     var out = [];
@@ -796,6 +796,7 @@
       '<label class="wl-lab">Annual fee<span class="wl-dollar">$<input id="wlCFee" type="number" inputmode="decimal" min="0" step="1" placeholder="0" value="' + (cu.fee != null ? cu.fee : "") + '"></span></label></div>' +
       '<div class="wl-two"><label class="wl-lab">Whose card (optional)<input id="wlHolder" maxlength="30" placeholder="e.g. Janice" value="' + esc(entry && entry.holder || "") + '"></label>' +
       '<label class="wl-lab">Status (optional)<select id="wlStatus">' + stOpts + "</select></label></div>" +
+      '<label class="wl-check"><input type="checkbox" id="wlWithHrt"' + (entry && entry.withHrt ? " checked" : "") + "> Opened with HRT’s help</label>" +
       '<div class="wl-lab">When did you open it?<div class="wl-date">' +
       '<select id="wlMonth" aria-label="Month opened">' + months + "</select>" +
       '<select id="wlDay" aria-label="Day opened">' + days + "</select>" +
@@ -868,12 +869,21 @@
     if ((fm && !fdy) || (fdy && !fm)) return { err: "For the fee date, choose both the month and the day, or leave both blank." };
     if (fm && fdy) { if (fdy > daysInMonth(2024, fm)) return { err: MONTHS[fm - 1] + " does not have " + fdy + " days." }; fd.val = (fm < 10 ? "0" : "") + fm + "-" + (fdy < 10 ? "0" : "") + fdy; }
     return { cardId: cardId, opened: opened, nickname: $("wlNick").value.trim().slice(0, 40), bonus: bn.bonus, custom: custom,
-      holder: $("wlHolder").value.trim().slice(0, 30), status: status, note: $("wlNote").value.trim().slice(0, 500), feeDate: fd.val };
+      holder: $("wlHolder").value.trim().slice(0, 30), status: status, note: $("wlNote").value.trim().slice(0, 500), feeDate: fd.val, withHrt: !!($("wlWithHrt") && $("wlWithHrt").checked) };
   }
   /* Copy the optional fields onto a saved card, dropping empty ones. */
   function applyExtras(c, v) {
-    ["holder", "status", "note", "feeDate"].forEach(function (k) { if (v[k]) c[k] = v[k]; else delete c[k]; });
+    ["holder", "status", "note", "feeDate", "withHrt"].forEach(function (k) { if (v[k]) c[k] = v[k]; else delete c[k]; });
     if (v.custom) c.custom = v.custom;
+  }
+
+  /* "5 cards opened with HRT since July 2024": the work the ʻOhana team has done. */
+  function hrtLine(w) {
+    var mine = (w && w.cards || []).filter(function (e) { return e.withHrt && e.status !== "next"; });
+    if (!mine.length) return "";
+    var first = mine.map(function (e) { return e.opened || ""; }).filter(Boolean).sort()[0], o = first ? parseOpened(first) : null;
+    return '<p class="wl-sum-hrt"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>' +
+      mine.length + (mine.length === 1 ? " card" : " cards") + " opened with HRT" + (o ? " since " + MONTHS[o.m - 1] + " " + o.y : "") + "</p>";
   }
 
   /* ----- list ----- */
@@ -959,14 +969,14 @@
       artHtml(c, "md") + '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
       '<span class="wl-sub">' + esc([e.holder ? e.holder + "\u2019s card" : "", c.issuer, e.nickname].filter(Boolean).join(" \u00b7 ")) + "</span>" +
       '<span class="wl-meta">' + renewLine + (r.hasFee && rn && opTxt ? ' <span class="wl-dot">&middot;</span> Opened ' + esc(opTxt) : "") + "</span>" +
-      statusHtml(e) + (e.addedBy === "hrt" ? '<span class="wl-byhrt">Added by your ʻOhana team</span>' : "") +
+      statusHtml(e) + (e.withHrt ? '<span class="wl-withhrt">Opened with HRT</span>' : e.withHrt === false ? '<span class="wl-prehrt">Had before HRT</span>' : e.addedBy === "hrt" ? '<span class="wl-byhrt">Added by your ʻOhana team</span>' : "") +
       valueLine(credits, other) +
       "</div>" +
       '<div class="wl-side"><span class="wl-fee">' + esc(feeLine) + "</span>" +
       (r.hasFee ? '<span class="wl-when' + (soon ? " on" : "") + '">' + esc(whenText(rn)) + "</span>" : "") +
       '<span class="wl-rowacts"><button class="wl-link" data-wl="edit" data-id="' + esc(e.id) + '">Edit</button>' +
       '<button class="wl-link" data-wl="remove" data-id="' + esc(e.id) + '">Remove</button></span></div></div>';
-    html += noteHtml(e) + bonusHtml(e) + (r.hasFee && rn && rn.days <= SOON_DAYS ? keepHtml(r) : "");
+    html += noteHtml(e) + bonusHtml(e) + (r.hasFee && rn && rn.days <= SOON_DAYS && !isClient() ? keepHtml(r) : "");
     var earnCount = earningFor(catalog(), c.id).length;
     if (mine.length || earnCount) {
       html += '<button class="wl-perkbtn" data-wl="perks" data-id="' + esc(e.id) + '" aria-expanded="' + open + '">' +
@@ -991,6 +1001,7 @@
     if (!list.length) return "";
     return '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Next up and closed</h3></div><ul class="wl-list">' + list.map(function (u) {
       var e = u.entry, c = u.card, name = c ? c.name : "A card we no longer track";
+      if (e.status === "next" && e.addedBy === "hrt") { name = "Your next card"; c = null; }
       var op = openedText(e.opened);
       return '<li class="wl-row wl-up" data-entry="' + esc(e.id) + '"><div class="wl-rowtop"><div class="wl-main"><b class="wl-name">' + esc(name) + "</b>" +
         '<span class="wl-sub">' + esc([e.holder ? e.holder + "\u2019s card" : "", c && c.issuer, e.nickname].filter(Boolean).join(" \u00b7 ")) + "</span>" +
@@ -1253,6 +1264,7 @@
       if (bf.renewSoon) pills += '<span class="wl-tl-pill">Renews in ' + bf.renewal.days + (bf.renewal.days === 1 ? " day" : " days") + "</span>";
       var bsT = bonusState(e);
       if (bsT && !bsT.met && !bsT.missed) pills += '<span class="wl-tl-pill">Bonus: ' + esc(money(bsT.left)) + " to go</span>";
+      if (e.withHrt) pills += '<span class="wl-tl-pill hrt">Opened with HRT</span>';
       if (bf.open > 1) pills += '<span class="wl-tl-pill soft">' + bf.open + " credits open</span>";
       return '<button class="wl-tile" data-wl="go-card" data-id="' + esc(e.id) + '">' + artHtml(c, "sm") +
         '<span class="wl-tl-body"><span class="wl-tl-name">' + esc(shortName(c.name)) + "</span>" +
@@ -1363,6 +1375,8 @@
      (custom field wants-card-help) so HRT can follow up. */
   var HELP_KEY = "hrtCardHelpHidden", HELP_DAYS = 60;
   function member() { return window.HRT_MEMBER || {}; }
+  /* ʻOhana Members: Scottie decides keep or cancel with them, so the self-serve box is hidden. */
+  function isClient() { return document.documentElement.classList.contains("ms-client"); }
   function helpHidden() {
     try { var t = +localStorage.getItem(HELP_KEY); return t && Date.now() - t < HELP_DAYS * 864e5; } catch (e) { return false; }
   }
@@ -1448,6 +1462,7 @@
       '<div class="wl-sum-top"><h2 class="wl-sum-title">' + title + "</h2>" +
       (home ? '<a class="wl-btn wl-ghost" href="#wallet" data-route="wallet">Open My Wallet</a>'
             : (state.editing ? "" : '<button class="wl-btn wl-ghost" data-wl="add">Add a card</button>')) + "</div>" + famHtml() +
+      hrtLine(V) +
       '<div class="wl-sum-hero">' +
       (due ? '<span class="wl-sum-big">' + esc(money(due)) + '</span><span class="wl-sum-cap">in credits to use in the next ' + SOON_PERK_DAYS + " days</span>"
            : laterUsd ? '<span class="wl-sum-big">' + esc(money(laterUsd)) + '</span><span class="wl-sum-cap">in credits left to use. Nothing ends in the next ' + SOON_PERK_DAYS + " days; the next one ends " + esc(dayText(later[0].period.end)) + "</span>"
@@ -1882,6 +1897,12 @@
       ".wl-dlwhen{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}",
       ".wl-dlwhen.warm{color:#8a4a10}.wl-dlwhen.hot{color:#a3410f}",
       "[data-theme=dark] .wl-dlwhen.warm,[data-theme=dark] .wl-dlwhen.hot{color:#f2b84b}",
+      ".wl-withhrt{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;margin-top:3px;font-size:11.5px;font-weight:800;color:#8a5a12;background:rgba(242,199,102,.28);border-radius:999px;padding:2px 9px}",
+      "[data-theme=dark] .wl-withhrt{color:#f2c766}",
+      ".wl-prehrt{align-self:flex-start;margin-top:3px;font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:1px 9px}",
+      ".wl-tl-pill.hrt{color:#8a5a12;background:rgba(242,199,102,.32)}[data-theme=dark] .wl-tl-pill.hrt{color:#f2c766}",
+      ".wl-sum .wl-sum-hrt{display:inline-flex;align-items:center;gap:7px;margin:12px 0 0;padding:6px 12px;border-radius:999px;background:rgba(242,199,102,.16);border:1px solid rgba(242,199,102,.45);color:#f2c766;font-size:13px;font-weight:700}",
+      ".wl-check{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--text)}.wl-check input{width:20px;height:20px}",
       ".wl-hm-grid>.wl-card{margin-bottom:0}.wl-pg-grid{margin-bottom:14px}",
       ".wl-soon-home .wl-cr-total b{font-size:24px}.wl-soon-home .wl-ctab{padding:7px 10px}",
       "@media (max-width:1060px){.wl-hm-grid{grid-template-columns:minmax(0,1fr)}}",

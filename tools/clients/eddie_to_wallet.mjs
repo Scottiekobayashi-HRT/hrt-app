@@ -32,6 +32,10 @@ export const ALIASES = {
   "capital one venture rewards": "capone-venture", "capital one venture": "capone-venture", "venture rewards": "capone-venture", "venture": "capone-venture",
   "capital one venture x": "capone-venture-x", "venture x": "capone-venture-x",
   "atmos rewards summit": "atmos-summit", "atmos summit": "atmos-summit", "atmos rewards summit visa infinite": "atmos-summit",
+  "ink business preferred": "chase-ink-business-preferred", "chase ink business preferred": "chase-ink-business-preferred", "ink preferred": "chase-ink-business-preferred", "cbp": "chase-ink-business-preferred", "cip": "chase-ink-business-preferred",
+  "ink business unlimited": "chase-ink-business-unlimited", "chase ink business unlimited": "chase-ink-business-unlimited", "ink unlimited": "chase-ink-business-unlimited", "cbu": "chase-ink-business-unlimited", "ciu": "chase-ink-business-unlimited",
+  "ink business cash": "chase-ink-business-cash", "chase ink business cash": "chase-ink-business-cash", "ink cash": "chase-ink-business-cash", "cbc": "chase-ink-business-cash", "cic": "chase-ink-business-cash",
+  "vr": "capone-venture", "vx": "capone-venture-x",
   "atmos rewards ascent": "atmos-ascent", "atmos ascent": "atmos-ascent", "atmos rewards ascent visa signature": "atmos-ascent"
 };
 
@@ -125,9 +129,14 @@ export function toWallet(rows, catalogIds, household = "") {
       if (iss) entry.custom.issuer = iss[1].replace(/^amex$/i, "American Express").replace(/\b\w/g, (c) => c.toUpperCase()).replace("Us Bank", "U.S. Bank");
       warnings.push("Row " + line + ': "' + name + '" is not in our card list yet, added as Other card' + (fee == null ? " (no fee given)" : "") + ".");
     }
+    /* Opened with HRT's help ("hrt") or before HRT ("pre"), from an origin column. */
+    if (/^\s*hrt\b/i.test(r.origin || "")) entry.withHrt = true;
+    else if (/^\s*pre\b/i.test(r.origin || "")) entry.withHrt = false;
+    /* The next card is never named on the member's side: they hear it from Scottie by text. */
+    if (status === "next") { entry.cardId = "custom"; entry.custom = { name: "Your next card" }; }
     if (r.who) entry.holder = r.who.slice(0, 30);
     if (status) entry.status = status;
-    const note = [status === null ? "Status: " + r.status : "", r.next_step || ""].filter(Boolean).join(". ").slice(0, 500);
+    const note = status === "next" ? "" : [status === null ? "Status: " + r.status : "", r.next_step || ""].filter(Boolean).join(". ").slice(0, 500);
     if (note) entry.note = note;
     if (/\(was /i.test(r.card)) entry.nickname = (r.card.match(/\((was [^)]*)\)/i) || [])[1].slice(0, 40);
     if (seen[entry.id]) { warnings.push("Row " + line + ": same card, person and date as row " + seen[entry.id] + ", skipped."); return; }

@@ -28,7 +28,8 @@ const { wallet, warnings } = toWallet(parseCsv(csv), ids, "pak");
 eq("4 cards", wallet.cards.length, 4);
 eq("catalog card", [wallet.cards[0].cardId, wallet.cards[0].holder, wallet.cards[0].status], ["chase-sapphire-preferred", "Daniel", "keep"]);
 eq("other card", [wallet.cards[1].cardId, wallet.cards[1].custom, wallet.cards[1].opened, wallet.cards[1].nickname], ["custom", { name: "Chase Freedom", fee: 0, issuer: "Chase" }, "", "was Sapphire"]);
-eq("planned card", [wallet.cards[2].status, wallet.cards[2].custom.name, wallet.cards[2].opened], ["next", "Atmos card", "2026-10-21"]);
+eq("planned card", [wallet.cards[2].status, wallet.cards[2].custom.name, wallet.cards[2].opened], ["next", "Your next card", "2026-10-21"]);
+eq("planned card has no note or issuer", [wallet.cards[2].note, wallet.cards[2].custom.issuer, wallet.cards[2].cardId], [undefined, undefined, "custom"]);
 eq("odd status kept in note", wallet.cards[3].note, "Status: Odd status");
 eq("warns about unreadable date", warnings.some((w) => /could not read open date "Someday"/.test(w)), true);
 
@@ -45,5 +46,12 @@ eq("imported cards marked added by HRT", wallet.cards.every((c) => c.addedBy ===
 eq("json cell quoted", /,"\{""wallet""/.test(line), true);
 eq("csv cell", csvCell('a,"b"'), '"a,""b"""');
 
+
+{
+  const ids = new Set(["chase-ink-business-preferred", "chase-ink-business-cash", "capone-venture"]);
+  const r = toWallet([{ card: "CBP", opened: "2024-07-18", origin: "hrt", who: "Justin" }, { card: "cbc", origin: "pre", who: "Marlene" }, { card: "VR", opened: "2025-11-12", origin: "HRT" }], ids, "sedono");
+  eq("ink + venture aliases", r.wallet.cards.map((c) => c.cardId), ["chase-ink-business-preferred", "chase-ink-business-cash", "capone-venture"]);
+  eq("withHrt from origin", r.wallet.cards.map((c) => c.withHrt), [true, false, true]);
+}
 console.log(pass + " passed, " + fail + " failed");
 if (fail) process.exit(1);
