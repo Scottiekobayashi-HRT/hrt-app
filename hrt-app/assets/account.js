@@ -95,7 +95,10 @@
 
    + '<section class="ac-card">'
    +  '<h3 class="ac-h">Plan and billing</h3>'
-   +  (isPro()
+   +  (isPro() && document.documentElement.classList.contains("ms-comp")
+      ? '<div class="ac-line"><div><span class="ac-v ac-strong">HRT PRO</span><span class="ac-k">Complimentary from HRT</span></div><span class="ac-on">Active</span></div>'
+        + '<p class="ac-note">No card on file and nothing to bill. Questions? Text Scottie.</p>'
+      : isPro()
       ? '<div class="ac-line"><div><span class="ac-v ac-strong">HRT PRO</span><span class="ac-k">$9.99 a month</span></div><span class="ac-on">Active</span></div>'
         + '<div class="ac-actions"><button type="button" class="ac-btn" id="acBilling">Manage billing</button></div>'
         + '<p class="ac-note">Update your card, see invoices, or cancel in one click.</p>'

@@ -125,6 +125,8 @@ html:not(.ms-ready) .hrt-app,html:not(.ms-ready) .hrt-gate{display:none!importan
 html.ms-ready:not(.ms-in) .hrt-app{display:none!important}
 html.ms-ready.ms-in .hrt-gate{display:none!important}
 html.ms-ready:not(.ms-in),html.ms-ready:not(.ms-in) body{height:auto!important;overflow:auto!important}
+/* complimentary Atmos (metaData.atmosComp): no subscription, so no billing button */
+html.ms-comp .topbar .ms-btn[data-ms-action="customer-portal"]{display:none!important}
 /* ===== phones: the top bar stays one compact row ===== */
 @media (max-width:560px){
  .topbar .tbin{flex-wrap:nowrap!important;gap:6px!important}
@@ -1021,7 +1023,12 @@ html.ms-client .pl.ohana .btn{display:none}
  function apply(m){
   document.documentElement.classList.toggle("ms-in", !!m);
   ready();
-  var ok=!!(m&&(m.planConnections||[]).some(function(p){return UNLOCK.indexOf(p.planId)>-1&&String(p.status||"").toUpperCase()!=="CANCELED";}));
+  var paid=!!(m&&(m.planConnections||[]).some(function(p){return UNLOCK.indexOf(p.planId)>-1&&String(p.status||"").toUpperCase()!=="CANCELED";}));
+  /* Complimentary Atmos access: metaData.atmosComp === true, set by HRT in Memberstack (members cannot edit metaData).
+     Comped members get PRO but no billing button, since they have no subscription. */
+  var comp=!paid&&!!(m&&m.metaData&&m.metaData.atmosComp===true);
+  var ok=paid||comp;
+  document.documentElement.classList.toggle("ms-comp",comp);
   document.documentElement.classList.toggle("ms-atmos",ok);
   document.documentElement.classList.toggle("ms-pro",ok);
   var nm=(m&&m.customFields&&(m.customFields["first-name"]||m.customFields.firstName))||"";
