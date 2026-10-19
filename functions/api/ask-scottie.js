@@ -209,8 +209,13 @@ const BANK_PAGES = {
 };
 
 /* Which transferable points (and Atmos points) this member holds, from My Wallet. */
+/* Cards the member actually holds. "next" is a card HRT plans for them: it is
+   never shown to Ask Scottie, so the AI can't name a member's next card
+   (Eddie's rule: members only learn their next card from us, with our link). */
+function cardHeld(c) { return !!c && c.status !== "closed" && c.status !== "next"; }
+
 function memberBanks(wallet, catalog) {
-  const cards = (wallet && Array.isArray(wallet.cards)) ? wallet.cards.filter((c) => c && c.status !== "closed") : [];
+  const cards = (wallet && Array.isArray(wallet.cards)) ? wallet.cards.filter(cardHeld) : [];
   const byId = {};
   (catalog.cards || []).forEach((c) => { byId[c.cardId || c.id] = c; });
   const held = {};
@@ -278,7 +283,7 @@ function describePartners(held, partners) {
 /* Turn the member's saved wallet into a short, plain description. */
 function describeWallet(wallet, catalog) {
   const cards = (wallet && Array.isArray(wallet.cards)) ? wallet.cards : [];
-  const live = cards.filter((c) => c && c.status !== "closed");
+  const live = cards.filter(cardHeld);
   if (!live.length) return "No cards saved in My Wallet yet.";
   const byId = {};
   (catalog.cards || []).forEach((c) => { byId[c.id] = c; });
