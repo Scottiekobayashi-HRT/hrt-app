@@ -2,7 +2,7 @@
    Do not hand-edit. Change the sheet, download it, run the script. */
 window.HRT_WALLET_CATALOG={
  "v": 1,
- "built": "2026-10-16",
+ "built": "2026-10-19",
  "cards": [
   {
    "id": "chase-sapphire-preferred",
@@ -161,6 +161,44 @@ window.HRT_WALLET_CATALOG={
    "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
    "checked": "2026-10-13",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/4bf88517-38ca-45c8-9691-ac1ff83aa12e/Sapphire+Reserve+for+Business%E2%84%A0.png?content-type=image%2Fpng"
+  },
+  {
+   "id": "chase-ink-business-preferred",
+   "issuer": "Chase",
+   "name": "Ink Business Preferred",
+   "network": "Visa",
+   "fee": 95.0,
+   "feeBasis": "anniversary",
+   "note": "Points transfer to airlines and hotels. Employee cards free. Cell phone protection up to $1,000 a claim when you pay your phone bill with it.",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/a583508f-7f75-486c-95ee-f807a01e569f/Ink+Business+Preferred%C2%AE+Credit+Card.png?content-type=image%2Fpng"
+  },
+  {
+   "id": "chase-ink-business-unlimited",
+   "issuer": "Chase",
+   "name": "Ink Business Unlimited",
+   "network": "Visa",
+   "fee": 0.0,
+   "feeBasis": "n/a",
+   "note": "Cash back is earned as Ultimate Rewards points. Pair it with a Sapphire or Ink Business Preferred to move them to airlines and hotels.",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/78fcc13e-89da-4a0e-a8d3-0861b8bd0fb4/Ink+Business+Unlimited%C2%AE+Credit+Card.png?content-type=image%2Fpng",
+   "ftf": 3.0
+  },
+  {
+   "id": "chase-ink-business-cash",
+   "issuer": "Chase",
+   "name": "Ink Business Cash",
+   "network": "Visa",
+   "fee": 0.0,
+   "feeBasis": "n/a",
+   "note": "Cash back is earned as Ultimate Rewards points. Pair it with a Sapphire or Ink Business Preferred to move them to airlines and hotels. 5% and 2% categories cap at $25,000 each per account year.",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/cash",
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/4025faae-8bc2-4561-8399-840df42aca2e/Ink+Business+Cash%C2%AE+Credit+Card.png?content-type=image%2Fpng",
+   "ftf": 3.0
   }
  ],
  "benefits": [
@@ -1387,6 +1425,57 @@ window.HRT_WALLET_CATALOG={
    "note": "Pay the application fee with the card.",
    "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
    "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-ink-business-preferred",
+   "id": "doordash",
+   "label": "DoorDash non-restaurant",
+   "type": "discount",
+   "unit": "usd",
+   "amount": 10.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "$10 off one non-restaurant order a month. Needs the free DashPass from this card (activate by Dec 31, 2027). Does not roll over.",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-unlimited",
+   "id": "instacart",
+   "label": "Instacart Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 20.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Only while an Instacart+ membership is active (3 months free, then $99 a year unless cancelled). One retailer's orders. Through Dec 31, 2027.",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-cash",
+   "id": "instacart",
+   "label": "Instacart Credit",
+   "type": "credit",
+   "unit": "usd",
+   "amount": 20.0,
+   "perYear": 12.0,
+   "cadence": "monthly",
+   "resets": "calendar",
+   "enroll": "yes",
+   "spendGate": "",
+   "confidence": "confirmed",
+   "note": "Only while an Instacart+ membership is active (3 months free, then $99 a year unless cancelled). One retailer's orders. Through Dec 31, 2027.",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/cash",
+   "checked": "2026-10-19"
   }
  ],
  "earning": [
@@ -2523,6 +2612,156 @@ window.HRT_WALLET_CATALOG={
    "confidence": "confirmed",
    "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
    "checked": "2026-10-13"
+  },
+  {
+   "card": "chase-ink-business-preferred",
+   "category": "Travel",
+   "groups": [
+    "travel"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "first $150,000 combined 3x spend per account year, then 1x",
+   "via": "",
+   "note": "Shares the $150,000 cap with shipping, ads and internet, cable and phone.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-preferred",
+   "category": "Shipping, social and search ads, internet, cable and phone",
+   "groups": [
+    "business"
+   ],
+   "rate": 3.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "first $150,000 combined 3x spend per account year, then 1x",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-preferred",
+   "category": "Lyft",
+   "groups": [
+    "promo"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "in the Lyft app",
+   "note": "Limited time through September 30 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-preferred",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Ultimate Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-unlimited",
+   "category": "Lyft",
+   "groups": [
+    "promo"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "in the Lyft app",
+   "note": "Limited time through September 30 2027.",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-unlimited",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.5,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-cash",
+   "category": "Office supply stores, internet, cable and phone",
+   "groups": [
+    "business"
+   ],
+   "rate": 5.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "first $25,000 combined per account year, then 1%",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/cash",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-cash",
+   "category": "Gas stations",
+   "groups": [
+    "gas"
+   ],
+   "rate": 2.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "first $25,000 combined with restaurants per account year, then 1%",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/cash",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-cash",
+   "category": "Restaurants",
+   "groups": [
+    "dining"
+   ],
+   "rate": 2.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "first $25,000 combined with gas per account year, then 1%",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/cash",
+   "checked": "2026-10-19"
+  },
+  {
+   "card": "chase-ink-business-cash",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Ultimate Rewards points (cash back)",
+   "cap": "",
+   "via": "",
+   "note": "",
+   "confidence": "confirmed",
+   "source": "https://creditcards.chase.com/business-credit-cards/ink/cash",
+   "checked": "2026-10-19"
   }
  ],
  "quarterly": [
