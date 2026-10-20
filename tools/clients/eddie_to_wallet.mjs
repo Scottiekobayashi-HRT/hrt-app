@@ -39,6 +39,36 @@ export const ALIASES = {
   "atmos rewards ascent": "atmos-ascent", "atmos ascent": "atmos-ascent", "atmos rewards ascent visa signature": "atmos-ascent"
 };
 
+/* Eddie's short codes (his tracker's Card column), Oct 19 2026. Exact cards map to the catalog.
+   Codes that cover several cards (Delta, Hilton, United...) become a named Other card with a
+   warning so a person picks the exact card; Eddie can also write the exact code (e.g. DELTA-GOLD). */
+export const EDDIE_CODES = {
+  "csp": "chase-sapphire-preferred", "csr": "chase-sapphire-reserve", "cfu": "chase-freedom-unlimited", "cff": "chase-freedom-flex",
+  "cbu": "chase-ink-business-unlimited", "cbc": "chase-ink-business-cash", "cbp": "chase-ink-business-preferred", "cbm": "chase-ink-business-premier",
+  "vr": "capone-venture", "vx": "capone-venture-x", "vone": "capone-ventureone", "vx b": "capone-venture-x-business",
+  "axg": "amex-gold", "axp": "amex-platinum", "axp b": "amex-business-platinum", "axg b": "amex-business-gold",
+  "atm asc": "atmos-ascent", "atm sum": "atmos-summit", "atm biz": "atmos-business",
+  "qs": "capone-quicksilver", "savor": "capone-savor",
+  "alaska": "atmos-ascent", /* the Alaska Visa Signature became Atmos Ascent automatically (BofA, Aug 2025) */
+  "ha": "barclays-hawaiian",
+  /* exact co-brand codes, if Eddie uses them */
+  "csw plus": "chase-southwest-plus", "csw premier": "chase-southwest-premier", "csw priority": "chase-southwest-priority",
+  "csw b premier": "chase-southwest-premier-business", "csw b performance": "chase-southwest-performance-business",
+  "united gateway": "chase-united-gateway", "united explorer": "chase-united-explorer", "united quest": "chase-united-quest", "united club": "chase-united-club",
+  "delta blue": "amex-delta-blue", "delta gold": "amex-delta-gold", "delta plat": "amex-delta-platinum", "delta platinum": "amex-delta-platinum", "delta reserve": "amex-delta-reserve",
+  "hilton honors": "amex-hilton-honors", "hilton surpass": "amex-hilton-surpass", "hilton aspire": "amex-hilton-aspire",
+  "marriott boundless": "chase-marriott-boundless", "marriott bold": "chase-marriott-bold", "marriott bevy": "amex-marriott-bevy", "marriott brilliant": "amex-marriott-brilliant",
+  "bilt blue": "bilt-blue", "bilt obsidian": "bilt-obsidian", "bilt palladium": "bilt-palladium",
+  "ha b": "barclays-hawaiian-business"
+};
+/* Codes that do not name one card: kept as an Other card with a clear name, flagged for a person. */
+export const EDDIE_GENERIC = {
+  "csw": ["Chase Southwest card", "Chase"], "delta": ["Amex Delta card", "American Express"], "hilton": ["Amex Hilton card", "American Express"],
+  "united": ["Chase United card", "Chase"], "marriott": ["Marriott card", ""], "atmos": ["Atmos card", "Bank of America"],
+  "citi": ["Citi card", "Citi"], "barclays": ["Barclays card", "Barclays"], "store": ["Store card", ""], "bofa": ["Bank of America card", "Bank of America"],
+  "bilt": ["Bilt card", "Bilt"]
+};
+
 const STATUS_MAP = [
   [/^keep$/i, "keep"],
   [/keep for now/i, "keep-for-now"],
@@ -112,7 +142,8 @@ export function toWallet(rows, catalogIds, household = "") {
     const opened = parseDate(r.opened);
     if (opened === null) warnings.push("Row " + line + ': could not read open date "' + r.opened + '", left blank.');
     const key = cardKey(name);
-    const id0 = ALIASES[key];
+    const generic = EDDIE_GENERIC[key];
+    const id0 = generic ? null : EDDIE_CODES[key] || ALIASES[key];
     const cardId = id0 && catalogIds.has(id0) ? id0 : "custom";
     const feeTxt = String(r.annual_fee || "").replace(/[$,\s]/g, "");
     const fee = feeTxt === "" ? null : +feeTxt;
@@ -122,14 +153,20 @@ export function toWallet(rows, catalogIds, household = "") {
       opened: opened || "",
       addedBy: "hrt"
     };
-    if (cardId === "custom") {
+    if (cardId === "custom" && generic) {
+      entry.custom = { name: generic[0] };
+      if (generic[1]) entry.custom.issuer = generic[1];
+      if (fee != null && fee >= 0) entry.custom.fee = fee;
+      warnings.push("Row " + line + ': "' + name + '" could be several cards, added as "' + generic[0] + '". Ask which one, or write the exact code (for example DELTA-GOLD).');
+    } else if (cardId === "custom") {
       entry.custom = { name: name.replace(/\s*\(.*?\)\s*/g, " ").trim().slice(0, 60) };
       if (fee != null && fee >= 0) entry.custom.fee = fee;
       const iss = name.match(/^(chase|amex|american express|capital one|citi|bank of america|barclays|wells fargo|us bank|discover)\b/i);
       if (iss) entry.custom.issuer = iss[1].replace(/^amex$/i, "American Express").replace(/\b\w/g, (c) => c.toUpperCase()).replace("Us Bank", "U.S. Bank");
       warnings.push("Row " + line + ': "' + name + '" is not in our card list yet, added as Other card' + (fee == null ? " (no fee given)" : "") + ".");
     }
-    /* Opened with HRT's help ("hrt") or before HRT ("pre"), from an origin column. */
+    if (key === "ha" && cardId !== "custom") warnings.push("Row " + line + ': "HA" added as the Barclays Hawaiian Airlines card. If it is the Bank of Hawaii Hawaiian card, change it.');
+        /* Opened with HRT's help ("hrt") or before HRT ("pre"), from an origin column. */
     if (/^\s*hrt\b/i.test(r.origin || "")) entry.withHrt = true;
     else if (/^\s*pre\b/i.test(r.origin || "")) entry.withHrt = false;
     /* The next card is never named on the member's side: they hear it from Scottie by text. */

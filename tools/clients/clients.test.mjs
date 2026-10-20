@@ -53,5 +53,24 @@ eq("csv cell", csvCell('a,"b"'), '"a,""b"""');
   eq("ink + venture aliases", r.wallet.cards.map((c) => c.cardId), ["chase-ink-business-preferred", "chase-ink-business-cash", "capone-venture"]);
   eq("withHrt from origin", r.wallet.cards.map((c) => c.withHrt), [true, false, true]);
 }
+{
+  /* Eddie's code list (Oct 19): every code maps to a catalog card or a flagged Other card */
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(new URL("../../hrt-app/data/wallet-catalog.js", import.meta.url), "utf8");
+  const ids = new Set([...src.matchAll(/"id": "([a-z0-9-]+)"/g)].map((m) => m[1]));
+  const codes = ["CSP","CSR","CSW","CFU","CFF","CBU","CBC","CBP","CBM","VR","VX","VONE","VX-B","AXG","AXP","AXP-B","AXG-B","ATMOS","ATM-ASC","ATM-SUM","ATM-BIZ","CITI","BARCLAYS","DELTA","HILTON","MARRIOTT","UNITED","QS","SAVOR","STORE","HA","ALASKA","BOFA","BILT"];
+  const r = toWallet(codes.map((c) => ({ card: c, who: "A" })), ids, "codes");
+  const got = Object.fromEntries(codes.map((c, i) => [c, r.wallet.cards[i].cardId === "custom" ? "custom:" + r.wallet.cards[i].custom.name : r.wallet.cards[i].cardId]));
+  eq("CBM premier", got.CBM, "chase-ink-business-premier");
+  eq("VX-B", got["VX-B"], "capone-venture-x-business");
+  eq("ATM-BIZ", got["ATM-BIZ"], "atmos-business");
+  eq("ALASKA -> Ascent", got.ALASKA, "atmos-ascent");
+  eq("HA -> Barclays Hawaiian", got.HA, "barclays-hawaiian");
+  eq("DELTA generic", got.DELTA, "custom:Amex Delta card");
+  eq("exact co-brand code", toWallet([{ card: "DELTA-GOLD" }], ids, "x").wallet.cards[0].cardId, "amex-delta-gold");
+  const exact = codes.filter((c) => !got[c].startsWith("custom:"));
+  eq("exact codes all in catalog", exact.length, 23);
+  console.log("  codes:", JSON.stringify(got));
+}
 console.log(pass + " passed, " + fail + " failed");
 if (fail) process.exit(1);
