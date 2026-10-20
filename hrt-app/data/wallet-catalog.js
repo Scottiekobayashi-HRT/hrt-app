@@ -7313,6 +7313,21 @@ window.HRT_WALLET_CATALOG={
    "checked": "2026-10-19"
   },
   {
+   "card": "barclays-hawaiian-business",
+   "category": "Everything else",
+   "groups": [
+    "everyday"
+   ],
+   "rate": 1.0,
+   "currency": "Atmos Rewards points",
+   "cap": "",
+   "via": "",
+   "note": "Every card earns at least 1x; the Barclays business page could not be read to confirm.",
+   "confidence": "assumed",
+   "source": "https://cards.barclaycardus.com/banking/cards/hawaiian-airlines-business-mastercard/",
+   "checked": "2026-10-19"
+  },
+  {
    "card": "bilt-blue",
    "category": "Rent and mortgage paid through Bilt",
    "groups": [
