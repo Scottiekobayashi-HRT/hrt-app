@@ -17,6 +17,8 @@
   /* The My Seat Alerts card on the Dashboard home is switched off for now
      (Scottie, Oct 18). Alerts still work in the chat. Set to true to bring it back. */
   var HOME_CARD = false;
+  /* Coaching only for now (Oct 20): no seat alerts. */
+  var ALERTS_ON = false;
   var SUGGEST = [
     "I need help redeeming my points",
     "Help me plan my next trip with points"
@@ -117,7 +119,8 @@
     if (show) build();
     if (fab) fab.hidden = !show;
     if (!show && isOpen) toggle(false);
-    if (show && !alerts) loadAlerts();
+    /* seat alerts are off while Ask Scottie is coaching only */
+    if (show && !alerts && ALERTS_ON) loadAlerts();
     if (!show) { var c = document.getElementById("ascAlerts"); if (c) c.remove(); }
   }
 

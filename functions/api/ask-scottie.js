@@ -7,9 +7,10 @@
 
      ANTHROPIC_API_KEY      secret   Claude API key
      MEMBERSTACK_SECRET_KEY secret   Memberstack secret key (sk_sb_... in test mode)
-     SEATS_AERO_KEY         secret   seats.aero key (award search for ʻOhana)
+     SEATS_AERO_KEY         secret   seats.aero key (NOT used while LIVE_SEARCH is false)
      SCOTTIE_TEXT_NUMBER    variable Scottie's business text number, e.g. +18085551234
-     ASK_SCOTTIE            KV binding. Keys "rulebook" and "knowledge" hold the
+     ASK_SCOTTIE            KV binding. Keys "rulebook", "knowledge" and optional
+                            "voice" (Scottie's voice guide) hold the
                             private instructions and knowledge base. Daily
                             counters are kept here too.
      ASK_MODEL              variable optional, defaults to claude-sonnet-5-5
@@ -18,7 +19,7 @@
      ALERT_EVERY_HOURS      variable optional, hours between seat alert checks (default 6)
 
    Who gets what (see the rulebook):
-     ʻOhana (HRT Client plan)  coach mode, My Wallet, seats.aero when asked
+     ʻOhana (HRT Client plan)  coaching on redeeming points, My Wallet, live transfer bonuses
      HRT PRO only              not built yet (Atmos Rewards Seat Finder comes next)
      Free                      nothing
 --------------------------------------------------------------------------- */
@@ -28,6 +29,12 @@ const PRO_PLANS = ["pln_atmos-calendar-irdd08f8", "pln_all-access-xsc20cqf"];
 const MS_API = "https://admin.memberstack.com";
 const SEATS_API = "https://seats.aero/partnerapi/search";
 const HANDOFF = "[[TEXT_SCOTTIE]]";
+
+/* COACHING ONLY (Scottie, Oct 20). Ask Scottie coaches members on how to
+   redeem their points. It does NOT look up live award seats: no seats.aero
+   search, no trip planner, no seat alerts. That code stays below, switched
+   off, for HRT's next platform. To switch it back on, set this to true. */
+const LIVE_SEARCH = false;
 const ATMOS_PITCH = "[[ATMOS_CALENDAR]]";
 
 /* Atmos Rewards award space on Alaska and Hawaiian flights is what the Atmos
@@ -729,6 +736,87 @@ function describeAlerts(list) {
 
 /* ----------------------------- prompts ----------------------------- */
 
+const BANK_KEYS = ["chase", "amex", "capital-one", "citi", "bilt"];
+
+/* Every bank's airline partners, so the coach can answer for points the
+   member mentions in chat even if those cards aren't in My Wallet yet. */
+function describeAllPartners(held, partners) {
+  return BANK_KEYS.filter((b) => partners[b]).map((bank) => {
+    const list = ((partners[bank] || {}).p || []).filter((x) => x[1] === "airline")
+      .map((x) => x[0] + " " + (x[2] === 1 && x[3] === 1 ? "1:1" : x[2] + ":" + x[3]));
+    const mine = held[bank] === "yes" ? " (they hold this)" : held[bank] === "cashback" ? " (they hold Chase cash back cards only)" : "";
+    return "- " + partners[bank].name + mine + ": " + list.join(", ");
+  }).join("\n");
+}
+
+/* Live transfer bonuses from HRT's daily tracker. */
+function describeBonuses(bonuses, held) {
+  if (!bonuses || !bonuses.length) return "None live right now (or the tracker could not be reached; then say you're not sure and to check the Transfer Bonuses page).";
+  return bonuses.slice(0, 40).map((b) => {
+    const mine = held[b.bank] === "yes" ? " [their bank]" : "";
+    return "- " + (b.bankName || b.bank) + " to " + b.partner + ": +" + b.bonusPct + "%" +
+      (b.bonusRatio ? " (" + b.transferRatio + " becomes " + b.bonusRatio + ")" : "") +
+      (b.expiresDate ? ", ends " + b.expiresDate : "") + mine;
+  }).join("\n");
+}
+
+function coachContext(m, walletText, held, partners, bonuses) {
+  const lines = [
+    "MEMBER CONTEXT (from the HRT dashboard, not from the member):",
+    "- Today in Hawaii: " + hawaiiDate(),
+    "- First name: " + (m.firstName || "unknown"),
+    "- Plans: " + [m.client ? "ʻOhana Member" : null, m.pro ? "HRT PRO" : null].filter(Boolean).join(" and "),
+    "",
+    "Their cards in My Wallet:",
+    walletText,
+    "",
+    "HRT's transfer partner table (airlines; ratios are bank points to airline miles and can change):",
+    describeAllPartners(held, partners),
+    "",
+    "Live transfer bonuses today (HRT's tracker, checked daily):",
+    describeBonuses(bonuses, held),
+    "",
+    "WHAT ASK SCOTTIE IS (this overrides anything in the rulebook about award searches):",
+    "- You are my points coach for ʻOhana Members. You teach them HOW to redeem their points: the best way to pay, which programs to use, and the steps and rules. You do NOT look up live award seats, dates or prices, and you have no search tool.",
+    "- Never claim a seat, date or price is available. If they ask \"is there space on March 10?\", say you coach on the strategy and they can check on the airline's site (or the portal); give them what to look for.",
+    "- You may give typical award ranges as rough guides (\"usually around\"), and say they change.",
+    "",
+    "HOW I COACH A REDEMPTION (follow this order, keep each part to a line or two):",
+    "1. If the key facts are missing, ask 1 or 2 quick questions first: where and roughly when, how many people, cabin, and which points and how many. If they gave enough, go straight to the answer.",
+    "2. Portal first, always. For Chase, Amex or Capital One points, start with that bank's travel portal: it's the most dependable and priced like cash, so they can see right away if it's a good deal.",
+    "   - Chase Travel (https://ultimaterewards.chase.com): Points Boost can make points worth more on select flights and hotels. Sapphire Reserve up to 2 cents a point, Sapphire Preferred and Ink Business Preferred up to 1.75 cents on flights and 1.5 on hotels. Without a boost it's 1 cent. Offers change by booking.",
+    "   - Amex Travel (https://www.amextravel.com) and Capital One Travel (https://travel.capitalone.com): check and compare first too.",
+    "3. Then the transfer partners I prefer for that trip, only ones their points actually transfer to (use the table above), with the ratio. Say whether there's a live transfer bonus for that bank and partner today, or that there's none right now.",
+    "4. The rules before they transfer: open the airline account first, in their own name, matching their ID; find the seat on the airline's site BEFORE moving points; transfers are one way and can't be moved back; most are instant, some take a few days; taxes and fees are extra.",
+    "5. Close by reminding them to look at the portal first, and offer the real me by text for anything personal or complicated.",
+    "",
+    "EXAMPLE OF MY STYLE (for tone and order, not facts to copy word for word):",
+    "Member: \"Hey Scottie, I have about 80,000 points. Definitely want to fly to Japan next spring. I have Chase and Capital One miles. What's the best way to get there?\"",
+    "Me: \"Love it, Japan in the spring is the best! Quick ones first: how many of you are going, and economy or business?",
+    "Here's how I'd play it:",
+    "- **Check Chase Travel first.** It's priced like cash and it's the most dependable. With Points Boost, your Chase points can go further on select flights.",
+    "- **Capital One: JAL.** It's one of my favorite ways to Japan. Capital One moves to JAL at 4:3, and there's no transfer bonus right now.",
+    "- **Chase: Virgin Atlantic for ANA, or Aeroplan or United.** Space comes and goes, so be flexible on dates.",
+    "Before you transfer: make your own account with the airline, find the seat first, and remember once points move, they can't come back.",
+    "As always, look at the portal first. Want me to walk you through it step by step?\"",
+    "",
+    "ATMOS REWARDS:",
+    m.pro
+      ? "- This member has HRT PRO. For Atmos award dates, send them to the Atmos Award Calendar in the sidebar."
+      : "- If they ask when Atmos award seats on Alaska or Hawaiian are open, say warmly that this is exactly what your Atmos Award Calendar is for: every Atmos saver date from Hawaiʻi, updated every morning, part of HRT PRO for $9.99 a month. Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. Only when it comes up, never more than once in a chat. You can still coach them on Atmos points in general.",
+    "",
+    "THINGS I NEVER DO:",
+    "- Never recommend applying for a specific new card or say what their next card should be. That's a handoff to the real me.",
+    "- Never guess at numbers you don't have. If unsure, say so and offer a text with me.",
+    "",
+    "HOW YOUR ANSWER IS SHOWN:",
+    "- Plain text in a phone chat bubble. Short and to the point, like a text from me. You may use **bold** and short lists with '- '. No headings, no tables.",
+    "- Never use em dashes or en dashes.",
+    "- When you hand off to the real Scottie, end your message with " + HANDOFF + " on its own line. The app turns it into a Text Scottie button. Never write a phone number."
+  ];
+  return lines.join("\n");
+}
+
 function memberContext(m, walletText, opts, partnerText) {
   const lines = [
     "MEMBER CONTEXT (from the HRT dashboard, not from the member):",
@@ -849,7 +937,7 @@ export async function onRequestGet({ request, env }) {
   const m = await loadMember(env, bearer(request));
   if (m.error) return json({ ok: false, error: m.error }, 401);
   if (new URL(request.url).searchParams.get("alerts")) {
-    if (!m.client || !env.SEATS_AERO_KEY) return json({ ok: true, client: m.client, alerts: [], unread: 0 });
+    if (!LIVE_SEARCH || !m.client || !env.SEATS_AERO_KEY) return json({ ok: true, client: m.client, alerts: [], unread: 0 });
     const list = await refreshAlerts(env, request, m);
     return json({ ok: true, client: true, max: MAX_ALERTS, alerts: list.map(publicAlert), unread: list.reduce((n, a) => n + (a.unread || 0), 0) });
   }
@@ -883,9 +971,10 @@ export async function onRequestPost({ request, env }) {
   const left = await spend(env, "msg", m.id, msgLimit);
   if (left < 0) return json({ error: "daily_limit" }, 429);
 
-  const [rulebook, knowledge, catalog, partners, bonuses] = await Promise.all([
+  const [rulebook, knowledge, voice, catalog, partners, bonuses] = await Promise.all([
     env.ASK_SCOTTIE.get("rulebook"),
     env.ASK_SCOTTIE.get("knowledge"),
+    env.ASK_SCOTTIE.get("voice"),
     loadCatalog(env, request),
     loadPartners(env, request),
     loadBonuses()
@@ -894,18 +983,20 @@ export async function onRequestPost({ request, env }) {
   if (!rulebook) return json({ error: "not_configured", missing: ["rulebook in KV"] }, 503);
 
   const searchLimit = parseInt(env.DAILY_SEARCHES || "15", 10);
-  const canSearch = !!env.SEATS_AERO_KEY;
+  const canSearch = LIVE_SEARCH && !!env.SEATS_AERO_KEY;
   const searchesLeft = canSearch ? await remaining(env, "search", m.id, searchLimit) : 0;
 
   const system = [
     { type: "text", text: rulebook },
-    { type: "text", text: "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
+    { type: "text", text: (voice ? "MY VOICE (how I talk; follow it closely):\n\n" + voice + "\n\n" : "") + "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
     { type: "text", text: "" }
   ];
   const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL, WATCH_TOOL, UNWATCH_TOOL] : undefined;
   const ctx = { held: memberBanks(wallet, catalog), partners, bonuses, budget: budgetFrom(wallet, null), hideAtmos: !m.pro };
   const alerts = canSearch ? (await loadAlerts(env, m.id)).filter((a) => a.end >= hawaiiDate()) : [];
-  system[2].text = memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners));
+  system[2].text = LIVE_SEARCH
+    ? memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners))
+    : coachContext(m, describeWallet(wallet, catalog), ctx.held, partners, bonuses);
 
   let convo = messages.slice();
   let seats = null;
@@ -997,7 +1088,7 @@ async function alertAction(request, env, body) {
   const m = await loadMember(env, bearer(request));
   if (m.error) return json({ error: m.error }, 401);
   if (!m.client) return json({ error: "ohana_only" }, 403);
-  if (!env.SEATS_AERO_KEY) return json({ error: "not_configured" }, 503);
+  if (!LIVE_SEARCH || !env.SEATS_AERO_KEY) return json({ error: "not_available" }, 403);
   if (body.action === "watch") {
     const r = await addAlerts(env, request, m, Array.isArray(body.watch) ? body.watch : [body.watch]);
     return json(r, r.error ? 400 : 200);
