@@ -767,15 +767,7 @@
 
   /* ----- add / edit form ----- */
   function formHtml(entry) {
-    var cat = catalog().cards.slice().sort(function (a, b) { return a.issuer.localeCompare(b.issuer) || a.name.localeCompare(b.name); });
-    var groups = {}, order = [];
-    cat.forEach(function (c) { if (!groups[c.issuer]) { groups[c.issuer] = []; order.push(c.issuer); } groups[c.issuer].push(c); });
     var o = entry ? parseOpened(entry.opened) : null, t = todayParts();
-    var opts = '<option value="">Choose a card</option>' + order.map(function (iss) {
-      return '<optgroup label="' + esc(iss) + '">' + groups[iss].map(function (c) {
-        return '<option value="' + esc(c.id) + '"' + (entry && entry.cardId === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
-      }).join("") + "</optgroup>";
-    }).join("") + '<option value="custom"' + (entry && entry.cardId === "custom" ? " selected" : "") + ">Other card (not on this list)</option>";
     var cu = entry && entry.custom || {};
     var stOpts = '<option value="">No status</option>' + STATUS_ORDER.map(function (k) {
       return '<option value="' + k + '"' + (entry && entry.status === k ? " selected" : "") + ">" + esc(STATUS_LABEL[k]) + "</option>";
@@ -787,28 +779,52 @@
     for (var y = t.y; y >= t.y - 40; y--) years += '<option value="' + y + '"' + (o && o.y === y ? " selected" : "") + ">" + y + "</option>";
     var days = '<option value="">Day (optional)</option>';
     for (var d = 1; d <= 31; d++) days += '<option value="' + d + '"' + (o && o.d === d ? " selected" : "") + ">" + d + "</option>";
+    var ec = entry ? cardFor(entry, catIndex()) : null;
+    var holders = holderList(state.wallet).filter(Boolean);
+    var more = entry && (entry.status || entry.note || entry.feeDate || entry.nickname || entry.withHrt) ? " open" : "";
     return '<form class="wl-form" id="wlForm" novalidate>' +
       '<h3 class="wl-h3">' + (entry ? "Edit card" : "Add a card") + "</h3>" +
-      '<label class="wl-lab">Card<select id="wlCard" required' + (entry ? " disabled" : "") + ">" + opts + "</select></label>" +
+      (entry ? '<div class="wl-pick-cur">' + (ec ? artHtml(ec, "sm") : "") + "<b>" + esc(ec ? ec.name : "Card") + "</b></div>" +
+        '<input type="hidden" id="wlCard" value="' + esc(entry.cardId) + '">'
+      : '<div class="wl-pick"><label class="wl-lab">Which card?<input type="search" id="wlPickQ" autocomplete="off" spellcheck="false" enterkeyhint="search" placeholder="Type a card, like Sapphire or Venture"></label>' +
+        '<input type="hidden" id="wlCard" value=""><ul class="wl-pick-list" id="wlPickList">' + pickItems("") + "</ul></div>") +
       '<div class="wl-custom" id="wlCustom"' + (entry && entry.cardId === "custom" ? "" : " hidden") + ">" +
       '<label class="wl-lab">Card name<input id="wlCName" maxlength="60" placeholder="e.g. Chase Ink Business Preferred" value="' + esc(cu.name || "") + '"></label>' +
       '<label class="wl-lab">Bank (optional)<input id="wlCIssuer" maxlength="40" placeholder="e.g. Chase" value="' + esc(cu.issuer || "") + '"></label>' +
       '<label class="wl-lab">Annual fee<span class="wl-dollar">$<input id="wlCFee" type="number" inputmode="decimal" min="0" step="1" placeholder="0" value="' + (cu.fee != null ? cu.fee : "") + '"></span></label></div>' +
-      '<div class="wl-two"><label class="wl-lab">Whose card (optional)<input id="wlHolder" maxlength="30" placeholder="e.g. Janice" value="' + esc(entry && entry.holder || "") + '"></label>' +
-      '<label class="wl-lab">Status (optional)<select id="wlStatus">' + stOpts + "</select></label></div>" +
-      '<label class="wl-check"><input type="checkbox" id="wlWithHrt"' + (entry && entry.withHrt ? " checked" : "") + "> Opened with HRT’s help</label>" +
+      '<label class="wl-lab">Whose card (optional)<input id="wlHolder" maxlength="30" list="wlHolders" placeholder="e.g. Marlene" value="' + esc(entry && entry.holder || "") + '"></label>' +
+      (holders.length ? '<datalist id="wlHolders">' + holders.map(function (h) { return '<option value="' + esc(h) + '">'; }).join("") + "</datalist>" : "") +
       '<div class="wl-lab">When did you open it?<div class="wl-date">' +
       '<select id="wlMonth" aria-label="Month opened">' + months + "</select>" +
       '<select id="wlDay" aria-label="Day opened">' + days + "</select>" +
       '<select id="wlYear" aria-label="Year opened">' + years + "</select></div>" +
-      '<small class="wl-help">Month and year are enough. Add the day for an exact renewal date. Not sure, or not opened yet? Leave it blank.</small></div>' +
+      '<small class="wl-help">Month and year are enough. Not sure? Leave it blank and add it later.</small></div>' +
+      '<details class="wl-formmore"' + more + "><summary>More options</summary><div class=\"wl-formmore-in\">" +
+      '<label class="wl-lab">Status (optional)<select id="wlStatus">' + stOpts + "</select></label>" +
+      '<label class="wl-check"><input type="checkbox" id="wlWithHrt"' + (entry && entry.withHrt ? " checked" : "") + "> Opened with HRT\u2019s help</label>" +
       '<label class="wl-lab">Next step (optional)<textarea id="wlNote" maxlength="500" rows="2" placeholder="e.g. Call Capital One in December to switch to the no-fee VentureOne">' + esc(entry && entry.note || "") + "</textarea></label>" +
       feeDateFields(entry) +
       '<label class="wl-lab">Nickname (optional)<input id="wlNick" maxlength="40" placeholder="e.g. Business card, Spouse\'s card" value="' + esc(entry && entry.nickname || "") + '"></label>' +
-      bonusFields(entry) +
+      bonusFields(entry) + "</div></details>" +
       '<p class="wl-err" id="wlFormErr" role="alert"></p>' +
       '<div class="wl-acts"><button class="wl-btn wl-pri" type="submit"' + (state.busy ? " disabled" : "") + ">" + (state.busy ? "Saving" : entry ? "Save changes" : "Add card") + "</button>" +
       '<button class="wl-btn" type="button" data-wl="cancel">Cancel</button></div></form>';
+  }
+
+  /* Card search for Add a card: type "sapphire", "plat" or "venture x". Every word must match. */
+  function catIndex() { return catalog().cards.reduce(function (m, k) { m[k.id] = k; return m; }, {}); }
+  function pickItems(q) {
+    var words = String(q || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(Boolean);
+    var cur = $("wlCard") ? $("wlCard").value : "";
+    var list = catalog().cards.slice().sort(function (a, b) { return a.issuer.localeCompare(b.issuer) || a.name.localeCompare(b.name); })
+      .filter(function (c) { var h = (c.issuer + " " + c.name).toLowerCase(); return words.every(function (w) { return h.indexOf(w) > -1; }); });
+    var item = function (id, art, name, sub) {
+      return '<li><button type="button" class="wl-pick-i' + (cur === id ? " on" : "") + '" data-wl="pick" data-key="' + esc(id) + '">' + art +
+        '<span class="wl-pick-t"><b>' + esc(name) + "</b><span>" + esc(sub) + '</span></span><span class="wl-pick-ok" aria-hidden="true">&#10003;</span></button></li>';
+    };
+    return list.map(function (c) { return item(c.id, artHtml(c, "sm"), c.name, c.issuer + " \u00b7 " + (c.fee ? money(c.fee) + " a year" : "No annual fee")); }).join("") +
+      (list.length ? "" : '<li class="wl-pick-none">No match in our card list.</li>') +
+      item("custom", '<span class="wl-pick-plus" aria-hidden="true">+</span>', "Other card", "Not on our list? Add it by name");
   }
 
   function feeDateFields(entry) {
@@ -846,7 +862,7 @@
     var cardId = entry ? entry.cardId : $("wlCard").value;
     var m = +$("wlMonth").value, y = +$("wlYear").value, d = +$("wlDay").value;
     var status = $("wlStatus").value || "";
-    if (!cardId) return { err: "Choose which card." };
+    if (!cardId) return { err: "Choose which card. Type its name above, then tap it." };
     var custom = null;
     if (cardId === "custom") {
       var nm = $("wlCName").value.trim().slice(0, 60), fr = $("wlCFee").value.trim(), fee = fr ? +fr : 0;
@@ -1082,7 +1098,7 @@
       return '<button class="wl-ctab' + (on ? " on" : "") + '" role="tab" aria-selected="' + on + '" data-wl="ctab" data-key="' + g.key + '">' +
         "<b>" + esc(g.label) + "</b><span>" + (g.usd ? esc(money(g.usd)) : g.rows.length + (g.rows.length === 1 ? " perk" : " perks")) + "</span></button>";
     }).join("") + "</div>" : "";
-    var limit = home ? 4 : 6, shown = state.showAllSoon && !home ? sel.rows : sel.rows.slice(0, limit);
+    var limit = 4, shown = state.showAllSoon && !home ? sel.rows : sel.rows.slice(0, limit);
     return '<section class="wl-card wl-soonbox' + (home ? " wl-soon-home" : "") + '"><div class="wl-cr-head"><div><h3 class="wl-cr-title">Credits to use</h3>' +
       '<p class="wl-cr-sub">' + (home ? "Soonest first. Tick each one once you use it." : "Everything you have not used yet, soonest first. Tick each one once you use it.") + "</p></div>" +
       (total ? '<div class="wl-cr-total"><b>' + esc(money(total)) + "</b><span>left to use</span></div>" : "") + "</div>" + tabs +
@@ -1355,6 +1371,7 @@
   /* Typing a store updates only the answer, so the keyboard stays open. */
   function onInput(ev) {
     var t = ev.target;
+    if (t && t.id === "wlPickQ") { var pl = $("wlPickList"); if (pl) pl.innerHTML = pickItems(t.value); return; }
     if (!t || !t.hasAttribute || !t.hasAttribute("data-wl-store")) return;
     state.storeQ = t.value;
     var wc = t.closest(".wl-wc"); if (!wc) return;
@@ -1499,6 +1516,139 @@
     alertHost.innerHTML = summaryHtml("home");
   }
 
+  /* ===================== MY WALLET PAGE, simple layout (Oct 19) =====================
+     Marlene's feedback: too much on one page, and fixing a card should be easy. The page
+     is now a slim header, one list of cards and the credits to use. Everything about one
+     card opens in a card sheet; the extra tools fold away under "More". */
+  var REVIEW_KEY = "hrt-wl-reviewed", REVIEW_DAYS = 30;
+  function reviewHidden() { try { var t = +localStorage.getItem(REVIEW_KEY); return t && Date.now() - t < REVIEW_DAYS * 864e5; } catch (e) { return false; } }
+  function missingDates(w) { return (w && w.cards || []).filter(function (e) { return e.status !== "next" && e.status !== "closed" && !e.opened; }); }
+  var STAR_SM = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>';
+
+  function slimHeadHtml(s, perks) {
+    var V = view(), m = member(), o = m.ohana || {}, name = String(m.firstName || "").trim();
+    var due = expiringSoon(perks, SOON_PERK_DAYS).reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
+    var nx = s.next;
+    var oh = m.client ? '<div class="wl-sl-oh"><span class="wl-sl-star">' + OH_STAR + "</span><span><b>ʻOhana Member" + (o.since ? " since " + esc(o.since) : "") +
+      "</b> · Guided by Scottie and the HRT team</span></div>" +
+      (o.strategy ? '<p class="wl-sl-strat"><span>Your strategy</span>' + esc(o.strategy) + "</p>" : "") : "";
+    return '<section class="wl-sum wl-slim' + (m.client ? " wl-sum-oh" : "") + '" aria-label="My Wallet">' + exampleBanner() + oh +
+      '<div class="wl-sum-top"><h2 class="wl-sum-title">' + (m.client && name ? "Aloha, " + esc(name) : "My Wallet") + "</h2>" +
+      '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div>' + famHtml() + hrtLine(V) +
+      '<dl class="wl-sl-stats">' +
+      '<div><dt>Credits to use</dt><dd>' + (due ? esc(money(due)) : "All used") + "<small>next " + SOON_PERK_DAYS + " days</small></dd></div>" +
+      "<div><dt>Annual fees</dt><dd>" + esc(money(s.yearly)) + "</dd></div>" +
+      "<div><dt>Next renewal</dt><dd>" + (nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + "<small>" + esc(shortName(nx.card.name)) + "</small>" : "None") + "</dd></div>" +
+      "</dl></section>";
+  }
+
+  function nudgeHtml() {
+    if (state.demo || state.review) return "";
+    var miss = missingDates(view());
+    if (!miss.length || reviewHidden()) return "";
+    return '<div class="wl-card wl-nudge"><div class="wl-nudge-t"><b>Is your wallet right?</b><span>' + miss.length + (miss.length === 1 ? " card is" : " cards are") +
+      " missing the date you opened it. Add it so we can remind you before a fee renews.</span></div>" +
+      '<div class="wl-nudge-acts"><button class="wl-btn wl-pri" data-wl="review">Check my cards</button><button class="wl-link" data-wl="review-later">Later</button></div></div>';
+  }
+
+  /* "Check my cards": every card on one screen, fix open dates, remove old ones, one Save. */
+  function reviewHtml() {
+    var idx = catIndex(), t = todayParts();
+    var rows = view().cards.filter(function (e) { return e.status !== "closed"; }).map(function (e) {
+      var c = cardFor(e, idx), o = parseOpened(e.opened), hidden = e.status === "next" && e.addedBy === "hrt";
+      var mo = '<option value="">Month</option>' + MONTHS.map(function (x, i) { return '<option value="' + (i + 1) + '"' + (o && o.m === i + 1 ? " selected" : "") + ">" + x.slice(0, 3) + "</option>"; }).join("");
+      var yr = '<option value="">Year</option>';
+      for (var y = t.y + (e.status === "next" ? 1 : 0); y >= t.y - 40; y--) yr += '<option value="' + y + '"' + (o && o.y === y ? " selected" : "") + ">" + y + "</option>";
+      return '<li class="wl-rv' + (e.opened ? "" : " miss") + '" data-rv="' + esc(e.id) + '">' + (c && !hidden ? artHtml(c, "sm") : '<span class="wl-art wl-art-sm wl-art-blank"></span>') +
+        '<div class="wl-rv-main"><b>' + esc(hidden ? "Your next card" : c ? shortName(c.name) : "A card we no longer track") + "</b><span>" +
+        esc([e.holder ? e.holder + "’s card" : "", e.opened ? "" : "Open date missing"].filter(Boolean).join(" · ")) + "</span></div>" +
+        '<div class="wl-rv-date"><select data-rv-m aria-label="Month opened">' + mo + '</select><select data-rv-y aria-label="Year opened">' + yr + "</select></div>" +
+        '<button class="wl-link wl-rv-rm" data-wl="remove" data-id="' + esc(e.id) + '">Remove</button></li>';
+    }).join("");
+    return '<section class="wl-card wl-review"><div class="wl-head"><h3 class="wl-h3">Check your cards</h3></div>' +
+      '<p class="wl-note">Fix the month and year you opened each card, and remove any you no longer have.' +
+      (member().client ? " Something else looks off? Text Scottie and we will fix it." : "") + "</p>" +
+      '<ul class="wl-rvlist">' + rows + '</ul><p class="wl-err" id="wlRvErr" role="alert"></p>' +
+      '<div class="wl-acts"><button class="wl-btn wl-pri" data-wl="review-save"' + (state.busy ? " disabled" : "") + ">" + (state.busy ? "Saving" : "Save") + "</button>" +
+      '<button class="wl-btn" data-wl="add">+ Add a missing card</button><button class="wl-link" data-wl="review-done">Cancel</button></div></section>';
+  }
+
+  /* One short row per card: art, name, whose and when it renews. Tap opens the card sheet. */
+  function crowHtml(r) {
+    var e = r.entry, c = r.card;
+    if (!c) return '<li><button class="wl-crow" data-wl="sheet" data-id="' + esc(e.id) + '"><span class="wl-crow-main"><b>A card we no longer track</b><span>Tap to remove it</span></span><span class="wl-crow-go" aria-hidden="true">&rsaquo;</span></button></li>';
+    var rn = r.renewal, soon = r.hasFee && rn && rn.days <= SOON_DAYS;
+    var line = r.hasFee ? (rn ? "Renews " + (rn.exact ? dayText(rn) : MONTHS[rn.m - 1].slice(0, 3)) + ", " + money(c.fee) : money(c.fee) + " a year") : "No annual fee";
+    var bs = bonusState(e), flag = "";
+    if (bs && !bs.met && !bs.missed) flag = '<span class="wl-crow-flag">Bonus: ' + esc(money(bs.left)) + " to go</span>";
+    else if (e.status && e.status !== "keep" && STATUS_LABEL[e.status]) flag = '<span class="wl-crow-flag st">' + esc(STATUS_LABEL[e.status]) + "</span>";
+    else if (soon) flag = '<span class="wl-crow-flag">Renews in ' + rn.days + (rn.days === 1 ? " day" : " days") + "</span>";
+    else if (!e.opened) flag = '<span class="wl-crow-flag soft">Add open date</span>';
+    return '<li><button class="wl-crow' + (soon ? " soon" : "") + '" data-wl="sheet" data-id="' + esc(e.id) + '">' + artHtml(c, "sm") +
+      '<span class="wl-crow-main"><b>' + esc(shortName(c.name)) + (e.withHrt ? '<span class="wl-crow-hrt" title="Opened with HRT">' + STAR_SM + "</span>" : "") + "</b>" +
+      "<span>" + esc([e.holder, line].filter(Boolean).join(" · ")) + "</span>" + flag + '</span><span class="wl-crow-go" aria-hidden="true">&rsaquo;</span></button></li>';
+  }
+  function cardListHtml(s, perks) {
+    var v = cardView(), hrt = s.rows.some(function (r) { return r.entry.withHrt; });
+    return '<section class="wl-card wl-cards"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards <span class="wl-count">' + s.count + "</span></h2>" + viewToggle() + "</div>" +
+      (v === "grid" ? tilesHtml(s, perks, "grid") : '<ul class="wl-clist">' + s.rows.map(crowHtml).join("") + "</ul>") +
+      '<div class="wl-cards-foot">' + (hrt ? '<span class="wl-cards-key"><span class="wl-crow-hrt">' + STAR_SM + "</span> Opened with HRT</span>" : "<span></span>") +
+      '<button class="wl-link" data-wl="review">Check and fix my cards</button></div></section>';
+  }
+
+  /* Folded sections; open ones are remembered while the page is open. */
+  function moreBox(key, title, inner, sub) {
+    if (!inner) return "";
+    var open = !!(state.more && state.more[key]);
+    return '<section class="wl-card wl-more' + (open ? " open" : "") + '"><button class="wl-more-h" data-wl="more" data-key="' + key + '" aria-expanded="' + open + '">' +
+      "<span><b>" + esc(title) + "</b>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + '</span><span class="wl-more-i" aria-hidden="true">' + (open ? "&minus;" : "+") + "</span></button>" +
+      (open ? '<div class="wl-more-in">' + inner + "</div>" : "") + "</section>";
+  }
+
+  /* The card sheet: one card's facts, Edit and Remove, then perks and earning folded away. */
+  function sheetHtml() {
+    var id = state.sel, adding = state.editing === "new";
+    if (!adding && !id && !state.editing) return "";
+    var inner;
+    if (adding) inner = formHtml(null);
+    else {
+      var eid = state.editing || id, e = state.wallet.cards.filter(function (k) { return k.id === eid; })[0];
+      if (!e) { state.sel = null; state.editing = null; return ""; }
+      inner = state.editing ? formHtml(e) : sheetBody(e);
+    }
+    return '<div class="wl-sheet-bg" data-wl="sheet-close"></div><div class="wl-sheet" role="dialog" aria-modal="true" aria-label="Card">' +
+      '<button class="wl-sheet-x" data-wl="sheet-close" aria-label="Close">&times;</button>' + inner + "</div>";
+  }
+  function sheetBody(e) {
+    var s = summarize(state.wallet, catalog()), r = s.rows.filter(function (x) { return x.entry.id === e.id; })[0];
+    var c = r ? r.card : cardFor(e, catIndex()), hidden = e.status === "next" && e.addedBy === "hrt";
+    var name = hidden ? "Your next card" : c ? c.name : "A card we no longer track";
+    var perks = perkRows(state.wallet, catalog()).filter(function (x) { return x.entry.id === e.id; });
+    var facts = [];
+    if (c && !hidden) facts.push(["Annual fee", c.fee ? money(c.fee) + " a year" : "None"]);
+    facts.push([e.status === "next" ? "Planned for" : "Opened", openedText(e.opened) || "Not added yet"]);
+    if (r && r.hasFee && r.renewal) facts.push(["Renews", renewalText(r.renewal)]);
+    var fdx = r && r.hasFee ? nextFeeDate(e) : null;
+    if (fdx) facts.push(["Fee posts around", dayText(fdx)]);
+    if (e.holder) facts.push(["Whose card", e.holder]);
+    if (e.nickname) facts.push(["Nickname", e.nickname]);
+    var credits = perks.reduce(function (t, x) { return t + perkYearUsd(x.perk); }, 0);
+    if (credits) facts.push(["Credits a year", "Up to " + money(credits)]);
+    var tags = statusHtml(e) + (e.withHrt ? '<span class="wl-withhrt">' + STAR_SM + " Opened with HRT</span>" : e.withHrt === false ? '<span class="wl-prehrt">Had before HRT</span>' : "");
+    var html = '<div class="wl-sh-top">' + (c && !hidden ? artHtml(c, "md") : "") + '<div class="wl-sh-id"><b class="wl-sh-name">' + esc(name) + "</b>" +
+      (c && !hidden && c.issuer ? '<span class="wl-sh-sub">' + esc(c.issuer) + "</span>" : "") + (tags ? '<span class="wl-sh-tags">' + tags + "</span>" : "") + "</div></div>" +
+      '<dl class="wl-sh-facts">' + facts.map(function (f) { return "<div><dt>" + esc(f[0]) + "</dt><dd" + (f[1] === "Not added yet" ? ' class="miss"' : "") + ">" + esc(f[1]) + "</dd></div>"; }).join("") + "</dl>" +
+      (!e.opened && e.status !== "next" ? '<p class="wl-sh-hint">Add the date you opened it to see when the fee renews.</p>' : "") +
+      noteHtml(e) + bonusHtml(e) + (r && r.hasFee && r.renewal && r.renewal.days <= SOON_DAYS && !isClient() ? keepHtml(r) : "") +
+      '<div class="wl-sh-acts"><button class="wl-btn wl-pri" data-wl="edit" data-id="' + esc(e.id) + '">Edit card</button>' +
+      '<button class="wl-link wl-danger" data-wl="remove" data-id="' + esc(e.id) + '">Remove card</button></div>';
+    if (perks.length) html += moreBox("p-" + e.id, "Credits and perks", '<ul class="wl-pks">' + perks.map(function (x) { return perkHtml(x); }).join("") + "</ul>",
+      perks.length + (perks.length === 1 ? " perk" : " perks") + (credits ? ", up to " + money(credits) + " a year" : ""));
+    if (c && !hidden && earningFor(catalog(), c.id).length) html += moreBox("e-" + e.id, "How it earns", earnHtml(c.id).replace(/<h4 class="wl-h4">How it earns<\/h4>/, ""));
+    if (c && c.note && !perks.length) html += '<p class="wl-pk-note wl-cardnote">' + esc(c.note) + "</p>";
+    return html;
+  }
+
   function paintMain() {
     if (!host) return;
     if (state.error) {
@@ -1512,28 +1662,32 @@
     var perks = perkRows(view(), catalog());
     s.credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
     setStats(s);
-    var editingEntry = state.editing && state.editing !== "new" ?
-      state.wallet.cards.filter(function (c) { return c.id === state.editing; })[0] : null;
-    var html = summaryHtml("page");
-    if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
-    if (state.editing) html += '<div class="wl-card">' + formHtml(editingEntry) + "</div>";
-
-    if (!s.count && !(s.upcoming || []).length && !state.editing) {
-      /* the summary card above invites them to add cards */
-    } else if (s.count) {
-      if (!state.editing) html += '<div class="wl-hm-grid wl-pg-grid"><div class="wl-card wl-hm"><div class="wl-hm-head"><h2 class="wl-hm-h">Your cards</h2>' + viewToggle() + "</div>" +
-        tilesHtml(s, perks, cardView()) + whichHtml() + "</div>" + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
-      if (!state.editing) html += tipsHtml(false) + datesHtml(importantDates(view(), catalog()));
-      html += '<div class="wl-card"><div class="wl-head"><h3 class="wl-h3">Card details</h3></div>' +
-        (s.soon ? '<p class="wl-note">' + s.soon + (s.soon === 1 ? " card renews" : " cards renew") + " in the next " + SOON_DAYS + " days. Now is the time to decide: keep it, ask for a retention offer, or downgrade.</p>" : "") +
-        '<ul class="wl-list">' + s.rows.map(function (r) { return rowHtml(r, perks); }).join("") + "</ul></div>";
+    var html;
+    if (!s.count && !(s.upcoming || []).length) {
+      html = summaryHtml("page"); /* empty wallet: the summary card invites them to add cards */
+      if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
+    } else {
+      html = (s.count ? slimHeadHtml(s, perks) : summaryHtml("page")) + helpHtml("page");
+      if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
+      if (state.review) html += reviewHtml();
+      else {
+        html += nudgeHtml();
+        if (s.count) html += '<div class="wl-hm-grid wl-pg-grid">' + cardListHtml(s, perks) + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
+        var dates = importantDates(view(), catalog());
+        html += '<h3 class="wl-more-title">More</h3>' +
+          moreBox("which", "Which card should I use?", whichHtml().replace(/<h3 class="wl-h4 wl-wc-h">Which card should I use\?<\/h3>/, ""), "Type a store, like Foodland or Costco") +
+          moreBox("dates", "Important dates", datesHtml(dates), dates.length + (dates.length === 1 ? " date" : " dates") + " in the next 90 days") +
+          moreBox("tips", "For your cards", tipsHtml(false), "Transfer bonuses, lounges and more from our other tools") +
+          moreBox("up", "Next up and closed", upcomingHtml(s.upcoming || []), (s.upcoming || []).length + " planned or closed");
+      }
     }
-    html += upcomingHtml(s.upcoming || []);
     var checked = catalog().cards.length ? catalog().cards.map(function (c) { return c.checked; }).sort()[0] : "";
-    html += '<p class="wl-foot">Fees and credits come from each issuer\'s own website' + (checked ? ", checked " + esc(fmtIso(checked)) : "") +
-      '. Where an issuer does not say when a credit resets, we show calendar periods. Renewal is your card anniversary; most issuers bill the fee on the statement after it. Your wallet is private to your account.</p>';
+    html += '<p class="wl-foot">Fees and credits come from each issuer\'s own website' + (checked ? ", checked " + esc(fmtIso(checked)) : "") + ". Your wallet is private to your account.</p>";
+    html += sheetHtml();
     host.innerHTML = html;
-    if (state.editing) bindForm(editingEntry);
+    var sheetOpen = !!host.querySelector(".wl-sheet");
+    document.documentElement.classList.toggle("wl-sheet-open", sheetOpen);
+    if (state.editing) bindForm(state.editing === "new" ? null : state.wallet.cards.filter(function (c) { return c.id === state.editing; })[0]);
     if (state.focus) {
       var row = host.querySelector('[data-entry="' + state.focus + '"]');
       state.focus = null;
@@ -1556,9 +1710,7 @@
           function () { state.editing = null; });
       }
     });
-    var sel = $("wlCard"), box = $("wlCustom");
-    if (sel && box) sel.addEventListener("change", function () { box.hidden = sel.value !== "custom"; if (!box.hidden) $("wlCName").focus(); });
-    var first = entry ? $("wlMonth") : $("wlCard");
+    var first = entry ? $("wlMonth") : $("wlPickQ");
     if (first) try { first.focus({ preventScroll: true }); } catch (e) {}
   }
 
@@ -1599,12 +1751,48 @@
     if (act === "demo-off") { endExample(); return; }
     if (act === "which") { var k = b.getAttribute("data-key"); state.which = (state.which === k && !state.storeQ) ? "" : k; state.storeQ = ""; paint(); return; }
     if (act === "go-wallet") { location.hash = "wallet"; return; }
-    if (act === "go-card") { state.open[id] = true; state.focus = id; state.editing = null; if (location.hash === "#wallet") paint(); else location.hash = "wallet"; return; }
-    if ((act === "go-add" || act === "add") && state.demo) { endExample(); state.editing = "new"; if (act === "go-add") location.hash = "wallet"; return; }
-    if (act === "go-add") { state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
-    if (act === "add") { state.editing = "new"; state.msg = ""; paint(); host.scrollIntoView({ block: "nearest" }); return; }
+    if (act === "go-card" || act === "sheet") { state.sel = id; state.editing = null; if (location.hash === "#wallet") paint(); else location.hash = "wallet"; return; }
+    if (act === "sheet-close") { state.sel = null; state.editing = null; paint(); return; }
+    if (act === "more") { state.more = state.more || {}; var mk = b.getAttribute("data-key"); state.more[mk] = !state.more[mk]; paint(); return; }
+    if (act === "pick") {
+      var pk = b.getAttribute("data-key"), hid = $("wlCard"), cbox = $("wlCustom");
+      if (hid) hid.value = pk;
+      Array.prototype.forEach.call(document.querySelectorAll(".wl-pick-i"), function (x) { x.classList.toggle("on", x === b); });
+      if (cbox) { cbox.hidden = pk !== "custom"; if (!cbox.hidden) $("wlCName").focus(); }
+      if (pk !== "custom" && $("wlHolder")) try { $("wlHolder").scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (x) {}
+      if ($("wlFormErr")) $("wlFormErr").textContent = "";
+      return;
+    }
+    if (act === "review") { state.review = true; state.sel = null; state.editing = null; state.msg = ""; paint(); try { host.scrollIntoView({ block: "start", behavior: "smooth" }); } catch (x) {} return; }
+    if (act === "review-done") { state.review = false; paint(); return; }
+    if (act === "review-later") { try { localStorage.setItem(REVIEW_KEY, String(Date.now())); } catch (x) {} paint(); return; }
+    if (act === "review-save") {
+      var errs = "", ch = {};
+      Array.prototype.forEach.call(host.querySelectorAll("[data-rv]"), function (li) {
+        if (errs) return;
+        var rid = li.getAttribute("data-rv"), rm = +li.querySelector("[data-rv-m]").value, ry = +li.querySelector("[data-rv-y]").value;
+        var ent = state.wallet.cards.filter(function (k) { return k.id === rid; })[0];
+        if ((rm && !ry) || (ry && !rm)) { errs = "Choose both the month and the year, or leave both blank."; return; }
+        var v = rm && ry ? ry + "-" + (rm < 10 ? "0" : "") + rm : "";
+        if (v && ent && ent.status !== "next" && isFuture(v)) { errs = MONTHS[rm - 1] + " " + ry + " is in the future. Pick the month you opened the card."; return; }
+        ch[rid] = v;
+      });
+      if (errs) { $("wlRvErr").textContent = errs; return; }
+      save(function (w) {
+        w.cards.forEach(function (k) {
+          if (!(k.id in ch)) return;
+          var v = ch[k.id];
+          if (v && k.opened && k.opened.slice(0, 7) === v) return; /* same month: keep the exact day */
+          k.opened = v;
+        });
+      }, function () { state.review = false; try { localStorage.setItem(REVIEW_KEY, String(Date.now())); } catch (x) {} });
+      return;
+    }
+    if ((act === "go-add" || act === "add") && state.demo) { endExample(); state.sel = null; state.editing = "new"; if (act === "go-add") location.hash = "wallet"; return; }
+    if (act === "go-add") { state.sel = null; state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
+    if (act === "add") { state.sel = null; state.editing = "new"; state.msg = ""; paint(); return; }
     if (act === "cancel") { state.editing = null; paint(); return; }
-    if (act === "edit") { state.editing = id; state.msg = ""; paint(); return; }
+    if (act === "edit") { state.sel = id; state.editing = id; state.msg = ""; paint(); return; }
     if (act === "perks") { state.open[id] = !state.open[id]; paint(); return; }
     if (act === "bonus-save") {
       var inp = b.parentNode.querySelector("[data-wl-spent]"), amt = inp ? +inp.value : NaN;
@@ -1632,7 +1820,7 @@
       var c = e && cardFor(e, catalog().cards.reduce(function (m, k) { m[k.id] = k; return m; }, {}));
       if (!window.confirm("Remove " + (c ? c.name : "this card") + " from your wallet? Its ticked-off credits go too.")) return;
       save(function (w) { w.cards = w.cards.filter(function (k) { return k.id !== id; }); },
-        function () { if (state.editing === id) state.editing = null; });
+        function () { if (state.editing === id) state.editing = null; if (state.sel === id) state.sel = null; });
     }
   }
   function onChange(ev) {
@@ -1986,7 +2174,100 @@
         ".wl-perkbtn{min-height:40px;padding:8px 14px}" +
         ".wl-form select,.wl-form input{min-height:44px;font-size:16px}" +
       "}",
-      "@media (max-width:560px){.wl-rowtop{display:grid;grid-template-columns:auto 1fr;gap:8px 12px}.wl-rowtop>.wl-side{grid-column:1/-1}.wl-art-md{width:72px;border-radius:5px}.wl-art-md .wl-art-ph{font-size:7.5px}.wl-side{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:8px 12px;align-items:center}.wl-rowacts{margin-left:auto}.wl-date{grid-template-columns:1fr 1fr}.wl-date select:first-child{grid-column:1/-1}}"
+      "@media (max-width:560px){.wl-rowtop{display:grid;grid-template-columns:auto 1fr;gap:8px 12px}.wl-rowtop>.wl-side{grid-column:1/-1}.wl-art-md{width:72px;border-radius:5px}.wl-art-md .wl-art-ph{font-size:7.5px}.wl-side{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:8px 12px;align-items:center}.wl-rowacts{margin-left:auto}.wl-date{grid-template-columns:1fr 1fr}.wl-date select:first-child{grid-column:1/-1}}",
+      /* ----- My Wallet page, simple layout (Oct 19) ----- */
+      ".wl-slim{padding:18px 22px 16px}",
+      ".wl-slim .wl-sum-title{font-size:21px;font-weight:800;color:#fff}",
+      ".wl-slim .wl-sum-top{margin-bottom:2px}",
+      ".wl-slim .wl-fam{margin-top:12px}",
+      ".wl-sl-oh{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;line-height:1.4;color:#cfe0ee}.wl-sl-oh b{color:#f5c75a;font-weight:700}",
+      ".wl-sl-star{display:inline-flex;flex:0 0 auto;color:#f2b84b}",
+      ".wl-sum .wl-sl-strat{margin:-2px 0 12px;font-size:13.5px;line-height:1.45;color:#fff}.wl-sum .wl-sl-strat span{display:block;font-size:11.5px;font-weight:700;letter-spacing:.03em;color:#f5c75a}",
+      ".wl-sl-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(255,255,255,.13)}",
+      ".wl-sl-stats>div{min-width:0;padding-right:12px}.wl-sl-stats>div+div{padding-left:14px;border-left:1px solid rgba(255,255,255,.13)}",
+      ".wl-sum .wl-sl-stats dd{font-size:20px}",
+      ".wl-nudge{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border:1.5px solid rgba(242,184,75,.6);background:linear-gradient(180deg,rgba(242,184,75,.10),var(--surface) 70%)}",
+      ".wl-nudge-t{display:flex;flex-direction:column;gap:3px;flex:1 1 300px}.wl-nudge-t b{font-size:15.5px;color:var(--text)}.wl-nudge-t span{font-size:13.5px;line-height:1.5;color:var(--muted)}",
+      ".wl-nudge-acts{display:flex;align-items:center;gap:8px}",
+      ".wl-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--surface-2,rgba(120,130,145,.12));font-size:12.5px;font-weight:800;color:var(--muted);vertical-align:3px}",
+      ".wl-clist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column}",
+      ".wl-clist li+li{border-top:1px solid var(--line)}",
+      ".wl-crow{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:10px 4px;min-height:60px;border-radius:10px}",
+      ".wl-crow:hover{background:var(--surface-2,rgba(120,130,145,.07))}.wl-crow:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
+      ".wl-crow .wl-art-sm{width:64px}",
+      ".wl-crow-main{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}",
+      ".wl-crow-main b{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;color:var(--text);line-height:1.3}",
+      ".wl-crow-main>span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+      ".wl-crow-main>.wl-crow-flag{align-self:flex-start;margin-top:2px;font-size:11.5px;font-weight:800;color:#b4541f;background:rgba(217,112,64,.12);border-radius:999px;padding:2px 8px}",
+      ".wl-crow-flag.st{color:#8a5a10;background:rgba(242,184,75,.2)}.wl-crow-flag.soft{color:var(--muted);background:var(--surface-2,rgba(120,130,145,.12))}",
+      "[data-theme=dark] .wl-crow-main>.wl-crow-flag{color:#f4a77c}[data-theme=dark] .wl-crow-flag.st{color:#f2c56b}[data-theme=dark] .wl-crow-main>.wl-crow-flag.soft{color:var(--muted)}",
+      ".wl-crow-hrt{display:inline-flex;color:#d9a134}",
+      ".wl-crow-go{flex:0 0 auto;font-size:24px;line-height:1;color:var(--muted)}",
+      ".wl-cards-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}",
+      ".wl-cards-key{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}",
+      ".wl-more-title{margin:22px 0 10px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}",
+      ".wl-more{padding:0;margin-bottom:10px;overflow:hidden}",
+      ".wl-more-h{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;min-height:56px}",
+      ".wl-more-h:focus-visible{outline:2px solid var(--coral);outline-offset:-2px}",
+      ".wl-more-h>span:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}.wl-more-h b{font-size:15.5px;font-weight:800;color:var(--text)}.wl-more-h small{font-size:13px;color:var(--muted)}",
+      ".wl-more-i{flex:0 0 30px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface-2,rgba(120,130,145,.12));font-size:19px;font-weight:700;color:var(--text)}",
+      ".wl-more.open .wl-more-i{background:var(--coral);color:#fff}",
+      ".wl-more-in{padding:0 18px 16px}",
+      ".wl-more-in .wl-card{border:0;box-shadow:none;background:none;padding:0;margin:0}",
+      ".wl-more-in .wl-dates>.wl-head,.wl-more-in .wl-tips>.wl-head,.wl-more-in .wl-card>.wl-head{display:none}",
+      ".wl-more-in .wl-wc{margin:0;padding:0;border:0}",
+      /* the card sheet: a bottom sheet on phones, a centred panel on bigger screens */
+      "html.wl-sheet-open{overflow:hidden}",
+      ".wl-sheet-bg{position:fixed;inset:0;z-index:80;background:rgba(10,18,28,.55);animation:wlFade .18s ease-out}",
+      ".wl-sheet{position:fixed;z-index:81;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow:auto;overscroll-behavior:contain;box-sizing:border-box;padding:22px 22px 20px;border-radius:20px;background:var(--surface);color:var(--text);box-shadow:0 30px 70px -20px rgba(5,12,22,.6);animation:wlPop .2s ease-out}",
+      "@keyframes wlFade{from{opacity:0}to{opacity:1}}@keyframes wlPop{from{opacity:0;transform:translate(-50%,-47%)}to{opacity:1;transform:translate(-50%,-50%)}}",
+      ".wl-sheet-x{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:var(--surface-2,rgba(120,130,145,.12));color:var(--text);font-size:24px;line-height:1;cursor:pointer}",
+      ".wl-sheet .wl-form{margin:0}.wl-sheet .wl-h3{padding-right:44px}",
+      ".wl-sh-top{display:flex;align-items:center;gap:14px;padding-right:44px}",
+      ".wl-sh-id{display:flex;flex-direction:column;gap:3px;min-width:0}.wl-sh-name{font-size:19px;font-weight:800;line-height:1.25}.wl-sh-sub{font-size:13.5px;color:var(--muted)}",
+      ".wl-sh-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.wl-sh-tags>span{margin-top:0}",
+      ".wl-withhrt svg{flex:0 0 auto}",
+      ".wl-sh-facts{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:16px 0 0;border:1px solid var(--line);border-radius:14px;overflow:hidden}",
+      ".wl-sh-facts>div{padding:10px 14px;border-bottom:1px solid var(--line);min-width:0}.wl-sh-facts>div:nth-child(odd){border-right:1px solid var(--line)}",
+      ".wl-sh-facts dt{font-size:12px;color:var(--muted);margin:0 0 2px}.wl-sh-facts dd{margin:0;font-size:15px;font-weight:700}.wl-sh-facts dd.miss{color:var(--muted);font-weight:600}",
+      ".wl-sh-hint{margin:10px 0 0;font-size:13.5px;color:var(--muted)}",
+      ".wl-sh-acts{display:flex;align-items:center;gap:12px;margin:16px 0 12px}",
+      ".wl-link.wl-danger{color:#b83a32}[data-theme=dark] .wl-link.wl-danger{color:#f6a7a3}",
+      ".wl-sheet .wl-more{border:1px solid var(--line);box-shadow:none;border-radius:14px;margin:10px 0 0}",
+      ".wl-sheet .wl-more-h{padding:12px 14px;min-height:52px}.wl-sheet .wl-more-in{padding:0 14px 12px}",
+      /* card search in Add a card */
+      ".wl-pick-list{list-style:none;margin:8px 0 0;padding:4px;max-height:248px;overflow:auto;border:1px solid var(--line);border-radius:12px}",
+      ".wl-pick-i{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:9px;min-height:48px}",
+      ".wl-pick-i:hover{background:var(--surface-2,rgba(120,130,145,.08))}.wl-pick-i:focus-visible{outline:2px solid var(--coral)}",
+      ".wl-pick-i.on{background:rgba(217,112,64,.12);box-shadow:inset 0 0 0 1.5px var(--coral)}",
+      ".wl-pick-i .wl-art-sm{width:52px}",
+      ".wl-pick-t{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}.wl-pick-t b{font-size:14px;color:var(--text)}.wl-pick-t span{font-size:12.5px;color:var(--muted)}",
+      ".wl-pick-ok{opacity:0;color:var(--coral);font-weight:800}.wl-pick-i.on .wl-pick-ok{opacity:1}",
+      ".wl-pick-plus{flex:0 0 52px;width:52px;aspect-ratio:1.586;border-radius:5px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted)}",
+      ".wl-pick-none{padding:10px;font-size:13.5px;color:var(--muted)}",
+      ".wl-pick-cur{display:flex;align-items:center;gap:10px;margin:4px 0 10px}.wl-pick-cur .wl-art-sm{width:56px}.wl-pick-cur b{font-size:15px}",
+      ".wl-form small.wl-help{display:block;border:0;padding:0;margin:4px 0 0;background:none;box-shadow:none;font-size:12.5px;color:var(--muted)}",
+      ".wl-formmore{border:1px solid var(--line);border-radius:12px;padding:0 12px}.wl-formmore>summary{cursor:pointer;padding:12px 0;font-size:14px;font-weight:800;color:var(--text)}",
+      ".wl-formmore-in{display:flex;flex-direction:column;gap:12px;padding:0 0 12px}",
+      /* Check my cards */
+      ".wl-rvlist{list-style:none;margin:10px 0 0;padding:0}",
+      ".wl-rv{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px 12px;padding:10px 0;border-top:1px solid var(--line)}",
+      ".wl-rv .wl-art-sm{width:56px}.wl-art-blank{background:var(--surface-2,rgba(120,130,145,.15))}",
+      ".wl-rv-main{display:flex;flex-direction:column;gap:1px;min-width:0}.wl-rv-main b{font-size:14.5px}.wl-rv-main span{font-size:12.5px;color:var(--muted)}",
+      ".wl-rv.miss .wl-rv-main span{color:#b4541f;font-weight:700}[data-theme=dark] .wl-rv.miss .wl-rv-main span{color:#f4a77c}",
+      ".wl-rv-date{display:flex;gap:6px}.wl-rv-date select{font:inherit;font-size:14px;min-height:40px;padding:0 8px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text)}",
+      ".wl-rv.miss select{border-color:rgba(217,112,64,.7)}",
+      "@media (max-width:560px){" +
+        ".wl-slim{padding:16px 16px 14px}.wl-slim .wl-sum-title{font-size:19px}.wl-slim .wl-sum-top .wl-btn{flex:0 0 auto;min-height:40px;padding:0 12px;font-size:13.5px}" +
+        ".wl-sl-oh{font-size:12.5px;align-items:flex-start}.wl-sum .wl-sl-strat{font-size:13px}" +
+        ".wl-sum .wl-sl-stats dd{font-size:17px}.wl-sl-stats>div+div{padding-left:10px}.wl-sl-stats>div{padding-right:8px}" +
+        ".wl-sheet{top:auto;bottom:0;left:0;right:0;transform:none;width:100%;max-height:88vh;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));animation:wlUp .22s ease-out}" +
+        ".wl-sh-facts{grid-template-columns:1fr 1fr}" +
+        ".wl-rv{grid-template-columns:auto 1fr auto}.wl-rv-date{grid-column:1/-1}.wl-rv-date select{flex:1;min-height:44px;font-size:16px}" +
+        ".wl-cards-foot{flex-wrap:wrap}" +
+      "}",
+      "@keyframes wlUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}",
+      "@media (prefers-reduced-motion:reduce){.wl-sheet,.wl-sheet-bg{animation:none}}"
     ].join("");
     document.head.appendChild(s);
   }
@@ -2012,6 +2293,9 @@
         host.addEventListener("click", onClick);
         host.addEventListener("change", onChange);
         host.addEventListener("input", onInput);
+        document.addEventListener("keydown", function (ev) {
+          if (ev.key === "Escape" && (state.sel || state.editing) && host.querySelector(".wl-sheet")) { state.sel = null; state.editing = null; paint(); }
+        });
       }
       if (!state.wallet && !state.loading) load(); else paint();
     },
