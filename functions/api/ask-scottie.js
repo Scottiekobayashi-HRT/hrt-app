@@ -163,7 +163,7 @@ async function loadPartners(env, request) {
 
 /* Live transfer bonuses from the daily bonus tracker. Cached about an hour. */
 const BONUS_FEED = "https://raw.githubusercontent.com/Scottiekobayashi-HRT/hrt-bonuses/main/bonuses.json";
-let bonusCache = null, bonusAt = 0;
+let bonusCache = null, bonusAt = 0, bonusPast = [];
 async function loadBonuses() {
   if (bonusCache && Date.now() - bonusAt < 3600000) return bonusCache;
   try {
@@ -171,11 +171,46 @@ async function loadBonuses() {
     const d = await r.json();
     const today = hawaiiDate();
     bonusCache = (d.bonuses || []).filter((x) => !x.expiresDate || x.expiresDate >= today);
+    bonusPast = (d.recentlyExpired || []).concat((d.bonuses || []).filter((x) => x.expiresDate && x.expiresDate < today));
     bonusAt = Date.now();
   } catch (e) {
     bonusCache = bonusCache || [];
   }
   return bonusCache;
+}
+
+/* Transfer bonus history, so the coach can say "the last one was 30% in
+   September". The feed only keeps recent ones, so every bonus we see is
+   also saved in KV ("bonusHistory"), updated at most once a day. */
+async function bonusHistory(env, live) {
+  let hist = {};
+  try { hist = JSON.parse((await env.ASK_SCOTTIE.get("bonusHistory")) || "{}") || {}; } catch (e) { hist = {}; }
+  const today = hawaiiDate();
+  if (hist._day !== today) {
+    live.concat(bonusPast).forEach((b) => {
+      if (!b || !b.bank || !b.partner || !b.bonusPct) return;
+      const k = b.bank + "|" + b.partner;
+      const list = hist[k] || [];
+      const start = b.startDate || "", end = b.expiresDate || "";
+      if (!list.some((x) => x.start === start && x.pct === b.bonusPct)) list.push({ pct: b.bonusPct, start, end, bank: b.bankName || b.bank, partner: b.partner });
+      list.sort((a, c) => String(c.start).localeCompare(String(a.start)));
+      hist[k] = list.slice(0, 6);
+    });
+    hist._day = today;
+    try { await env.ASK_SCOTTIE.put("bonusHistory", JSON.stringify(hist)); } catch (e) {}
+  }
+  return hist;
+}
+
+function describeHistory(hist) {
+  const today = hawaiiDate();
+  const rows = Object.keys(hist).filter((k) => k !== "_day").map((k) => {
+    const past = (hist[k] || []).filter((x) => x.end && x.end < today);
+    if (!past.length) return null;
+    const h = past[0];
+    return "- " + h.bank + " to " + h.partner + ": " + past.map((x) => x.pct + "% (" + x.start + " to " + x.end + ")").join(", ");
+  }).filter(Boolean);
+  return rows.length ? rows.join("\n") : "(none recorded yet)";
 }
 
 /* seats.aero program keys: the name to show, where to book, and how to find
@@ -760,7 +795,7 @@ function describeBonuses(bonuses, held) {
   }).join("\n");
 }
 
-function coachContext(m, walletText, held, partners, bonuses) {
+function coachContext(m, walletText, held, partners, bonuses, historyText) {
   const lines = [
     "MEMBER CONTEXT (from the HRT dashboard, not from the member):",
     "- Today in Hawaii: " + hawaiiDate(),
@@ -776,17 +811,21 @@ function coachContext(m, walletText, held, partners, bonuses) {
     "Live transfer bonuses today (HRT's tracker, checked daily):",
     describeBonuses(bonuses, held),
     "",
+    "Past transfer bonuses (most recent first, from HRT's tracker):",
+    historyText || "(none recorded yet)",
+    "",
     "WHAT ASK SCOTTIE IS (this overrides anything in the rulebook about award searches):",
     "- You are my points coach for ʻOhana Members. You teach them HOW to redeem their points: the best way to pay, which programs to use, and the steps and rules. You do NOT look up live award seats, dates or prices, and you have no search tool.",
     "- Never claim a seat, date or price is available. If they ask \"is there space on March 10?\", say you coach on the strategy and they can check on the airline's site (or the portal); give them what to look for.",
-    "- You may give typical award ranges as rough guides (\"usually around\"), and say they change.",
+    "- You may give typical award ranges as rough guides (\"usually around\"), and say they change. Use my playbook's numbers when it has them.",
+    "- If they ask for availability or dates, be upfront: \"We don't do award seat availability yet, but I can walk you through exactly how to find it.\"",
     "",
     "HOW I COACH A REDEMPTION (follow this order, keep each part to a line or two):",
     "1. If the key facts are missing, ask 1 or 2 quick questions first: where and roughly when, how many people, cabin, and which points and how many. If they gave enough, go straight to the answer.",
     "2. Portal first, always. For Chase, Amex or Capital One points, start with that bank's travel portal: it's the most dependable and priced like cash, so they can see right away if it's a good deal.",
     "   - Chase Travel (https://ultimaterewards.chase.com): Points Boost can make points worth more on select flights and hotels. Sapphire Reserve up to 2 cents a point, Sapphire Preferred and Ink Business Preferred up to 1.75 cents on flights and 1.5 on hotels. Without a boost it's 1 cent. Offers change by booking.",
     "   - Amex Travel (https://www.amextravel.com) and Capital One Travel (https://travel.capitalone.com): check and compare first too.",
-    "3. Then the transfer partners I prefer for that trip, only ones their points actually transfer to (use the table above), with the ratio. Say whether there's a live transfer bonus for that bank and partner today, or that there's none right now.",
+    "3. Then lead them down the path, not just a name. For each of the 1 to 3 best options (only ones their points actually transfer to, from the table above): the program and airline, the ratio, roughly how many points one way per person, what that means for their balance and their group, whether there's a transfer bonus today, and if not, when the last one was and how big (from the history above, e.g. \"no bonus right now, but Capital One to JAL had 30% in September, they come around a few times a year\").",
     "4. The rules before they transfer: open the airline account first, in their own name, matching their ID; find the seat on the airline's site BEFORE moving points; transfers are one way and can't be moved back; most are instant, some take a few days; taxes and fees are extra.",
     "5. Close by reminding them to look at the portal first, and offer the real me by text for anything personal or complicated.",
     "",
@@ -802,15 +841,15 @@ function coachContext(m, walletText, held, partners, bonuses) {
     "",
     "ATMOS REWARDS:",
     m.pro
-      ? "- This member has HRT PRO. For Atmos award dates, send them to the Atmos Award Calendar in the sidebar."
-      : "- If they ask when Atmos award seats on Alaska or Hawaiian are open, say warmly that this is exactly what your Atmos Award Calendar is for: every Atmos saver date from Hawaiʻi, updated every morning, part of HRT PRO for $9.99 a month. Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. Only when it comes up, never more than once in a chat. You can still coach them on Atmos points in general.",
+      ? "- This member has HRT PRO. For any Atmos redemption question, coach them, then point them to the Atmos Award Calendar in the sidebar: it checks Atmos award space every day on 15 major routes from Honolulu."
+      : "- For any Atmos redemption question, coach them, then say: we don't do award seat availability yet, but if they want a daily check of Atmos data from Honolulu, my Atmos Rewards Calendar searches every day on 15 major routes from Honolulu, part of HRT PRO for $9.99 a month. Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. Once per chat at most.",
     "",
     "THINGS I NEVER DO:",
     "- Never recommend applying for a specific new card or say what their next card should be. That's a handoff to the real me.",
     "- Never guess at numbers you don't have. If unsure, say so and offer a text with me.",
     "",
     "HOW YOUR ANSWER IS SHOWN:",
-    "- Plain text in a phone chat bubble. Short and to the point, like a text from me. You may use **bold** and short lists with '- '. No headings, no tables.",
+    "- Plain text in a phone chat bubble. Detailed and personal, like I'm texting them the full game plan, but easy to scan: short lines, **bold** for the key move, short lists with '- '. No headings, no tables. Use their name now and then.",
     "- Never use em dashes or en dashes.",
     "- When you hand off to the real Scottie, end your message with " + HANDOFF + " on its own line. The app turns it into a Text Scottie button. Never write a phone number."
   ];
@@ -971,10 +1010,11 @@ export async function onRequestPost({ request, env }) {
   const left = await spend(env, "msg", m.id, msgLimit);
   if (left < 0) return json({ error: "daily_limit" }, 429);
 
-  const [rulebook, knowledge, voice, catalog, partners, bonuses] = await Promise.all([
+  const [rulebook, knowledge, voice, playbook, catalog, partners, bonuses] = await Promise.all([
     env.ASK_SCOTTIE.get("rulebook"),
     env.ASK_SCOTTIE.get("knowledge"),
     env.ASK_SCOTTIE.get("voice"),
+    env.ASK_SCOTTIE.get("playbook"),
     loadCatalog(env, request),
     loadPartners(env, request),
     loadBonuses()
@@ -988,7 +1028,7 @@ export async function onRequestPost({ request, env }) {
 
   const system = [
     { type: "text", text: rulebook },
-    { type: "text", text: (voice ? "MY VOICE (how I talk; follow it closely):\n\n" + voice + "\n\n" : "") + "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
+    { type: "text", text: (voice ? "MY VOICE (how I talk; follow it closely):\n\n" + voice + "\n\n" : "") + (playbook ? "MY REDEMPTION PLAYBOOK FROM HONOLULU (approved by me; typical prices, they change):\n\n" + playbook + "\n\n" : "") + "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
     { type: "text", text: "" }
   ];
   const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL, WATCH_TOOL, UNWATCH_TOOL] : undefined;
@@ -996,7 +1036,7 @@ export async function onRequestPost({ request, env }) {
   const alerts = canSearch ? (await loadAlerts(env, m.id)).filter((a) => a.end >= hawaiiDate()) : [];
   system[2].text = LIVE_SEARCH
     ? memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners))
-    : coachContext(m, describeWallet(wallet, catalog), ctx.held, partners, bonuses);
+    : coachContext(m, describeWallet(wallet, catalog), ctx.held, partners, bonuses, describeHistory(await bonusHistory(env, bonuses)));
 
   let convo = messages.slice();
   let seats = null;
