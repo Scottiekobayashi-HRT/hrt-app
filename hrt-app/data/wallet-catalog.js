@@ -209,7 +209,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Cash back card (points worth 1 cent each), not transferable Ultimate Rewards. Pay in Full card with a Flex for Business option to carry part of the balance.",
    "source": "https://creditcards.chase.com/business-credit-cards/ink/premier",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/fe42075f-75d0-41cc-b067-547e6aae2e3c/Ink+Business+Premier+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-southwest-plus",
@@ -220,7 +221,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Entry Southwest card: free first checked bag for you plus up to 8 on the same reservation, Group 5 boarding, and 3,000 anniversary points. Worth keeping for the bag perk on interisland and mainland trips.",
    "source": "https://creditcards.chase.com/travel-credit-cards/southwest/plus",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/cafe2bf4-3f0a-414f-b3ef-f6a1d591eac5/Southwest+Rapid+Rewards+Plus+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-southwest-premier",
@@ -231,7 +233,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Mid tier Southwest card: 6,000 anniversary points, a 15% off flight code each year, free first checked bag, and Preferred seat selection within 48 hours of departure.",
    "source": "https://creditcards.chase.com/travel-credit-cards/southwest/premier",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/858e1723-e6a0-492c-bc0e-a4d471ac2a38/Southwest+Rapid+Rewards+Premier+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-southwest-priority",
@@ -242,7 +245,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Top personal Southwest card: 7,500 anniversary points, Preferred seat at booking, free Extra Legroom upgrades within 48 hours, and free first checked bag. The old $75 annual Southwest travel credit is no longer listed.",
    "source": "https://creditcards.chase.com/travel-credit-cards/southwest/priority",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/a30a6e2d-09b8-4b0e-8ec6-9d949e62647e/Southwest+Rapid+Rewards+Priority+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-southwest-premier-business",
@@ -253,7 +257,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Business version of the Premier: 6,000 anniversary points, 15% off flight code each year, free first checked bag, and Standard or Preferred seat within 48 hours.",
    "source": "https://creditcards.chase.com/business-credit-cards/southwest/premier-business",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a40438a-fe45-4faa-941a-572f86f831b3/Southwest+Rapid+Rewards+Premier+Business+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-southwest-performance-business",
@@ -264,7 +269,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Top Southwest business card: 9,000 anniversary points, Preferred seat at booking, free Extra Legroom upgrades within 48 hours, free first checked bag, and a Global Entry or TSA PreCheck credit.",
    "source": "https://creditcards.chase.com/business-credit-cards/southwest/performance-business",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/49db1d24-d24c-4fcf-8d6a-72c0c2d10f6b/Southwest+Rapid+Rewards+Performance+Business+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-united-gateway",
@@ -275,7 +281,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "No annual fee United card. Spend $10,000 in a calendar year to unlock 2 free checked bag certificates, 8x on United flights and award flight savings.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-gateway",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a7bef34-62d1-46f2-ac99-3005e8efe9dd/United+Gateway+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-united-explorer",
@@ -286,7 +293,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "$0 intro annual fee the first year, then $150. First checked bag free for you and one companion when you buy the ticket with the card, plus 2 United Club passes each year.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-explorer",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/58809098-0140-47a6-b7d3-7535fd38a014/United+Explorer+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-united-quest",
@@ -297,7 +305,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "First and second checked bags free for you and one companion. $200 United TravelBank cash each card anniversary covers a big part of the fee if you fly United from HNL.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-quest",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/bb6be301-d16a-4d4e-b93c-7f89b781fb50/United+Quest+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-united-club",
@@ -308,7 +317,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Formerly the United Club Infinite Card, now called the United Club Card. Includes United Club membership (you plus one adult guest) and first and second checked bags free for you and one companion.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-club",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/d5a20e3f-60b9-41a9-a960-3f14db0b1b85/United+Club+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-marriott-boundless",
@@ -319,7 +329,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Free Night Award (up to 35,000 points) every year after your card anniversary, plus Silver Elite status and 15 Elite Night Credits each calendar year. Great for Marriott stays in Waikiki and on the neighbor islands.",
    "source": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/boundless",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ffcc4433-1b5d-444a-acea-5a48c40ef9bf/Marriott+Bonvoy+Boundless+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "chase-marriott-bold",
@@ -330,7 +341,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "No annual fee Marriott card with Silver Elite status and 5 Elite Night Credits each calendar year. No free night certificate.",
    "source": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/bold",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/71b294ad-0fb9-4c2c-bdce-573192e97cd2/Marriott+Bonvoy+Bold+Credit+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "capone-ventureone",
@@ -341,7 +353,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "No annual fee miles card. Miles transfer to Capital One travel partners and never expire while the account is open.",
    "source": "https://www.capitalone.com/credit-cards/ventureone/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/f9b9dc8a-a45b-41f6-b2ec-d46bb2a5c8ad/Capital+One+VentureOne+Rewards.png?content-type=image%2Fpng"
   },
   {
    "id": "capone-venture-x-business",
@@ -352,7 +365,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Designed to be paid in full each month. The $300 Business Travel credit and 10,000 anniversary miles roughly offset the fee if you book through Capital One Business Travel.",
    "source": "https://www.capitalone.com/small-business/credit-cards/venture-x-business/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/86be5474-e82d-4b3d-8780-a0b3fbf75b4e/Capital+One+Venture+X+Business.png?content-type=image%2Fpng"
   },
   {
    "id": "capone-quicksilver",
@@ -363,7 +377,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "Flat 1.5% cash back, no annual fee. Starting May 2026 some cards moved to the Discover network (which is less widely accepted abroad) with new 3% grocery and gas rates, so check which version you hold.",
    "source": "https://www.capitalone.com/learn-grow/money-management/quicksilver-card-benefits/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/9bc076c5-83ad-41a9-85b6-aa94a3865f1e/Capital+One+Quicksilver+Rewards.png?content-type=image%2Fpng"
   },
   {
    "id": "capone-savor",
@@ -374,7 +389,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "Savor is now the $0 fee card (the old $95 Savor and no-fee SavorOne were combined into it). Grocery 3% excludes superstores like Walmart and Target, so Costco and Walmart in Hawaii likely earn 1%.",
    "source": "https://www.capitalone.com/credit-cards/savor/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b9ddc6ce-7837-48bc-a2fc-510dd33bc43f/Capital+One+Savor.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-delta-blue",
@@ -385,7 +401,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "No annual fee starter Delta card. No free checked bag or companion certificate, but 20% back on Delta in-flight food and drinks.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-blue-american-express-card/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/12e3fe62-4a83-4289-85b3-fe65bc3d1ae3/Delta+SkyMiles+Blue+American+Express+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-delta-gold",
@@ -396,7 +413,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "$0 intro annual fee the first year for new cardmembers, then $150. Free first checked bag on Delta, $100 Delta Stays credit, and a $200 Delta flight credit after $10,000 spend in a calendar year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b895a222-0f86-4f5b-9a3c-311af3324e4d/Delta+SkyMiles+Gold+American+Express+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-delta-platinum",
@@ -407,7 +425,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Companion Certificate each year after renewal (Main Cabin, U.S. incl. Hawaii, Mexico, Caribbean, Central America), plus monthly Resy and rideshare credits that need enrollment. Also $2,500 MQD Headstart each Medallion Qualification Year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-platinum-american-express-card/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b6d9a57b-89f8-48e5-9bfa-a80eb1a48f32/Delta+SkyMiles+Platinum+American+Express+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-delta-reserve",
@@ -418,7 +437,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Delta's top card: 15 Sky Club visits per Medallion Year (unlimited after $75,000 spend in a calendar year), Centurion Lounge access when flying Delta on a ticket bought with the card, and a First/Comfort/Main Companion Certificate each renewal.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-reserve-american-express-card/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/52691a2a-520e-439d-98fd-9b5d25009d1a/Delta+SkyMiles+Reserve+American+Express+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-hilton-honors",
@@ -429,7 +449,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "No annual fee Hilton card with Silver status (Gold after $20,000 spend in a calendar year). No free night reward or statement credits.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/36fcd6bb-0bf0-4ac2-b053-5ecb7a4b76bc/Hilton+Honors+American+Express+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-hilton-surpass",
@@ -440,7 +461,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "$0 intro annual fee the first year for new cardmembers, then $150. Gold status, $50 Hilton credit each quarter, and a Free Night Reward after $15,000 spend in a calendar year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-surpass/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3052f642-7dd9-4723-b378-b810f9b767b5/Hilton+Honors+American+Express+Surpass+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-hilton-aspire",
@@ -451,7 +473,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Diamond status, a Free Night Reward each renewal, $400 resort credit split Jan to Jun and Jul to Dec, and $200 flight credit at $50 per calendar quarter. Good fit for Hilton resorts in Hawaii.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-aspire/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/470da76a-7cd0-4b93-a1cc-94e903667727/Hilton+Honors+American+Express+Aspire+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-marriott-bevy",
@@ -462,7 +485,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Gold Elite status and 15 Elite Night Credits each calendar year. No automatic free night; you earn one (up to 50,000 points) after $15,000 spend in a calendar year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-bevy/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e22db910-8408-4608-8272-879af23e5b3b/Marriott+Bonvoy+Bevy+American+Express+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "amex-marriott-brilliant",
@@ -473,7 +497,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Platinum Elite status, 25 Elite Night Credits each calendar year, a Free Night Award (up to 85,000 points) after each renewal month, and up to $25 a month in dining credits.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-brilliant/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ad2223cf-5e38-41c7-8e2d-9418fa9242f3/Marriott+Bonvoy+Brilliant+American+Express+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "atmos-business",
@@ -484,7 +509,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Renamed from the Alaska Airlines Visa Business card, works on Alaska and Hawaiian flights. Fee is $70 per company plus $25 per card, so $95 with one card.",
    "source": "https://business.bankofamerica.com/en/credit-cards/atmos-rewards",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/248caa21-2a6c-4c71-8732-654642061007/Atmos+Rewards+Visa+Signature+Business+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "barclays-hawaiian",
@@ -517,7 +543,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "No annual fee Bilt Card 2.0, issued by Column N.A. and serviced by Cardless since Feb 7, 2026. Rent and mortgage points scale with how much other spending you put on the card.",
    "source": "https://www.bilt.com/card/blue",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b9aa677a-f5a2-42f0-867d-deb72714651f/Bilt+Blue+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "bilt-obsidian",
@@ -528,7 +555,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Mid tier Bilt Card 2.0 (Column N.A., serviced by Cardless). Pick 3x dining or 3x grocery; grocery choice only changes in January.",
    "source": "https://www.bilt.com/card/obsidian",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/bf3fe1f7-5ad3-4e44-a83c-084f0d18b9c7/Bilt+Obsidian+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "bilt-palladium",
@@ -539,7 +567,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Top tier Bilt Card 2.0 (Column N.A., serviced by Cardless) with 2x on everything and Priority Pass. Hotel credits only work on Bilt Travel Portal stays of 2+ nights.",
    "source": "https://www.bilt.com/card/palladium",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/856af1cf-0d63-4d06-9394-97abecf18309/Bilt+Palladium+Card.png?content-type=image%2Fpng"
   },
   {
    "id": "boa-customized-cash",
@@ -551,6 +580,7 @@ window.HRT_WALLET_CATALOG={
    "note": "Pick one 3% category, change it once a month. The 3% and 2% only apply to the first $2,500 combined each quarter.",
    "source": "https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/",
    "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/50b5520a-579c-41e2-a282-ec30c26a6622/Bank+of+America+Customized+Cash+Rewards.png?content-type=image%2Fpng",
    "ftf": 3.0
   },
   {
@@ -562,7 +592,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Solid flat earner with no foreign fee, plus a $100 airline fee credit each year.",
    "source": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-credit-card/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3e7896da-63ec-40c0-842e-2b5fb0eda7cd/Bank+of+America+Premium+Rewards.png?content-type=image%2Fpng"
   },
   {
    "id": "boa-travel-rewards",
@@ -573,7 +604,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "n/a",
    "note": "No fee, no foreign fee, 1.5 points everywhere, redeem against travel purchases.",
    "source": "https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/c002e75b-a264-4ac0-957b-6e313848ad3b/Bank+of+America+Travel+Rewards.png?content-type=image%2Fpng"
   }
  ],
  "benefits": [
