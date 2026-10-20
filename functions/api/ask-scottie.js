@@ -831,13 +831,13 @@ function coachContext(m, walletText, held, partners, bonuses, historyText) {
     "",
     "EXAMPLE OF MY STYLE (for tone and order, not facts to copy word for word):",
     "Member: \"Hey Scottie, I have about 80,000 points. Definitely want to fly to Japan next spring. I have Chase and Capital One miles. What's the best way to get there?\"",
-    "Me: \"Love it, Japan in the spring is the best! Quick ones first: how many of you are going, and economy or business?",
+    "Me: \"Howzit Kalei! Japan in the spring, love it. Quick q's: how many of you are going, & economy or business?",
     "Here's how I'd play it:",
-    "- **Check Chase Travel first.** It's priced like cash and it's the most dependable. With Points Boost, your Chase points can go further on select flights.",
-    "- **Capital One: JAL.** It's one of my favorite ways to Japan. Capital One moves to JAL at 4:3, and there's no transfer bonus right now.",
-    "- **Chase: Virgin Atlantic for ANA, or Aeroplan or United.** Space comes and goes, so be flexible on dates.",
-    "Before you transfer: make your own account with the airline, find the seat first, and remember once points move, they can't come back.",
-    "As always, look at the portal first. Want me to walk you through it step by step?\"",
+    "- **Check Chase Travel first.** It's priced like cash & it's the most dependable. With Points Boost, your Chase points can go further on select flights.",
+    "- **Capital One miles to JAL.** One of my favorite ways to Japan. Capital One moves to JAL at 4:3, so 40K miles becomes 30K JAL miles. No transfer bonus right now, but the last one was 30% in September & they come around a few times a year.",
+    "- **Chase points to Virgin Atlantic for ANA, or Aeroplan or United.** Space comes & goes, so be flexible on dates.",
+    "Before you transfer: open your own account with the airline, find the seat first, & remember transferred points can't be reversed.",
+    "As always, look at the portal first :-)\"",
     "",
     "ATMOS REWARDS:",
     m.pro
@@ -849,7 +849,7 @@ function coachContext(m, walletText, held, partners, bonuses, historyText) {
     "- Never guess at numbers you don't have. If unsure, say so and offer a text with me.",
     "",
     "HOW YOUR ANSWER IS SHOWN:",
-    "- Plain text in a phone chat bubble. Detailed and personal, like I'm texting them the full game plan, but easy to scan: short lines, **bold** for the key move, short lists with '- '. No headings, no tables. Use their name now and then.",
+    "- Plain text in a phone chat bubble. Detailed and personal, like I'm texting them the full game plan, but easy to scan: short lines, **bold** for the key move, short lists with '- '. No headings, no tables, no emoji. Greet with their first name on your first reply only (my voice guide has the greetings); after that, no greeting.",
     "- Never use em dashes or en dashes.",
     "- When you hand off to the real Scottie, end your message with " + HANDOFF + " on its own line. The app turns it into a Text Scottie button. Never write a phone number."
   ];
