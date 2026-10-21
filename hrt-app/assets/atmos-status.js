@@ -497,7 +497,7 @@
       wrap.appendChild(rankCard(r));
       wrap.appendChild(Q.next([
         ["communities", "Atmos Community Calculator", "See which Community gives you the most each year"],
-        ["atmos", "Atmos Award Calendar", "Find award seats to use your points (HRT PRO)"],
+        ["atmos", "Atmos Rewards Calendar", "Find award seats to use your points (HRT PRO)"],
         ["wallet", "My Wallet", "Track your Atmos card's perks and renewal date"]
       ]));
       wrap.appendChild(Q.more("ap-why", "Why the choice matters", "Short hops versus long flights", explainCard));
