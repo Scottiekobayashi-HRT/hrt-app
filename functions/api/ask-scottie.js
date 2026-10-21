@@ -769,6 +769,84 @@ function describeAlerts(list) {
     (a.maxMiles ? ", under " + a.maxMiles + " miles" : "") + (a.best ? ". Cheapest seen: " + a.best.miles + " miles on " + a.best.date : ". Nothing seen yet")).join("\n");
 }
 
+/* ------------------------ FAQ knowledge base ------------------------
+   Scottie's FAQ knowledge base (306+ entries, "### ID: question" format) lives
+   in KV. It is too big to send whole on every question, so the server picks
+   the entries that best match what the member asked. Long files can be split
+   across KV keys "knowledge", "knowledge-2" ... "knowledge-9"; they are joined
+   in that order. An older plain-text knowledge file (no ### entries) is still
+   sent whole. */
+
+const KB_PARTS = ["knowledge", "knowledge-2", "knowledge-3", "knowledge-4", "knowledge-5", "knowledge-6", "knowledge-7", "knowledge-8", "knowledge-9"];
+const KB_PICK = 8;
+const STOP = new Set(("a an and are as at be but by can do does for from get got have how i if in is it its me my of on or our should so that the their them then there they this to was we what when where which who why will with you your im ive id dont cant just want like about any some more much many also would could into out up our us").split(" "));
+let kbCache = null;
+
+function kbWords(t) {
+  return String(t || "").toLowerCase().replace(/[ʻ’']/g, "").replace(/[^a-z0-9$%]+/g, " ").split(" ")
+    .filter((w) => w.length > 1 && !STOP.has(w))
+    .map((w) => (w.length > 4 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w));
+}
+
+function parseKb(raw) {
+  const chunks = String(raw || "").split(/\n(?=### )/);
+  const entries = [];
+  chunks.forEach((c) => {
+    const m = c.match(/^### ([A-Z]{2,4}-\d+[a-z]?):\s*(.+)/);
+    if (!m) return;
+    const ask = (c.match(/People also ask:\s*(.+)/) || [])[1] || "";
+    const who = (c.match(/Who can see it:\s*(.+)/) || [])[1] || "";
+    const head = new Set(kbWords(m[2] + " " + ask + " " + m[1]));
+    const body = new Set(kbWords(c));
+    entries.push({ id: m[1], title: m[2].trim(), who: who.trim(), text: c.replace(/\n## [^\n]*\s*$/, "").trim(), head, body });
+  });
+  const df = {};
+  entries.forEach((e) => e.body.forEach((w) => { df[w] = (df[w] || 0) + 1; }));
+  return { entries, df, n: entries.length };
+}
+
+async function loadKb(env) {
+  if (kbCache && Date.now() - kbCache.at < 600000) return kbCache;
+  const parts = await Promise.all(KB_PARTS.map((k) => env.ASK_SCOTTIE.get(k)));
+  const raw = parts.filter(Boolean).join("\n");
+  const parsed = parseKb(raw);
+  kbCache = { at: Date.now(), raw, ...parsed };
+  return kbCache;
+}
+
+/* Score entries against the member's last two messages (the latest counts double). */
+function pickEntries(kb, messages, opts) {
+  const users = messages.filter((m) => m.role === "user" && typeof m.content === "string");
+  const latest = kbWords((users[users.length - 1] || {}).content);
+  const before = kbWords((users[users.length - 2] || {}).content);
+  const q = {};
+  latest.forEach((w) => { q[w] = 2; });
+  before.forEach((w) => { q[w] = Math.max(q[w] || 0, 1); });
+  const scored = kb.entries
+    .filter((e) => opts.client || !/only/i.test(e.who))
+    .map((e) => {
+      let s = 0;
+      Object.keys(q).forEach((w) => {
+        if (!e.body.has(w)) return;
+        const idf = Math.log(1 + kb.n / (kb.df[w] || 1));
+        s += q[w] * idf * (e.head.has(w) ? 3 : 1);
+      });
+      return { e, s };
+    })
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, KB_PICK);
+  return scored.map((x) => x.e);
+}
+
+function knowledgeText(kb, messages, opts) {
+  if (!kb.raw) return "(empty)";
+  if (!kb.n) return kb.raw.slice(0, 60000);
+  const picked = pickEntries(kb, messages, opts);
+  if (!picked.length) return "(No FAQ entry matched this question closely. Coach from the playbook and partner table, or say you're not sure.)";
+  return picked.map((e) => e.text).join("\n\n");
+}
+
 /* ----------------------------- prompts ----------------------------- */
 
 const BANK_KEYS = ["chase", "amex", "capital-one", "citi", "bilt"];
@@ -819,6 +897,12 @@ function coachContext(m, walletText, held, partners, bonuses, historyText) {
     "- Never claim a seat, date or price is available. If they ask \"is there space on March 10?\", say you coach on the strategy and they can check on the airline's site (or the portal); give them what to look for.",
     "- You may give typical award ranges as rough guides (\"usually around\"), and say they change. Use my playbook's numbers when it has them.",
     "- If they ask for availability or dates, be upfront: \"We don't do award seat availability yet, but I can walk you through exactly how to find it.\"",
+    "",
+    "USING MY FAQ ENTRIES (at the end of this context):",
+    "- If an entry matches the question, lead with its Short answer in your own words, staying faithful to its facts. Add More detail when it helps.",
+    "- If an entry says \"Hand off to Scottie: Yes\", end with the handoff to the real me.",
+    "- Share the entry's HRT source link when it helps them read more.",
+    "- For redemption questions, my playbook and today's partner table and bonuses win over an older FAQ entry if they disagree.",
     "",
     "HOW I COACH A REDEMPTION (follow this order, keep each part to a line or two):",
     "1. If the key facts are missing, ask 1 or 2 quick questions first: where and roughly when, how many people, cabin, and which points and how many. If they gave enough, go straight to the answer.",
@@ -1010,9 +1094,9 @@ export async function onRequestPost({ request, env }) {
   const left = await spend(env, "msg", m.id, msgLimit);
   if (left < 0) return json({ error: "daily_limit" }, 429);
 
-  const [rulebook, knowledge, voice, playbook, catalog, partners, bonuses] = await Promise.all([
+  const [rulebook, kb, voice, playbook, catalog, partners, bonuses] = await Promise.all([
     env.ASK_SCOTTIE.get("rulebook"),
-    env.ASK_SCOTTIE.get("knowledge"),
+    loadKb(env),
     env.ASK_SCOTTIE.get("voice"),
     env.ASK_SCOTTIE.get("playbook"),
     loadCatalog(env, request),
@@ -1028,15 +1112,17 @@ export async function onRequestPost({ request, env }) {
 
   const system = [
     { type: "text", text: rulebook },
-    { type: "text", text: (voice ? "MY VOICE (how I talk; follow it closely):\n\n" + voice + "\n\n" : "") + (playbook ? "MY REDEMPTION PLAYBOOK FROM HONOLULU (approved by me; typical prices, they change):\n\n" + playbook + "\n\n" : "") + "HRT KNOWLEDGE BASE (approved answers):\n\n" + (knowledge || "(empty)"), cache_control: { type: "ephemeral" } },
+    { type: "text", text: (voice ? "MY VOICE (how I talk; follow it closely):\n\n" + voice + "\n\n" : "") + (playbook ? "MY REDEMPTION PLAYBOOK FROM HONOLULU (approved by me; typical prices, they change):\n\n" + playbook : "(no playbook yet)"), cache_control: { type: "ephemeral" } },
     { type: "text", text: "" }
   ];
+  const kbText = knowledgeText(kb, messages, { client: m.client });
   const tools = canSearch ? [SEARCH_TOOL, PLAN_TOOL, WATCH_TOOL, UNWATCH_TOOL] : undefined;
   const ctx = { held: memberBanks(wallet, catalog), partners, bonuses, budget: budgetFrom(wallet, null), hideAtmos: !m.pro };
   const alerts = canSearch ? (await loadAlerts(env, m.id)).filter((a) => a.end >= hawaiiDate()) : [];
   system[2].text = LIVE_SEARCH
     ? memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners))
     : coachContext(m, describeWallet(wallet, catalog), ctx.held, partners, bonuses, describeHistory(await bonusHistory(env, bonuses)));
+  system[2].text += "\n\nMY FAQ KNOWLEDGE BASE: the entries that best match this question (my approved answers):\n\n" + kbText;
 
   let convo = messages.slice();
   let seats = null;
