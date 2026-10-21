@@ -282,7 +282,7 @@
     if (m.role === "user") return '<div class="asc-msg me"><div class="asc-b">' + esc(m.content) + "</div></div>";
     return '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28">' +
       '<div class="asc-b' + (m.error ? " err" : "") + (m.alert ? " alert" : "") + '">' + fmt(m.content) + tripCard(m.trip) + seatCards(m.seats) +
-      watchOffer(m, i) + (m.atmos ? '<a class="asc-atmos" href="#atmos" data-route="atmos" data-asc-close>&#9733; Unlock the Atmos Award Calendar</a>' : "") +
+      watchOffer(m, i) + (m.atmos ? '<a class="asc-atmos" href="#atmos" data-route="atmos" data-asc-close>&#9733; Unlock the Atmos Reward Calendar</a>' : "") +
       (m.handoff ? textBtn("asc-textbtn inline") : "") + "</div></div>";
   }
 
@@ -313,7 +313,7 @@
     ai_unavailable: "I couldn't answer just now. Give it a minute and try again.",
     not_configured: "Ask Scottie is still being set up. Check back soon.",
     ohana_only: "Ask Scottie is for ʻOhana Members.",
-    pro_coming_soon: "The Atmos Rewards Seat Finder for HRT PRO is coming soon."
+    pro_coming_soon: "The Atmos Reward Seat Finder for HRT PRO is coming soon."
   };
 
   function send(text) {

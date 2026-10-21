@@ -20,7 +20,7 @@
 
    Who gets what (see the rulebook):
      ʻOhana (HRT Client plan)  coaching on redeeming points, My Wallet, live transfer bonuses
-     HRT PRO only              not built yet (Atmos Rewards Seat Finder comes next)
+     HRT PRO only              not built yet (Atmos Reward Seat Finder comes next)
      Free                      nothing
 --------------------------------------------------------------------------- */
 
@@ -38,7 +38,7 @@ const LIVE_SEARCH = false;
 const ATMOS_PITCH = "[[ATMOS_CALENDAR]]";
 
 /* Atmos Rewards award space on Alaska and Hawaiian flights is what the Atmos
-   Award Calendar (HRT PRO) sells, so Ask Scottie leaves it out for members
+   Reward Calendar (HRT PRO) sells, so Ask Scottie leaves it out for members
    without PRO (Scottie, Oct 18). Atmos partner awards (JAL, Qatar and so on)
    still show. To undo: make this return false. */
 function hideForNonPro(r) {
@@ -431,7 +431,7 @@ async function searchSeats(env, q, ctx) {
     .slice(0, q.keep || 12);
   if (ctx) out.forEach((r) => { r.book = bookingFor(r.program, ctx.held, ctx.partners, ctx.bonuses); });
   const found = { results: out, travelers: q.travelers };
-  if (atmosHidden) found.atmosHidden = "Atmos Rewards award seats on Alaska and Hawaiian flights were found but are not shown. They are in the Atmos Award Calendar (HRT PRO).";
+  if (atmosHidden) found.atmosHidden = "Atmos Rewards award seats on Alaska and Hawaiian flights were found but are not shown. They are in the Atmos Reward Calendar (HRT PRO).";
   return found;
 }
 
@@ -841,8 +841,8 @@ function coachContext(m, walletText, held, partners, bonuses, historyText) {
     "",
     "ATMOS REWARDS:",
     m.pro
-      ? "- This member has HRT PRO. For any Atmos redemption question, coach them, then point them to the Atmos Award Calendar in the sidebar: it checks Atmos award space every day on 15 major routes from Honolulu."
-      : "- For any Atmos redemption question, coach them, then say: we don't do award seat availability yet, but if they want a daily check of Atmos data from Honolulu, my Atmos Rewards Calendar searches every day on 15 major routes from Honolulu, part of HRT PRO for $9.99 a month. Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. Once per chat at most.",
+      ? "- This member has HRT PRO. For any Atmos redemption question, coach them, then point them to the Atmos Reward Calendar in the sidebar: it checks Atmos award space every day on 15 major routes from Honolulu."
+      : "- For any Atmos redemption question, coach them, then say: we don't do award seat availability yet, but if they want a daily check of Atmos data from Honolulu, my Atmos Reward Calendar searches every day on 15 major routes from Honolulu, part of HRT PRO for $9.99 a month. Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. Once per chat at most.",
     "",
     "THINGS I NEVER DO:",
     "- Never recommend applying for a specific new card or say what their next card should be. That's a handoff to the real me.",
@@ -862,7 +862,7 @@ function memberContext(m, walletText, opts, partnerText) {
     "- Today in Hawaii: " + hawaiiDate(),
     "- First name: " + (m.firstName || "unknown"),
     "- Plans: " + [m.client ? "ʻOhana Member" : null, m.pro ? "HRT PRO" : null].filter(Boolean).join(" and "),
-    "- Mode: Coach Mode (Part 3 of the rulebook)." + (m.pro ? " This member also has HRT PRO, but the Atmos Rewards Seat Finder is not switched on yet, so for Atmos calendar data point them to the Atmos Award Calendar in the sidebar." : ""),
+    "- Mode: Coach Mode (Part 3 of the rulebook)." + (m.pro ? " This member also has HRT PRO, but the Atmos Reward Seat Finder is not switched on yet, so for Atmos calendar data point them to the Atmos Reward Calendar in the sidebar." : ""),
     "- Award search: " + (opts.searchesLeft > 0 ? "available through search_award_seats, only if they ask (" + opts.searchesLeft + " searches left today)." : "used up for today. Say so kindly if they ask."),
     "",
     "Their cards in My Wallet:",
@@ -879,10 +879,10 @@ function memberContext(m, walletText, opts, partnerText) {
     "",
     "ATMOS REWARDS AWARD SEATS:",
     m.pro
-      ? "- This member has HRT PRO, so searches include Atmos Rewards seats on Alaska and Hawaiian flights. For browsing Atmos dates, the Atmos Award Calendar in the sidebar is the best tool."
+      ? "- This member has HRT PRO, so searches include Atmos Rewards seats on Alaska and Hawaiian flights. For browsing Atmos dates, the Atmos Reward Calendar in the sidebar is the best tool."
       : "- This member does not have HRT PRO. Searches leave out Atmos Rewards award seats on Alaska and Hawaiian flights (Atmos partner awards like JAL still show). " +
         "If they ask about Atmos award seats, Alaska or Hawaiian award flights, or booking with Atmos points on Alaska or Hawaiian, do not search for them. " +
-        "Tell them warmly, in your own words, that this is exactly what your Atmos Award Calendar is for: every Atmos saver date from Hawaiʻi, updated every morning, part of HRT PRO for $9.99 a month. " +
+        "Tell them warmly, in your own words, that this is exactly what your Atmos Reward Calendar is for: every Atmos saver date from Hawaiʻi, updated every morning, part of HRT PRO for $9.99 a month. " +
         "Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. If a search result says atmosHidden, mention it the same way. Do not pitch it otherwise, and never more than once in a chat.",
     "",
     "TRAVEL PORTAL FIRST (Scottie's rule):",
