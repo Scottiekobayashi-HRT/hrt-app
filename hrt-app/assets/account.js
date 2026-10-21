@@ -102,7 +102,7 @@
       ? '<div class="ac-line"><div><span class="ac-v ac-strong">HRT PRO</span><span class="ac-k">$9.99 a month</span></div><span class="ac-on">Active</span></div>'
         + '<div class="ac-actions"><button type="button" class="ac-btn" id="acBilling">Manage billing</button></div>'
         + '<p class="ac-note">Update your card, see invoices, or cancel in one click.</p>'
-      : '<p class="ac-note">You are on the free account. HRT PRO adds the Atmos Rewards Calendar for $9.99 a month.</p>'
+      : '<p class="ac-note">You are on the free account. HRT PRO adds the Atmos Reward Calendar for $9.99 a month.</p>'
         + '<div class="ac-actions"><a class="ac-btn ac-primary" href="#atmos" data-route="atmos">See HRT PRO</a></div>')
    + '</section>'
    + '</div>'
