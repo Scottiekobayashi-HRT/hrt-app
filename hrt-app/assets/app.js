@@ -35,6 +35,7 @@
  var ROUTES = {
   home:{ title:"Dashboard", hint:"Free tools for Hawaiʻi points travelers" },
   kamaaina:{ title:"Kamaʻāina Deals", hint:"Resident staycation rates by island" },
+ bigfamily:{ title:"Big Family Finder", hint:"Rooms that fit 5 or more" },
   atmos:{ title:"Atmos Reward Calendar", hint:"HRT PRO \u00b7 $9.99/mo" },
   lounges:{ title:"HNL Lounge Map", hint:"Every lounge at HNL" },
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
@@ -529,6 +530,7 @@
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
  onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };
  onShow.communities = function(){ if(window.HRT_COMMUNITIES) window.HRT_COMMUNITIES.show(); };
+ onShow.bigfamily = function(){ if(window.HRT_BIGFAM) window.HRT_BIGFAM.show(); };
  onShow.wallet = function(){ if(window.HRT_WALLET) window.HRT_WALLET.show(); };
  /* My Wallet panel on the Dashboard home; wraps any existing home handler */
  (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
