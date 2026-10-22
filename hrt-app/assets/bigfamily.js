@@ -37,6 +37,17 @@
     ["name", "Hotel name, A to Z"]
   ];
   var MIN_GUESTS = 5, MAX_GUESTS = 10;
+  /* Scottie's Tokyo tips: facts checked on official pages Oct 21, 2026. Shown when Japan is picked. */
+  var JAPAN_TIPS = [
+    ["Disney hotels open 4 months ahead", "Tokyo Disney Resort hotel rooms open for booking 4 months out at 11am Japan time, which is 4pm the day before in Hawaiʻi. Family rooms go fast.", "https://faq-en.tokyodisneyresort.jp/answer/680ba041d7820362f46c7b56/"],
+    ["Only one Disney hotel room fits 6", "The Disney Ambassador Family Room is the only official Disney hotel room for 6, and the 6th guest needs a paid extra bed. Nearby hotels like Grand Nikko, Royal Park Maihama and Oriental have six real beds.", "https://www.tokyodisneyresort.jp/en/hotel/dah/room/detail/family/"],
+    ["Bunk beds do not stretch", "At Disney hotels, kids can share a bed only on regular beds, never on bunks, trundles or daybeds. A bunk room holds exactly what it says.", "https://faq-en.tokyodisneyresort.jp/answer/683f07a285e09d45dfdde8cc/"],
+    ["Little ones often stay free", "Many hotels let kids 6 and under share an adult's bed at no charge, and do not count them as guests. MIMARU apartments for 6 also take 2 more kids 6 and under without beds.", "https://mimaruhotels.com/en/hotel/ikebukuro"],
+    ["Japanese rooms mean futons", "Japanese-style rooms on tatami often sleep extra people on futons laid out at night. Comfortable for kids, and a fun part of the trip.", "https://www.hotel-emion.jp/guest/japanese_w2.html"],
+    ["Check it is one room", "Many 6-person plans on Japanese booking sites are really two connecting rooms. Every room on this list fits 6 in one room or apartment.", "https://www.jtb.co.jp/kokunai-hotel/list/tokyo/feature/6p_room/"],
+    ["Points stays may cover 2 guests", "Hotel points nights in Japan often include 2 guests, with a cash charge for each extra person. Check the total before you book.", ""]
+  ];
+
   var PREF_KEY = "hrtBigFam2"; /* v2: list view became the default (Oct 21) */
 
   /* ---------------- pure helpers (tested) ---------------- */
@@ -120,7 +131,7 @@
     return '<tr>'
       + '<td><b class="bf-tn">' + esc(x.n) + '</b><small>' + esc(x.a + ", " + x.p) + '</small></td>'
       + '<td class="bf-tsl">' + esc(x.s) + '</td>'
-      + '<td>' + esc(x.br + ", " + x.k) + '</td>'
+      + '<td>' + esc(x.r) + '<small>' + esc(x.br + ", " + x.k) + '</small></td>'
       + '<td><span class="bf-pill ' + (isRealBeds(x) ? "ok" : "") + '">' + esc(BEDS_SHORT[x.b]) + '</span></td>'
       + '<td><b class="bf-tp ' + p.cls + '">' + esc(main) + '</b><small>' + esc(sub) + '</small></td>'
       + '<td class="bf-tgo"><a class="bf-see" href="' + esc(safeUrl(x.u)) + '" target="_blank" rel="noopener" aria-label="' + esc("See " + x.n + ", " + x.r + " on the hotel site") + '">See room</a></td>'
@@ -135,7 +146,7 @@
     var picks = cheapest(list, 3);
     var places = PLACES[st.dest];
     var tip = st.dest === "japan"
-      ? "Heads up: points stays in Japan often cover only 2 guests, with a charge for each extra person."
+      ? ""
       : (st.real ? "" : "Tip: many rooms count a sofa bed to reach 6. Turn on Real beds only to skip those.");
 
     var h = '<div class="bf">';
@@ -171,6 +182,15 @@
           + '<span class="bf-pn">' + esc(x.n) + '</span><span class="bf-pr">' + esc(x.r) + '</span></a>';
       });
       h += '</div><p class="bf-fine">Prices seen on hilton.com on ' + esc(window.HRT_BIGFAM_CHECKED || "") + ' for ' + esc(window.HRT_BIGFAM_POINTS_DATES || "sample dates") + '. Your dates will differ.</p></div>';
+    }
+
+    if (st.dest === "japan") {
+      h += '<details class="bf-tips card" open><summary><b>Booking Tokyo with a big family</b><span>Scottie\'s tips, checked October 2026</span></summary><ol>';
+      JAPAN_TIPS.forEach(function (t) {
+        h += '<li><b>' + esc(t[0]) + '</b><span>' + esc(t[1]) + '</span>'
+          + (t[2] ? '<a href="' + esc(safeUrl(t[2])) + '" target="_blank" rel="noopener">Source</a>' : '') + '</li>';
+      });
+      h += '</ol></details>';
     }
 
     h += '<div class="bf-bar"><div><h2>' + list.length + (list.length === 1 ? " room fits " : " rooms fit ") + st.guests + '</h2>'
@@ -290,7 +310,7 @@
       "#bf-host .bf-name{font-size:17px;font-weight:800;line-height:1.25}",
       "#bf-host .bf-room{font-size:14px;color:var(--text)}",
       "#bf-host .bf-facts{font-size:13px;color:var(--muted)}",
-      "#bf-host .bf-pill{align-self:flex-start;display:inline-block;margin-top:4px;font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;background:var(--look-bg);color:var(--look)}",
+      "#bf-host .bf-pill{align-self:flex-start;display:inline-block;white-space:nowrap;margin-top:4px;font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;background:var(--look-bg);color:var(--look)}",
       "#bf-host .bf-pill.ok{background:var(--deal-bg);color:var(--deal)}",
       "#bf-host .bf-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}",
       "#bf-host .bf-pts{display:flex;flex-direction:column}",
@@ -312,6 +332,16 @@
       "#bf-host .bf-see{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--coral);color:var(--coral-d);font-weight:800;text-decoration:none;white-space:nowrap}",
       "#bf-host .bf-see:hover{background:var(--coral);color:#fff}",
       "@media (max-width:640px){#bf-host .bf-tablewrap{overflow:visible}#bf-host .bf-table{min-width:0}#bf-host .bf-table thead{display:none}#bf-host .bf-table,#bf-host .bf-table tbody{display:block}#bf-host .bf-table tr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}#bf-host .bf-table tr:last-child{border-bottom:0}#bf-host .bf-table td{display:block;padding:0;border:0}#bf-host .bf-table td:nth-child(1){grid-column:1}#bf-host .bf-table td:nth-child(2){grid-column:2;grid-row:1;text-align:right}#bf-host .bf-table td:nth-child(2)::after{content:' fit';font-size:12px;font-weight:700;color:var(--muted)}#bf-host .bf-table td:nth-child(3),#bf-host .bf-table td:nth-child(4){grid-column:1 / -1;font-size:13px}#bf-host .bf-table td:nth-child(5){grid-column:1}#bf-host .bf-table td:nth-child(6){grid-column:2;align-self:end}}",
+      "#bf-host .bf-tips{padding:0;overflow:hidden}",
+      "#bf-host .bf-tips summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 14px;padding:16px 20px;min-height:44px;box-sizing:border-box}",
+      "#bf-host .bf-tips summary::-webkit-details-marker{display:none}",
+      "#bf-host .bf-tips summary b{font-size:17px;color:var(--text)}",
+      "#bf-host .bf-tips summary span{font-size:13px;color:var(--muted)}",
+      "#bf-host .bf-tips ol{margin:0;padding:0 20px 18px;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}",
+      "#bf-host .bf-tips li{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);font-size:14px;line-height:1.45;color:var(--text)}",
+      "#bf-host .bf-tips li b{font-size:15px}",
+      "#bf-host .bf-tips li a{font-size:13px;font-weight:700;color:var(--coral-d);align-self:flex-start}",
+      ":root[data-theme='dark'] #bf-host .bf-tips li a{color:#f7c39f}",
       "#bf-host .bf-empty{padding:32px;text-align:center;display:flex;flex-direction:column;gap:6px;color:var(--muted)}",
       "#bf-host .bf-empty b{color:var(--text);font-size:17px}",
       "#bf-host .bf-fine{margin:0;font-size:12px;line-height:1.55;color:var(--muted);max-width:760px}",
