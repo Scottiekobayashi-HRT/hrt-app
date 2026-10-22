@@ -37,7 +37,7 @@
     ["name", "Hotel name, A to Z"]
   ];
   var MIN_GUESTS = 5, MAX_GUESTS = 10;
-  var PREF_KEY = "hrtBigFam";
+  var PREF_KEY = "hrtBigFam2"; /* v2: list view became the default (Oct 21) */
 
   /* ---------------- pure helpers (tested) ---------------- */
   function isRealBeds(x) { return x.b === "real" || x.b === "shared"; }
@@ -87,7 +87,7 @@
   function safeUrl(u) { return /^https:\/\/[^\s"'<>]+$/.test(String(u || "")) ? u : "#"; }
 
   /* ---------------- state ---------------- */
-  var st = { dest: "hawaii", place: 0, guests: 6, real: false, pts: false, view: "grid", sort: "points" };
+  var st = { dest: "hawaii", place: 0, guests: 6, real: false, pts: false, view: "list", sort: "points" };
   try {
     var saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
     if (saved.view === "list" || saved.view === "grid") st.view = saved.view;
@@ -178,8 +178,8 @@
       + '<div class="bf-tools"><label for="bf-sort">Sort by</label><select id="bf-sort" data-bf-sort>';
     SORTS.forEach(function (s) { h += '<option value="' + s[0] + '"' + (st.sort === s[0] ? " selected" : "") + '>' + s[1] + '</option>'; });
     h += '</select><div class="bf-seg sm" role="group" aria-label="View">'
-      + '<button type="button" data-bf-view="grid" aria-pressed="' + (st.view === "grid") + '">Grid</button>'
-      + '<button type="button" data-bf-view="list" aria-pressed="' + (st.view === "list") + '">List</button></div></div></div>';
+      + '<button type="button" data-bf-view="list" aria-pressed="' + (st.view === "list") + '">List</button>'
+      + '<button type="button" data-bf-view="grid" aria-pressed="' + (st.view === "grid") + '">Grid</button></div></div></div>';
 
     if (!list.length) {
       h += '<div class="bf-empty card"><b>No rooms match yet</b><span>Try fewer guests, another island, or turn off a filter. We add new rooms as we check them.</span></div>';
@@ -311,6 +311,7 @@
       "#bf-host .bf-tgo{text-align:right;vertical-align:middle}",
       "#bf-host .bf-see{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--coral);color:var(--coral-d);font-weight:800;text-decoration:none;white-space:nowrap}",
       "#bf-host .bf-see:hover{background:var(--coral);color:#fff}",
+      "@media (max-width:640px){#bf-host .bf-tablewrap{overflow:visible}#bf-host .bf-table{min-width:0}#bf-host .bf-table thead{display:none}#bf-host .bf-table,#bf-host .bf-table tbody{display:block}#bf-host .bf-table tr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}#bf-host .bf-table tr:last-child{border-bottom:0}#bf-host .bf-table td{display:block;padding:0;border:0}#bf-host .bf-table td:nth-child(1){grid-column:1}#bf-host .bf-table td:nth-child(2){grid-column:2;grid-row:1;text-align:right}#bf-host .bf-table td:nth-child(2)::after{content:' fit';font-size:12px;font-weight:700;color:var(--muted)}#bf-host .bf-table td:nth-child(3),#bf-host .bf-table td:nth-child(4){grid-column:1 / -1;font-size:13px}#bf-host .bf-table td:nth-child(5){grid-column:1}#bf-host .bf-table td:nth-child(6){grid-column:2;align-self:end}}",
       "#bf-host .bf-empty{padding:32px;text-align:center;display:flex;flex-direction:column;gap:6px;color:var(--muted)}",
       "#bf-host .bf-empty b{color:var(--text);font-size:17px}",
       "#bf-host .bf-fine{margin:0;font-size:12px;line-height:1.55;color:var(--muted);max-width:760px}",
