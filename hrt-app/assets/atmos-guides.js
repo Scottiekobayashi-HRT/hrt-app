@@ -34,7 +34,10 @@
 
   /* ======================= Choose to Earn ======================= */
 
-  /* Two example round trips from Honolulu, used by all three panels.
+  /* Photos: free Unsplash photos (Unsplash License), hotlinked. Distance: wing
+     over the ocean. Price: boarding passes. Segments: Diamond Head from the air.
+
+     Two example round trips from Honolulu, used by all three panels.
      Miles: HNL-OGG about 100 each way, HNL-LAX 2,556 each way.
      Fares are typical examples, before taxes and fees. */
   var TRIPS = [
@@ -42,19 +45,19 @@
     { name: "Honolulu to Los Angeles", miles: 5112, fare: 420, flights: 2 }
   ];
   var WAYS = [
-    { key: "distance", color: "#5c7fa3", name: "By distance", rule: "1 point per mile",
+    { key: "distance", color: "#5c7fa3", photo: "photo-1758537697408-87849d0baffc", name: "By distance", rule: "1 point per mile",
       plain: "The farther you fly, the more you earn.",
       best: "Best for long flights on cheaper fares.",
       calc: function (t) { return t.miles; },
       how: function (t) { return fmt(t.miles) + " miles"; } },
-    { key: "price", color: "#0b7fc0", name: "By price", rule: "5 points per dollar",
+    { key: "price", color: "#0b7fc0", photo: "photo-1655722724447-2d2a3071e7f8", name: "By price", rule: "5 points per dollar",
       plain: "The more your ticket costs, the more you earn.",
-      best: "Best for pricey tickets and premium seats.",
+      best: "Best for a mix of trip lengths, or premium and Exit Row seats.",
       calc: function (t) { return t.fare * 5; },
       how: function (t) { return "$" + fmt(t.fare) + " fare"; } },
-    { key: "segment", color: "#d4722f", name: "By segments", rule: "500 points per flight",
+    { key: "segment", color: "#d4722f", photo: "photo-1581720488341-a02fe8d6575d", name: "By segments", rule: "500 points per flight",
       plain: "Every flight counts the same, short or long.",
-      best: "Best for short island hops.",
+      best: "Best for short hops, like island flights.",
       calc: function (t) { return t.flights * 500; },
       how: function (t) { return t.flights + " flights"; } }
   ];
@@ -96,7 +99,7 @@
 
     var head = el("div", "ag-head");
     head.appendChild(el("h2", "ag-h", "What is Choose to Earn?"));
-    head.appendChild(el("p", "ag-lead", "Every paid flight on Alaska or Hawaiian earns status points. Status points decide your elite tier, starting with Silver at 20,000. From Jan 1 2027, Atmos Rewards lets you choose how those points are counted, in one of three ways."));
+    head.appendChild(el("p", "ag-lead", "Every flight on Alaska, Hawaiian and their partners earns two kinds of points: points you spend on award flights, and status points that decide your elite tier (Silver starts at 20,000). From Jan 1 2027, Atmos Rewards lets you choose how both are counted, in one of three ways."));
     var facts = el("ul", "ag-facts");
     ["Pick one in your Atmos Rewards account", "Change it once a year", "Do nothing and you stay on distance"].forEach(function (f) { facts.appendChild(el("li", null, f)); });
     head.appendChild(facts);
@@ -111,6 +114,8 @@
       p.dataset.key = w.key;
       p.style.setProperty("--wc", w.color);
       var top = el("div", "ag-waytop");
+      top.style.backgroundImage = "linear-gradient(180deg, color-mix(in srgb, " + w.color + " 10%, transparent) 0%, color-mix(in srgb, " + w.color + " 30%, transparent) 40%, color-mix(in srgb, " + w.color + " 90%, #1b2430) 100%), url('https://images.unsplash.com/" + w.photo + "?auto=format&fit=crop&w=800&q=70')";
+      top.setAttribute("role", "img"); top.setAttribute("aria-label", w.name + ", " + w.rule);
       top.appendChild(el("span", "ag-match", "Your best match"));
       top.appendChild(svgEl(ART[w.key]));
       p.appendChild(top);
@@ -148,7 +153,7 @@
     btn.addEventListener("click", function () { scrollToTool("v-status"); });
     foot.appendChild(btn);
     sec.appendChild(foot);
-    sec.appendChild(el("p", "ag-fine", "Status points shown for the example round trips, before any elite bonus. Example fares exclude taxes and fees, which never count. Saver and Basic Economy fares earn nothing on any of the three."));
+    sec.appendChild(el("p", "ag-fine", "Points shown for the example round trips, before any elite bonus. Award flights earn status points only. Example fares exclude taxes and fees, which never count. Saver and Basic Economy fares earn nothing on any of the three."));
     return sec;
   }
 
@@ -303,7 +308,8 @@
       ".ag-ways{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}",
       "@media (max-width:900px){.ag-ways{grid-template-columns:1fr}}",
       ".ag-way{display:flex;flex-direction:column;overflow:hidden;border-radius:var(--radius,16px);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}",
-      ".ag-waytop{position:relative;background:var(--wc);padding:16px 14px 10px}",
+      ".ag-waytop{position:relative;background-color:var(--wc);background-size:cover;background-position:center;padding:22px 14px 14px;min-height:230px;display:flex;align-items:flex-end}",
+      ".ag-waytop .ag-art{width:100%;max-width:78%;margin:0 auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}",
       ".ag-art svg{display:block;width:100%;height:auto;max-height:130px}",
       ".ag-art text{font-family:'DM Sans',sans-serif}",
       ".ag-wayb{display:flex;flex-direction:column;padding:16px 18px 18px;flex:1}",
