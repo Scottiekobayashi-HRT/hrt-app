@@ -638,11 +638,10 @@
       ]));
       wrap.appendChild(Q.more("ac-math", "See the math", "Your top two, line by line", function () { return compareBody(compute()); }));
       wrap.appendChild(Q.more("ac-tune", "Fine tune", "Your card, bags, how you earn, what matters most", fineTuneBody));
-      wrap.appendChild(Q.more("ac-six", "Meet the six Communities", "What each one gives you", function () { return sixBody(compute()); }));
-      wrap.appendChild(Q.more("ac-how", "How Communities work", "The rules and the bonus points challenge", howBody));
       wrap.appendChild(Q.more("ac-fine", "Fine print and sources", null, fineBody));
     }
     host.appendChild(wrap);
+    if (window.HRT_ATMOS_GUIDE) window.HRT_ATMOS_GUIDE.mark("comm", state.done ? (function () { var r = compute(); return r.best.score > 0 ? r.best.c.key : null; })() : null);
   }
 
   function styles() {
@@ -820,11 +819,13 @@
 
   window.HRT_COMMUNITIES = {
     _test: { compute: compute, state: state, COMMUNITIES: COMMUNITIES, CUMUL: CUMUL, PRESETS: PRESETS, perRoundTrip: perRoundTrip },
+    data: { COMMUNITIES: COMMUNITIES, ICON: ICON },
     show: function () {
       if (window.HRT_QUIZ) window.HRT_QUIZ.css();
       styles();
       host = document.getElementById("ac-host");
       if (host && !host.getAttribute("data-ready")) { host.setAttribute("data-ready", "1"); paint(); }
+      if (window.HRT_ATMOS_GUIDE) window.HRT_ATMOS_GUIDE.mount("comm");
     }
   };
 })();

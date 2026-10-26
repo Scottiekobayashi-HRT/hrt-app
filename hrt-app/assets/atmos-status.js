@@ -500,13 +500,13 @@
         ["atmos", "Atmos Reward Calendar", "Find award seats to use your points (HRT PRO)"],
         ["wallet", "My Wallet", "Track your Atmos card's perks and renewal date"]
       ]));
-      wrap.appendChild(Q.more("ap-why", "Why the choice matters", "Short hops versus long flights", explainCard));
       wrap.appendChild(Q.more("ap-tiers", "How to reach each tier", "Silver, Gold, Platinum, Titanium", function () { return pathwaysCard(compute()); }));
       wrap.appendChild(Q.more("ap-tune", "Fine tune", "Miles, fares and status you already hold", tuneBody));
       wrap.appendChild(Q.more("ap-faq", "Common questions", null, faqCard));
       wrap.appendChild(Q.more("ap-fine", "Fine print", null, function () { return footerCard(compute()); }));
     }
     host.appendChild(wrap);
+    if (window.HRT_ATMOS_GUIDE) window.HRT_ATMOS_GUIDE.mark("earn", state.done ? compute().best.key : null);
   }
   function redraw() { paint(); }
 
@@ -660,6 +660,7 @@
       styles();
       host = document.getElementById("as-host");
       if (host && !host.getAttribute("data-ready")) { host.setAttribute("data-ready", "1"); paint(); }
+      if (window.HRT_ATMOS_GUIDE) window.HRT_ATMOS_GUIDE.mount("earn");
     }
   };
 })();
