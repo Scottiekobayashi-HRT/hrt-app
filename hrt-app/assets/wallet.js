@@ -1376,6 +1376,15 @@
   /* Typing a store updates only the answer, so the keyboard stays open. */
   function onInput(ev) {
     var t = ev.target;
+    if (t && t.id === "wlCardQ") {
+      state.cardQ = t.value;
+      var q = t.value.trim().toLowerCase(), shown = 0;
+      Array.prototype.forEach.call(host.querySelectorAll("[data-ct-q]"), function (r) {
+        var hit = !q || r.getAttribute("data-ct-q").indexOf(q) > -1; r.hidden = !hit; if (hit) shown++;
+      });
+      var n = $("wlCardN"); if (n) n.textContent = shown + (shown === 1 ? " card" : " cards");
+      return;
+    }
     if (t && t.id === "wlPickQ") { var pl = $("wlPickList"); if (pl) pl.innerHTML = pickItems(t.value); return; }
     if (!t || !t.hasAttribute || !t.hasAttribute("data-wl-store")) return;
     state.storeQ = t.value;
@@ -1660,6 +1669,69 @@
     return html;
   }
 
+
+  /* ===================== MY WALLET SUB PAGES =====================
+     Overview (#wallet) is home base: everything at a glance. Cards
+     (#wallet/cards) and Credits (#wallet/credits) are the full lists. */
+  function tabsHtml(s, perks) {
+    var due = expiringSoon(perks, SOON_PERK_DAYS).reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
+    var tab = function (key, route, label, extra) {
+      var on = (state.tab || "overview") === key;
+      return '<a class="wl-tab' + (on ? " on" : "") + '" href="#' + route + '" data-route="' + route + '"' + (on ? ' aria-current="page"' : "") + ">" + label +
+        (extra ? '<span class="wl-tab-n">' + extra + "</span>" : "") + "</a>";
+    };
+    return '<nav class="wl-tabs" aria-label="My Wallet">' + tab("overview", "wallet", "Overview") +
+      tab("cards", "wallet/cards", "Cards", String(s.count)) + tab("credits", "wallet/credits", "Credits", due ? esc(money(due)) : "") + "</nav>";
+  }
+
+  function cardsPageHtml(s, perks) {
+    var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0), net = credits - s.yearly, m = member();
+    var head = '<section class="wl-card wl-cp"><div class="wl-cp-head"><div><h2 class="wl-cp-h">Your cards</h2>' +
+      '<p class="wl-cp-sub">Fees, credits and welcome bonuses for every card you hold. Tap a card for the details.</p></div>' +
+      '<div class="wl-cp-acts">' + (m.client ? '<a class="wl-btn wl-ghost" href="' + SCOTTIE_SMS + '">' + CHAT_ICON + "Text Scottie</a>" : "") +
+      '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div></div>' +
+      '<dl class="wl-cp-tot"><div><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
+      "<div><dt>Credits a year</dt><dd>" + esc(money(credits)) + "<small>if you use them all</small></dd></div>" +
+      '<div><dt>Net value</dt><dd class="' + (net >= 0 ? "up" : "down") + '">' + (net >= 0 ? "+" : "&minus;") + esc(money(Math.abs(net))) + "<small>credits minus fees</small></dd></div></dl>" +
+      famHtml() +
+      '<div class="wl-cp-bar"><label class="wl-cp-q"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
+      '<input id="wlCardQ" type="search" placeholder="Search your cards" aria-label="Search your cards" value="' + esc(state.cardQ || "") + '"></label>' +
+      '<span class="wl-cp-n" id="wlCardN">' + s.count + (s.count === 1 ? " card" : " cards") + "</span></div>";
+    var q = String(state.cardQ || "").trim().toLowerCase();
+    var rows = s.rows.map(function (r) {
+      var e = r.entry, c = r.card;
+      var find = [c ? c.name : "", c ? c.issuer : "", e.holder, e.nickname].join(" ").toLowerCase();
+      var hide = q && find.indexOf(q) < 0 ? " hidden" : "";
+      if (!c) return '<li data-ct-q="' + esc(find) + '"' + hide + '><button class="wl-ct" data-wl="sheet" data-id="' + esc(e.id) + '"><span class="wl-ct-card"><span class="wl-ct-nm"><b>A card we no longer track</b><small>Tap to remove it</small></span></span><span class="wl-ct-go" aria-hidden="true">&rsaquo;</span></button></li>';
+      var cr = perks.filter(function (x) { return x.entry.id === e.id; }).reduce(function (t, x) { return t + perkYearUsd(x.perk); }, 0);
+      var rn = r.renewal, soon = r.hasFee && rn && rn.days <= SOON_DAYS;
+      var bs = bonusState(e), bonus = '<span class="wl-ct-dim">&ndash;</span>';
+      if (bs && bs.met) bonus = '<span class="wl-ct-ok">Earned</span>';
+      else if (bs && bs.missed) bonus = '<span class="wl-ct-dim">Missed</span>';
+      else if (bs) bonus = '<span class="wl-ct-bonus"><span class="wl-ct-bt">' + esc(money(bs.spent)) + " of " + esc(money(bs.spend)) + "</span>" +
+        '<span class="wl-ct-track"><i style="width:' + bs.pct + '%"></i></span><small>by ' + esc(dayText(bs.by)) + "</small></span>";
+      return '<li data-ct-q="' + esc(find) + '"' + hide + '><button class="wl-ct' + (soon ? " soon" : "") + '" data-wl="sheet" data-id="' + esc(e.id) + '">' +
+        '<span class="wl-ct-card">' + artHtml(c, "sm") + '<span class="wl-ct-nm"><small>' + esc(c.issuer || "") + "</small><b>" + esc(shortName(c.name)) +
+        (e.withHrt ? '<span class="wl-crow-hrt" title="Opened with HRT">' + STAR_SM + "</span>" : "") + "</b>" +
+        (e.nickname ? '<small class="wl-ct-nick">' + esc(e.nickname) + "</small>" : "") +
+        (e.holder ? '<small class="wl-ct-pho">' + esc(e.holder) + "\u2019s card</small>" : "") + "</span></span>" +
+        '<span class="wl-ct-c wl-ct-who" data-l="Whose">' + esc(e.holder || "You") + "</span>" +
+        '<span class="wl-ct-c" data-l="Credits a year">' + (cr ? esc(money(cr)) : '<span class="wl-ct-dim">&ndash;</span>') + "</span>" +
+        '<span class="wl-ct-c" data-l="Annual fee">' + (r.hasFee ? esc(money(c.fee)) : '<span class="wl-ct-dim">None</span>') + "</span>" +
+        '<span class="wl-ct-c" data-l="Renews">' + (r.hasFee && rn ? '<span class="' + (soon ? "wl-ct-hot" : "") + '">' + esc(rn.exact ? dayText(rn) : MONTHS[rn.m - 1].slice(0, 3)) + "</span>" : r.hasFee ? '<span class="wl-ct-dim">Add open date</span>' : '<span class="wl-ct-dim">&ndash;</span>') + "</span>" +
+        '<span class="wl-ct-c wl-ct-wb' + (bs ? "" : " nob") + '" data-l="Welcome bonus">' + bonus + "</span>" +
+        '<span class="wl-ct-go" aria-hidden="true">&rsaquo;</span></button></li>';
+    }).join("");
+    return head + '<div class="wl-ct-head" aria-hidden="true"><span>Card</span><span>Whose</span><span>Credits a year</span><span>Annual fee</span><span>Renews</span><span>Welcome bonus</span><span></span></div>' +
+      '<ul class="wl-ct-list">' + rows + "</ul>" +
+      '<div class="wl-cards-foot"><span></span><button class="wl-link" data-wl="review">Check and fix my cards</button></div></section>' +
+      upcomingHtml(s.upcoming || []);
+  }
+
+  function creditsPageHtml(perks) {
+    return soonHtml(perks) || '<section class="wl-card wl-soonbox"><h3 class="wl-cr-title">Credits to use</h3><p class="wl-cr-sub">All caught up. You have used every credit that is open right now.</p></section>';
+  }
+
   function paintMain() {
     if (!host) return;
     if (state.error) {
@@ -1678,9 +1750,13 @@
       html = summaryHtml("page"); /* empty wallet: the summary card invites them to add cards */
       if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     } else {
-      html = (s.count ? slimHeadHtml(s, perks) : summaryHtml("page")) + helpHtml("page");
+      var tab = s.count ? (state.tab || "overview") : "overview";
+      html = s.count ? tabsHtml(s, perks) : "";
+      html += tab === "overview" ? (s.count ? slimHeadHtml(s, perks) : summaryHtml("page")) + helpHtml("page") : "";
       if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
       if (state.review) html += reviewHtml();
+      else if (tab === "cards") html += cardsPageHtml(s, perks);
+      else if (tab === "credits") html += creditsPageHtml(perks);
       else {
         html += nudgeHtml();
         if (s.count) html += '<div class="wl-hm-grid wl-pg-grid">' + cardListHtml(s, perks) + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
@@ -1762,7 +1838,7 @@
     if (act === "demo-off") { endExample(); return; }
     if (act === "which") { var k = b.getAttribute("data-key"); state.which = (state.which === k && !state.storeQ) ? "" : k; state.storeQ = ""; paint(); return; }
     if (act === "go-wallet") { location.hash = "wallet"; return; }
-    if (act === "go-card" || act === "sheet") { state.sel = id; state.editing = null; if (location.hash === "#wallet") paint(); else location.hash = "wallet"; return; }
+    if (act === "go-card" || act === "sheet") { state.sel = id; state.editing = null; if (/^#wallet(\/|$)/.test(location.hash)) paint(); else location.hash = "wallet"; return; }
     if (act === "sheet-close") { state.sel = null; state.editing = null; paint(); return; }
     if (act === "more") { state.more = state.more || {}; var mk = b.getAttribute("data-key"); state.more[mk] = !state.more[mk]; paint(); return; }
     if (act === "pick") {
@@ -2316,7 +2392,8 @@
       shortName: shortName, cardBrief: cardBrief, topAlerts: topAlerts,
       whichCard: whichCard, exampleWallet: exampleWallet, centsPer: centsPer, valueText: valueText, SPEND: SPEND,
       rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
-    show: function () {
+    show: function (sub) {
+      state.tab = sub === "cards" || sub === "credits" ? sub : "overview";
       styles();
       host = document.getElementById("wl-host");
       if (host && !host.getAttribute("data-ready")) {

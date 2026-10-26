@@ -50,22 +50,29 @@
  var shown = {}, current = null;
  var onShow = {};
  function parentHash(){ try{ if(window.parent !== window) return window.parent.location.hash; }catch(e){} return ""; }
+ /* Sub pages: "wallet/cards" and "wallet/credits" are pages inside My Wallet. */
+ var SUBS = { wallet: { cards: "Cards", credits: "Credits" } };
  function route(name, noScroll){
-  if(!ROUTES[name]) name = "home";
-  current = name;
+  var parts = String(name || "").split("/"), sub = parts[1] || "";
+  name = parts[0];
+  if(!ROUTES[name]) { name = "home"; sub = ""; }
+  if(sub && !(SUBS[name] && SUBS[name][sub])) sub = "";
+  var full = sub ? name + "/" + sub : name;
+  current = full;
   document.querySelectorAll(".view").forEach(function(v){ v.classList.toggle("on", v.getAttribute("data-page") === name); });
   document.querySelectorAll("#sideNav [data-route]").forEach(function(a){
-   var on = a.getAttribute("data-route") === name;
+   var on = a.getAttribute("data-route") === full;
    a.classList.toggle("on", on); a.setAttribute("aria-current", on ? "page" : "false");
   });
   /* ʻOhana Members see their wallet as the ʻOhana Wallet; the html.ms-client class picks the right words */
   var crumbTitle = name === "wallet" ? '<span class="client-hide">My Wallet</span><span class="client-only">ʻOhana Wallet</span>' : esc(ROUTES[name].title);
+  if(sub) crumbTitle = '<a href="#' + name + '" data-route="' + name + '">' + crumbTitle + '</a> <span aria-hidden="true">/</span> ' + esc(SUBS[name][sub]);
   $("crumb").innerHTML = name === "home" ? "Dashboard" : '<a href="#home" data-route="home">Dashboard</a> <span aria-hidden="true">/</span> ' + crumbTitle;
   if (name === "wallet") $("tbHint").innerHTML = '<span class="client-hide">' + esc(ROUTES[name].hint) + '</span><span class="client-only">Managed for you by Scottie</span>';
   else $("tbHint").textContent = ROUTES[name].hint;
-  try{ history.replaceState(null, "", "#" + name); }catch(e){}
-  try{ if(window.parent !== window) window.parent.history.replaceState(null, "", "#" + name); }catch(e){}
-  if(onShow[name]) onShow[name](!shown[name]);
+  try{ history.replaceState(null, "", "#" + full); }catch(e){}
+  try{ if(window.parent !== window) window.parent.history.replaceState(null, "", "#" + full); }catch(e){}
+  if(onShow[name]) onShow[name](!shown[name], sub);
   shown[name] = true;
   if(!noScroll){
    var main = document.querySelector(".hrt-main");
@@ -495,7 +502,7 @@
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
  onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };
  onShow.communities = function(){ if(window.HRT_COMMUNITIES) window.HRT_COMMUNITIES.show(); };
- onShow.wallet = function(){ if(window.HRT_WALLET) window.HRT_WALLET.show(); };
+ onShow.wallet = function(first, sub){ if(window.HRT_WALLET) window.HRT_WALLET.show(sub); };
  /* My Wallet panel on the Dashboard home; wraps any existing home handler */
  (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
 
@@ -514,5 +521,5 @@
  }
  homeKama(); homeVals(); homeLounges(); homeFirst(); tbLoad();
  var start = (location.hash || parentHash() || "").replace("#","");
- route(ROUTES[start] ? start : "home", true);
+ route(ROUTES[start.split("/")[0]] ? start : "home", true);
 })();
