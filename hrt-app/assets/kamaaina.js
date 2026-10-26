@@ -465,6 +465,79 @@
   $("aEmpty").hidden = list.length > 0;
  }
 
+ /* ---------- freshness: live "updated" line, Deal of the Day, latest changes ----------
+    The daily refresh stamps every deal with fs (first seen) and us (last changed).
+    Deal of the Day: a brand-new Top pick gets the spot for its first 3 days (a freshly
+    updated one for 2). Otherwise it rotates through the strongest deals, a different
+    one each morning in Hawaii, the same for everyone that day. */
+ var STAMP = window.HRT_KAMAAINA_STAMP ? new Date(window.HRT_KAMAAINA_STAMP) : null;
+ var TODAY = new Date(Date.now() - 10 * 3600 * 1000).toISOString().slice(0, 10);
+ var MS_DAY = 864e5;
+ function ago(iso){ return iso ? Math.round((Date.parse(TODAY + "T12:00:00Z") - Date.parse(iso + "T12:00:00Z")) / MS_DAY) : 999; }
+ function shortDate(iso){ return new Date(iso + "T12:00:00Z").toLocaleDateString("en-US", { month:"short", day:"numeric", timeZone:"UTC" }); }
+ function whenLabel(iso){ var a = ago(iso); return a <= 0 ? "Today" : a === 1 ? "Yesterday" : shortDate(iso); }
+ DEALS.forEach(function(d){
+  d._fd = d.us && d.us > (d.fs || "") ? d.us : (d.fs || "");
+  d._fk = d.us && d.us >= (d.fs || "") ? "upd" : "new";
+  d._fr = d._fd && ago(d._fd) <= 6 ? d._fk : "";
+ });
+ function hash(s){ var h = 2166136261; for(var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+ function pickDeal(){
+  var day = Math.floor(Date.parse(TODAY + "T12:00:00Z") / MS_DAY);
+  var ok = DEALS.filter(function(d){ return d.dl >= 2 && (d.r === "Top pick" || d.r === "Strong"); });
+  var hot = ok.filter(function(d){ return d.r === "Top pick" && d._fd && ago(d._fd) <= (d._fk === "new" ? 2 : 1); }).sort(SORTS.score);
+  if(hot.length) return hot[day % hot.length];
+  var stays = ok.filter(function(d){ return d._c === "stay"; }).sort(SORTS.score).slice(0, 16);
+  var acts = ok.filter(function(d){ return d._c !== "stay"; }).sort(SORTS.score).slice(0, 4);
+  var pool = stays.concat(acts).sort(function(a, b){ return hash(a.b + "|" + a.t) - hash(b.b + "|" + b.t); });
+  return pool.length ? pool[day % pool.length] : null;
+ }
+ function stampLine(){
+  if(!STAMP || isNaN(STAMP.getTime())) return { t:"Updated " + SNAPSHOT_LABEL, live:false };
+  var sd = new Date(STAMP.getTime() - 10 * 3600 * 1000).toISOString().slice(0, 10), a = ago(sd);
+  var tm = STAMP.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit", timeZone:"Pacific/Honolulu" });
+  return { t:"Updated " + (a <= 0 ? "today at " + tm : a === 1 ? "yesterday at " + tm : shortDate(sd)), live: a <= 1 };
+ }
+ function renderFresh(){
+  var nNew = DEALS.filter(function(d){ return d._fr === "new"; }).length;
+  var nUpd = DEALS.filter(function(d){ return d._fr === "upd"; }).length;
+  var week = [];
+  if(nNew) week.push(nNew + " new");
+  if(nUpd) week.push(nUpd + " updated");
+  var weekTxt = week.length ? week.join(" and ") + " this week" : "Checked every morning";
+  var st = stampLine();
+  if($("kFresh")){
+   $("kFreshTxt").textContent = st.t + " · " + weekTxt;
+   $("kFresh").classList.toggle("off", !st.live);
+   $("kFresh").hidden = false;
+  }
+  var box = $("kDay"); if(!box) return;
+  var d = pickDeal();
+  if(!d){ box.hidden = true; return; }
+  var h = headline(d), si = imgFor(d), idx = DEALS.indexOf(d);
+  var tag = d._fr === "new" ? "Just added" : d._fr === "upd" ? "Just updated" : "";
+  var dayName = new Date(TODAY + "T12:00:00Z").toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric", timeZone:"UTC" });
+  $("kDotd").innerHTML = '<span class="ph"'+(si ? ' style="background-image:url(\''+si+'\')"' : '')+'><span class="isl">'+svg("pin",12)+esc(where(d))+'</span></span>'
+   + '<span class="bd"><span class="ey"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9L22 9.3l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.9L2 9.3l7.1-.4z"/></svg>Deal of the day · '+esc(dayName)+(tag ? '<span class="tg">'+tag+'</span>' : '')+'</span>'
+   + '<h3>'+esc(d.b)+'</h3><span class="of">'+esc(d.t)+'</span>'
+   + '<span class="big"><b class="tnum">'+esc(h.big)+'</b>'+(h.small ? '<span>'+esc(h.small)+'</span>' : '')+'</span>'
+   + (d.k.length ? '<span class="chips">'+d.k.slice(0, 4).map(function(p){ return '<span>'+esc(p)+'</span>'; }).join("")+'</span>' : '')
+   + '<span class="act"><span class="btn coral" data-open="'+idx+'">See this deal &rarr;</span><small>'+esc(d.h && d._isl !== "all" ? d.h + " · " : "")+esc(daysLabel(d))+'</small></span>'
+   + '<span class="nx">A new pick every morning</span></span>';
+  $("kDotd").setAttribute("data-open", idx);
+  $("kDotd").setAttribute("aria-label", "Deal of the day: " + d.b + ", " + h.big);
+
+  var feed = DEALS.filter(function(x){ return x._fd; }).sort(function(a, b){ return b._fd.localeCompare(a._fd) || b.s - a.s; }).slice(0, 6);
+  $("kFeedNote").innerHTML = '<span class="fdot"></span>' + esc(week.length ? week.join(", ") + " in the last 7 days" : "Checked every morning");
+  $("kFeed").innerHTML = feed.length ? feed.map(function(x){
+   var hh = headline(x);
+   return '<button type="button" class="kfi" data-open="'+DEALS.indexOf(x)+'"><span class="tg '+x._fk+'">'+(x._fk === "new" ? "New" : "Updated")+'</span>'
+    + '<span class="nm"><b>'+esc(x.b)+'</b><small>'+esc(x.t)+'</small></span>'
+    + '<span class="vl"><b class="tnum">'+esc(hh.big)+'</b><small>'+esc(whenLabel(x._fd))+'</small></span></button>';
+  }).join("") : '<p class="kfe">New and changed offers show up here the morning they appear.</p>';
+  box.hidden = false;
+ }
+
  function syncView(){ document.querySelectorAll("[data-view]").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-view") === state.view ? "true" : "false"); }); }
  function renderAll(){ syncView(); renderHotels(); renderSoon(); renderActs(); syncNav(); }
 
@@ -778,7 +851,7 @@
   $("kActs").textContent = ACTS.length;
   $("snapLine").textContent = "Last updated " + SNAPSHOT_LABEL + ".";
   $("footSnap").textContent = "Kamaʻāina offers last updated " + SNAPSHOT_LABEL;
-  renderTop(); renderAll(); wire(); sizeFrame();
+  renderTop(); renderFresh(); renderAll(); wire(); sizeFrame();
   /* New map (assets/deals-map.js): list on the left, real street map on the right, same system as the HNL Lounge Map.
      The older map and lists below it stay in the page, hidden (#kOld), until they are removed. */
   var KM = null, kmHost = $("kmHost");
@@ -786,7 +859,7 @@
    if(KM || !kmHost || !window.HRT_DEALS_MAP) return KM;
    KM = window.HRT_DEALS_MAP.mount(kmHost, { details:function(i){ var d = DEALS[i]; if(d) openDialog(d); },
     deals:DEALS.map(function(d, i){ return { id:i, b:d.b, h:d.h, isl:d._isl, k:d._c === "stay" ? "stay" : (d._c === "dining" || d._c === "svc" || d._c === "around") ? "more" : "act",
-     p:d.p, v:d.v, kk:d.k, s:d.s, r:d.r, e:d.e, m:d.m, u:d.u, d:d.d, ll:locFor(d) }; }) });
+     p:d.p, v:d.v, kk:d.k, s:d.s, r:d.r, e:d.e, m:d.m, u:d.u, d:d.d, ll:locFor(d), fr:d._fr, fd:d._fd }; }) });
    return KM;
   }
   window.HRT_KAMA = {

@@ -185,6 +185,38 @@ export function indexPrev(list) {
   return out;
 }
 
+/* Freshness. Each row carries:
+     fs  the date we first saw this offer (blank = before tracking started)
+     us  the date its terms last changed, or the business swapped in a new offer (blank = never)
+     n   1 while the offer is under a week old (older pages use it for the "New" tag)
+   A business that replaces its old offer with a new one counts as "updated", not "new". */
+const FRESH_FIELDS = ["t", "d", "f", "p", "a", "k", "v", "e"];
+function sig(r) { return JSON.stringify(FRESH_FIELDS.map((k) => r[k] == null ? null : r[k])); }
+export function stampRows(rows, prevList, today) {
+  const keyOf = (r) => (r.b + "|" + r.t).toLowerCase();
+  const prevByKey = {}, prevByBiz = {};
+  (prevList || []).forEach((p) => {
+    if (!p || !p.b) return;
+    prevByKey[keyOf(p)] = p;
+    (prevByBiz[p.b.toLowerCase()] = prevByBiz[p.b.toLowerCase()] || []).push(p);
+  });
+  const cur = new Set(rows.map(keyOf));
+  rows.forEach((r) => {
+    const o = prevByKey[keyOf(r)];
+    if (o) {
+      r.fs = o.fs || "";
+      r.us = sig(o) !== sig(r) ? today : (o.us || "");
+    } else {
+      const replaced = (prevByBiz[r.b.toLowerCase()] || []).filter((p) => !cur.has(keyOf(p)));
+      if (replaced.length) { r.fs = replaced[0].fs || ""; r.us = today; }
+      else { r.fs = today; r.us = ""; }
+    }
+    const age = r.fs ? daysLeft(today, r.fs) : 99;
+    r.n = age <= 6 ? 1 : 0;
+  });
+  return rows;
+}
+
 export function build({ hvcb, sheetRows = [], prevList = [], today = hawaiiToday(), minHvcb = 40 }) {
   if (!Array.isArray(hvcb) || hvcb.length < minHvcb) throw new Error("Only " + (hvcb ? hvcb.length : 0) + " HVCB offers read (expected at least " + minHvcb + "). HVCB may have changed its pages. Keeping the last good data.");
   const prev = indexPrev(prevList);
@@ -197,6 +229,7 @@ export function build({ hvcb, sheetRows = [], prevList = [], today = hawaiiToday
   };
   hvcb.forEach((o) => push(fromHvcb(o, today, prev)));
   sheetRows.filter((r) => /^(y|yes|approved|true|1)$/i.test(String(r.approved || "").trim())).forEach((r) => push(fromSheet(r, today, prev)));
+  stampRows(rows, prevList, today);
   rows.sort((a, b) => b.s - a.s || a.b.localeCompare(b.b));
   return rows;
 }
@@ -206,8 +239,10 @@ export function label(today) {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-export function toJs(rows, today) {
-  return "window.HRT_KAMAAINA_UPDATED=" + JSON.stringify(label(today)) + ";\n" +
+/* Line 1 holds both the date label and the exact run time. The Mac's refresh.sh
+   ignores changes to this line when deciding whether anything changed. */
+export function toJs(rows, today, now = new Date()) {
+  return "window.HRT_KAMAAINA_UPDATED=" + JSON.stringify(label(today)) + ";window.HRT_KAMAAINA_STAMP=" + JSON.stringify(now.toISOString()) + ";\n" +
     "window.HRT_KAMAAINA_DEALS=" + JSON.stringify(rows) + ";\n";
 }
 

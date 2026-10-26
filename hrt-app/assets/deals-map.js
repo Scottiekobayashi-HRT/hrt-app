@@ -87,6 +87,7 @@
     '.row .nm small{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
     '.row .vl{flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:1px}',
     '.row .vl b{font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums}.row .vl small{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}.row .vl small.soon{color:var(--coral-ink);font-weight:700}',
+    '.ft{font-style:normal;font-weight:800;font-size:10.5px;letter-spacing:.3px;border-radius:999px;padding:1px 7px;margin-right:6px;vertical-align:1px}.ft.new{background:#e7f6ed;color:#1a8a4c}.ft.upd{background:#fbf0d3;color:#8a6208}:host(.dark) .ft.new{background:#123125;color:#3fce7f}:host(.dark) .ft.upd{background:#33290f;color:#e8c15e}',
     '.empty{color:var(--muted);text-align:center;padding:30px 16px;font-size:13.5px}',
     '.w{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;height:min(80vh,780px);min-height:560px;display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;box-shadow:var(--shadow)}',
     ':host(.full) .w{height:100vh;height:100dvh;min-height:0;border-radius:0;border:0}',
@@ -164,7 +165,7 @@
       return { id: d.id, b: d.b, h: d.h || "", isl: d.isl, k: d.k, p: d.p || 0, v: d.v, kk: d.kk || [], s: d.s || 0, r: d.r || "", m: d.m || "", u: d.u || "",
         d: String(d.d || "").replace(/\s*•\s*/g, ". ").slice(0, 220), ll: d.ll, days: days,
         ends: e ? MN[e.getMonth()] + " " + e.getDate() + ", " + e.getFullYear() : "",
-        head: d.p ? d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate"), place: (d.h ? d.h + " · " : "") + (ISLN[d.isl] || "") };
+        fr: d.fr || "", fd: d.fd || "", head: d.p ? d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate"), place: (d.h ? d.h + " · " : "") + (ISLN[d.isl] || "") };
     }).filter(function (d) { return d.days >= 0; });
     /* spread deals that share one spot a little so each can be tapped */
     var seen = {};
@@ -179,7 +180,7 @@
       '<div class="lay"><aside class="side" aria-label="Deals"><div class="sh">' +
         '<div class="r1"><b class="scnt"></b><span class="ssub"></span></div>' +
         '<label class="srch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" class="sq" placeholder="Search a hotel, town or activity" aria-label="Search deals" autocomplete="off"></label>' +
-        '<div class="sorts" role="group" aria-label="Sort"><button type="button" data-sort="best" aria-pressed="true">Best deals</button><button type="button" data-sort="soon" aria-pressed="false">Ending soon</button><button type="button" data-sort="off" aria-pressed="false">Biggest discount</button></div>' +
+        '<div class="sorts" role="group" aria-label="Sort"><button type="button" data-sort="best" aria-pressed="true">Best deals</button><button type="button" data-sort="soon" aria-pressed="false">Ending soon</button><button type="button" data-sort="off" aria-pressed="false">Biggest discount</button><button type="button" data-sort="new" aria-pressed="false">Newest</button></div>' +
         '<label class="follow"><input type="checkbox" class="fol" checked> Only show deals on the map</label>' +
       '</div><div class="sl"></div></aside>' +
       '<div class="mapcol"><div class="w" role="region" aria-label="Kamaʻāina Deals map">' +
@@ -330,7 +331,7 @@
       card.style.setProperty("--c", KINDS[d.k].c);
       var near = !d.ll ? [] : onMap.filter(function (x) { return x !== d && Math.abs(x.ll[0] - d.ll[0]) < .008 && Math.abs(x.ll[1] - d.ll[1]) < .008; });
       card.innerHTML = '<span class="grab" aria-hidden="true"></span><button type="button" class="x" aria-label="Close">×</button>' +
-        '<span class="cat"><i></i>' + esc(KINDS[d.k].one) + (d.r === "Top pick" ? " · Top pick" : "") + '</span><h3>' + esc(d.b) + '</h3><div class="meta">' + esc(d.place) + (d.m ? " · " + esc(d.m) : "") + '</div>' +
+        '<span class="cat"><i></i>' + esc(KINDS[d.k].one) + (d.r === "Top pick" ? " · Top pick" : "") + (d.fr ? " · " + (d.fr === "new" ? "New this week" : "Updated this week") : "") + '</span><h3>' + esc(d.b) + '</h3><div class="meta">' + esc(d.place) + (d.m ? " · " + esc(d.m) : "") + '</div>' +
         '<div class="big"><b>' + esc(d.head) + '</b><span class="' + (d.days <= 30 ? "soon" : "") + '">' + (d.ends ? "Ends " + d.ends + " · " + (d.days === 0 ? "last day" : d.days + (d.days === 1 ? " day" : " days") + " left") : "") + '</span></div>' +
         (d.kk.length ? '<div class="perks">' + d.kk.map(function (k) { return "<span>" + esc(k) + "</span>"; }).join("") + "</div>" : "") +
         (d.d ? "<p>" + esc(d.d) + "</p>" : "") + '<div class="id">Bring your Hawaiʻi ID. Rates and dates are set by the business.</div>' +
@@ -358,10 +359,11 @@
 
     /* ---------- the list (left on desktop, slide-up on phones) ---------- */
     function inView(d) { if (!map) return true; if (!d.ll) return !island; return map.getBounds().contains([d.ll[1], d.ll[0]]); }
-    function sorted(arr) { return arr.slice().sort(function (a, b) { return sortBy === "soon" ? a.days - b.days || b.s - a.s : sortBy === "off" ? (b.p || 0) - (a.p || 0) || b.s - a.s : b.s - a.s; }); }
+    function sorted(arr) { return arr.slice().sort(function (a, b) { return sortBy === "soon" ? a.days - b.days || b.s - a.s : sortBy === "new" ? (b.fd || "").localeCompare(a.fd || "") || b.s - a.s : sortBy === "off" ? (b.p || 0) - (a.p || 0) || b.s - a.s : b.s - a.s; }); }
+    function ftag(d) { return d.fr ? '<i class="ft ' + d.fr + '">' + (d.fr === "new" ? "New" : "Updated") + "</i>" : ""; }
     function rowHtml(d) {
       return '<button type="button" class="row" data-id="' + d.id + '" style="--c:' + KINDS[d.k].c + '"><span class="dt">' + ic(KINDS[d.k].icon) + '</span>' +
-        '<span class="nm"><b>' + esc(d.b) + '</b><small>' + esc(d.place) + '</small></span>' +
+        '<span class="nm"><b>' + esc(d.b) + '</b><small>' + ftag(d) + esc(d.place) + '</small></span>' +
         '<span class="vl"><b>' + esc(d.head) + '</b><small class="' + (d.days <= 30 ? "soon" : "") + '">' + (d.days <= 30 ? d.days + (d.days === 1 ? " day left" : " days left") : "Ends " + esc(d.ends.replace(/, \d{4}$/, ""))) + '</small></span></button>';
     }
     var sideT = null;

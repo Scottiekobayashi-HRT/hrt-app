@@ -1,4 +1,4 @@
-import { build, readDeal, islandKey, groupFor, scoreFor, ratingFor, parseCsv, toJs, stripHtml, daysLeft, parseOfferPage } from "./build.mjs";
+import { build, stampRows, readDeal, islandKey, groupFor, scoreFor, ratingFor, parseCsv, toJs, stripHtml, daysLeft, parseOfferPage } from "./build.mjs";
 
 let pass = 0, fail = 0;
 const eq = (name, got, want) => {
@@ -71,7 +71,31 @@ eq("expired dropped", build({ hvcb: many, sheetRows: [Object.assign({}, sheet[0]
 
 /* output */
 const js = toJs(rows.slice(0, 1), "2026-10-14");
-eq("label", js.split("\n")[0], 'window.HRT_KAMAAINA_UPDATED="October 14, 2026";');
+eq("label", js.split("\n")[0].split(";")[0], 'window.HRT_KAMAAINA_UPDATED="October 14, 2026"');
+eq("stamp on line 1", /^window\.HRT_KAMAAINA_UPDATED=.*;window\.HRT_KAMAAINA_STAMP="\d{4}-\d\d-\d\dT/.test(js.split("\n")[0]), true);
+
+/* freshness: first seen, updated, replaced offers */
+const yest = [
+  { b: "Hotel A", t: "20% off", d: "x", f: "", p: 20, a: 0, k: [], v: null, e: "2027-01-01", fs: "2026-10-01", us: "" },
+  { b: "Hotel B", t: "Save 30%", d: "y", f: "", p: 30, a: 0, k: [], v: null, e: "2027-01-01", fs: "", us: "" },
+  { b: "Hotel C", t: "Old offer", d: "z", f: "", p: 10, a: 0, k: [], v: null, e: "2027-01-01", fs: "2026-09-30", us: "" },
+  { b: "Hotel D", t: "Same", d: "q", f: "", p: 15, a: 0, k: [], v: null, e: "2027-01-01", fs: "2026-10-20", us: "2026-10-22" }
+];
+const todayRows = [
+  Object.assign({}, yest[0]),
+  Object.assign({}, yest[1], { p: 35 }),
+  { b: "Hotel C", t: "New offer", d: "z2", f: "", p: 25, a: 0, k: [], v: null, e: "2027-01-01" },
+  Object.assign({}, yest[3]),
+  { b: "Hotel E", t: "Brand new", d: "n", f: "", p: 40, a: 0, k: [], v: null, e: "2027-01-01" }
+];
+const st = stampRows(todayRows.map((r) => Object.assign({}, r)), yest, "2026-10-27");
+eq("unchanged keeps dates", [st[0].fs, st[0].us, st[0].n], ["2026-10-01", "", 0]);
+eq("changed terms = updated", [st[1].fs, st[1].us, st[1].n], ["", "2026-10-27", 0]);
+eq("replaced offer = updated", [st[2].fs, st[2].us], ["2026-09-30", "2026-10-27"]);
+eq("keeps old update date", [st[3].us, st[3].n], ["2026-10-22", 0]);
+eq("brand new", [st[4].fs, st[4].us, st[4].n], ["2026-10-27", "", 1]);
+eq("new for a week", stampRows([Object.assign({}, st[4])], [st[4]], "2026-11-02")[0].n, 1);
+eq("then not new", stampRows([Object.assign({}, st[4])], [st[4]], "2026-11-03")[0].n, 0);
 eq("no em dash in output", /—/.test(js), false);
 
 console.log(pass + " passed, " + fail + " failed");

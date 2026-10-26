@@ -887,12 +887,22 @@ html.ms-client .pl.ohana .btn{display:none}
   <div class="hs-text">
    <h1>Kamaʻāina Deals <span class="wave">Tracker</span></h1>
    <p>Every kamaʻāina rate across the islands, scored so the best deals come first. Move the map and the list follows, or tap a deal to see the details.</p>
+   <p class="kfresh" id="kFresh" hidden><span class="kdot" aria-hidden="true"></span><span id="kFreshTxt"></span></p>
   </div>
   <div class="hstats">
    <div class="hstat"><b class="tnum" id="kHotels">0</b><span><i style="background:#9fc1d4"></i>Hotel deals</span></div>
    <div class="hstat"><b class="tnum" id="kTop">0</b><span><i style="background:#3fce7f"></i>Top-rated hotels</span></div>
    <div class="hstat"><b class="tnum" id="kSoon">0</b><span><i style="background:#f2726e"></i>Ending soon</span></div>
    <div class="hstat"><b class="tnum" id="kActs">0</b><span><i style="background:#e8c15e"></i>Activities &amp; dining</span></div>
+  </div>
+ </div>
+
+ <!-- ===== DEAL OF THE DAY + LATEST CHANGES (kamaaina.js renderFresh) ===== -->
+ <div class="kday" id="kDay" hidden>
+  <button type="button" class="kdotd" id="kDotd"></button>
+  <div class="card kfeed">
+   <div class="sec-h"><h2>Latest <span class="hl">changes</span></h2><span class="note" id="kFeedNote"></span></div>
+   <div class="kfl" id="kFeed"></div>
   </div>
  </div>
 
