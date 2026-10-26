@@ -373,9 +373,12 @@ html.ms-client .pl.ohana .btn{display:none}
    <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
    <span class="plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>
    <span class="hero-pills"><span class="pro-pill pro-only">&#9733; HRT PRO</span><span class="client-pill client-only"><svg class="oh-star" width="11" height="11" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7.5-6.5-4-6.5 4 2-7.5L2 9.5 9 9z" fill="currentColor"/></svg>ʻOhana</span></span>
+   <span class="hero-date" id="hmDate"></span>
    <h1><span class="named">Aloha, <span class="wave ms-first-name">friend</span></span><span class="unnamed">Aloha, welcome to <span class="wave">HRT</span></span></h1>
    <p class="free-only">The tools we use to plan points and miles trips from the islands, in one place and free for every Hawaiʻi traveler.</p><p class="pro-only">Your PRO tools are unlocked. Fresh Atmos award space lands every morning.</p>
    <div class="cta-row"><a class="btn coral" href="#wallet" data-route="wallet"><span class="client-hide">Open My Wallet</span><span class="client-only">Open your ʻOhana Wallet</span> &rarr;</a><a class="btn ghost free-only" href="#atmos" data-route="atmos">Atmos tools</a><a class="btn ghost pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Atmos tools</a><a class="btn ghost" href="#kamaaina" data-route="kamaaina">Kamaʻāina deals</a></div>
+   <!-- Today for you: filled by assets/today.js; hides the welcome text and stats when it has lines -->
+   <div class="today" id="hmToday" aria-live="polite"></div>
    <div class="hstats">
     <div class="hstat"><b class="tnum" id="hmKama">&ndash;</b><span><i style="background:#9fc1d4"></i>Kamaʻāina hotel deals</span></div>
     <div class="hstat"><b class="tnum" id="hmTb">&ndash;</b><span><i style="background:#3fce7f"></i>Transfer bonuses live</span></div>
@@ -1052,6 +1055,7 @@ html.ms-client .pl.ohana .btn{display:none}
 <script src="assets/account.js"></script>
 <script src="assets/lounge-map.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/today.js"></script>
 <script src="assets/dealwall.js"></script>
 <script>
 /* SANDBOX: unlock Atmos placeholder for Atmos Calendar or All Access members */

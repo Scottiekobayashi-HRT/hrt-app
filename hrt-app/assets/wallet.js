@@ -1190,6 +1190,39 @@
 
   /* ----- Links to the other tools (connect.js) ----- */
   /* The member's held cards and their open perks, as plain data for connect.js. */
+  /* For the Dashboard's "Today for you" banner (today.js): the most urgent
+     dollar credit, and what the member has used so far this year.
+     "This year" = calendar-year periods (2026, 2026-Q4, 2026-10, 2026-H2)
+     plus each card's current card year. Counts ticks and part amounts only. */
+  function capturedThisYear(V, cat, t) {
+    t = t || todayParts();
+    var y = String(t.y), total = 0, idx = catIndex();
+    (V && V.cards || []).forEach(function (e) {
+      if (!isHeld(e) || !e.used) return;
+      var cy = cardYearStart(e.opened, t), ak = cy ? "A" + cy.y : null;
+      (cat && cat.benefits || []).forEach(function (b) {
+        if (b.card !== e.cardId || b.unit !== "usd" || !(b.amount > 0)) return;
+        var u = e.used[b.id]; if (!u) return;
+        Object.keys(u).forEach(function (k) {
+          if (!(k === y || k.indexOf(y + "-") === 0 || k === ak)) return;
+          var v = u[k];
+          if (v === true) total += b.amount; else if (typeof v === "number" && v > 0) total += Math.min(v, b.amount);
+        });
+      });
+    });
+    return Math.round(total * 100) / 100;
+  }
+  function todayData() {
+    if (!state.wallet || state.error) return null;
+    var V = view(), cat = catalog(), s = summarize(V, cat);
+    if (!s.count) return { count: 0 };
+    var soon = expiringSoon(perkRows(V, cat), 14).filter(function (r) { return r.perk.unit === "usd" && r.perk.type !== "activation"; });
+    var r = soon[0];
+    return {
+      count: s.count, fees: s.yearly, captured: capturedThisYear(V, cat), demo: !!state.demo,
+      urgent: r ? { amount: r.part ? r.left : r.perk.amount, label: r.perk.label, card: shortName(r.card.name), days: r.period.days } : null
+    };
+  }
   function connectData() {
     if (!state.wallet) return null;
     var V = view(), cat = catalog();
@@ -2383,6 +2416,7 @@
 
   window.HRT_WALLET = {
     connectData: connectData,
+    todayData: todayData,
     /* load the wallet without showing it, so other tools can use it (called by app.js once signed in) */
     ensure: function () { if (!state.wallet && !state.loading) load(); },
     _test: { importantDates: importantDates, nextFeeDate: nextFeeDate, holderList: holderList, valueTextX: function (v) { return valueText(v); }, creditGroups: creditGroups, findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,

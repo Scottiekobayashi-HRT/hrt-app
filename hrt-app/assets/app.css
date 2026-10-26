@@ -814,3 +814,27 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .wl-cp .wl-fam-b:hover{border-color:var(--coral)}.wl-cp .wl-fam-b:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
 .wl-cp .wl-fam-b.on{background:#1b2430;border-color:#1b2430;color:#fff}
 [data-theme=dark] .wl-cp .wl-fam-b.on{background:#f2b84b;border-color:#f2b84b;color:#14202e}
+
+/* ---- Today for you, inside the Aloha banner (assets/today.js). Few, big words. ---- */
+.hero .hero-date{display:none;font-size:13px;font-weight:600;color:#9fb4c8;margin:0 0 6px;position:relative;z-index:2}
+.hero.has-today .hero-date{display:block}
+.hero.has-today > p,.hero.has-today .cta-row,#v-home .hero.has-today .hstats{display:none}
+.hero.has-today{justify-content:flex-start}
+.today{position:relative;z-index:2}
+.today:empty{display:none}
+.hero .td-k{max-width:none;margin:14px 0 8px;font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#9fb4c8}
+.td-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.td-row{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 14px;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.td-row:hover{background:rgba(255,255,255,.14)}
+.td-row:focus-visible{outline:2px solid #f2b84b;outline-offset:2px}
+.td-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;background:#9fc1d4}
+.t-hot .td-dot{background:#ff7a70}.t-warn .td-dot,.t-gold .td-dot{background:#f2b84b}.t-blue .td-dot{background:#9fc1d4}
+.td-t{flex:1;min-width:0;font-size:16px;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-a{flex:0 0 auto;font-size:14px;font-weight:800;color:#f2b84b}
+.td-cap{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.13)}
+.td-cap-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:15px;color:#cfe0ee}
+.td-cap-top b{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:800;color:#fff;margin-right:6px}
+.td-cap-pct{font-size:14px;font-weight:700;color:#a6e9c3}
+.td-bar{margin-top:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.td-bar i{display:block;height:100%;border-radius:999px;background:#3fce7f}
+@media (max-width:560px){.td-t{white-space:normal;font-size:15.5px}.td-row{padding:10px 12px}}
