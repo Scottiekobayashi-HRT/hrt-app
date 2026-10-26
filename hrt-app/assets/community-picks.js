@@ -49,7 +49,7 @@
   var S = {
     board: null, error: "", memberId: "", signedIn: false,
     mine: [], myTip: null, myHelped: {}, show: false,
-    view: "cards", cat: "all", period: "month",
+    view: "cards", cat: "all", period: "month", tab: "rank",
     poll: null
   };
 
@@ -134,27 +134,33 @@
     if (S.error) { host.innerHTML = '<div class="cp"><div class="cp-wrap"><div class="cp-empty">' + esc(S.error) + "</div></div></div>"; return; }
     if (!S.board) { host.innerHTML = '<div class="cp"><div class="cp-wrap"><div class="cp-empty">Loading Community Picks...</div></div></div>'; return; }
     var rk = S.board.rankings || { topics: [], travelers: 0, picksMonth: 0 };
+    var tabs = [["rank", "Rankings"], ["tips", "Tips"], ["crew", "Contributors"]];
+    var body = S.tab === "tips" ? tipsHtml() : S.tab === "crew" ? crewHtml() : rankingsHtml();
     host.innerHTML = '<div class="cp">' + heroHtml(rk) + '<div class="cp-wrap">' + inviteHtml() + '<div class="cp-poll" id="cpPoll" hidden></div>' +
-      rankingsHtml() + tipsHtml() + crewHtml() + howHtml() + "</div></div>";
+      '<nav class="cp-tabs" aria-label="Community Picks sections">' + tabs.map(function (t) {
+        return '<button type="button" data-cp-tab="' + t[0] + '" aria-pressed="' + (S.tab === t[0]) + '">' + t[1] + "</button>";
+      }).join("") + "</nav>" + body + howHtml() + "</div></div>";
     flapBoard(rk);
-    renderTopics();
+    if (S.tab === "rank") renderTopics();
     if (S.poll) { host.querySelector("#cpInvite").hidden = true; drawPoll(); }
   }
 
+  /* Hero photo: Waikiki sunset by Tim Mossholder on Unsplash (Unsplash License, free to use). */
+  var HERO_IMG = "https://images.unsplash.com/photo-1719469243598-0191cfae6f83?w=2000&h=1000&fit=crop&crop=focalpoint&fp-x=0.6&fp-y=0.32&q=70&auto=format";
+  var HERO_CREDIT = "https://unsplash.com/photos/a-sunset-on-a-beach-with-palm-trees-in-the-background-xRgUxTUI_dE";
   function heroHtml(rk) {
     var live = (rk.topics || []).filter(function (t) { return !t.locked; });
     var crew = (S.board.crew && S.board.crew.monthly) || [];
     var stack = crew.slice(0, 5).map(function (c, i) { return avatar(c, i, "cp-stk"); }).join("");
-    return '<header class="cp-hero"><div class="cp-sky"><div class="cp-sun" aria-hidden="true"></div><div class="cp-in cp-hin">' +
-      '<div class="cp-live"><i aria-hidden="true"></i><span><b class="cp-num">' + fmt(rk.picksMonth) + "</b> picks in " + esc(monthName()) + "</span></div>" +
+    return '<header class="cp-hero"><div class="cp-photo" style="background-image:url(\'' + HERO_IMG + '\')"><div class="cp-in cp-hin">' +
+      (rk.picksMonth ? '<div class="cp-live"><i aria-hidden="true"></i><span><b class="cp-num">' + fmt(rk.picksMonth) + "</b> picks in " + esc(monthName()) + "</span></div>" : '<div class="cp-live"><i aria-hidden="true"></i><span>Community Picks is open</span></div>') +
       '<h1 class="cp-h1">What Hawaiʻi travelers rank #1</h1>' +
       '<p class="cp-lede">Lounges, resorts, routes and cards, ranked by locals who have actually been there. Look before you spend your points.</p>' +
       (rk.travelers ? '<div class="cp-crowd">' + (stack ? '<span class="cp-stack" aria-hidden="true">' + stack + "</span>" : "") + '<small><b class="cp-num">' + fmt(rk.travelers) + "</b> " + (rk.travelers === 1 ? "traveler has" : "travelers have") + " shared picks so far</small></div>" : "") +
-      '</div><div class="cp-ridge" aria-hidden="true"><svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 120 L0 88 C60 80 110 52 170 58 C220 63 250 30 300 34 C350 38 380 70 430 72 C480 74 520 40 580 44 C640 48 660 82 720 86 C790 90 840 60 900 66 C960 72 1010 96 1080 94 C1130 92 1170 84 1200 86 L1200 120 Z" fill="#2a2150" opacity=".6"/><path d="M0 120 L0 100 C80 96 140 74 210 80 C270 86 300 62 360 66 C420 70 470 98 540 100 C610 102 650 86 720 90 C800 94 860 106 940 104 C1020 102 1090 96 1200 100 L1200 120 Z" fill="#0f2238"/></svg></div></div>' +
-      '<div class="cp-sea"><div class="cp-glints" aria-hidden="true"><i style="left:60%;top:10px;width:120px"></i><i style="left:64%;top:24px;width:80px;animation-delay:.8s"></i><i style="left:56%;top:40px;width:150px;animation-delay:1.6s"></i></div>' +
+      '</div><a class="cp-credit" href="' + HERO_CREDIT + '" target="_blank" rel="noopener">Photo: Tim Mossholder, Unsplash</a></div>' +
       '<div class="cp-in cp-sin"><div class="cp-board" role="table" aria-label="Community number one picks"><div class="cp-bh" role="row"><span role="columnheader">TOPIC</span><span role="columnheader">#1 PICK</span><span role="columnheader" class="r">SHARE</span><span role="columnheader" class="r cp-hide-s">PICKS</span></div>' +
-      '<div id="cpBoardRows">' + (live.length ? "" : '<div class="cp-brow" role="row"><span class="cp-cell t" role="cell" style="--rc:#f2b84b">FIRST RANKINGS</span><span class="cp-cell" role="cell">POSTING SOON</span><span class="cp-cell p" role="cell">--</span><span class="cp-cell v cp-hide-s" role="cell">' + fmt(REVEAL_AT) + "</span></div>") + "</div>" +
-      '<div class="cp-bf"><span>' + (live.length ? "NOW SHOWING · " + live.length + (live.length === 1 ? " TOPIC" : " TOPICS") : "EACH RANKING SHOWS AT " + REVEAL_AT + " PICKS") + "</span><span>UPDATES DAILY 5:00 AM HST</span></div></div></div></div></header>";
+      '<div id="cpBoardRows">' + (live.length ? "" : '<div class="cp-brow" role="row"><span class="cp-cell t" role="cell" style="--rc:#f2b84b">FIRST RANKINGS</span><span class="cp-cell" role="cell">POSTING SOON</span><span class="cp-cell p" role="cell">--</span><span class="cp-cell v cp-hide-s" role="cell">--</span></div>') + "</div>" +
+      '<div class="cp-bf"><span>' + (live.length ? "NOW SHOWING · " + live.length + (live.length === 1 ? " TOPIC" : " TOPICS") : "RANKINGS POST AS PICKS COME IN") + "</span><span>UPDATES DAILY 5:00 AM HST</span></div></div></div></header>";
   }
 
   function boardLabel(q) { return String(q || "").replace(/\?$/, "").replace(/^(best|most)\s+/i, "").slice(0, 26); }
@@ -307,9 +313,7 @@
       '<p class="cp-note">Contributors appear with their profile photo and initials only, never their name. Showing up is your choice.</p></section>';
   }
   function howHtml() {
-    return '<section class="cp-how" aria-label="How it works"><div><b>1. Pick what you\'ve tried</b><span>A few quick questions each week. Skip anything you haven\'t experienced.</span></div>' +
-      "<div><b>2. Tap why, or share a tip</b><span>Add up to two reasons, or write in your own answer. No chat, no replies, just useful picks.</span></div>" +
-      "<div><b>3. Everyone travels smarter</b><span>A ranking shows once " + REVEAL_AT + " travelers weigh in, so you know it's real.</span></div></section>";
+    return '<p class="cp-how">Pick only what you\'ve tried. One pick per member per question. A ranking shows once ' + REVEAL_AT + ' travelers weigh in, and every tip is reviewed before it posts.</p>';
   }
 
   /* ----------------------------- poll ----------------------------- */
@@ -333,8 +337,7 @@
       if (hit) return { pct: hit[1], text: hit[1] + "% of travelers also picked " + pick };
       return { pct: 0, text: "You're one of the few picking " + pick + ". Nice find." };
     }
-    var n = (t ? t.votes : 0) + 1;
-    return { pct: Math.min(100, Math.round(n / REVEAL_AT * 100)), text: "You're pick #" + n + " on this question. It ranks at " + REVEAL_AT + "." };
+    return null;
   }
   function drawPoll() {
     var P = S.poll, r = S.board.round, el = host.querySelector("#cpPoll"); if (!el || !P) return;
@@ -369,7 +372,8 @@
       var pick = P.answers[q.id], w = !!P.writein[q.id], chosen = P.reasons[q.id] || [], a = w ? null : agreeLine(q, pick);
       el.innerHTML = pollHead(q.cat, q.q, P.step, n) + "</div>" +
         (w ? '<div class="cp-agree"><b>Thanks for adding "' + esc(pick) + '"</b><span class="cp-small">It goes to review first. If a few more travelers say the same, it joins the list for everyone.</span></div>'
-          : '<div class="cp-agree"><b>' + esc(a.text) + '</b><div class="cp-bar"><i data-w="' + a.pct + '"></i></div></div>') +
+          : a ? '<div class="cp-agree"><b>' + esc(a.text) + '</b><div class="cp-bar"><i data-w="' + a.pct + '"></i></div></div>'
+          : '<div class="cp-agree saved"><b><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Your pick: ' + esc(pick) + '</b></div>') +
         ((q.reasons || []).length ? '<div class="cp-col"><span class="cp-lab">Why did you pick it? <span class="cp-small">Tap up to 2</span></span><div class="cp-reasons">' + q.reasons.map(function (x) { return '<button type="button" class="cp-reason" data-cp-reason="' + esc(x) + '" aria-pressed="' + (chosen.indexOf(x) > -1) + '">' + esc(x) + "</button>"; }).join("") + "</div></div>" : "") +
         '<div class="cp-pfoot"><button type="button" class="cp-btn ghost" data-cp="repick">Change pick</button><button type="button" class="cp-btn" data-cp="next">' + (P.step === n - 1 ? "Finish" : "Next question") + "</button></div>";
       grow(el);
@@ -451,6 +455,7 @@
     if (b.id === "cpShow" || b.id === "cpShow2") { setShow(b.checked); return; }
     if (b.hasAttribute("data-cp-cat")) { S.cat = b.getAttribute("data-cp-cat"); host.querySelectorAll("[data-cp-cat]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); renderTopics(); return; }
     if (b.hasAttribute("data-cp-view")) { S.view = b.getAttribute("data-cp-view"); host.querySelectorAll("[data-cp-view]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); renderTopics(); return; }
+    if (b.hasAttribute("data-cp-tab")) { S.tab = b.getAttribute("data-cp-tab"); render(); var nv = host.querySelector(".cp-tabs"); if (nv) nv.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); return; }
     if (b.hasAttribute("data-cp-period")) { S.period = b.getAttribute("data-cp-period"); render(); return; }
     if (b.hasAttribute("data-cp-help")) { toggleHelped(b.getAttribute("data-cp-help"), b); return; }
     var act = b.getAttribute("data-cp");
@@ -479,7 +484,7 @@
     if (act === "repick") { P.phase = "pick"; drawPoll(); return; }
     if (act === "back") { P.other = false; if (P.step > 0) { P.step--; P.phase = "pick"; drawPoll(); } else closePoll(); return; }
     if (act === "close") { closePoll(); return; }
-    if (act === "finish") { S.poll = null; render(); var t2 = host.querySelector("#cpRankT"); if (t2) t2.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); }
+    if (act === "finish") { S.poll = null; S.tab = "rank"; render(); var t2 = host.querySelector(".cp-tabs"); if (t2) t2.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); }
   }
   function nextStep() {
     var P = S.poll; P.step++; P.phase = "pick"; P.other = false;
@@ -499,26 +504,26 @@
       "#cp-host .cp-num{font-variant-numeric:tabular-nums}",
       "#cp-host .cp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}",
       "#cp-host .cp-in{max-width:1120px;margin:0 auto;padding-left:clamp(16px,3vw,32px);padding-right:clamp(16px,3vw,32px)}",
-      "#cp-host .cp-wrap{max-width:1120px;margin:0 auto;padding:28px clamp(16px,3vw,32px) 40px;display:flex;flex-direction:column;gap:40px}",
-      "#cp-host .cp-sky{position:relative;overflow:hidden;background:linear-gradient(180deg,#16244a 0%,#3e3a78 30%,#9b4d86 55%,#e2696a 74%,#f59a5b 88%,#f8c867 100%)}",
-      "#cp-host .cp-sea{position:relative;overflow:hidden;background:linear-gradient(180deg,#0f2238 0%,var(--cp-ink) 100%)}",
-      "#cp-host .cp-sun{position:absolute;left:70%;bottom:0;width:min(36vw,360px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff0c4 0%,#ffcf7a 38%,rgba(255,170,90,0) 70%);transform:translate(-50%,42%);pointer-events:none}",
-      "#cp-host .cp-ridge{position:absolute;left:0;right:0;bottom:-1px;height:100px;pointer-events:none}",
-      "#cp-host .cp-ridge svg{width:100%;height:100%;display:block}",
-      "#cp-host .cp-glints{position:absolute;left:0;right:0;top:0;height:60px;pointer-events:none;opacity:.7}",
-      "#cp-host .cp-glints i{position:absolute;height:2px;border-radius:2px;background:#ffd79a;animation:cpGlint 4.5s ease-in-out infinite}",
-      "@keyframes cpGlint{0%,100%{opacity:.15;transform:translateX(0)}50%{opacity:.7;transform:translateX(12px)}}",
-      "#cp-host .cp-hin{position:relative;padding-top:26px;padding-bottom:clamp(100px,13vw,150px);display:flex;flex-direction:column;gap:12px}",
-      "#cp-host .cp-sin{position:relative;padding-top:6px;padding-bottom:26px}",
+      "#cp-host .cp-wrap{max-width:1120px;margin:0 auto;padding:24px clamp(16px,3vw,32px) 36px;display:flex;flex-direction:column;gap:22px}",
+      "#cp-host .cp-photo{position:relative;background-color:#1b2430;background-size:cover;background-position:60% 32%}",
+      "#cp-host .cp-photo::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,20,32,.82) 0%,rgba(12,20,32,.55) 45%,rgba(12,20,32,.1) 100%),linear-gradient(180deg,rgba(12,20,32,0) 55%,var(--cp-ink) 100%)}",
+      "#cp-host .cp-credit{position:absolute;right:14px;top:10px;z-index:1;font-size:12px;color:rgba(255,255,255,.7);text-decoration:none}",
+      "#cp-host .cp-credit:hover{color:#fff;text-decoration:underline}",
+      "#cp-host .cp-hin{position:relative;padding-top:28px;padding-bottom:clamp(70px,9vw,110px);display:flex;flex-direction:column;gap:12px}",
+      "#cp-host .cp-sin{position:relative;margin-top:-34px;padding-bottom:6px}",
+      "#cp-host .cp-tabs{display:flex;gap:6px;padding:5px;border-radius:14px;background:var(--cp-panel);border:1px solid var(--cp-line);position:sticky;top:0;z-index:2;overflow-x:auto}",
+      "#cp-host .cp-tabs button{flex:1 1 0;min-height:46px;padding:0 16px;border-radius:10px;border:0;background:transparent;color:var(--cp-mute);font-weight:700;font-size:16px;white-space:nowrap}",
+      "#cp-host .cp-tabs button[aria-pressed='true']{background:var(--cp-fg);color:var(--cp-ink)}",
+      "#cp-host .cp-agree.saved b{display:flex;align-items:center;gap:10px;color:var(--qc,var(--cp-gold))}",
       "#cp-host .cp-live{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-size:15px;color:#e6e8f5;background:rgba(10,16,30,.45);border:1px solid rgba(255,255,255,.14);padding:6px 12px;border-radius:99px}",
       "#cp-host .cp-live i{width:9px;height:9px;border-radius:50%;background:var(--cp-live);animation:cpPulse 2s infinite}",
       "@keyframes cpPulse{0%{box-shadow:0 0 0 0 rgba(95,211,141,.55)}70%{box-shadow:0 0 0 10px rgba(95,211,141,0)}100%{box-shadow:0 0 0 0 rgba(95,211,141,0)}}",
       "#cp-host .cp-h1{margin:6px 0 0;font-size:clamp(38px,6.4vw,76px);line-height:.95;font-weight:800;letter-spacing:-.01em;color:#fff;text-wrap:balance;max-width:14ch}",
-      "#cp-host .cp-lede{margin:0;max-width:52ch;color:#f1e4f1;font-size:18px}",
+      "#cp-host .cp-lede{margin:0;max-width:46ch;color:#e8edf3;font-size:18px}",
       "#cp-host .cp-crowd{display:flex;align-items:center;gap:12px;flex-wrap:wrap}",
-      "#cp-host .cp-crowd small{font-size:15px;color:#f2e6f2}",
+      "#cp-host .cp-crowd small{font-size:15px;color:#e8edf3}",
       "#cp-host .cp-stack{display:flex}",
-      "#cp-host .cp-stack .cp-av{width:32px;height:32px;font-size:12px;border:2px solid #3e3a78;margin-left:-8px}",
+      "#cp-host .cp-stack .cp-av{width:32px;height:32px;font-size:12px;border:2px solid #1b2430;margin-left:-8px}",
       "#cp-host .cp-stack .cp-av:first-child{margin-left:0}",
       "#cp-host .cp-board{background:rgba(8,13,22,.92);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;overflow:hidden}",
       "#cp-host .cp-bh,#cp-host .cp-brow{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.6fr) 80px 80px;gap:8px}",
@@ -535,7 +540,7 @@
       "#cp-host .cp-invite{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;border-radius:18px;background:var(--cp-panel);border:1px solid var(--cp-gold)}",
       "#cp-host .cp-invite.done{border-color:#2f6b55}",
       "#cp-host .cp-h2s{margin:0;font-size:26px;font-weight:800;color:var(--cp-fg)}",
-      "#cp-host .cp-h2{margin:0;font-size:clamp(30px,4vw,44px);font-weight:800;line-height:1;color:var(--cp-fg);text-wrap:balance}",
+      "#cp-host .cp-h2{margin:0;font-size:clamp(24px,3vw,32px);font-weight:800;line-height:1.1;color:var(--cp-fg);text-wrap:balance}",
       "#cp-host .cp-h3{margin:0;font-size:22px;font-weight:700;line-height:1.15;color:var(--cp-fg);text-wrap:balance}",
       "#cp-host .cp-p{margin:6px 0 0;color:var(--cp-mute);max-width:60ch;font-size:16px}",
       "#cp-host .cp-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}",
@@ -671,11 +676,8 @@
       "#cp-host .cp-lrow.me{background:#1f2c48;border-top:1px solid var(--cp-gold)}",
       "#cp-host .cp-lrow.me .cp-pos{color:var(--cp-gold);font-size:15px}",
       "#cp-host .cp-lrow.me .cp-av{border-color:var(--cp-gold);font-size:12px}",
-      "#cp-host .cp-how{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}",
-      "#cp-host .cp-how div{border-top:2px solid var(--cp-line);padding-top:14px}",
-      "#cp-host .cp-how b{display:block;font-size:19px}",
-      "#cp-host .cp-how span{color:var(--cp-mute)}",
-      "@media (max-width:640px){#cp-host .cp-bh,#cp-host .cp-brow{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 60px}#cp-host .cp-hide-s{display:none}#cp-host .cp-sun{left:80%}#cp-host .cp-podium{gap:8px}#cp-host .cp-pod{padding:14px 6px}#cp-host .cp-big{font-size:28px}#cp-host .cp-av{width:52px;height:52px;font-size:19px}#cp-host .cp-pod.p1 .cp-av{width:64px;height:64px;font-size:24px}#cp-host .cp-lrow{grid-template-columns:32px 40px minmax(0,1fr) auto;gap:10px;padding:12px}#cp-host .cp-streak{display:none}#cp-host .cp-lrow .cp-av{width:38px;height:38px}#cp-host .cp-lrow.me .cp-opt{grid-column:3/5}}",
+      "#cp-host .cp-how{margin:4px 0 0;font-size:14px;color:var(--cp-dim);text-align:center;max-width:70ch;align-self:center}",
+      "@media (max-width:640px){#cp-host .cp-bh,#cp-host .cp-brow{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 60px}#cp-host .cp-hide-s{display:none}#cp-host .cp-photo{background-position:62% 30%}#cp-host .cp-tabs button{font-size:15px;padding:0 10px}#cp-host .cp-podium{gap:8px}#cp-host .cp-pod{padding:14px 6px}#cp-host .cp-big{font-size:28px}#cp-host .cp-av{width:52px;height:52px;font-size:19px}#cp-host .cp-pod.p1 .cp-av{width:64px;height:64px;font-size:24px}#cp-host .cp-lrow{grid-template-columns:32px 40px minmax(0,1fr) auto;gap:10px;padding:12px}#cp-host .cp-streak{display:none}#cp-host .cp-lrow .cp-av{width:38px;height:38px}#cp-host .cp-lrow.me .cp-opt{grid-column:3/5}}",
       "@media (prefers-reduced-motion:reduce){#cp-host *{animation:none!important;transition:none!important}}"
     ].join("\n");
     var s = document.createElement("style"); s.id = "cp-styles"; s.textContent = css; document.head.appendChild(s);
