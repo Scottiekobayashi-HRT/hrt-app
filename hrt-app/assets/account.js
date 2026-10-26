@@ -40,6 +40,15 @@
   t.innerHTML = avatarHtml("ac-av ac-av-sm");
   t.setAttribute("aria-label", "My account" + (first() ? ", " + first() : "") + (isClient() ? ", ʻOhana Member" : ""));
  }
+ /* the profile card at the bottom of the sidebar (Oct 25) */
+ function paintSide(){
+  var av = document.getElementById("sbMeAv"), me = document.getElementById("sbMe");
+  if(!av || !member) return;
+  av.innerHTML = avatarHtml("ac-av");
+  var nm = first() || (email().split("@")[0] || "My account");
+  var b = me.querySelector(".hrt-me-t b"); if(b){ b.textContent = nm; b.classList.remove("ms-first-name"); }
+  me.setAttribute("aria-label", "My account and settings, " + nm);
+ }
 
  var ICON_CAM = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
  var ICON_STAR = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>';
@@ -47,7 +56,7 @@
  var ICON_OUT = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/></svg>';
 
  function render(){
-  paintTop();
+  paintTop(); paintSide();
   if(!host) return;
   if(!member){ host.innerHTML = '<div class="ac-card"><p class="ac-note">Log in to see your account.</p></div>'; return; }
   var name = (first() + " " + last()).trim();
