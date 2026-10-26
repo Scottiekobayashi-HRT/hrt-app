@@ -412,65 +412,28 @@
   { id:"southwest", name:"Southwest VIP Lounge", op:"Southwest Airlines", t:"t2", gate:"T2 · Building 342", r:null, x:50, y:35, url:"/hnl-lounges/southwest-lounge", access:["Coming soon, access to be announced"], tags:["coming-soon"], soon:true, blurb:"A historic first. Southwest has never run an airport lounge anywhere, and HNL is its debut.", note:"Lease approved October 2025." },
   { id:"alaskahawaiian", name:"New Alaska/Hawaiian Premium Lounge", op:"Alaska Air Group", t:"t1", gate:"T1 · Mauka Concourse entrance", r:null, x:84, y:73, url:"/hnl-lounges/alaska-hawaiian-premium-lounge", access:["Opening late 2027"], tags:["coming-soon"], soon:true, blurb:"15,000 sq ft, five times larger than the current Plumeria. Expected to rival Delta One and United Polaris lounges.", note:"May carry the Atmos brand and will serve both Alaska and Hawaiian guests." }
  ];
- /* lounges the member's own cards open (connect.js); empty without a real wallet */
- function myLounges(){ var d = myWallet(), C = window.HRT_CONNECT, m = {}; if(!d || !C) return m;
-  C.loungeAccess(d, LOUNGES).list.forEach(function(x){ m[x.id] = x; }); return m; }
- var LG_F = [ ["all","All lounges",function(){ return true; }], ["mine","Open to you",function(l){ return !!myLounges()[l.id]; }], ["t1","Terminal 1",function(l){ return l.t === "t1"; }], ["t2","Terminal 2",function(l){ return l.t === "t2"; }], ["pp","Priority Pass",function(l){ return l.tags.indexOf("priority-pass") > -1; }], ["soon","Coming soon",function(l){ return !!l.soon; }] ];
- var LG_TAG = { "priority-pass":["Priority Pass","pp"], "star-alliance":["Star Alliance",""], "oneworld":["Oneworld",""], "skyteam":["SkyTeam",""], "amex":["Amex",""], "chase":["Chase",""], "day-pass":["Day Pass",""], "resort-only":["Resort only","resort"], "coming-soon":["Coming soon","soon"] };
- var LG = { f:"all", active:null };
- /* Only lounges with a published review page get the button. Add the path to url to switch one on. */
- function lgReview(l){ return l.url ? '<a class="btn coral" href="'+SITE+l.url+'" target="_top">Read the full review &rarr;</a>' : '<span class="lg-soon-note">Full review coming soon</span>'; }
+ /* The map itself is assets/lounge-map.js (Fall Fest style map, list on the left on desktop).
+    It mounts the first time the page opens; signed-in members' My Wallet cards are picked for them. */
  function lgNum(l){ return l.soon ? "&#10022;" : (LOUNGES.indexOf(l) + 1); }
- function lgStars(r){ if(r == null) return '<span class="lg-rate none">No rating</span>'; return '<span class="lg-rate">'+"★".repeat(Math.floor(r))+(r % 1 >= .5 ? "½" : "")+" "+r.toFixed(1)+'</span>'; }
- function lgTags(l){ return l.tags.map(function(t){ var x = LG_TAG[t] || [t,""]; return '<span class="lg-tag '+x[1]+'">'+x[0]+'</span>'; }).join(""); }
- function lgMine(l){ var x = myLounges()[l.id]; if(!x) return "";
-  return '<p class="lg-mine"><b>Open to you</b> with your '+esc(x.cards.join(" or "))+' ('+esc(x.how)+(x.how === "Priority Pass" ? ', enroll first' : '')+').</p>'; }
- function lgMatch(l){ return LG_F.filter(function(f){ return f[0] === LG.f; })[0][2](l); }
- function lgRender(){
-  if(LG.f === "mine" && !LOUNGES.some(LG_F[1][2])) LG.f = "all";
-  $("lgFilters").innerHTML = LG_F.filter(function(f){ return f[0] !== "mine" || LOUNGES.some(f[2]); }).map(function(f){ var on = LG.f === f[0]; return '<button type="button" class="chipf'+(on?'':' plain')+'" data-l-f="'+f[0]+'">'+f[1]+'<span class="n">'+LOUNGES.filter(f[2]).length+'</span></button>'; }).join("");
-  $("lgMarkers").innerHTML = LOUNGES.map(function(l){ return '<button type="button" class="lg-mk'+(l.soon?' soon':'')+(lgMatch(l)?'':' off')+(LG.active === l.id ? ' on' : '')+'" data-l-id="'+l.id+'" style="left:'+l.x+'%;top:'+l.y+'%" aria-label="'+esc(l.name)+'"><span>'+lgNum(l)+'</span></button>'; }).join("");
-  var n = LOUNGES.filter(lgMatch).length; $("lgCount").textContent = n + (n === 1 ? " lounge" : " lounges");
-  $("lgList").innerHTML = LOUNGES.map(function(l){
-   return '<div role="button" tabindex="0" class="lg-card'+(l.soon?' soon':'')+(lgMatch(l)?'':' off')+(LG.active === l.id ? ' on' : '')+'" data-l-id="'+l.id+'">'
-    + '<div class="lg-top"><span class="lg-num">'+lgNum(l)+'</span><span class="lg-name">'+esc(l.name)+'</span>'+lgStars(l.r)+'</div>'
-    + '<div class="lg-meta">'+esc(l.gate)+' &middot; '+esc(l.op)+'</div><div class="lg-tags">'+lgTags(l)+'</div>'
-    + '<div class="lg-det"><p>'+esc(l.blurb)+'</p>'+(l.note ? '<p class="nt">'+esc(l.note)+'</p>' : '')+lgMine(l)+'<p><b>Access:</b> '+esc(l.access.join(" · "))+'</p>'+lgReview(l)+'</div></div>';
-  }).join("");
- }
- function lgPop(){
-  var pop = $("lgPop"), l = LOUNGES.filter(function(x){ return x.id === LG.active; })[0];
-  if(!l){ pop.hidden = true; return; }
-  pop.innerHTML = '<button type="button" class="x" data-l-close aria-label="Close">&times;</button><b>'+esc(l.name)+'</b><small>'+esc(l.gate)+' &middot; '+esc(l.op)+'</small><div class="lg-tags" style="margin:0">'+lgTags(l)+'</div>'
-   + (l.note ? '<div style="color:#c25c26;margin-top:6px;font-style:italic">'+esc(l.note)+'</div>' : '') + lgMine(l) + '<div style="margin-top:6px"><b style="display:inline;font-size:12px">Access:</b> '+esc(l.access.join(" · "))+'</div>'
-   + lgReview(l);
-  pop.hidden = false;
-  var w = pop.parentElement.offsetWidth, h = pop.parentElement.offsetHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
-  var mx = l.x / 100 * w, my = l.y / 100 * h;
-  var left = Math.max(8, Math.min(w - pw - 8, mx - pw / 2)), top = my - ph - 22; if(top < 8) top = my + 22; top = Math.max(8, Math.min(h - ph - 8, top));
-  pop.style.left = left + "px"; pop.style.top = top + "px";
- }
- function lgSet(id){ LG.active = LG.active === id ? null : id; lgRender(); lgPop(); }
- document.addEventListener("click", function(ev){
-  var t = ev.target;
-  var f = t.closest("[data-l-f]"); if(f){ LG.f = f.getAttribute("data-l-f"); var a = LOUNGES.filter(function(x){ return x.id === LG.active; })[0]; if(a && !lgMatch(a)) LG.active = null; lgRender(); lgPop(); return; }
-  if(t.closest("[data-l-close]")){ LG.active = null; lgRender(); lgPop(); return; }
-  if(t.closest(".lg-det a, .lg-pop a")) return;
-  var c = t.closest("[data-l-id]"); if(c){ lgSet(c.getAttribute("data-l-id")); return; }
- });
- window.addEventListener("resize", function(){ if(LG.active) lgPop(); });
+ var LM = null, LM_WAIT = [];
+ function lmHeld(){ var d = myWallet(); return d ? d.held.map(function(h){ return h.cardId; }) : []; }
+ function lmDo(fn){ if(LM) fn(LM); else LM_WAIT.push(fn); }
+ onShow.lounges = function(){
+  if(!LM && window.HRT_LOUNGE_MAP){ LM = window.HRT_LOUNGE_MAP.mount($("lgHost"), { lounges:LOUNGES, site:SITE }); if(LM){ LM.setWallet(lmHeld()); LM_WAIT.splice(0).forEach(function(fn){ fn(LM); }); } }
+  else if(LM) LM.resize();
+ };
  (function(){
   var open = LOUNGES.filter(function(l){ return !l.soon; }), pp = LOUNGES.filter(function(l){ return l.tags.indexOf("priority-pass") > -1; });
   var top = Math.max.apply(null, LOUNGES.map(function(l){ return l.r || 0; }));
   $("lgS1").textContent = open.length; $("lgS2").textContent = pp.length; $("lgS3").textContent = LOUNGES.length - open.length; $("lgS4").textContent = top.toFixed(1);
   $("navLounge").textContent = LOUNGES.length; $("ttLounge").textContent = open.length + " open, " + pp.length + " with Priority Pass";
-  lgRender();
+
  })();
 
  window.HRT_LOUNGES = LOUNGES; /* shared with My Wallet through connect.js */
 
  /* ===== When the wallet or member changes, refresh the pages that use it ===== */
- window.addEventListener("hrt:wallet", function(){ try{ if(TB.loaded) tbRender(); lgRender(); if(LG.active) lgPop(); rsClock(); }catch(e){} });
+ window.addEventListener("hrt:wallet", function(){ try{ if(TB.loaded) tbRender(); if(LM) LM.setWallet(lmHeld()); rsClock(); }catch(e){} });
  window.addEventListener("hrt:member", function(){ var m = window.HRT_MEMBER; if(m && m.signedIn && window.HRT_WALLET && window.HRT_WALLET.ensure) window.HRT_WALLET.ensure(); });
  /* "For your cards" links in My Wallet: open the tool already set up for this member */
  document.addEventListener("click", function(ev){
@@ -482,7 +445,7 @@
    TB.bank = bank; TB.type = "all"; tbStats(); tbRender();
    if(bonus && PROGRAMS[bank]){ $("tcProg").value = bank; $("tcBonus").value = bonus; if(!$("tcPts").value) $("tcPts").value = "50,000"; tcRender(); }
   }
-  if(to === "lounges"){ LG.f = LOUNGES.some(LG_F[1][2]) ? "mine" : "all"; LG.active = null; lgRender(); lgPop(); }
+  if(to === "lounges") lmDo(function(m){ m.setWallet(lmHeld()); m.mine(); });
  });
 
  /* ============================== HOME ============================== */
@@ -527,7 +490,7 @@
   var k = ev.target.closest("[data-kopen]");
   if(k){ route("kamaaina"); var i = +k.getAttribute("data-kopen"); setTimeout(function(){ if(window.HRT_KAMA) window.HRT_KAMA.open(i); }, 60); return; }
   var hl = ev.target.closest("[data-hlounge]");
-  if(hl){ route("lounges"); LG.f = "all"; LG.active = null; lgSet(hl.getAttribute("data-hlounge")); return; }
+  if(hl){ var id = hl.getAttribute("data-hlounge"); route("lounges"); lmDo(function(m){ m.show(id); }); return; }
  });
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
  onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };

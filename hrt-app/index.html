@@ -559,7 +559,7 @@ html.ms-client .pl.ohana .btn{display:none}
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
   <div class="hs-text">
    <h1>The HNL <span class="wave">Lounge Map</span></h1>
-   <p>Every lounge at Daniel K. Inouye International Airport on the real airport map. Tap one to see where it is and what it takes to get in.</p>
+   <p>Every lounge at Daniel K. Inouye International Airport. Tap a lounge to see where it is, or pick your cards and status and the lounges you can use light up.</p>
   </div>
   <div class="hstats">
    <div class="hstat"><b class="tnum" id="lgS1">&ndash;</b><span><i style="background:#9fc1d4"></i>Open lounges</span></div>
@@ -569,25 +569,7 @@ html.ms-client .pl.ohana .btn{display:none}
   </div>
  </div>
 
- <div class="card">
-  <div class="qrow" style="padding-top:14px"><div class="fchips" id="lgFilters"></div></div>
-  <div class="lg-grid">
-   <div class="lg-mapcol">
-    <div class="lg-frame">
-     <div class="lg-imgwrap">
-      <img class="lg-img" decoding="async" src="https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a4154ba-97b5-4754-8e5c-00b8fe039db4/Daniel-K.-Inouye-International-Airport-Map-1.webp?content-type=image%2Fwebp" alt="Daniel K. Inouye International Airport floor 2 map with terminals and gates">
-      <div class="lg-markers" id="lgMarkers"></div>
-      <div class="lg-pop" id="lgPop" hidden></div>
-     </div>
-    </div>
-    <div class="lg-cap"><b>Floor 2 &middot; Daniel K. Inouye International Airport</b><span>Tap any marker</span></div>
-   </div>
-   <div class="lg-listcol">
-    <div class="lg-listhead"><b id="lgCount"></b><span>Tap to locate</span></div>
-    <div class="lg-list" id="lgList"></div>
-   </div>
-  </div>
- </div>
+ <div id="lgHost" class="lg-host"></div>
 
  <div class="navycard">
   <div class="hrt-eyebrow">Scottie's top card picks</div>
@@ -1017,6 +999,7 @@ html.ms-client .pl.ohana .btn{display:none}
 <script src="assets/connect.js"></script>
 <script src="assets/wallet.js"></script>
 <script src="assets/account.js"></script>
+<script src="assets/lounge-map.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/dealwall.js"></script>
 <script>
