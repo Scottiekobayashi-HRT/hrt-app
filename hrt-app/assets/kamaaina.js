@@ -779,7 +779,22 @@
   $("snapLine").textContent = "Last updated " + SNAPSHOT_LABEL + ".";
   $("footSnap").textContent = "Kamaʻāina offers last updated " + SNAPSHOT_LABEL;
   renderTop(); renderAll(); wire(); sizeFrame();
-  window.HRT_KAMA = { show:function(){ if(!map) initMap(); else map.resize(); }, open:function(i){ var d = DEALS[i]; if(d) openDialog(d); } };
+  /* New map (assets/deals-map.js): list on the left, real street map on the right, same system as the HNL Lounge Map.
+     The older map and lists below it stay in the page, hidden (#kOld), until they are removed. */
+  var KM = null, kmHost = $("kmHost");
+  function kmMount(){
+   if(KM || !kmHost || !window.HRT_DEALS_MAP) return KM;
+   KM = window.HRT_DEALS_MAP.mount(kmHost, { details:function(i){ var d = DEALS[i]; if(d) openDialog(d); },
+    deals:DEALS.map(function(d, i){ return { id:i, b:d.b, h:d.h, isl:d._isl, k:d._c === "stay" ? "stay" : (d._c === "dining" || d._c === "svc" || d._c === "around") ? "more" : "act",
+     p:d.p, v:d.v, kk:d.k, s:d.s, r:d.r, e:d.e, m:d.m, u:d.u, d:d.d, ll:locFor(d) }; }) });
+   return KM;
+  }
+  window.HRT_KAMA = {
+   show:function(){ if(kmHost){ if(KM) KM.resize(); else kmMount(); } else if(!map) initMap(); else map.resize(); },
+   open:function(i){ var d = DEALS[i]; if(!d) return; if(kmMount()) KM.show(i); else openDialog(d); }
+  };
+  /* the page may already be open (a #kamaaina link) before this script finished starting */
+  var kv = document.getElementById("v-kamaaina"); if(kv && kv.classList.contains("on")) window.HRT_KAMA.show();
   var mq = window.matchMedia("(max-width:760px)");
   var onMq = function(){ renderHotels(); renderSoon(); };
   if(mq.addEventListener) mq.addEventListener("change", onMq); else if(mq.addListener) mq.addListener(onMq);

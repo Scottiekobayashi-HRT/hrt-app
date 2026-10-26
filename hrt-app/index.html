@@ -826,7 +826,7 @@ html.ms-client .pl.ohana .btn{display:none}
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
   <div class="hs-text">
    <h1>Kamaʻāina Deals <span class="wave">Tracker</span></h1>
-   <p>Every kamaʻāina staycation rate across the islands, scored and sorted so the best hotel deals come first.</p>
+   <p>Every kamaʻāina rate across the islands, scored so the best deals come first. Move the map and the list follows, or tap a deal to see the details.</p>
   </div>
   <div class="hstats">
    <div class="hstat"><b class="tnum" id="kHotels">0</b><span><i style="background:#9fc1d4"></i>Hotel deals</span></div>
@@ -836,6 +836,11 @@ html.ms-client .pl.ohana .btn{display:none}
   </div>
  </div>
 
+ <!-- ===== DEALS MAP: list on the left, map on the right (assets/deals-map.js) ===== -->
+ <div id="kmHost" class="km-host"></div>
+
+ <!-- Older map and lists, hidden. kamaaina.js still fills them; remove together with that code. -->
+ <div id="kOld" hidden>
   <div class="kama-search"><label class="pts" for="q"><span class="lead"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 18 18"/></svg></span><span class="stack"><span style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase">Search kamaʻāina offers</span><input id="q" type="search" placeholder="Try Waikīkī or breakfast" autocomplete="off"></span></label></div>
 
  <!-- ===== DEALS MAP + TOP STAYCATION ===== -->
@@ -932,6 +937,8 @@ html.ms-client .pl.ohana .btn{display:none}
   <div class="empty" id="aEmpty" hidden><b>Nothing here yet.</b>Try another island or category.</div>
  </div>
 
+ </div>
+
  <!-- ===== HOW WE WOULD PAY ===== -->
  <div>
   <div class="sec-h" style="padding-left:2px;padding-right:2px"><h2>How we would pay for these</h2><span class="note">The points and miles angle on resident rates</span></div>
@@ -973,6 +980,7 @@ html.ms-client .pl.ohana .btn{display:none}
      ========================================================== -->
 <script src="data/kamaaina-deals.js"></script>
 
+<script src="assets/deals-map.js"></script>
 <script src="assets/kamaaina.js"></script>
 <script src="assets/hrt-quiz.js"></script>
 <script>
