@@ -839,3 +839,35 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .td-bar{margin-top:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
 .td-bar i{display:block;height:100%;border-radius:999px;background:#3fce7f}
 @media (max-width:560px){.td-t{white-space:normal;font-size:15.5px}.td-row{padding:10px 12px}}
+
+/* ---------- Resy credit guide (under the map; same pattern as the Atmos guides, Oct 26 2026) ---------- */
+.hero .rg-jump{position:relative;z-index:2;align-self:flex-start;margin-top:10px;padding:6px 0;min-height:36px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;background:none;border:0;color:#fff;text-decoration:underline;text-decoration-color:var(--coral);text-decoration-thickness:2px;text-underline-offset:4px}
+.hero .rg-jump:hover{color:#ffd9c4}
+.rg{margin:10px 0 0;scroll-margin-top:80px}
+.rg-head{border-radius:var(--radius);padding:24px 24px 22px;color:#fff;background:#1b2430;margin-bottom:18px}
+@media (max-width:560px){.rg-head{padding:20px 18px}}
+.hrt-app .rg-head h2{margin:0;font-size:26px;font-weight:800;line-height:1.15;color:#fff}
+.hrt-app .rg-head>p{margin:8px 0 0;font-size:15px;line-height:1.5;color:#d3dbe5;max-width:60ch}
+.rg-steps{list-style:none;counter-reset:rg;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:760px){.rg-steps{grid-template-columns:1fr}}
+.rg-steps li{counter-increment:rg;position:relative;padding:14px 14px 14px 58px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+.rg-steps li:before{content:counter(rg);position:absolute;left:14px;top:14px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff;background:var(--coral)}
+.rg-steps b{display:block;font-size:15.5px;color:#fff}
+.rg-steps span{display:block;margin-top:2px;font-size:13.5px;line-height:1.45;color:#c9d3df}
+.hrt-app .rg-h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--text)}
+.rg-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:980px){.rg-cards{grid-template-columns:1fr 1fr}}
+.rg-card{display:flex;flex-direction:column;padding:16px 16px 14px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--rc);box-shadow:var(--shadow)}
+.rg-name{font-size:14px;font-weight:700;color:var(--text)}
+.rg-big{margin-top:8px;font-family:'sofia-pro','Montserrat','DM Sans',sans-serif;font-size:38px;font-weight:800;line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
+.rg-every{font-size:14px;font-weight:700;color:var(--muted)}
+.rg-year{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.hrt-app .rg-note{margin:10px 2px 0;font-size:13.5px;color:var(--text)}
+.rg-links{display:flex;flex-wrap:wrap;gap:8px 22px;margin:14px 2px 0}
+.hrt-app .rg-ext{display:inline-flex;align-items:center;gap:6px;min-height:40px;font-size:14px;font-weight:700;color:var(--coral);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+.hrt-app .rg-ext:hover{color:var(--coral-d)}
+.rg-foot{display:flex;align-items:center;gap:16px;margin-top:16px;padding:16px 20px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line)}
+@media (max-width:640px){.rg-foot{flex-direction:column;align-items:stretch}.rg-foot .btn{text-align:center}}
+.rg-foot>div{flex:1}.rg-foot b{font-size:15.5px;color:var(--text)}
+.hrt-app .rg-foot p{margin:3px 0 0;font-size:13.5px;color:var(--muted)}
+.hrt-app .rg-fine{margin:10px 2px 0;font-size:12px;line-height:1.5;color:var(--muted)}
