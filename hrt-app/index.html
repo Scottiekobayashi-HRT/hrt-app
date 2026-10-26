@@ -300,6 +300,7 @@ html.ms-client .pl.ohana .btn{display:none}
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>The Resy map for your Amex dining credit</span></li>
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>The Atmos Choose to Earn Calculator, built around how you fly</span></li>
   <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>The Atmos Community Calculator, so you join the right one</span></li>
+  <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Community Picks: the lounges, resorts and cards Hawaiʻi travelers rank #1</span></li>
  </ul>
  <div class="gpro">
   <div class="gpro-top"><span class="gpro-pill">&#9733; HRT PRO</span><span class="gpro-price">$9.99 a month</span></div>
@@ -320,6 +321,7 @@ html.ms-client .pl.ohana .btn{display:none}
  <a class="hrt-navi" href="#home" data-route="home"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="nm">Dashboard</span></a>
  <a class="hrt-navi pro free-only" id="navPro" href="#plans" data-route="plans"><span class="hic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 8 12.5l4-7 4 7 4.5-4-2 10.5h-13Z"/><path d="M6 21h12"/></svg></span><span class="nm">Try HRT PRO</span><span class="cnt">&rarr;</span></a>
  <a class="hrt-navi ohana-nav client-hide" id="coachLink" href="#" target="_top"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7.5-6.5-4-6.5 4 2-7.5L2 9.5 9 9z" fill="currentColor"/></svg></span><span class="nm">ʻOhana Coaching<small>Book a free call</small></span><span class="cnt">&rarr;</span></a>
+ <a class="hrt-navi" href="#picks" data-route="picks"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg></span><span class="nm">Community Picks</span><span class="cnt">NEW</span></a>
  <div class="hrt-grp gold pro-only" data-grp="pro">
   <button type="button" class="hrt-grph" aria-expanded="false" aria-controls="grp-pro"><span>HRT PRO tools</span><svg class="hrt-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
   <div class="hrt-grpb" id="grp-pro">
@@ -596,6 +598,11 @@ html.ms-client .pl.ohana .btn{display:none}
   <p class="disc-small"><b>Advertiser disclosure:</b> Hawaii Reward Travel may receive compensation from card issuers and affiliate networks when a customer clicks a link, when an application is approved, or when an account is opened. Opinions are the author's alone and have not been reviewed, endorsed or approved by any bank or card issuer. This is not financial advice. Always review the issuer's current terms before applying.</p>
  </div>
 </div>
+</section>
+
+<!-- ================= COMMUNITY PICKS (free) ================= -->
+<section class="view" data-page="picks" id="v-picks">
+<div class="content"><div id="cp-host"></div></div>
 </section>
 
 <!-- ================= HNL LOUNGES ================= -->
@@ -1054,6 +1061,7 @@ html.ms-client .pl.ohana .btn{display:none}
 <script src="assets/wallet.js"></script>
 <script src="assets/account.js"></script>
 <script src="assets/lounge-map.js"></script>
+<script src="assets/community-picks.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/today.js"></script>
 <script src="assets/dealwall.js"></script>

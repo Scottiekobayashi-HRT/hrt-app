@@ -45,7 +45,8 @@
   communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
   account:{ title:"My account", hint:"Photo, name, login and billing" },
-  plans:{ title:"Plans", hint:"Free, ʻOhana and HRT PRO" }
+  plans:{ title:"Plans", hint:"Free, ʻOhana and HRT PRO" },
+  picks:{ title:"Community Picks", hint:"Ranked by Hawaiʻi travelers" }
  };
  var shown = {}, current = null;
  var onShow = {};
@@ -502,6 +503,7 @@
  onShow.kamaaina = function(){ if(window.HRT_KAMA) window.HRT_KAMA.show(); };
  onShow.status = function(){ if(window.HRT_ATMOS) window.HRT_ATMOS.show(); };
  onShow.communities = function(){ if(window.HRT_COMMUNITIES) window.HRT_COMMUNITIES.show(); };
+ onShow.picks = function(){ if(window.HRT_PICKS) window.HRT_PICKS.show(); };
  onShow.wallet = function(first, sub){ if(window.HRT_WALLET) window.HRT_WALLET.show(sub); };
  /* My Wallet panel on the Dashboard home; wraps any existing home handler */
  (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
