@@ -1129,7 +1129,9 @@
   var miniHost;
   function miniHtml() {
     var head = function (link) {
-      return '<div class="wlm-head"><h2 class="wlm-title">Your wallet</h2>' + (link ? '<a class="wlm-open" href="#wallet" data-route="wallet">Open My Wallet <span aria-hidden="true">&rsaquo;</span></a>' : "") + "</div>";
+      var cl = member().client;
+      return '<div class="wlm-head"><h2 class="wlm-title">' + (cl ? '<span class="wlm-ow">' + OH_STAR + "</span>Your ʻOhana Wallet" : "Your wallet") + "</h2>" +
+        (link ? '<a class="wlm-open" href="#wallet" data-route="wallet">' + (cl ? "Open" : "Open My Wallet") + ' <span aria-hidden="true">&rsaquo;</span></a>' : "") + "</div>";
     };
     if (state.error) return head(true) + '<p class="wlm-lede">' + esc(errText(state.error)) + "</p>" +
       (state.error.code === "READ_FAILED" ? '<div class="wlm-acts"><button class="wl-btn" data-wl="retry">Try again</button></div>' : "");
@@ -1427,11 +1429,11 @@
         '<a href="' + esc(COACH_URL) + '" target="_top">See how the program works &rarr;</a></span></div>';
     }
     if (helpHidden()) return "";
-    return '<div class="wl-card wl-help"><div><span class="wl-help-eyebrow">HRT ʻOhana program</span>' +
-      '<b>Join our ʻOhana: free, personal card coaching</b>' +
-      '<ul class="wl-help-pts"><li>We help pick your next best card for your travel goals</li>' +
-      '<li>Help hitting every welcome bonus</li>' +
-      '<li>We manage this wallet for you, so it is always up to date</li></ul></div>' +
+    return '<div class="wl-card wl-help"><div><span class="wl-help-eyebrow">' + OH_STAR + ' The ʻOhana Wallet</span>' +
+      '<b>Want Scottie to manage your wallet for you?</b>' +
+      '<ul class="wl-help-pts"><li>ʻOhana Members get the ʻOhana Wallet: we keep your cards up to date for you</li>' +
+      '<li>Your own card strategy, and help picking your next best card</li>' +
+      '<li>Help hitting every welcome bonus, with a text from Scottie when it is time</li></ul></div>' +
       '<div class="wl-help-acts"><button class="wl-btn wl-pri" data-wl="help-yes"' + (state.busy ? " disabled" : "") + '>Join the ʻOhana program</button>' +
       '<button class="wl-link" data-wl="help-no">Not now</button></div></div>';
   }
@@ -1529,12 +1531,15 @@
     var V = view(), m = member(), o = m.ohana || {}, name = String(m.firstName || "").trim();
     var due = expiringSoon(perks, SOON_PERK_DAYS).reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
     var nx = s.next;
-    var oh = m.client ? '<div class="wl-sl-oh"><span class="wl-sl-star">' + OH_STAR + "</span><span><b>ʻOhana Member" + (o.since ? " since " + esc(o.since) : "") +
-      "</b> · Guided by Scottie and the HRT team</span></div>" +
-      (o.strategy ? '<p class="wl-sl-strat"><span>Your strategy</span>' + esc(o.strategy) + "</p>" : "") : "";
-    return '<section class="wl-sum wl-slim' + (m.client ? " wl-sum-oh" : "") + '" aria-label="My Wallet">' + exampleBanner() + oh +
-      '<div class="wl-sum-top"><h2 class="wl-sum-title">' + (m.client && name ? "Aloha, " + esc(name) : "My Wallet") + "</h2>" +
-      '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div>' + famHtml() + hrtLine(V) +
+    /* ʻOhana Wallet (Oct 25): ʻOhana Members get their own premium wallet, managed by Scottie. */
+    var since = o.since ? "ʻOhana Member since " + esc(o.since) : "ʻOhana Member";
+    var oh = m.client ? '<div class="wl-ow-top"><span class="wl-ow-eyebrow"><span class="wl-sl-star">' + OH_STAR + "</span>ʻOhana Wallet</span>" +
+      '<span class="wl-ow-managed">Managed by Scottie</span></div>' : "";
+    var ohSub = m.client ? '<p class="wl-ow-sub">' + since + (o.review ? " \u00b7 Last review " + esc(ohanaDate(o.review)) : "") + "</p>" +
+      (o.strategy ? '<div class="wl-ow-strat"><span>Your strategy</span><b>' + esc(o.strategy) + "</b></div>" : "") : "";
+    return '<section class="wl-sum wl-slim' + (m.client ? " wl-sum-oh wl-ow" : "") + '" aria-label="' + (m.client ? "ʻOhana Wallet" : "My Wallet") + '">' + exampleBanner() + oh +
+      '<div class="wl-sum-top"><h2 class="wl-sum-title">' + (m.client ? (name ? "Aloha, " + esc(name) : "Aloha") : "My Wallet") + "</h2>" +
+      '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div>' + ohSub + famHtml() + hrtLine(V) +
       '<dl class="wl-sl-stats">' +
       '<div><dt>Credits to use</dt><dd>' + (due ? esc(money(due)) : "All used") + "<small>next " + SOON_PERK_DAYS + " days</small></dd></div>" +
       "<div><dt>Annual fees</dt><dd>" + esc(money(s.yearly)) + "</dd></div>" +
@@ -2267,7 +2272,22 @@
         ".wl-cards-foot{flex-wrap:wrap}" +
       "}",
       "@keyframes wlUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}",
-      "@media (prefers-reduced-motion:reduce){.wl-sheet,.wl-sheet-bg{animation:none}}"
+      "@media (prefers-reduced-motion:reduce){.wl-sheet,.wl-sheet-bg{animation:none}}",
+      /* ----- ʻOhana Wallet (Oct 25): premium header for ʻOhana Members ----- */
+      ".wl-sum.wl-ow{border:0;padding-top:20px;background:radial-gradient(900px 260px at 92% -40%,rgba(242,199,102,.30),transparent 60%),radial-gradient(700px 220px at -10% 120%,rgba(217,112,64,.20),transparent 60%),linear-gradient(135deg,#141b24,#1b2430 55%,#232f3e);box-shadow:0 0 0 1.5px rgba(242,184,75,.75),0 0 0 5px rgba(242,184,75,.10),0 22px 46px -22px rgba(9,20,35,.85)}",
+      ".wl-sum.wl-ow:before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#b98a2e,#f5d27a 30%,#f2b84b 60%,#d97040);pointer-events:none}",
+      ".wl-ow-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}",
+      ".wl-sum .wl-ow-eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(90deg,#f5d27a,#f2b84b);-webkit-background-clip:text;background-clip:text;color:transparent}",
+      ".wl-ow-eyebrow .wl-sl-star svg{width:15px;height:15px}",
+      ".wl-sum .wl-ow-managed{flex:0 0 auto;font-size:11.5px;font-weight:800;letter-spacing:.02em;color:#1b2430;background:linear-gradient(135deg,#f5d27a,#f2b84b);border-radius:999px;padding:5px 11px;box-shadow:0 2px 10px -2px rgba(242,184,75,.55)}",
+      ".wl-sum.wl-ow .wl-sum-title{font-size:24px;letter-spacing:-.01em}",
+      ".wl-sum .wl-ow-sub{margin:4px 0 0;font-size:13px;color:#c9d6e3}",
+      ".wl-sum .wl-ow-strat{display:flex;flex-direction:column;gap:2px;margin:12px 0 2px;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,rgba(242,199,102,.14),rgba(255,255,255,.04));border:1px solid rgba(242,199,102,.30)}",
+      ".wl-sum .wl-ow-strat span{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#f5c75a}.wl-sum .wl-ow-strat b{font-size:14.5px;font-weight:600;line-height:1.45;color:#fff}",
+      ".wl-sum.wl-ow .wl-sl-stats{border-top-color:rgba(242,199,102,.25)}.wl-sum.wl-ow .wl-sl-stats>div+div{border-left-color:rgba(242,199,102,.22)}",
+      ".wlm-ow{display:inline-flex;margin-right:6px;color:#f2b84b;vertical-align:-2px}",
+      ".wl-help .wl-help-eyebrow svg{width:12px;height:12px;vertical-align:-1px;color:#d9a134}",
+      "@media (max-width:560px){.wl-sum.wl-ow .wl-sum-title{font-size:20px}.wl-ow-top{flex-wrap:wrap}}"
     ].join("");
     document.head.appendChild(s);
   }

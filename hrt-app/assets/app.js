@@ -58,8 +58,11 @@
    var on = a.getAttribute("data-route") === name;
    a.classList.toggle("on", on); a.setAttribute("aria-current", on ? "page" : "false");
   });
-  $("crumb").innerHTML = name === "home" ? "Dashboard" : '<a href="#home" data-route="home">Dashboard</a> <span aria-hidden="true">/</span> ' + esc(ROUTES[name].title);
-  $("tbHint").textContent = ROUTES[name].hint;
+  /* ʻOhana Members see their wallet as the ʻOhana Wallet; the html.ms-client class picks the right words */
+  var crumbTitle = name === "wallet" ? '<span class="client-hide">My Wallet</span><span class="client-only">ʻOhana Wallet</span>' : esc(ROUTES[name].title);
+  $("crumb").innerHTML = name === "home" ? "Dashboard" : '<a href="#home" data-route="home">Dashboard</a> <span aria-hidden="true">/</span> ' + crumbTitle;
+  if (name === "wallet") $("tbHint").innerHTML = '<span class="client-hide">' + esc(ROUTES[name].hint) + '</span><span class="client-only">Managed for you by Scottie</span>';
+  else $("tbHint").textContent = ROUTES[name].hint;
   try{ history.replaceState(null, "", "#" + name); }catch(e){}
   try{ if(window.parent !== window) window.parent.history.replaceState(null, "", "#" + name); }catch(e){}
   if(onShow[name]) onShow[name](!shown[name]);
