@@ -27,6 +27,9 @@
   var MONTHS = ["January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December"];
   var COACH_URL = "https://www.hawaiirewardtravel.com/our-accelerated-program"; /* our 1:1 program */
+  /* Scottie's number for ʻOhana Members (Oct 25). Opens a text on phones; desktop Macs open Messages. */
+  var SCOTTIE_SMS = "sms:+18083545216";
+  var CHAT_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>';
   var SOON_DAYS = 45; /* renewals inside this window get a "coming up" flag */
 
   /* ============================ DATE MATH ============================ */
@@ -1535,11 +1538,14 @@
     var since = o.since ? "ʻOhana Member since " + esc(o.since) : "ʻOhana Member";
     var oh = m.client ? '<div class="wl-ow-top"><span class="wl-ow-eyebrow"><span class="wl-sl-star">' + OH_STAR + "</span>ʻOhana Wallet</span>" +
       '<span class="wl-ow-managed">Managed by Scottie</span></div>' : "";
+    var ohActs = '<div class="wl-ow-acts"><a class="wl-btn wl-ghost wl-ow-text" href="' + SCOTTIE_SMS + '">' + CHAT_ICON + "Text Scottie</a>" +
+      '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div>';
     var ohSub = m.client ? '<p class="wl-ow-sub">' + since + (o.review ? " \u00b7 Last review " + esc(ohanaDate(o.review)) : "") + "</p>" +
-      (o.strategy ? '<div class="wl-ow-strat"><span>Your strategy</span><b>' + esc(o.strategy) + "</b></div>" : "") : "";
+      '<div class="wl-ow-row">' + (o.strategy ? '<div class="wl-ow-strat"><span>Your strategy</span><b>' + esc(o.strategy) + "</b></div>" : "") + ohActs + "</div>" : "";
     return '<section class="wl-sum wl-slim' + (m.client ? " wl-sum-oh wl-ow" : "") + '" aria-label="' + (m.client ? "ʻOhana Wallet" : "My Wallet") + '">' + exampleBanner() + oh +
       '<div class="wl-sum-top"><h2 class="wl-sum-title">' + (m.client ? (name ? "Aloha, " + esc(name) : "Aloha") : "My Wallet") + "</h2>" +
-      '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div>' + ohSub + famHtml() + hrtLine(V) +
+      (m.client ? "" : '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button>') + "</div>" + ohSub +
+      famHtml() + hrtLine(V) +
       '<dl class="wl-sl-stats">' +
       '<div><dt>Credits to use</dt><dd>' + (due ? esc(money(due)) : "All used") + "<small>next " + SOON_PERK_DAYS + " days</small></dd></div>" +
       "<div><dt>Annual fees</dt><dd>" + esc(money(s.yearly)) + "</dd></div>" +
@@ -2287,7 +2293,12 @@
       ".wl-sum.wl-ow .wl-sl-stats{border-top-color:rgba(242,199,102,.25)}.wl-sum.wl-ow .wl-sl-stats>div+div{border-left-color:rgba(242,199,102,.22)}",
       ".wlm-ow{display:inline-flex;margin-right:6px;color:#f2b84b;vertical-align:-2px}",
       ".wl-help .wl-help-eyebrow svg{width:12px;height:12px;vertical-align:-1px;color:#d9a134}",
-      "@media (max-width:560px){.wl-sum.wl-ow .wl-sum-title{font-size:20px}.wl-ow-top{flex-wrap:wrap}}"
+      ".wl-ow-row{display:flex;align-items:center;gap:14px;margin:12px 0 2px}.wl-ow-row .wl-ow-strat{flex:1 1 auto;margin:0;min-width:0}",
+      ".wl-ow-acts{display:flex;justify-content:flex-end;gap:10px;margin-left:auto;flex:0 0 auto}",
+      ".wl-sum .wl-ow-acts .wl-btn{min-height:44px;justify-content:center;gap:8px;padding:0 18px;font-size:14px}",
+      ".wl-sum .wl-ow-text{text-decoration:none;border-color:rgba(242,199,102,.55);color:#f5d27a}.wl-sum .wl-ow-text:hover{background:rgba(242,199,102,.12)}",
+      "@media (max-width:560px){.wl-sum.wl-ow .wl-sum-title{font-size:20px}.wl-ow-top{flex-wrap:wrap}" +
+        ".wl-ow-row{flex-direction:column;align-items:stretch;gap:10px}.wl-ow-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-left:0}.wl-sum .wl-ow-acts .wl-btn{padding:0 10px;font-size:14px;white-space:nowrap}}"
     ].join("");
     document.head.appendChild(s);
   }
