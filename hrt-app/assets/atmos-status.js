@@ -220,6 +220,8 @@
     h.appendChild(Q.whyList(why));
     var how = el("p", "ap-hhow", "To choose: sign in to Atmos Rewards and open Choose how you earn. It applies to flights from Jan 1 2027, and you can change it once a year.");
     h.appendChild(how);
+    var G = window.HRT_ATMOS_GUIDE;
+    if (G) h.appendChild(G.extLink("Open Choose how you earn on Atmos Rewards", G.links.choose, "on-dark"));
     return h;
   }
 

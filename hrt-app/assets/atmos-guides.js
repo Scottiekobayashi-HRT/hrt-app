@@ -26,6 +26,30 @@
   function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
   function svgEl(markup) { var w = el("div", "ag-art"); w.innerHTML = markup; return w; }
   function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
+
+  /* Official Atmos pages (links read from alaskaair.com's Communities page,
+     Oct 26 2026). We link out so members can read the full rules and each
+     Bonus Points Challenge list on Atmos itself. */
+  var LINKS = {
+    communities: "https://www.alaskaair.com/atmosrewards/content/benefits/2026-updates/communities",
+    choose:      "https://www.alaskaair.com/atmosrewards/content/earn-points/choose-how-you-earn",
+    huakai:      "https://www.hawaiianairlines.com/content/huakai",
+    families:    "https://www.alaskaair.com/atmosrewards/content/families-on-the-go",
+    global:      "https://www.alaskaair.com/atmosrewards/content/global-locals",
+    culinary:    "https://www.alaskaair.com/atmosrewards/content/culinary-journeys",
+    active:      "https://www.alaskaair.com/atmosrewards/content/active-escapes",
+    club49:      "https://www.alaskaair.com/atmosrewards/content/club-49"
+  };
+  var EXT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+  /* A link that opens the official page in a new tab, with a clear icon. */
+  function extLink(text, url, cls) {
+    var a = el("a", "ag-ext" + (cls ? " " + cls : ""));
+    a.href = url; a.target = "_blank"; a.rel = "noopener";
+    a.appendChild(el("span", null, text));
+    var i = el("span", "ag-exti"); i.innerHTML = EXT; a.appendChild(i);
+    a.setAttribute("aria-label", text + " (opens in a new tab)");
+    return a;
+  }
   function scrollToTool(id) {
     var t = document.getElementById(id);
     if (!t) return;
@@ -103,6 +127,7 @@
     var facts = el("ul", "ag-facts");
     ["Pick one in your Atmos Rewards account", "Change it once a year", "Do nothing and you stay on distance"].forEach(function (f) { facts.appendChild(el("li", null, f)); });
     head.appendChild(facts);
+    head.appendChild(extLink("Read Choose how you earn on Atmos Rewards", LINKS.choose, "on-dark"));
     sec.appendChild(head);
 
     var max = 0;
@@ -200,6 +225,7 @@
     var head = el("div", "ag-head");
     head.appendChild(el("h2", "ag-h", "What are Atmos Communities?"));
     head.appendChild(el("p", "ag-lead", "Communities are free groups inside Atmos Rewards, the Alaska and Hawaiian Airlines loyalty program. Each one gives extra perks to a certain kind of traveler, so the right one depends on how you travel."));
+    head.appendChild(extLink("See all six Communities on Atmos Rewards", LINKS.communities, "on-dark"));
     sec.appendChild(head);
 
     var steps = el("ol", "ag-steps");
@@ -245,6 +271,7 @@
         var ul = el("ul", "ag-tmore");
         h.more.forEach(function (m) { ul.appendChild(el("li", null, m)); });
         body.appendChild(ul);
+        body.appendChild(extLink((k === "huakai" ? "Full details on Hawaiian Airlines" : "Full details on Atmos Rewards") + ", including its 10 challenge places", LINKS[k], "tile"));
         t.appendChild(body);
         grid.appendChild(t);
       });
@@ -262,6 +289,7 @@
      "Flight deals sent by email",
      "20% off Atmos Rewards Unlocked experiences"].forEach(function (x) { ul.appendChild(el("li", null, x)); });
     ev.appendChild(ul);
+    ev.appendChild(el("p", "ag-evnote", "Each Community has its own 10 places. Open its Atmos page above to see the list and the full challenge rules."));
     every.appendChild(ev);
     var lad = el("div", "ag-lad");
     var steps10 = [100, 200, 300, 400, 500, 750, 1000, 1250, 2500, 3000];
@@ -388,6 +416,15 @@
       ".ag-ladcap{display:block;margin-top:8px;font-size:12.5px;color:#b9c4d1;text-align:center}",
       ".hero .ag-jump{position:relative;z-index:2;margin-top:10px;padding:6px 0;min-height:36px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;background:none;border:0;color:#fff;text-decoration:underline;text-decoration-color:var(--coral);text-decoration-thickness:2px;text-underline-offset:4px}",
       ".hero .ag-jump:hover{color:#ffd9c4}",
+      ".hrt-app .ag-ext{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;line-height:1.35;color:var(--coral);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;min-height:36px}",
+      ".hrt-app .ag-ext:hover{color:var(--coral-d,#c05f32)}",
+      ".ag-exti{display:inline-flex;flex:0 0 auto}",
+      ".hrt-app .ag-ext.on-dark{position:relative;margin-top:14px;color:#fff;text-decoration-color:var(--coral)}",
+      ".hrt-app .ag-ext.on-dark:hover{color:#ffd9c4}",
+      ".ag-tbody{display:flex;flex-direction:column}",
+      ".hrt-app .ag-ext.tile{margin-top:auto;padding-top:12px;font-size:13px;color:var(--cc)}",
+      ":root[data-theme=\"dark\"] .hrt-app .ag-ext.tile{color:color-mix(in srgb,var(--cc) 60%,#fff)}",
+      ".ag .ag-evnote{margin:10px 0 0;font-size:13px;color:#b9c4d1}",
       "@media (prefers-reduced-motion:reduce){.ag *{transition:none!important}}"
     ].join("\n");
     document.head.appendChild(s);
@@ -417,5 +454,5 @@
     if (b) scrollToTool(b.getAttribute("data-ag"));
   });
 
-  window.HRT_ATMOS_GUIDE = { mount: mount, mark: mark, _test: { WAYS: WAYS, TRIPS: TRIPS, HEADLINE: HEADLINE, ORDER: ORDER } };
+  window.HRT_ATMOS_GUIDE = { mount: mount, mark: mark, links: LINKS, extLink: extLink, _test: { WAYS: WAYS, TRIPS: TRIPS, HEADLINE: HEADLINE, ORDER: ORDER } };
 })();

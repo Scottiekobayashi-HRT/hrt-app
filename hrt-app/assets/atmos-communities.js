@@ -415,6 +415,8 @@
     c.appendChild(el("p", "qz-small", "Dollar values per year, counting points at " + r.cpp.toFixed(1) + "¢ each." + (off.length ? " Not shown, " + off.join("; ") + "." : "")));
     var join = el("p", "qz-small", "To join, sign in to Atmos Rewards and choose Join a Community. It is free, and you can switch once a year.");
     c.appendChild(join);
+    var G = window.HRT_ATMOS_GUIDE, best = r.best && r.best.score > 0 ? r.best.c : null;
+    if (G && best && G.links[best.key]) c.appendChild(G.extLink("See " + best.name + " and its challenge places on " + (best.key === "huakai" ? "Hawaiian Airlines" : "Atmos Rewards"), G.links[best.key]));
     return c;
   }
 
