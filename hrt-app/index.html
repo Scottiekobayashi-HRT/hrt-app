@@ -423,8 +423,8 @@ html.ms-client .pl.ohana .btn{display:none}
  <div class="hero slim">
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
   <div class="hs-text">
-   <h1>Transfer Bonus <span class="wave">Tracker</span></h1>
-   <p>Every current transfer bonus from Amex, Bilt, Capital One, Chase, Citi and Rove, checked daily.</p>
+   <h1>Transfer Bonuses <span class="wave">&amp; Partners</span></h1>
+   <p>Three tools in one place: live transfer bonuses checked daily, every bank&rsquo;s airline and hotel partners, and a calculator for your miles.</p>
   </div>
   <div class="hstats">
    <div class="hstat"><b class="tnum" id="tbS1">&ndash;</b><span><i style="background:#9fc1d4"></i>Active bonuses</span></div>
@@ -434,7 +434,13 @@ html.ms-client .pl.ohana .btn{display:none}
   </div>
  </div>
 
- <div class="card">
+ <nav class="tp-jump" aria-label="On this page">
+  <a href="#tbBonus" data-jump="tbBonus">Live bonuses</a>
+  <a href="#tbPartners" data-jump="tbPartners">Transfer partners</a>
+  <a href="#tbCalc" data-jump="tbCalc">Calculator</a>
+ </nav>
+
+ <div class="card" id="tbBonus">
   <div class="sec-h"><h2>Active bonuses</h2><span class="note"><span class="fdot"></span><span id="tbUpdated">Checking for the latest bonuses&hellip;</span></span>
    <div class="right" id="tbType">
     <button type="button" class="chipf" data-t-type="all" aria-pressed="true">All</button>
@@ -447,10 +453,15 @@ html.ms-client .pl.ohana .btn{display:none}
   <div id="tbExpired"></div>
  </div>
 
+ <div class="card tp-card" id="tbPartners">
+  <div class="sec-h"><h2>Transfer partners</h2><span class="note">Which points move to which airline or hotel</span></div>
+  <div id="tpHost"></div>
+ </div>
+
  <div class="card" id="tbCalc">
   <div class="sec-h"><h2>Transfer calculator</h2><span class="note">Pick a program, enter points, add any bonus</span></div>
   <div class="calc-in">
-   <label><span>Points program</span><select id="tcProg"><option value="">Choose a program</option><option value="amex">Amex Membership Rewards</option><option value="bilt">Bilt Rewards</option><option value="capital-one">Capital One Miles</option><option value="chase">Chase Ultimate Rewards</option><option value="citi">Citi ThankYou Points</option></select></label>
+   <label><span>Points program</span><select id="tcProg"><option value="">Choose a program</option><option value="amex">Amex Membership Rewards</option><option value="bilt">Bilt Rewards</option><option value="capital-one">Capital One Miles</option><option value="chase">Chase Ultimate Rewards</option><option value="citi">Citi ThankYou Points</option><option value="wells">Wells Fargo Rewards</option><option value="rove">Rove Miles</option></select></label>
    <label><span>Points to transfer</span><input id="tcPts" type="text" inputmode="numeric" placeholder="50,000" autocomplete="off"></label>
    <label><span>Transfer bonus %</span><input id="tcBonus" type="number" min="0" max="200" value="0" autocomplete="off"></label>
   </div>
@@ -464,7 +475,7 @@ html.ms-client .pl.ohana .btn{display:none}
    <div class="right"><select class="chipf" id="tcSort" aria-label="Sort partners"><option value="most">Most miles</option><option value="alpha">A to Z</option><option value="cat">By type</option></select></div>
   </div>
   <div class="calc-grid" id="tcResults"></div>
-  <p class="calc-note">Transfer ratios come from each program's official terms as of September 2026, including the new Citi and Capital One partnerships with Japan Airlines. Citi ratios shown are for annual fee cards. Most programs transfer 1:1. Notable exceptions: Amex to Hilton is 1:2, Amex to JetBlue is 250:200, and Capital One to Accor is 2:1. Transfers are almost always final, so confirm with the program before you move points. Hawaiʻi-friendly programs are tagged.</p>
+  <p class="calc-note">Partners and ratios come from the same list as the Transfer partners chart above, checked October 27, 2026. Most transfers are 1:1. Transfers are almost always final, so confirm in your bank account before you move points. Hawaiʻi-friendly programs are tagged.</p>
  </div>
 
  <div class="card srcnote">
@@ -1084,6 +1095,7 @@ html.ms-client .pl.ohana .btn{display:none}
 <script src="assets/account.js"></script>
 <script src="assets/lounge-map.js"></script>
 <script src="assets/community-picks.js"></script>
+<script src="assets/transfer-partners.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/today.js"></script>
 <script src="assets/dealwall.js"></script>

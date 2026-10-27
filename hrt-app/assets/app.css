@@ -974,3 +974,12 @@ button.hw-row:hover{background:rgba(255,255,255,.14)}button.hw-row:focus-visible
  .hw-t b,.tdy-t b,.tdy-dt b{white-space:normal}
  .hw-btn{flex:1;justify-content:center}
 }
+
+/* Transfers page: in-page jump links, partner chart card, one line per partner in the calculator */
+.tp-jump{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 -4px}
+.tp-jump a{display:inline-flex;align-items:center;min-height:40px;padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--text);font-weight:700;font-size:13.5px;text-decoration:none}
+.tp-jump a:hover{border-color:var(--coral);color:var(--coral)}
+.tp-card{padding:0;overflow:hidden}.tp-card .sec-h{padding:16px 16px 4px}
+#tbBonus,#tbPartners,#tbCalc{scroll-margin-top:80px}
+#tbCalc .calc-grid{grid-template-columns:minmax(0,1fr);gap:6px}
+.chipf .bdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}

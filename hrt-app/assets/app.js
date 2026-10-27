@@ -110,6 +110,7 @@
  var TB = { list:[], expired:[], bank:"all", type:"all", loaded:false };
  var BANK_ORDER = ["amex","bilt","capital-one","chase","citi","rove"];
  var BANK_NAMES = { "amex":"American Express Membership Rewards","bilt":"Bilt Rewards","capital-one":"Capital One Miles","chase":"Chase Ultimate Rewards","citi":"Citi ThankYou Points","rove":"Rove Rewards" };
+ var BANK_DOT = { "amex":"#2f6fbf","bilt":"#3a3f47","capital-one":"#c4393a","chase":"#1f5aa6","citi":"#0d6fa8","rove":"#6a4fb3" };
  var BANK_SHORT = { "amex":"Amex","bilt":"Bilt","capital-one":"Capital One","chase":"Chase","citi":"Citi","rove":"Rove" };
  function daysUntil(s){ if(!s) return 999; var t = new Date(s + "T23:59:59"); if(isNaN(t)) return 999; return Math.ceil((t - new Date()) / 86400000); }
  function fmtDate(s){ if(!s) return "No end date"; var d = new Date(s + "T12:00:00"); if(isNaN(d)) return s || ""; var o = { month:"short", day:"numeric" }; if(d.getFullYear() !== new Date().getFullYear()) o.year = "numeric"; return d.toLocaleDateString("en-US", o); }
@@ -151,7 +152,7 @@
   $("ttTb").textContent = TB.list.length + " live" + (best ? ", best +" + best + "%" : "");
   var counts = {}; TB.list.forEach(function(b){ counts[b.bank] = (counts[b.bank]||0) + 1; });
   $("tbBanks").innerHTML = '<button type="button" class="chipf'+(TB.bank==="all"?'':' plain')+'" data-t-bank="all" aria-pressed="'+(TB.bank==="all")+'">All banks<span class="n">'+TB.list.length+'</span></button>'
-   + BANK_ORDER.map(function(k){ var on = TB.bank === k; return '<button type="button" class="chipf'+(on?'':' plain')+'" data-t-bank="'+k+'" aria-pressed="'+on+'">'+BANK_SHORT[k]+'<span class="n">'+(counts[k]||0)+'</span></button>'; }).join("");
+   + BANK_ORDER.map(function(k){ var on = TB.bank === k; return '<button type="button" class="chipf'+(on?'':' plain')+'" data-t-bank="'+k+'" aria-pressed="'+on+'">'+'<i class="bdot" style="background:'+(BANK_DOT[k]||'#8a9aab')+'"></i>'+BANK_SHORT[k]+'<span class="n">'+(counts[k]||0)+'</span></button>'; }).join("");
  }
  /* ===== Links with My Wallet (connect.js). Real wallets only, never the example. ===== */
  function myWallet(){ var W = window.HRT_WALLET, d = W && W.connectData && W.connectData(); return d && !d.demo && d.held.length ? d : null; }
@@ -200,6 +201,8 @@
   "citi":{ name:"Citi ThankYou Points", p:[["Japan Airlines Mileage Bank","airline",1,1,1],["Aeromexico Rewards","airline",1,1],["EVA Air Infinity MileageLands","airline",1,1],["Qantas Frequent Flyer","airline",1,1],["Thai Royal Orchid Plus","airline",1,1],["Choice Privileges","hotel",1,2],["Accor Live Limitless","hotel",2,1],["Leading Hotels of the World Leaders Club","hotel",5,1],["Air France/KLM Flying Blue","airline",1,1],["Singapore KrisFlyer","airline",1,1],["Turkish Airlines Miles&Smiles","airline",1,1],["Emirates Skywards","airline",1,1],["Etihad Guest","airline",1,1],["Qatar Airways Privilege Club","airline",1,1],["Virgin Atlantic Flying Club","airline",1,1],["Avianca LifeMiles","airline",1,1],["Cathay Asia Miles","airline",1,1],["JetBlue TrueBlue","airline",1,1],["Wyndham Rewards","hotel",1,1]] },
   "bilt":{ name:"Bilt Rewards", p:[["United MileagePlus","airline",1,1,1],["American Airlines AAdvantage","airline",1,1,1],["Alaska Atmos Rewards","airline",1,1,1],["Japan Airlines Mileage Bank","airline",1,1,1],["Air Canada Aeroplan","airline",1,1],["British Airways Avios","airline",1,1],["Iberia Avios","airline",1,1],["Aer Lingus Avios","airline",1,1],["Air France/KLM Flying Blue","airline",1,1],["Emirates Skywards","airline",1,1],["Cathay Asia Miles","airline",1,1],["Turkish Airlines Miles&Smiles","airline",1,1],["Virgin Atlantic Flying Club","airline",1,1],["Singapore KrisFlyer","airline",1,1],["Avianca LifeMiles","airline",1,1],["ITA Airways Volare","airline",1,1],["World of Hyatt","hotel",1,1,1],["Marriott Bonvoy","hotel",1,1,1],["IHG One Rewards","hotel",1,1],["Hilton Honors","hotel",1,1,1],["Wyndham Rewards","hotel",1,1]] }
  };
+ /* the shared transfer partner data (assets/transfer-partners.js) replaces the lists above when it loads */
+ if(window.HRT_TRANSFERS && window.HRT_TRANSFERS.calcLists) PROGRAMS = window.HRT_TRANSFERS.calcLists();
  var TC = { cat:"all" };
  function tcPts(){ var n = parseInt(($("tcPts").value || "").replace(/[^0-9]/g,""), 10); return isNaN(n) ? 0 : n; }
  function tcRender(){
@@ -233,6 +236,15 @@
   }
  });
  tcRender();
+ /* Transfer partners chart: bank by program, with live bonuses and the member's own points */
+ function tcOpen(bank, bonus){ if(!PROGRAMS[bank]) return; $("tcProg").value = bank; $("tcBonus").value = bonus || 0; if(!$("tcPts").value) $("tcPts").value = "50,000"; tcRender(); $("tbCalc").scrollIntoView({ behavior:"smooth", block:"start" }); }
+ var TP = window.HRT_TRANSFERS && $("tpHost") ? window.HRT_TRANSFERS.mount($("tpHost"), {
+  bonuses:function(){ return TB.list; },
+  myBanks:function(){ var d = myWallet(), C = window.HRT_CONNECT, cat = window.HRT_WALLET_CATALOG || {}; return d && C ? C.banks(d, cat.earning).banks : null; },
+  calc:tcOpen
+ }) : null;
+ window.addEventListener("hrt:bonuses", function(){ if(TP) TP.refresh(); });
+ window.addEventListener("hrt:wallet", function(){ if(TP) TP.refresh(); });
 
  /* ========================== VALUATIONS ========================== */
  var VALS = [
