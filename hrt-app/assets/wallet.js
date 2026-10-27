@@ -1729,7 +1729,7 @@
         (extra ? '<span class="wl-tab-n">' + extra + "</span>" : "") + "</a>";
     };
     return '<nav class="wl-tabs" aria-label="My Wallet">' + tab("overview", "wallet", "Overview") +
-      tab("cards", "wallet/cards", "Cards", String(s.count)) + tab("credits", "wallet/credits", "Credits", due ? esc(money(due)) : "") + "</nav>";
+      tab("cards", "wallet/cards", "Cards", String(s.count)) + tab("credits", "wallet/credits", "Credits", due ? esc(money(due)) : "") + tab("transfers", "wallet/transfers", "Transfer Partners") + "</nav>";
   }
 
   function cardsPageHtml(s, perks) {
@@ -1776,6 +1776,54 @@
       upcomingHtml(s.upcoming || []);
   }
 
+  /* Transfer Partners (#wallet/transfers): where this wallet's points can go.
+     Partners come from assets/transfer-partners.js (the same list as the Transfers page chart);
+     which banks the member earns with comes from connect.js banks(). */
+  function transfersPageHtml() {
+    var T = window.HRT_TRANSFERS, C = window.HRT_CONNECT, d = connectData();
+    var intro = '<section class="wl-card wl-tp"><div class="wl-tp-intro"><h2 class="wl-cp-h">Transfer partners</h2>' +
+      '<p class="wl-tp-lead">One of the best ways to use credit card points is to move them to an airline or hotel program, then book an award seat or room there. ' +
+      'Used well, a transfer can be worth far more than cash back or gift cards. Here is where the points from your cards can go.</p>' +
+      '<div class="wl-tp-warn" role="note"><b>Transfers are one way.</b> Once points move to an airline or hotel, they cannot be moved back. ' +
+      'Find the award first, then transfer only what you need. Most transfers are instant, but some take a few days.</div></div>';
+    if (!T || !C) return intro + '<p class="wl-tp-none">Transfer partners are still loading. Refresh the page in a moment.</p></section>';
+    var bk = d ? C.banks(d, catalog().earning) : { banks: {}, cashOnly: [] };
+    var live = window.HRT_TB_LIVE || [];
+    var mine = T.BANKS.filter(function (b) { return bk.banks[b.id]; });
+    var out = intro;
+    if (mine.length) {
+      out += '<h3 class="wl-tp-h3">Your points can go to</h3>';
+      out += mine.map(function (b) {
+        var cards = bk.banks[b.id].cards;
+        var direct = T.PROGRAMS.filter(function (p) { var v = p.t[b.id]; return v && v.charAt(0) !== "v"; });
+        var via = T.PROGRAMS.filter(function (p) { var v = p.t[b.id]; return v && v.charAt(0) === "v"; });
+        direct.sort(function (x, y) { return (y.hi ? 1 : 0) - (x.hi ? 1 : 0) || (x.type === y.type ? 0 : x.type === "airline" ? -1 : 1) || x.name.localeCompare(y.name); });
+        var bonusOf = function (p) { for (var i = 0; i < live.length; i++) if (live[i].bank === b.id && p.m.test(String(live[i].partner || ""))) return live[i]; return null; };
+        var nBon = direct.filter(bonusOf).length;
+        var air = direct.filter(function (p) { return p.type === "airline"; }), hot = direct.filter(function (p) { return p.type === "hotel"; });
+        var row = function (p) {
+          var v = p.t[b.id], bon = bonusOf(p);
+          return '<li><span class="wl-tp-cd">' + esc(p.code) + '</span><span class="wl-tp-nm">' + esc(p.name) + (p.hi ? '<small>Hawaiʻi favorite</small>' : "") + "</span>" +
+            (bon ? '<span class="wl-tp-bon">+' + esc(bon.bonusPct) + "%</span>" : "") + '<span class="wl-tp-r">' + esc(v) + "</span></li>";
+        };
+        return '<article class="wl-tp-bank" style="--c:' + b.c + '"><header><span class="wl-tp-dot" aria-hidden="true"></span><div><b>' + esc(b.name) + "</b>" +
+          "<small>Earned with your " + esc(cards.join(" and ")) + "</small></div>" +
+          '<span class="wl-tp-n">' + air.length + (air.length === 1 ? " airline" : " airlines") + (hot.length ? ", " + hot.length + (hot.length === 1 ? " hotel" : " hotels") : "") + "</span>" +
+          (nBon ? '<span class="wl-tp-live">' + nBon + (nBon === 1 ? " live bonus" : " live bonuses") + "</span>" : "") + "</header>" +
+          (air.length ? '<div class="wl-tp-g">Airlines</div><ul class="wl-tp-list">' + air.map(row).join("") + "</ul>" : "") +
+          (hot.length ? '<div class="wl-tp-g">Hotels</div><ul class="wl-tp-list">' + hot.map(row).join("") + "</ul>" : "") +
+          (via.length ? '<p class="wl-tp-via">Also reachable through Avios: ' + esc(via.map(function (p) { return p.name.replace(/ Avios$/, ""); }).join(", ")) + ".</p>" : "") +
+          '<div class="wl-tp-acts"><a class="wl-btn wl-ghost" href="#transfers" data-tp-calc="' + esc(b.id) + '">Calculate my miles</a></div></article>';
+      }).join("");
+    } else {
+      out += '<p class="wl-tp-none">' + (d && d.held.length ? "None of the cards in your wallet earn points that transfer yet." : "Add your cards to My Wallet and this page will show where your points can go.") +
+        " Cards like the Amex Gold, Chase Sapphire Preferred, Capital One Venture X and Bilt cards earn points you can transfer.</p>";
+    }
+    if (bk.cashOnly && bk.cashOnly.length) out += '<p class="wl-tp-none"><b>About your ' + esc(bk.cashOnly.join(" and ")) + ":</b> these earn Chase points as cash back. Pair them with a Sapphire Preferred, Sapphire Reserve or Ink Business Preferred and the same points can transfer to the Chase partners.</p>";
+    out += '<p class="wl-tp-foot"><a href="#transfers" data-tp-jump="tbPartners">See every bank in the full transfer chart</a> &middot; Partners and ratios checked ' + esc(T.UPDATED) + ". Confirm in your bank account before you move points.</p></section>";
+    return out;
+  }
+
   function creditsPageHtml(perks) {
     return soonHtml(perks) || '<section class="wl-card wl-soonbox"><h3 class="wl-cr-title">Credits to use</h3><p class="wl-cr-sub">All caught up. You have used every credit that is open right now.</p></section>';
   }
@@ -1794,7 +1842,9 @@
     s.credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
     setStats(s);
     var html;
-    if (!s.count && !(s.upcoming || []).length) {
+    if (state.tab === "transfers" && !s.count) {
+      html = transfersPageHtml();
+    } else if (!s.count && !(s.upcoming || []).length) {
       html = summaryHtml("page"); /* empty wallet: the summary card invites them to add cards */
       if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     } else {
@@ -1805,6 +1855,7 @@
       if (state.review) html += reviewHtml();
       else if (tab === "cards") html += cardsPageHtml(s, perks);
       else if (tab === "credits") html += creditsPageHtml(perks);
+      else if (tab === "transfers") html += transfersPageHtml();
       else {
         html += nudgeHtml();
         if (s.count) html += '<div class="wl-hm-grid wl-pg-grid">' + cardListHtml(s, perks) + (soonHtml(perks) || soonHtml(perks, true)) + "</div>";
@@ -2465,7 +2516,7 @@
       whichCard: whichCard, exampleWallet: exampleWallet, centsPer: centsPer, valueText: valueText, SPEND: SPEND,
       rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
     show: function (sub) {
-      state.tab = sub === "cards" || sub === "credits" ? sub : "overview";
+      state.tab = sub === "cards" || sub === "credits" || sub === "transfers" ? sub : "overview";
       styles();
       host = document.getElementById("wl-host");
       if (host && !host.getAttribute("data-ready")) {

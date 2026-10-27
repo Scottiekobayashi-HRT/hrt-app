@@ -52,7 +52,7 @@
  var onShow = {};
  function parentHash(){ try{ if(window.parent !== window) return window.parent.location.hash; }catch(e){} return ""; }
  /* Sub pages: "wallet/cards" and "wallet/credits" are pages inside My Wallet. */
- var SUBS = { wallet: { cards: "Cards", credits: "Credits" } };
+ var SUBS = { wallet: { cards: "Cards", credits: "Credits", transfers: "Transfer Partners" } };
  function route(name, noScroll){
   var parts = String(name || "").split("/"), sub = parts[1] || "";
   name = parts[0];
@@ -244,6 +244,14 @@
   calc:tcOpen
  }) : null;
  window.addEventListener("hrt:bonuses", function(){ if(TP) TP.refresh(); });
+ /* links from My Wallet > Transfer Partners: open the calculator for that bank, or jump to the chart */
+ document.addEventListener("click", function(ev){
+  var c = ev.target.closest && ev.target.closest("[data-tp-calc]"), j = ev.target.closest && ev.target.closest("[data-tp-jump]");
+  if(!c && !j) return; ev.preventDefault(); route("transfers");
+  if(c) setTimeout(function(){ tcOpen(c.getAttribute("data-tp-calc"), 0); }, 60);
+  else setTimeout(function(){ var el = $(j.getAttribute("data-tp-jump")); if(el) el.scrollIntoView({ behavior:"smooth", block:"start" }); }, 60);
+ });
+ window.addEventListener("hrt:bonuses", function(){ if(current === "wallet/transfers" && window.HRT_WALLET && window.HRT_WALLET.show) window.HRT_WALLET.show("transfers"); });
  window.addEventListener("hrt:wallet", function(){ if(TP) TP.refresh(); });
 
  /* ========================== VALUATIONS ========================== */

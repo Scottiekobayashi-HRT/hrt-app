@@ -29,11 +29,16 @@
   var CURRENCY_BANK = {
     "Ultimate Rewards points": "chase",
     "Membership Rewards points": "amex",
-    "Capital One miles": "capital-one"
+    "Capital One miles": "capital-one",
+    "Bilt Points": "bilt",
+    /* ready for when these cards join the catalog sheet; use these exact currency names there */
+    "ThankYou Points": "citi",
+    "Wells Fargo Rewards points": "wells",
+    "Rove Miles": "rove"
   };
   var CASHBACK_UR = "Ultimate Rewards points (cash back)";
-  var BANK_SHORT = { "amex": "Amex", "bilt": "Bilt", "capital-one": "Capital One", "chase": "Chase", "citi": "Citi", "rove": "Rove" };
-  var BANK_POINTS = { "amex": "Membership Rewards points", "capital-one": "Capital One miles", "chase": "Chase Ultimate Rewards points" };
+  var BANK_SHORT = { "amex": "Amex", "bilt": "Bilt", "capital-one": "Capital One", "chase": "Chase", "citi": "Citi", "wells": "Wells Fargo", "rove": "Rove" };
+  var BANK_POINTS = { "amex": "Membership Rewards points", "capital-one": "Capital One miles", "chase": "Chase Ultimate Rewards points", "bilt": "Bilt Points", "citi": "Citi ThankYou Points", "wells": "Wells Fargo Rewards points", "rove": "Rove Miles" };
   var PRIORITY_PASS = ["amex-platinum", "amex-business-platinum", "chase-sapphire-reserve", "chase-sapphire-reserve-business", "capone-venture-x"];
   var SKY_CLUB = ["amex-platinum", "amex-business-platinum"];
   var ATMOS_CARDS = ["atmos-summit", "atmos-ascent"];
