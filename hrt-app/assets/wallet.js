@@ -1734,13 +1734,16 @@
 
   function cardsPageHtml(s, perks) {
     var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0), net = credits - s.yearly, m = member();
-    var head = '<section class="wl-card wl-cp"><div class="wl-cp-head"><div><h2 class="wl-cp-h">Your cards</h2>' +
-      '<p class="wl-cp-sub">Fees, credits and welcome bonuses for every card you hold. Tap a card for the details.</p></div>' +
+    /* navy header like the Overview card, so all My Wallet pages feel like one place */
+    var head = '<section class="wl-sum wl-slim wl-pghead" aria-label="Your cards"><div class="wl-sum-top"><h2 class="wl-sum-title">Your cards</h2>' +
       '<div class="wl-cp-acts">' + (m.client ? '<a class="wl-btn wl-ghost" href="' + SCOTTIE_SMS + '">' + CHAT_ICON + "Text Scottie</a>" : "") +
       '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div></div>' +
-      '<dl class="wl-cp-tot"><div><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
-      "<div><dt>Credits a year</dt><dd>" + esc(money(credits)) + "<small>if you use them all</small></dd></div>" +
-      '<div><dt>Net value</dt><dd class="' + (net >= 0 ? "up" : "down") + '">' + (net >= 0 ? "+" : "&minus;") + esc(money(Math.abs(net))) + "<small>credits minus fees</small></dd></div></dl>" +
+      '<p class="wl-sum-lede">Fees, credits and welcome bonuses for every card you hold. Tap a card for the details.</p>' +
+      '<dl class="wl-sum-stats wl-pg-stats"><div class="wl-sum-stat"><dt>Cards</dt><dd>' + s.count + "</dd></div>" +
+      '<div class="wl-sum-stat"><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
+      '<div class="wl-sum-stat"><dt>Credits a year</dt><dd>' + esc(money(credits)) + "<small>if you use them all</small></dd></div>" +
+      '<div class="wl-sum-stat"><dt>Net value</dt><dd class="' + (net >= 0 ? "wl-up" : "wl-down") + '">' + (net >= 0 ? "+" : "&minus;") + esc(money(Math.abs(net))) + "<small>credits minus fees</small></dd></div></dl></section>" +
+      '<section class="wl-card wl-cp">' +
       famHtml() +
       '<div class="wl-cp-bar"><label class="wl-cp-q"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
       '<input id="wlCardQ" type="search" placeholder="Search your cards" aria-label="Search your cards" value="' + esc(state.cardQ || "") + '"></label>' +
@@ -1781,18 +1784,31 @@
      which banks the member earns with comes from connect.js banks(). */
   function transfersPageHtml() {
     var T = window.HRT_TRANSFERS, C = window.HRT_CONNECT, d = connectData();
-    var intro = '<section class="wl-card wl-tp"><div class="wl-tp-intro"><h2 class="wl-cp-h">Transfer partners</h2>' +
-      '<p class="wl-tp-lead">One of the best ways to use credit card points is to move them to an airline or hotel program, then book an award seat or room there. ' +
-      'Used well, a transfer can be worth far more than cash back or gift cards. Here is where the points from your cards can go.</p>' +
+    var explain = '<div class="wl-tp-intro"><p class="wl-tp-lead">One of the best ways to use credit card points is to move them to an airline or hotel program, then book an award seat or room there. ' +
+      'Used well, a transfer can be worth far more than cash back or gift cards.</p>' +
       '<div class="wl-tp-warn" role="note"><b>Transfers are one way.</b> Once points move to an airline or hotel, they cannot be moved back. ' +
       'Find the award first, then transfer only what you need. Most transfers are instant, but some take a few days.</div></div>';
+    var headFor = function (stats, lede) {
+      return '<section class="wl-sum wl-slim wl-pghead" aria-label="Transfer partners"><div class="wl-sum-top"><h2 class="wl-sum-title">Transfer partners</h2>' +
+        '<a class="wl-btn wl-ghost" href="#transfers" data-tp-jump="tbPartners">Full chart, every bank</a></div>' +
+        '<p class="wl-sum-lede">' + lede + "</p>" + (stats || "") + "</section>";
+    };
+    var intro = headFor("", "Where the points from your cards can go.") + '<section class="wl-card wl-tp">' + explain;
     if (!T || !C) return intro + '<p class="wl-tp-none">Transfer partners are still loading. Refresh the page in a moment.</p></section>';
     var bk = d ? C.banks(d, catalog().earning) : { banks: {}, cashOnly: [] };
     var live = window.HRT_TB_LIVE || [];
     var mine = T.BANKS.filter(function (b) { return bk.banks[b.id]; });
-    var out = intro;
+    var reach = {}, nAir = 0, nHot = 0, nLive = 0;
+    mine.forEach(function (b) { T.PROGRAMS.forEach(function (p) { var v = p.t[b.id]; if (v && v.charAt(0) !== "v" && !reach[p.code]) { reach[p.code] = 1; if (p.type === "airline") nAir++; else nHot++; }
+      if (v && v.charAt(0) !== "v") for (var i = 0; i < live.length; i++) if (live[i].bank === b.id && p.m.test(String(live[i].partner || ""))) { nLive++; break; } }); });
+    var stats = mine.length ? '<dl class="wl-sum-stats wl-pg-stats"><div class="wl-sum-stat"><dt>Your points</dt><dd>' + mine.length + (mine.length === 1 ? " bank" : " banks") + "</dd></div>" +
+      '<div class="wl-sum-stat"><dt>Airlines</dt><dd>' + nAir + "</dd></div>" + '<div class="wl-sum-stat"><dt>Hotels</dt><dd>' + nHot + "</dd></div>" +
+      '<div class="wl-sum-stat"><dt>Live bonuses</dt><dd class="' + (nLive ? "wl-gold-t" : "") + '">' + nLive + "</dd></div></dl>" : "";
+    var lede = mine.length ? "Showing only the partners your cards can reach, based on the cards in your " + (member().client ? "ʻOhana Wallet" : "wallet") + "." :
+      "Once you add cards that earn transferable points, this page shows where they can go.";
+    var out = headFor(stats, lede) + '<section class="wl-card wl-tp">' + explain;
     if (mine.length) {
-      out += '<h3 class="wl-tp-h3">Your points can go to</h3>';
+      out += '<h3 class="wl-tp-h3">From the cards in your wallet</h3>';
       out += mine.map(function (b) {
         var cards = bk.banks[b.id].cards;
         var direct = T.PROGRAMS.filter(function (p) { var v = p.t[b.id]; return v && v.charAt(0) !== "v"; });
@@ -1871,6 +1887,8 @@
     html += '<p class="wl-foot">Fees and credits come from each issuer\'s own website' + (checked ? ", checked " + esc(fmtIso(checked)) : "") + ". Your wallet is private to your account.</p>";
     html += sheetHtml();
     host.innerHTML = html;
+    /* phones: keep the open tab in view (Transfer Partners sits past the screen edge) */
+    var onTab = host.querySelector(".wl-tab.on"); if (onTab && onTab.parentNode) onTab.parentNode.scrollLeft = Math.max(0, onTab.offsetLeft - 8);
     var sheetOpen = !!host.querySelector(".wl-sheet");
     document.documentElement.classList.toggle("wl-sheet-open", sheetOpen);
     if (state.editing) bindForm(state.editing === "new" ? null : state.wallet.cards.filter(function (c) { return c.id === state.editing; })[0]);

@@ -1013,3 +1013,18 @@ button.hw-row:hover{background:rgba(255,255,255,.14)}button.hw-row:focus-visible
 .wl-tp-foot{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
 .wl-tp-foot a{color:var(--coral);font-weight:700}
 @media (max-width:700px){.wl-tp-list{grid-template-columns:minmax(0,1fr)}}
+
+/* My Wallet sub pages share the Overview's navy header (wallet.js .wl-sum) */
+.wl-pghead{margin-bottom:14px}
+.wl-pghead .wl-sum-top{flex-wrap:wrap}
+.wl-pghead .wl-sum-title{font-size:21px;font-weight:800;color:#fff}
+.wl-pghead .wl-sum-lede{margin:6px 0 14px}
+.wl-pghead .wl-cp-acts{display:flex;flex-wrap:wrap;gap:8px}
+.wl-pg-stats dd.wl-up{color:#a6e9c3}.wl-pg-stats dd.wl-down{color:#ffb3a6}.wl-pg-stats dd.wl-gold-t{color:#f2b84b}
+@media (max-width:560px){.wl-pg-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}.wl-pg-stats .wl-sum-stat:nth-child(3){padding-left:0;border-left:0}}
+/* bolder bank blocks on Transfer Partners */
+.wl-tp-bank header{background:var(--c);color:#fff;box-shadow:none;border-bottom:0}
+.wl-tp-bank header small,.wl-tp-bank header .wl-tp-n{color:rgba(255,255,255,.85)}
+.wl-tp-bank header .wl-tp-dot{background:#fff}
+.wl-tp-bank header .wl-tp-live{background:#f2b84b;color:#14202e}
+.wl-tp-bank{border-color:color-mix(in srgb,var(--c) 40%,var(--line))}
