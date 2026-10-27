@@ -68,6 +68,36 @@ ok('deal name escaped', hd.indexOf('<b>Hilton Hawaiian Village &lt;b&gt;') > -1)
 ok('photo only from https', T.html(T.build({ now: NOW, dotd: Object.assign({}, dd, { image: 'javascript:x' }) })).indexOf('background-image') < 0);
 ok('Asia Miles short', T.shortPartner('Cathay Pacific Asia Miles') === 'Cathay Pacific', T.shortPartner('Cathay Pacific Asia Miles'));
 ok('deal subtitle drops the repeated name', T.html(T.build({ now: NOW, dotd: Object.assign({}, dd, { name: 'The Westin Hapuna', offer: 'Kamaaina Starting $299 - The Westin Hapuna' }) })).indexOf('<small>Kamaaina Starting $299</small>') > -1);
+const drop = { title: 'Atmos Deal Drop: HNL to Tokyo 35k', text: 'Book by Friday', url: 'https://www.hawaiirewardtravel.com/traveldeals/tokyo', price: '35k points', ends: '2026-11-15', for: 'all' };
+let hdr = T.html(T.build({ now: NOW, news: Object.assign({}, news, { drop: drop, deal: { title: 'same', url: drop.url, date: NOW } }), dotd: dd }));
+ok('drop pinned first', hdr.indexOf('tdy-drop') > -1 && hdr.indexOf('tdy-drop') < hdr.indexOf('tdy-deal'));
+ok('drop shows price and end date', hdr.indexOf('35k points · Ends Nov 15') > -1);
+ok('drop not repeated as New deal', hdr.indexOf('New deal') < 0);
+ok('pro drop is a locked teaser for free members', T.dropFor({ drop: Object.assign({}, drop, { for: 'pro' }) }, {}).locked === true);
+ok('pro drop open for PRO', T.dropFor({ drop: Object.assign({}, drop, { for: 'pro' }) }, { pro: true }).locked === false);
+ok('ohana drop locked for PRO-only members', T.dropFor({ drop: Object.assign({}, drop, { for: 'ohana' }) }, { pro: true }).locked === true);
+const lk = T.html(T.build({ now: NOW, news: { drop: Object.assign({}, drop, { for: 'pro' }) }, audience: {} }));
+ok('locked teaser points to Plans, not the post', lk.indexOf('data-route="plans"') > -1 && lk.indexOf(drop.url) < 0 && /Unlock with HRT PRO/.test(lk));
+ok('locked teaser hides the details', lk.indexOf('Book by Friday') < 0 && /got this one first/.test(lk));
+const oh = T.html(T.build({ now: NOW, news: { drop: Object.assign({}, drop, { for: 'ohana' }) }, audience: {} }));
+ok('ohana teaser says Join the ʻOhana', /Join the ʻOhana/.test(oh));
+const up = T.html(T.build({ now: NOW, news: { drop: Object.assign({}, drop, { kind: 'update', title: 'New: My Wallet Cards page' }) }, audience: {} }));
+ok('update gets HRT Update badge', /HRT Update/.test(up) && /Read more/.test(up) && up.indexOf('tdy-drop upd') > -1);
+ok('drop must link to hawaiirewardtravel.com', T.dropFor({ drop: Object.assign({}, drop, { url: 'https://evil.example/' }) }, {}) === null);
+ok('deal of the day says Kamaaina and daily', hd.indexOf('Kamaʻāina deal of the day') > -1);
+/* posts Scottie asks for in chat (data/drops.json) */
+const FD = [{ title: 'Black Friday: Ohana spots open', text: 'Book your onboarding call this week', start: '2026-10-24', ends: '2026-10-31', link: '#plans', button: 'Book a call', kind: 'update' },
+  { title: 'Old one', start: '2026-10-01' }, { title: 'Future one', start: '2026-11-20' }];
+const f1 = T.fileDrop(FD, '2026-10-25');
+ok('chat post live today is picked', f1 && f1.title === 'Black Friday: Ohana spots open' && f1.own === true);
+ok('no ends = 7 days', T.fileDrop([{ title: 'x', start: '2026-10-20' }], '2026-10-28') === null && !!T.fileDrop([{ title: 'x', start: '2026-10-20' }], '2026-10-27'));
+ok('future post waits', T.fileDrop([{ title: 'x', start: '2026-11-20' }], '2026-10-25') === null);
+const hf = T.html(T.build({ now: NOW, drops: FD }));
+ok('chat post shows with its own button and route', /Book a call/.test(hf) && hf.indexOf('data-route="plans"') > -1 && /HRT Update/.test(hf));
+ok('newer chat post beats older Squarespace drop', /Black Friday/.test(T.html(T.build({ now: NOW, drops: FD, news: { drop: Object.assign({}, drop, { date: Date.parse('2026-10-01') }) } }))));
+ok('newer Squarespace drop beats older chat post', /Tokyo/.test(T.html(T.build({ now: NOW, drops: FD, news: { drop: Object.assign({}, drop, { date: Date.parse('2026-10-25T12:00:00Z') }) } }))));
+ok('bad link not clickable', T.safeLink('javascript:alert(1)') === '' && T.safeLink('https://evil.example/') === '' && T.safeLink('#atmos') === '#atmos');
+ok('post with no link still shows, not a link', /<div class="tdy-drop/.test(T.html(T.build({ now: NOW, drops: [{ title: 'Note from Scottie', start: '2026-10-25' }] }))));
 ok('bonus row has label and body', /tdy-k">Transfer bonus<\/span><b>Amex to Flying Blue \+25%/.test(T.html(T.build({ now: NOW, bonuses, myBanks: ['amex'] }))));
 ok('no em dashes in banner text', !/[—]/.test(h));
 

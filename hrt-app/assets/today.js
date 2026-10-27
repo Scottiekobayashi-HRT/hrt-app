@@ -79,18 +79,70 @@
     return { key: "site", tone: "blue", label: label.replace(/: $/, ""), body: cut(pick.it.title, 60), text: label + cut(pick.it.title, 46), act: "Read", href: pick.it.url, title: pick.it.title };
   }
 
+  /* Posts Scottie asks for in chat live in data/drops.json. Pure: the newest one that is
+     live today (start <= today <= ends; no ends = 7 days from start). */
+  function addDays(iso, n) { return new Date(Date.parse(iso + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10); }
+  function fileDrop(list, today) {
+    var ok = (list || []).filter(function (d) {
+      if (!d || !d.title || !/^\d{4}-\d\d-\d\d$/.test(d.start || "")) return false;
+      var ends = /^\d{4}-\d\d-\d\d$/.test(d.ends || "") ? d.ends : addDays(d.start, 7);
+      return d.start <= today && today <= ends;
+    }).sort(function (a, b) { return String(b.start).localeCompare(String(a.start)); });
+    var d = ok[0];
+    if (!d) return null;
+    return { title: d.title, text: d.text || "", url: d.link || "", button: d.button || "", price: d.price || "", ends: d.ends || "",
+      image: d.image || "", for: d.for === "pro" || d.for === "ohana" ? d.for : "all", kind: d.kind === "update" ? "update" : "drop",
+      date: Date.parse(d.start + "T00:00:00-10:00") || 0, own: true };
+  }
+  /* A link is a Dashboard page ("#atmos") or https on an HRT site. */
+  function safeLink(u) {
+    u = String(u || "");
+    if (/^#[a-z][a-z0-9\/-]*$/.test(u)) return u;
+    if (/^https:\/\/(www\.hawaiirewardtravel\.com|tools\.hawaiirewardtravel\.com)\//.test(u)) return u;
+    return "";
+  }
+
+  /* Scottie's Deal Drop (a Travel Deals post tagged "drop", see functions/api/site-news.js).
+     for:pro shows to HRT PRO members only, for:ohana to ʻOhana Members only. */
+  function dropFor(news, aud) {
+    var d = news && news.drop;
+    if (!d || !d.title) return null;
+    if (!safeLink(d.url) && !d.own) return null;
+    aud = aud || {};
+    /* Not for this member: show a locked teaser that points to the next step instead
+       of hiding it, so every drop also shows what PRO or ʻOhana adds. */
+    var locked = (d.for === "pro" && !aud.pro) || (d.for === "ohana" && !aud.ohana);
+    var out = {}; for (var k in d) if (Object.prototype.hasOwnProperty.call(d, k)) out[k] = d[k];
+    out.locked = locked;
+    out.kind = d.kind === "update" ? "update" : "drop";
+    return out;
+  }
+  var LOCK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  function endsText(iso) {
+    if (!/^\d{4}-\d\d-\d\d$/.test(iso || "")) return "";
+    var p = iso.split("-");
+    return "Ends " + MON[+p[1] - 1] + " " + (+p[2]);
+  }
+
   /* Pure: everything the banner shows. */
   function build(opt) {
     opt = opt || {};
     var today = opt.today || hiIso(opt.now);
     /* Layout B: credits live in the wallet tile, so this tile holds the outside news */
-    var lines = [bonusLine(opt.bonuses, opt.myBanks, today), siteLine(opt.news, opt.now)].filter(Boolean);
+    var fd = fileDrop(opt.drops, today), sd = opt.news && opt.news.drop;
+    var pickD = fd && (!sd || (fd.date || 0) >= (sd.date || 0)) ? fd : sd;
+    var drop = dropFor(pickD ? { drop: pickD } : null, opt.audience);
+    var news = opt.news;
+    if (drop && news) {  /* the drop is already on top; do not repeat it as "New deal" */
+      news = { article: news.article && news.article.url === drop.url ? null : news.article, deal: news.deal && news.deal.url === drop.url ? null : news.deal };
+    }
+    var lines = [bonusLine(opt.bonuses, opt.myBanks, today), siteLine(news, opt.now)].filter(Boolean);
     var td = opt.wallet, cap = null;
     if (td && td.count && td.captured > 0) {
       cap = { amount: td.captured, pct: td.fees > 0 ? Math.min(100, Math.round(td.captured / td.fees * 100)) : null };
     }
     var dd = opt.dotd && opt.dotd.name ? opt.dotd : null;
-    return { date: dateLine(opt.now), lines: lines, captured: cap, dotd: dd };
+    return { date: dateLine(opt.now), lines: lines, captured: cap, dotd: dd, drop: drop };
   }
 
   /* "Kamaʻāina Starting $299 - The Westin Hapuna" -> "Kamaʻāina Starting $299" (the name is already the title) */
@@ -101,11 +153,37 @@
   }
   function html(v) {
     var out = "";
+    var dr = v.drop;
+    if (dr) {
+      var dimg = /^https:\/\//.test(dr.image || "") ? ' style="background-image:url(\'' + esc(dr.image).replace(/'/g, "%27") + '\')"' : "";
+      var meta = [dr.price, endsText(dr.ends)].filter(Boolean).join(" · ");
+      var upd = dr.kind === "update";
+      var who = dr.for === "pro" ? "PRO " : dr.for === "ohana" ? "ʻOhana " : "";
+      var badge = upd ? (who ? who + "Update" : "HRT Update") : (who ? who + "Deal Drop" : "Scottie\u2019s Deal Drop");
+      var icon = upd ? '<path d="M4 10v4h3l5 4V6L7 10zM16 9a4 4 0 0 1 0 6"/>' : '<path d="M12 2l2.9 6.9L22 9.3l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.9L2 9.3l7.1-.4z"/>';
+      var iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" ' + (upd ? 'fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"' : 'fill="currentColor"') + ' aria-hidden="true">' + icon + "</svg>";
+      if (dr.locked) {
+        var pro = dr.for === "pro";
+        out += '<a class="tdy-drop locked" href="#plans" data-route="plans">' +
+          '<span class="tdy-dbody"><span class="tdy-dbadge">' + LOCK + esc(badge) + "</span>" +
+          "<b>" + esc(cut(dr.title, 70)) + "</b>" +
+          "<small>" + (pro ? "HRT PRO members got this one first." : "ʻOhana Members got this one first.") + "</small>" +
+          '<span class="tdy-dfoot"><span>' + esc(endsText(dr.ends)) + '</span><span class="tdy-dgo">' + (pro ? "Unlock with HRT PRO" : "Join the ʻOhana") + " &rsaquo;</span></span></span></a>";
+      } else {
+        var lk = safeLink(dr.url), lattr = !lk ? "" : lk.charAt(0) === "#" ? 'href="' + esc(lk) + '" data-route="' + esc(lk.slice(1)) + '"' : 'href="' + esc(lk) + '" target="_top" rel="noopener"';
+        out += (lk ? '<a class="tdy-drop' + (upd ? " upd" : "") + '" ' + lattr + ">" : '<div class="tdy-drop' + (upd ? " upd" : "") + '">') +
+          (dimg ? '<span class="tdy-dph"' + dimg + "></span>" : "") +
+          '<span class="tdy-dbody"><span class="tdy-dbadge">' + iconSvg + esc(badge) + "</span>" +
+          "<b>" + esc(cut(dr.title, 70)) + "</b>" + (dr.text ? "<small>" + esc(cut(dr.text, 110)) + "</small>" : "") +
+          '<span class="tdy-dfoot">' + (meta ? "<span>" + esc(meta) + "</span>" : "<span></span>") +
+          (lk ? '<span class="tdy-dgo">' + esc(dr.button || (upd ? "Read more" : "See the drop")) + " &rsaquo;</span>" : "") + "</span></span>" + (lk ? "</a>" : "</div>");
+      }
+    }
     var d = v.dotd;
     if (d) {
       var img = /^https:\/\//.test(d.image || "") ? ' style="background-image:url(\'' + esc(d.image).replace(/'/g, "%27") + '\')"' : "";
-      out += '<a class="tdy-deal" href="#kamaaina" data-route="kamaaina" data-kama-open="' + (+d.idx || 0) + '" aria-label="Deal of the day: ' + esc(d.name) + '">' +
-        '<span class="tdy-ph"' + img + '><span class="tdy-badge">Deal of the day</span>' + (d.where ? '<span class="tdy-where">' + esc(d.where) + "</span>" : "") + "</span>" +
+      out += '<a class="tdy-deal" href="#kamaaina" data-route="kamaaina" data-kama-open="' + (+d.idx || 0) + '" aria-label="Kamaʻāina deal of the day: ' + esc(d.name) + '. A new pick every morning">' +
+        '<span class="tdy-ph"' + img + '><span class="tdy-badge">Kamaʻāina deal of the day</span>' + (d.where ? '<span class="tdy-where">' + esc(d.where) + "</span>" : "") + "</span>" +
         '<span class="tdy-db"><span class="tdy-dt"><b>' + esc(cut(d.name, 44)) + "</b>" + (offerText(d) ? "<small>" + esc(cut(offerText(d), 60)) + "</small>" : "") + "</span>" +
         '<span class="tdy-big"><b>' + esc(d.big) + "</b>" + (d.small ? "<small>" + esc(d.small) + "</small>" : "") + "</span></span></a>";
     }
@@ -133,21 +211,29 @@
   }
   function paint() {
     var host = document.getElementById("hmToday");
-    var v = build({ bonuses: root.HRT_TB_LIVE || [], myBanks: myBanks(), news: news, dotd: dotd() });
+    var cl = document.documentElement.classList;
+    var v = build({ drops: drops, bonuses: root.HRT_TB_LIVE || [], myBanks: myBanks(), news: news, dotd: dotd(), audience: { pro: cl.contains("ms-pro"), ohana: cl.contains("ms-client") } });
     var dl = document.getElementById("hmDate"); if (dl) dl.textContent = v.date;
     if (host) host.innerHTML = html(v);
+  }
+  var drops = [];
+  function loadDrops() {
+    try {
+      fetch("data/drops.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
+        .then(function (d) { drops = d && Array.isArray(d.drops) ? d.drops : []; paint(); }).catch(function () {});
+    } catch (e) {}
   }
   function loadNews() {
     if (newsAsked) return; newsAsked = true;
     try {
       fetch(SITE_NEWS, { cache: "default" }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
-        .then(function (d) { news = d && (d.article || d.deal) ? d : null; paint(); }).catch(function () {});
+        .then(function (d) { news = d && (d.article || d.deal || d.drop) ? d : null; paint(); }).catch(function () {});
     } catch (e) {}
   }
   var t;
   function soon() { clearTimeout(t); t = setTimeout(paint, 30); }
 
-  var api = { build: build, html: html, shortPartner: shortPartner, creditLine: creditLine, bonusLine: bonusLine, siteLine: siteLine, paint: paint };
+  var api = { fileDrop: fileDrop, safeLink: safeLink, dropFor: dropFor, build: build, html: html, shortPartner: shortPartner, creditLine: creditLine, bonusLine: bonusLine, siteLine: siteLine, paint: paint };
   root.HRT_TODAY = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof document === "undefined" || !root.addEventListener) return;
@@ -162,7 +248,7 @@
     var i = +a.getAttribute("data-kama-open");
     setTimeout(function () { try { if (root.HRT_KAMA && root.HRT_KAMA.open) root.HRT_KAMA.open(i); } catch (x) {} }, 400);
   });
-  function start() { loadNews(); paint(); }
+  function start() { loadNews(); loadDrops(); paint(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
   /* membership is read a moment after load */
   setTimeout(paint, 1500); setTimeout(paint, 4000);
