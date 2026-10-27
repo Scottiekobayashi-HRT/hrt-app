@@ -51,15 +51,24 @@ ok('only links to hawaiirewardtravel.com', T.siteLine({ deal: { title: 'x', url:
 
 // build
 let v = T.build({ now: NOW, wallet: { count: 8, fees: 2995, captured: 1240, urgent: { amount: 25, days: 6 } }, bonuses, myBanks: ['amex'], news });
-ok('three lines in order', v.lines.map((l) => l.key).join() === 'credit,bonus,site');
+ok('tile lines: bonus then site (credits live in the wallet tile)', v.lines.map((l) => l.key).join() === 'bonus,site');
 ok('date in Hawaii time', v.date === 'Sunday, October 25', v.date);
 ok('captured and percent of fees', v.captured.amount === 1240 && v.captured.pct === 41, JSON.stringify(v.captured));
 v = T.build({ now: NOW, wallet: { count: 0 }, bonuses: [], news: null });
-ok('nothing to show = empty html', T.html(v) === '');
+ok('nothing to show = a calm note', /Nothing new yet today/.test(T.html(v)));
 v = T.build({ now: NOW, wallet: { count: 3, fees: 0, captured: 0, urgent: null }, bonuses, news: null });
 ok('no captured line before any tick', v.captured === null && v.lines.length === 1);
 const h = T.html(T.build({ now: NOW, wallet: { count: 1, fees: 95, captured: 50, urgent: { amount: 25, days: 3 } }, bonuses, news }));
-ok('html escapes and links', h.indexOf('data-route="wallet/credits"') > -1 && h.indexOf('target="_top"') > -1 && h.indexOf('<script') < 0);
+ok('html links', h.indexOf('data-route="transfers"') > -1 && h.indexOf('target="_top"') > -1 && h.indexOf('<script') < 0);
+const dd = { name: 'Hilton Hawaiian Village <b>', offer: 'Kamaaina rate with breakfast', big: '$219', small: 'a night', image: 'https://images.example/x.jpg', where: 'Oahu', idx: 7 };
+const hd = T.html(T.build({ now: NOW, bonuses, news, dotd: dd }));
+ok('deal of the day card first', hd.indexOf('tdy-deal') > -1 && hd.indexOf('tdy-deal') < hd.indexOf('tdy-row'));
+ok('deal opens Kamaaina deal 7', hd.indexOf('data-route="kamaaina"') > -1 && hd.indexOf('data-kama-open="7"') > -1);
+ok('deal name escaped', hd.indexOf('<b>Hilton Hawaiian Village &lt;b&gt;') > -1);
+ok('photo only from https', T.html(T.build({ now: NOW, dotd: Object.assign({}, dd, { image: 'javascript:x' }) })).indexOf('background-image') < 0);
+ok('Asia Miles short', T.shortPartner('Cathay Pacific Asia Miles') === 'Cathay Pacific', T.shortPartner('Cathay Pacific Asia Miles'));
+ok('deal subtitle drops the repeated name', T.html(T.build({ now: NOW, dotd: Object.assign({}, dd, { name: 'The Westin Hapuna', offer: 'Kamaaina Starting $299 - The Westin Hapuna' }) })).indexOf('<small>Kamaaina Starting $299</small>') > -1);
+ok('bonus row has label and body', /tdy-k">Transfer bonus<\/span><b>Amex to Flying Blue \+25%/.test(T.html(T.build({ now: NOW, bonuses, myBanks: ['amex'] }))));
 ok('no em dashes in banner text', !/[—]/.test(h));
 
 console.log(`\n${pass} passed, ${fail} failed`);

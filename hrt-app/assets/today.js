@@ -5,8 +5,9 @@
      1. a wallet credit that ends within 14 days      (wallet.js todayData)
      2. a transfer bonus, for points they hold if any (Transfer Bonuses feed)
      3. the newest HRT article or travel deal         (/api/site-news)
-   Then "$X used this year" against their annual fees, once they have ticked
-   a credit Used.
+   Layout B (Oct 26): this is now the tile on the right of the Aloha tile.
+   It shows Kamaʻāina Deals' Deal of the day, the bonus line and the site line.
+   The wallet credit and "used this year" moved into the wallet in the big tile.
 
    Scottie: keep it to a few big words. Older members read this.
    When there is nothing to show (signed out, empty wallet and no news), the
@@ -34,7 +35,7 @@
   function cut(s, n) { s = String(s || "").trim(); return s.length > n ? s.slice(0, n - 1).replace(/[\s,.:;]+\S*$/, "") + "…" : s; }
 
   /* "Air France-KLM Flying Blue" -> "Flying Blue", "Aeromexico Rewards" -> "Aeromexico" */
-  var PROGRAM = /\s+(Flying Club|Privilege Club|Maharaja Club|Mileage Bank|Mileage Club|Avios|TrueBlue|Rewards|Loyalty Program|Loyalty|Program|Miles|Club|Plus)$/i;
+  var PROGRAM = /\s+(Asia Miles|Flying Club|Privilege Club|Maharaja Club|Mileage Bank|Mileage Club|Avios|TrueBlue|Rewards|Loyalty Program|Loyalty|Program|Miles|Club|Plus)$/i;
   function shortPartner(p) {
     p = String(p || "").trim();
     if (/^Air France-KLM\s+/i.test(p)) return "Flying Blue";
@@ -61,7 +62,8 @@
       return String(b.startDate || "").localeCompare(String(a.startDate || "")) || (+b.bonusPct || 0) - (+a.bonusPct || 0);
     });
     var b = pool[0], fresh = b.startDate && daysBetween(b.startDate, today) <= 7;
-    return { key: "bonus", tone: "gold", text: (fresh ? "New bonus: " : "Bonus: ") + (BANK[b.bank] || b.bankName || b.bank) + " to " + shortPartner(b.partner) + " +" + b.bonusPct + "%",
+    var body = (BANK[b.bank] || b.bankName || b.bank) + " to " + shortPartner(b.partner) + " +" + b.bonusPct + "%";
+    return { key: "bonus", tone: "gold", label: fresh ? "New bonus" : "Transfer bonus", body: body, text: (fresh ? "New bonus: " : "Bonus: ") + body,
       act: "See bonus", route: "transfers", title: (b.bankName || "") + " to " + b.partner + ", ends " + (b.expiresDate || "") };
   }
 
@@ -74,38 +76,46 @@
     if (!pick) return null;
     var age = pick.it.date ? ((nowMs == null ? Date.now() : nowMs) - pick.it.date) / 864e5 : 99;
     var label = pick.kind === "deal" ? (age <= 14 ? "New deal: " : "Latest deal: ") : (age <= 14 ? "New article: " : "Latest article: ");
-    return { key: "site", tone: "blue", text: label + cut(pick.it.title, 46), act: "Read", href: pick.it.url, title: pick.it.title };
+    return { key: "site", tone: "blue", label: label.replace(/: $/, ""), body: cut(pick.it.title, 60), text: label + cut(pick.it.title, 46), act: "Read", href: pick.it.url, title: pick.it.title };
   }
 
   /* Pure: everything the banner shows. */
   function build(opt) {
     opt = opt || {};
     var today = opt.today || hiIso(opt.now);
-    var lines = [creditLine(opt.wallet), bonusLine(opt.bonuses, opt.myBanks, today), siteLine(opt.news, opt.now)].filter(Boolean);
+    /* Layout B: credits live in the wallet tile, so this tile holds the outside news */
+    var lines = [bonusLine(opt.bonuses, opt.myBanks, today), siteLine(opt.news, opt.now)].filter(Boolean);
     var td = opt.wallet, cap = null;
     if (td && td.count && td.captured > 0) {
       cap = { amount: td.captured, pct: td.fees > 0 ? Math.min(100, Math.round(td.captured / td.fees * 100)) : null };
     }
-    return { date: dateLine(opt.now), lines: lines, captured: cap };
+    var dd = opt.dotd && opt.dotd.name ? opt.dotd : null;
+    return { date: dateLine(opt.now), lines: lines, captured: cap, dotd: dd };
   }
 
+  /* "Kamaʻāina Starting $299 - The Westin Hapuna" -> "Kamaʻāina Starting $299" (the name is already the title) */
+  function offerText(d) {
+    var o = String(d.offer || ""), n = String(d.name || "");
+    if (n && o.indexOf(n) > -1) o = o.split(n).join("");
+    return o.replace(/\s*[-\u2013\u2014|:,]\s*$/, "").replace(/^\s*[-\u2013\u2014|:,]\s*/, "").replace(/\s{2,}/g, " ").trim();
+  }
   function html(v) {
-    if (!v.lines.length && !v.captured) return "";
-    var out = '<div class="td-in">';
-    if (v.lines.length) {
-      out += '<p class="td-k">Today for you</p><ul class="td-list">' + v.lines.map(function (l) {
-        var attrs = l.href ? 'href="' + esc(l.href) + '" target="_top" rel="noopener"' : 'href="#' + esc(l.route) + '" data-route="' + esc(l.route) + '"';
-        return '<li><a class="td-row t-' + l.tone + '" ' + attrs + ' title="' + esc(l.title || "") + '"><span class="td-dot" aria-hidden="true"></span>' +
-          '<b class="td-t">' + esc(l.text) + '</b><span class="td-a">' + esc(l.act) + "</span></a></li>";
-      }).join("") + "</ul>";
+    var out = "";
+    var d = v.dotd;
+    if (d) {
+      var img = /^https:\/\//.test(d.image || "") ? ' style="background-image:url(\'' + esc(d.image).replace(/'/g, "%27") + '\')"' : "";
+      out += '<a class="tdy-deal" href="#kamaaina" data-route="kamaaina" data-kama-open="' + (+d.idx || 0) + '" aria-label="Deal of the day: ' + esc(d.name) + '">' +
+        '<span class="tdy-ph"' + img + '><span class="tdy-badge">Deal of the day</span>' + (d.where ? '<span class="tdy-where">' + esc(d.where) + "</span>" : "") + "</span>" +
+        '<span class="tdy-db"><span class="tdy-dt"><b>' + esc(cut(d.name, 44)) + "</b>" + (offerText(d) ? "<small>" + esc(cut(offerText(d), 60)) + "</small>" : "") + "</span>" +
+        '<span class="tdy-big"><b>' + esc(d.big) + "</b>" + (d.small ? "<small>" + esc(d.small) + "</small>" : "") + "</span></span></a>";
     }
-    if (v.captured) {
-      var c = v.captured;
-      out += '<div class="td-cap"><div class="td-cap-top"><span><b>' + esc(money(c.amount)) + "</b> used this year</span>" +
-        (c.pct != null ? '<span class="td-cap-pct">' + c.pct + "% of your fees</span>" : "") + "</div>" +
-        (c.pct != null ? '<div class="td-bar" aria-hidden="true"><i style="width:' + Math.max(3, c.pct) + '%"></i></div>' : "") + "</div>";
-    }
-    return out + "</div>";
+    out += v.lines.map(function (l) {
+      var attrs = l.href ? 'href="' + esc(l.href) + '" target="_top" rel="noopener"' : 'href="#' + esc(l.route) + '" data-route="' + esc(l.route) + '"';
+      return '<a class="tdy-row t-' + l.tone + '" ' + attrs + ' title="' + esc(l.title || "") + '"><span class="tdy-dot" aria-hidden="true"></span>' +
+        '<span class="tdy-t"><span class="tdy-k">' + esc(l.label || "") + "</span><b>" + esc(l.body || l.text) + '</b></span><span class="tdy-go" aria-hidden="true">&rsaquo;</span></a>';
+    }).join("");
+    if (!out) out = '<p class="tdy-none">Nothing new yet today. We check every morning.</p>';
+    return out;
   }
 
   /* ---------- browser wiring ---------- */
@@ -118,17 +128,14 @@
       return Object.keys(C.banks(d, cat.earning || []).banks || {});
     } catch (e) { return []; }
   }
+  function dotd() {
+    try { return root.HRT_KAMA && root.HRT_KAMA.today ? root.HRT_KAMA.today() : null; } catch (e) { return null; }
+  }
   function paint() {
-    var host = document.getElementById("hmToday"), hero = host && host.closest(".hero");
-    if (!host) return;
-    var W = root.HRT_WALLET, td = null;
-    try { td = W && W.todayData ? W.todayData() : null; } catch (e) { td = null; }
-    var signedIn = !!(root.HRT_MEMBER && root.HRT_MEMBER.signedIn);
-    var v = build({ wallet: td, bonuses: root.HRT_TB_LIVE || [], myBanks: myBanks(), news: news });
-    var inner = signedIn ? html(v) : "";
-    host.innerHTML = inner;
+    var host = document.getElementById("hmToday");
+    var v = build({ bonuses: root.HRT_TB_LIVE || [], myBanks: myBanks(), news: news, dotd: dotd() });
     var dl = document.getElementById("hmDate"); if (dl) dl.textContent = v.date;
-    if (hero) hero.classList.toggle("has-today", !!inner);
+    if (host) host.innerHTML = html(v);
   }
   function loadNews() {
     if (newsAsked) return; newsAsked = true;
@@ -147,6 +154,14 @@
   root.addEventListener("hrt:wallet", soon);
   root.addEventListener("hrt:bonuses", soon);
   root.addEventListener("hrt:member", soon);
+  root.addEventListener("hrt:kama", soon);
+  /* Deal of the day opens on the Kamaʻāina Deals page (app.js routes the click) */
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("[data-kama-open]");
+    if (!a) return;
+    var i = +a.getAttribute("data-kama-open");
+    setTimeout(function () { try { if (root.HRT_KAMA && root.HRT_KAMA.open) root.HRT_KAMA.open(i); } catch (x) {} }, 400);
+  });
   function start() { loadNews(); paint(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
   /* membership is read a moment after load */

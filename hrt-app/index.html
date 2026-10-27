@@ -377,10 +377,11 @@ html.ms-client .pl.ohana .btn{display:none}
    <span class="hero-pills"><span class="pro-pill pro-only">&#9733; HRT PRO</span><span class="client-pill client-only"><svg class="oh-star" width="11" height="11" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7.5-6.5-4-6.5 4 2-7.5L2 9.5 9 9z" fill="currentColor"/></svg>ʻOhana</span></span>
    <span class="hero-date" id="hmDate"></span>
    <h1><span class="named">Aloha, <span class="wave ms-first-name">friend</span></span><span class="unnamed">Aloha, welcome to <span class="wave">HRT</span></span></h1>
+   <!-- Layout B (Oct 26): your wallet lives in the big tile. Filled by wallet.js (HRT_WALLET.home);
+        when the member has cards it hides the welcome text, buttons and stats below -->
+   <div class="hw" id="wl-hero" aria-live="polite"></div>
    <p class="free-only">The tools we use to plan points and miles trips from the islands, in one place and free for every Hawaiʻi traveler.</p><p class="pro-only">Your PRO tools are unlocked. Fresh Atmos award space lands every morning.</p>
    <div class="cta-row"><a class="btn coral" href="#wallet" data-route="wallet"><span class="client-hide">Open My Wallet</span><span class="client-only">Open your ʻOhana Wallet</span> &rarr;</a><a class="btn ghost free-only" href="#atmos" data-route="atmos">Atmos tools</a><a class="btn ghost pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Atmos tools</a><a class="btn ghost" href="#kamaaina" data-route="kamaaina">Kamaʻāina deals</a></div>
-   <!-- Today for you: filled by assets/today.js; hides the welcome text and stats when it has lines -->
-   <div class="today" id="hmToday" aria-live="polite"></div>
    <div class="hstats">
     <div class="hstat"><b class="tnum" id="hmKama">&ndash;</b><span><i style="background:#9fc1d4"></i>Kamaʻāina hotel deals</span></div>
     <div class="hstat"><b class="tnum" id="hmTb">&ndash;</b><span><i style="background:#3fce7f"></i>Transfer bonuses live</span></div>
@@ -388,8 +389,11 @@ html.ms-client .pl.ohana .btn{display:none}
     <div class="hstat" id="hmFirstWrap" hidden><b class="tnum" id="hmFirst">&ndash;</b><span><i style="background:#f2b84b"></i>First class deals from Hawaiʻi</span></div>
    </div>
   </div>
-  <!-- Mini wallet: the top right tile. Filled by wallet.js (HRT_WALLET.home) -->
-  <div class="spot wlmini" id="wl-mini" aria-live="polite"></div>
+  <!-- Today for you: the flexible tile on the right (Deal of the day, new bonus, newest article or deal). Filled by assets/today.js -->
+  <section class="spot tdy" aria-label="Today for you">
+   <div class="tdy-h"><h2>Today for you</h2><span class="tdy-note">Checked every morning</span></div>
+   <div id="hmToday" aria-live="polite"></div>
+  </section>
  </div>
  <!-- For your cards: where the member's wallet meets the other tools. Filled by wallet.js (connect.js) -->
  <div id="wl-tips-home"></div>

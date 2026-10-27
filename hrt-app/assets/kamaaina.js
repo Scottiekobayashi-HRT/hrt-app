@@ -868,8 +868,12 @@
   }
   window.HRT_KAMA = {
    show:function(){ if(kmHost){ if(KM) KM.resize(); else kmMount(); } else if(!map) initMap(); else map.resize(); },
-   open:function(i){ var d = DEALS[i]; if(!d) return; if(kmMount()) KM.show(i); else openDialog(d); }
+   open:function(i){ var d = DEALS[i]; if(!d) return; if(kmMount()) KM.show(i); else openDialog(d); },
+   /* today's Deal of the Day, for the Dashboard's "Today for you" tile (today.js) */
+   today:function(){ var d = pickDeal(); if(!d) return null; var h = headline(d);
+    return { name:d.b, offer:d.t, big:h.big, small:h.small || "", image:imgFor(d) || "", where:where(d), idx:DEALS.indexOf(d), tag:d._fr || "" }; }
   };
+  try{ window.dispatchEvent(new Event("hrt:kama")); }catch(e){}
   /* the page may already be open (a #kamaaina link) before this script finished starting */
   var kv = document.getElementById("v-kamaaina"); if(kv && kv.classList.contains("on")) window.HRT_KAMA.show();
   var mq = window.matchMedia("(max-width:760px)");

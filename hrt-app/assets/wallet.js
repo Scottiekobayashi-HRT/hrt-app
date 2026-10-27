@@ -1129,59 +1129,74 @@
   /* ===================== MINI WALLET (Dashboard top right tile) =====================
      Small on purpose: one headline number, three facts, and the next three things
      to act on. Everything else lives on the My Wallet page. */
-  var miniHost;
+  var miniHost, miniMode = "";
+  /* Layout B (Oct 26): the member's wallet inside the big Aloha tile on the Dashboard.
+     Four equal boxes (cards, fees, credits to use, next renewal), what they have used
+     this year, then Up next. The greeting and date above it stay in index.html. */
   function miniHtml() {
-    var head = function (link) {
-      var cl = member().client;
-      return '<div class="wlm-head"><h2 class="wlm-title">' + (cl ? '<span class="wlm-ow">' + OH_STAR + "</span>Your ʻOhana Wallet" : "Your wallet") + "</h2>" +
-        (link ? '<a class="wlm-open" href="#wallet" data-route="wallet">' + (cl ? "Open" : "Open My Wallet") + ' <span aria-hidden="true">&rsaquo;</span></a>' : "") + "</div>";
+    var cl = member().client;
+    var tag = cl ? '<span class="hw-tag"><span class="hw-star">' + OH_STAR + "</span>ʻOhana Wallet · Managed by Scottie</span>" : "";
+    var acts = function () {
+      return '<div class="hw-acts">' + (cl ? '<a class="hw-btn ghost" href="' + SCOTTIE_SMS + '">Text Scottie</a>' : "") +
+        '<a class="hw-btn gold" href="#wallet" data-route="wallet">' + (cl ? "Open wallet" : "Open My Wallet") + ' <span aria-hidden="true">&rsaquo;</span></a></div>';
     };
-    if (state.error) return head(true) + '<p class="wlm-lede">' + esc(errText(state.error)) + "</p>" +
-      (state.error.code === "READ_FAILED" ? '<div class="wlm-acts"><button class="wl-btn" data-wl="retry">Try again</button></div>' : "");
-    if (!state.wallet) return head(false) + '<p class="wlm-lede">Loading your wallet</p>';
-    var V = view(), s = summarize(V, catalog());
-    var demo = state.demo ? '<div class="wlm-demo"><span>Example wallet. Nothing is saved.</span><button class="wlm-x" data-wl="demo-off">Use my own cards</button></div>' : "";
+    miniMode = "";
+    if (state.error) { miniMode = "empty"; return tag + '<p class="hw-lede">' + esc(errText(state.error)) + "</p>" +
+      (state.error.code === "READ_FAILED" ? '<div class="hw-acts2"><button class="wl-btn" data-wl="retry">Try again</button></div>' : ""); }
+    if (!state.wallet) return "";
+    var V = view(), cat = catalog(), s = summarize(V, cat);
+    var demo = state.demo ? '<div class="hw-demo"><span>Example wallet. Nothing is saved.</span><button class="hw-x" data-wl="demo-off">Use my own cards</button></div>' : "";
     if (!s.count) {
-      return head(false) +
-        '<p class="wlm-big wlm-big-empty">Never miss a card credit again</p>' +
-        '<ul class="wlm-points"><li>Every annual fee and renewal date</li><li>Credits to use before they reset</li><li>Which card to use at Foodland, Costco and more</li></ul>' +
-        '<div class="wlm-acts"><button class="wl-btn wl-gold" data-wl="go-add">Add your cards</button>' +
-        '<button class="wl-btn wl-ghost" data-wl="demo">See an example</button></div>' +
-        '<p class="wlm-foot">Free with your account. We never ask for card numbers.</p>';
+      miniMode = "empty";
+      return demo + tag + '<div class="hw-empty"><p class="hw-lede"><b>Never miss a card credit again.</b> Every fee, renewal and credit in one place.</p>' +
+        '<div class="hw-acts2"><button class="wl-btn wl-gold" data-wl="go-add">Add your cards</button>' +
+        '<button class="wl-btn wl-ghost" data-wl="demo">See an example</button></div></div>';
     }
-    var perks = perkRows(V, catalog());
+    miniMode = "full";
+    var perks = perkRows(V, cat);
     var soon = expiringSoon(perks, SOON_PERK_DAYS);
     var due = soon.reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
-    var nx = s.next;
-    var html = demo + head(true) + '<div class="wlm-hero">' +
-      (due ? '<span class="wlm-big">' + esc(money(due)) + '</span><span class="wlm-cap">in credits to use in the next ' + SOON_PERK_DAYS + " days</span>"
-           : '<span class="wlm-big wlm-ok">All caught up</span><span class="wlm-cap">No credits end in the next ' + SOON_PERK_DAYS + " days</span>") + "</div>" +
-      '<dl class="wlm-stats"><div><dt>Cards</dt><dd>' + s.count + "</dd></div>" +
-      "<div><dt>Annual fees</dt><dd>" + esc(money(s.yearly)) + "</dd></div>" +
-      "<div><dt>Next renewal</dt><dd>" + (nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None") + "</dd></div></dl>";
-    /* Up next: renewals, welcome bonus deadlines and activations first (they are not
-       in the credit list), then the soonest credits, three rows in all. */
-    var alerts = topAlerts(V, catalog(), null, 6).filter(function (a) { return a.level === "warn" || (a.level === "hot" && /welcome bonus/.test(a.text)); }).slice(0, 2);
-    var credits = soon.filter(function (r) { return r.perk.type !== "activation"; }).slice(0, Math.max(1, 3 - alerts.length));
-    var rows = alerts.map(function (a) {
-      return '<li><button class="wlm-row ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + '>' +
-        '<span class="wlm-dot" aria-hidden="true"></span><span class="wlm-txt">' + esc(a.text.replace(/ fee posts around .*$/, " fee")) + '</span><span class="wlm-go" aria-hidden="true">&rsaquo;</span></button></li>';
-    }).concat(credits.map(function (r) {
+    var nx = s.next, cap = capturedThisYear(V, cat);
+    var box = function (label, value, sub) {
+      return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
+    };
+    var html = demo + acts() + tag + '<div class="hw-boxes">' +
+      box("Cards", String(s.count), "in your wallet") +
+      box("Annual fees", esc(money(s.yearly)), "a year") +
+      box("Credits to use", due ? esc(money(due)) : "All used", "next " + SOON_PERK_DAYS + " days") +
+      box("Next renewal", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
+    if (cap > 0) {
+      var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
+      html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +
+        (pct != null ? '<span class="hw-pct">' + pct + "% of your fees</span>" : "") + "</div>" +
+        (pct != null ? '<div class="hw-bar" aria-hidden="true"><i style="width:' + Math.max(3, pct) + '%"></i></div>' : "") + "</div>";
+    }
+    /* Up next, two rows: the soonest credit (with its Used tick), plus the next
+       renewal or welcome bonus deadline when there is one. */
+    var alerts = topAlerts(V, cat, null, 6).filter(function (a) { return a.level === "warn" || (a.level === "hot" && /welcome bonus/.test(a.text)); }).slice(0, 1);
+    var credits = soon.filter(function (r) { return r.perk.type !== "activation"; }).slice(0, 2 - alerts.length);
+    var rows = credits.map(function (r) {
       var b = r.perk, p = r.period, lvl = p.days <= 7 ? " hot" : p.days <= 14 ? " warn" : "";
-      return '<li class="wlm-cr' + lvl + '"><span class="wlm-dot" aria-hidden="true"></span><span class="wlm-txt"><b>' + esc(shortName(r.card.name)) + " " + esc(b.label) +
-        (b.unit === "usd" ? " " + esc(money(r.part ? r.left : b.amount)) : "") + "</b><small>" + esc(daysLeft(p.days)) + ", use by " + esc(dayText(p.end)) + "</small></span>" +
-        '<label class="wlm-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) + '" data-key="' + esc(p.key) + '"' +
+      var amt = b.unit === "usd" ? money(r.part ? r.left : b.amount) : "";
+      return '<li class="hw-row hw-cr' + lvl + '" title="' + esc(shortName(r.card.name) + ": " + b.label) + '"><span class="hw-dot" aria-hidden="true"></span>' +
+        '<span class="hw-t"><b>' + esc((amt ? amt + " " : "") + b.label) + "</b><small>" + esc(shortName(r.card.name)) + " · " + esc(daysLeft(p.days)) + "</small></span>" +
+        '<label class="hw-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) + '" data-key="' + esc(p.key) + '"' +
         (state.busy ? " disabled" : "") + "> Used</label></li>";
+    }).concat(alerts.map(function (a) {
+      return '<li><button class="hw-row ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + '>' +
+        '<span class="hw-dot" aria-hidden="true"></span><span class="hw-t"><b>' + esc(a.text.replace(/ fee posts around .*$/, " fee")) + '</b></span><span class="hw-go" aria-hidden="true">&rsaquo;</span></button></li>';
     }));
-    if (rows.length) html += '<h3 class="wlm-sub">Up next</h3><ul class="wlm-list">' + rows.join("") + "</ul>";
-    if (state.msg) html += '<p class="wlm-msg" role="alert">' + esc(state.msg) + "</p>";
+    if (rows.length) html += '<h3 class="hw-sub">Up next</h3><ul class="hw-list">' + rows.join("") + "</ul>";
+    if (state.msg) html += '<p class="hw-msg" role="alert">' + esc(state.msg) + "</p>";
     return html;
   }
   function paintMini() {
-    if (miniHost) miniHost.innerHTML = miniHtml();
-    var th = document.getElementById("wl-tips-home");
-    if (th) th.innerHTML = state.wallet && !state.error ? tipsHtml(true) : "";
+    if (!miniHost) return;
+    miniHost.innerHTML = miniHtml();
+    var hero = miniHost.closest(".hero");
+    if (hero) { hero.classList.toggle("has-wallet", miniMode === "full"); hero.classList.toggle("wallet-empty", miniMode === "empty"); }
   }
+
   function paint() {
     paintMain(); paintHome(); paintAlerts(); paintMini();
     /* tell the other tools (Transfer Bonuses, Resy, Lounges) the wallet changed; see connect.js */
@@ -2469,7 +2484,7 @@
       styles();
       homeHost = document.getElementById("wl-home");
       alertHost = document.getElementById("wl-summary");
-      miniHost = document.getElementById("wl-mini");
+      miniHost = document.getElementById("wl-hero");
       if (miniHost && !miniHost.getAttribute("data-ready")) {
         miniHost.setAttribute("data-ready", "1");
         miniHost.addEventListener("click", onClick);
