@@ -468,8 +468,10 @@
  /* ---------- freshness: live "updated" line, Deal of the Day, latest changes ----------
     The daily refresh stamps every deal with fs (first seen) and us (last changed).
     Deal of the Day: a brand-new Top pick gets the spot for its first 3 days (a freshly
-    updated one for 2). Otherwise it rotates through the strongest deals, a different
-    one each morning in Hawaii, the same for everyone that day. */
+    updated one for 2). Otherwise it rotates through the strongest deals (top 16 hotels,
+    at most 3 per brand, plus the top 4 tours, ocean trips and attractions), a different
+    one each morning in Hawaii, the same for everyone that day. Only Top pick or Strong
+    deals with at least 2 days left can be picked. */
  var STAMP = window.HRT_KAMAAINA_STAMP ? new Date(window.HRT_KAMAAINA_STAMP) : null;
  var TODAY = new Date(Date.now() - 10 * 3600 * 1000).toISOString().slice(0, 10);
  var MS_DAY = 864e5;
@@ -487,8 +489,10 @@
   var ok = DEALS.filter(function(d){ return d.dl >= 2 && (d.r === "Top pick" || d.r === "Strong"); });
   var hot = ok.filter(function(d){ return d.r === "Top pick" && d._fd && ago(d._fd) <= (d._fk === "new" ? 2 : 1); }).sort(SORTS.score);
   if(hot.length) return hot[day % hot.length];
-  var stays = ok.filter(function(d){ return d._c === "stay"; }).sort(SORTS.score).slice(0, 16);
-  var acts = ok.filter(function(d){ return d._c !== "stay"; }).sort(SORTS.score).slice(0, 4);
+  var perBrand = {};   /* at most 3 hotels from one brand, so one chain cannot take over the week */
+  var stays = ok.filter(function(d){ return d._c === "stay"; }).sort(SORTS.score).filter(function(d){
+   if(!d.m) return true; perBrand[d.m] = (perBrand[d.m] || 0) + 1; return perBrand[d.m] <= 3; }).slice(0, 16);
+  var acts = ok.filter(function(d){ return d._c === "ocean" || d._c === "tour" || d._c === "attr"; }).sort(SORTS.score).slice(0, 4);
   var pool = stays.concat(acts).sort(function(a, b){ return hash(a.b + "|" + a.t) - hash(b.b + "|" + b.t); });
   return pool.length ? pool[day % pool.length] : null;
  }
@@ -523,11 +527,11 @@
    + '<span class="big"><b class="tnum">'+esc(h.big)+'</b>'+(h.small ? '<span>'+esc(h.small)+'</span>' : '')+'</span>'
    + (d.k.length ? '<span class="chips">'+d.k.slice(0, 4).map(function(p){ return '<span>'+esc(p)+'</span>'; }).join("")+'</span>' : '')
    + '<span class="act"><span class="btn coral" data-open="'+idx+'">See this deal &rarr;</span><small>'+esc(d.h && d._isl !== "all" ? d.h + " · " : "")+esc(daysLabel(d))+'</small></span>'
-   + '<span class="nx">A new pick every morning</span></span>';
+   + '</span>';
   $("kDotd").setAttribute("data-open", idx);
   $("kDotd").setAttribute("aria-label", "Deal of the day: " + d.b + ", " + h.big);
 
-  var feed = DEALS.filter(function(x){ return x._fd; }).sort(function(a, b){ return b._fd.localeCompare(a._fd) || b.s - a.s; }).slice(0, 6);
+  var feed = DEALS.filter(function(x){ return x._fd; }).sort(function(a, b){ return b._fd.localeCompare(a._fd) || b.s - a.s; }).slice(0, 5);
   $("kFeedNote").innerHTML = '<span class="fdot"></span>' + esc(week.length ? week.join(", ") + " in the last 7 days" : "Checked every morning");
   $("kFeed").innerHTML = feed.length ? feed.map(function(x){
    var hh = headline(x);

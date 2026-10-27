@@ -95,6 +95,7 @@ eq("replaced offer = updated", [st[2].fs, st[2].us], ["2026-09-30", "2026-10-27"
 eq("keeps old update date", [st[3].us, st[3].n], ["2026-10-22", 0]);
 eq("brand new", [st[4].fs, st[4].us, st[4].n], ["2026-10-27", "", 1]);
 eq("new for a week", stampRows([Object.assign({}, st[4])], [st[4]], "2026-11-02")[0].n, 1);
+eq("no previous list marks nothing new", stampRows([{ b: "X", t: "Y" }], [], "2026-10-27")[0].n, 0);
 eq("then not new", stampRows([Object.assign({}, st[4])], [st[4]], "2026-11-03")[0].n, 0);
 eq("no em dash in output", /—/.test(js), false);
 

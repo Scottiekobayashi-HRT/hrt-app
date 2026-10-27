@@ -201,6 +201,9 @@ export function stampRows(rows, prevList, today) {
     (prevByBiz[p.b.toLowerCase()] = prevByBiz[p.b.toLowerCase()] || []).push(p);
   });
   const cur = new Set(rows.map(keyOf));
+  /* No previous list (first run, or yesterday's file could not be read): we cannot tell
+     what is new, so mark nothing new rather than calling every deal new. */
+  if (!(prevList || []).length) { rows.forEach((r) => { r.fs = ""; r.us = ""; r.n = 0; }); return rows; }
   rows.forEach((r) => {
     const o = prevByKey[keyOf(r)];
     if (o) {
