@@ -74,9 +74,16 @@
     '.srch svg{width:16px;height:16px;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round}',
     '.srch input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:14px;color:var(--text);height:auto;margin:0;padding:0;box-shadow:none}',
     '.srch:focus-within{border-color:var(--coral)}',
-    '.sorts{display:flex;gap:6px;flex-wrap:wrap}',
-    '.sorts button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font-size:12.5px;font-weight:700;min-height:34px}',
-    '.sorts button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}:host(.dark) .sorts button[aria-pressed=true]{background:#fff;color:var(--navy2);border-color:#fff}',
+    '.r1 .cn{display:flex;flex-direction:column;line-height:1.2;min-width:0}',
+    '.ssort{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:none}',
+    '.ssort select{font:inherit;font-size:12.5px;font-weight:700;color:var(--text);background:var(--surface2);border:1.5px solid var(--line);border-radius:999px;padding:5px 26px 5px 11px;min-height:34px;margin:0;cursor:pointer;-webkit-appearance:none;appearance:none;',
+    ' background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 14px) 50%,calc(100% - 10px) 50%;background-size:4px 4px;background-repeat:no-repeat}',
+    '.ssort select:focus{border-color:var(--coral);outline:0}',
+    '.kinds{display:flex;background:var(--surface2);border:1.5px solid var(--line);border-radius:12px;padding:3px;gap:2px}',
+    '.kinds button{flex:1 1 auto;border:0;background:transparent;border-radius:9px;padding:6px 6px;font-size:12.5px;font-weight:700;min-height:34px;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--text)}',
+    '.kinds button i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}.kinds button em{font-style:normal;font-size:11px;opacity:.65;font-weight:600}',
+    '.kinds button:hover{background:var(--surface)}',
+    '.kinds button[aria-pressed=true]{background:var(--navy);color:#fff}.kinds button[aria-pressed=true] i{box-shadow:0 0 0 1.5px #fff}:host(.dark) .kinds button[aria-pressed=true]{background:#fff;color:var(--navy2)}',
     '.follow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer;min-height:32px}.follow input{width:18px;height:18px;accent-color:#d97040;margin:0}',
     '.sl{flex:1;overflow-y:auto;padding:4px 8px 12px}',
     '.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:transparent;border-radius:12px;padding:10px;min-height:62px}',
@@ -178,9 +185,10 @@
     var root = host.attachShadow({ mode: "open" });
     root.innerHTML = '<link rel="stylesheet" href="' + MAPLIBRE_CSS + '"><style>' + CSS + '</style>' +
       '<div class="lay"><aside class="side" aria-label="Deals"><div class="sh">' +
-        '<div class="r1"><b class="scnt"></b><span class="ssub"></span></div>' +
+        '<div class="r1"><div class="cn"><b class="scnt"></b><span class="ssub"></span></div>' +
+          '<label class="ssort">Sort <select data-sortsel aria-label="Sort deals"><option value="best">Best deals</option><option value="off">Biggest discount</option><option value="soon">Ending soon</option><option value="new">Newest</option></select></label></div>' +
         '<label class="srch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" class="sq" placeholder="Search a hotel, town or activity" aria-label="Search deals" autocomplete="off"></label>' +
-        '<div class="sorts" role="group" aria-label="Sort"><button type="button" data-sort="best" aria-pressed="true">Best deals</button><button type="button" data-sort="soon" aria-pressed="false">Ending soon</button><button type="button" data-sort="off" aria-pressed="false">Biggest discount</button><button type="button" data-sort="new" aria-pressed="false">Newest</button></div>' +
+        '<div class="kinds" role="group" aria-label="Show"></div>' +
         '<label class="follow"><input type="checkbox" class="fol" checked> Only show deals on the map</label>' +
       '</div><div class="sl"></div></aside>' +
       '<div class="mapcol"><div class="w" role="region" aria-label="Kamaʻāina Deals map">' +
@@ -215,6 +223,10 @@
       var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.f = c[0]; b.setAttribute("aria-pressed", c[0] === "all");
       b.style.setProperty("--c", c[2]); b.innerHTML = (c[0] === "all" ? "" : "<i></i>") + esc(c[1]) + " <em>" + n + "</em>";
       b.onclick = function () { setKind(c[0]); }; chips.appendChild(b);
+      var s2 = document.createElement("button"); s2.type = "button"; s2.dataset.f = c[0]; s2.setAttribute("aria-pressed", c[0] === "all");
+      s2.style.setProperty("--c", c[2]); s2.title = c[1] + " (" + n + ")";
+      s2.innerHTML = (c[0] === "all" ? "" : "<i></i>") + esc(c[0] === "more" ? "Dining & more" : c[1]) + (c[0] === "all" ? " <em>" + n + "</em>" : "");
+      s2.onclick = function () { setKind(c[0]); }; $(".kinds").appendChild(s2);
     });
     [["oahu", "Oʻahu"], ["maui", "Maui"], ["hawaii", "Hawaiʻi"], ["kauai", "Kauaʻi"], ["lm", "Lānaʻi & Molokaʻi"]].forEach(function (x) {
       var b = document.createElement("button"); b.type = "button"; b.className = "q"; b.dataset.isl = x[0]; b.setAttribute("aria-pressed", "false"); b.textContent = x[1];
@@ -348,7 +360,7 @@
         map.flyTo({ center: [d.ll[1], d.ll[0]], zoom: Math.max(map.getZoom(), 15), offset: wide ? [mapEl.clientWidth * .12, 0] : [0, -mapEl.clientHeight * .2], duration: 900 });
       } else render();
     }
-    function setKind(k) { kind = k; chips.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.f === k); });
+    function setKind(k) { kind = k; root.querySelectorAll(".chip,.kinds button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.f === k); });
       if (selected && k !== "all" && selected.k !== k) select(null); render(); renderSide(); }
     var pulseT;
     function highlight(arr) {
@@ -383,7 +395,7 @@
     follow.addEventListener("change", renderSide);
     var qT; sq.addEventListener("input", function () { clearTimeout(qT); qT = setTimeout(function () { q = sq.value.trim().toLowerCase(); select(null); render(); renderSide();
       if (q && map) { var m = onMap.filter(visible); if (m.length && m.length < 60) { var keep = follow.checked; follow.checked = false; fitTo(m, 14); setTimeout(function () { follow.checked = keep; renderSide(); }, 900); } } }, 180); });
-    root.querySelectorAll("[data-sort]").forEach(function (b) { b.onclick = function () { sortBy = b.dataset.sort; root.querySelectorAll("[data-sort]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); renderSide(); }; });
+    $("[data-sortsel]").addEventListener("change", function (e) { sortBy = e.target.value; renderSide(); });
     function renderList() {
       var arr = sorted(D.filter(visible));
       list.innerHTML = '<button type="button" class="close" data-a="closelist">Back to map</button><h4>' + arr.length + ' deals</h4>' + arr.map(rowHtml).join("");
