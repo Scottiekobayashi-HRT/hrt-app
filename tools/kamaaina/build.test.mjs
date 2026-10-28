@@ -42,7 +42,7 @@ eq("parsed until", o._validUntil, "2027-09-27");
 eq("braces in strings", o.udfs_object["2703"].value, 'Rates plus tax. {braces} "quoted"');
 
 /* build */
-const many = Array.from({ length: 40 }, (_, i) => Object.assign(JSON.parse(JSON.stringify(o)), { title: "Offer " + i }));
+const many = Array.from({ length: 40 }, (_, i) => Object.assign(JSON.parse(JSON.stringify(o)), { title: "Offer " + i, _path: "/coupon/offer-" + i + "/28" + i + "/" }));
 const rows = build({ hvcb: many, prevList: [{ b: "Aston at the Executive Centre Hotel", t: "Offer 1", h: "Waikīkī", m: "Aqua-Aston" }], today: "2026-10-14" });
 eq("count", rows.length, 40);
 const r1 = rows.find((r) => r.t === "Offer 1");
@@ -52,6 +52,7 @@ eq("others are new", rows.find((r) => r.t === "Offer 2").n, 1);
 eq("island", r1.i, ["oahu"]);
 eq("group", r1.g, "Stays");
 eq("link", r1.u, "https://www.aquaaston.com/x");
+eq("hvcb coupon page", r1.c, "https://www.hvcb.org/coupon/offer-1/281/");
 eq("coords", r1.ll, [21.3093, -157.86]);
 eq("ends", [r1.e, r1.dl, r1.x], ["2027-09-27", 348, 0]);
 let threw = false; try { build({ hvcb: many.slice(0, 10) }); } catch (e) { threw = true; }

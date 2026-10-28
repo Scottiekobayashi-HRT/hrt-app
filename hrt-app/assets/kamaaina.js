@@ -565,8 +565,11 @@
    + '<dl>'+rows.join("")+'</dl>'
    + howTo(d)
    + (d.f ? '<p class="fine"><b>Fine print:</b> '+esc(d.f)+'</p>' : '')
-   + (d.u ? '<a class="btn coral" href="'+esc(d.u)+'" target="_blank" rel="noopener">'+(d._kl ? 'Book the kamaʻāina rate' : 'Go to '+esc(d.b))+' &rarr;</a>' : '')
-   + '<p class="src">'+(d._kl ? 'This link opens the business\'s kamaʻāina offer or rate. ' : '')+'Confirm the current rate and terms with the business before booking.</p>'
+   + (d.c
+      ? '<a class="btn coral" href="'+esc(d.c)+'" target="_blank" rel="noopener">See the kamaʻāina offer &rarr;</a>'
+        + (d.u && d.u !== d.c ? '<p class="src"><a href="'+esc(d.u)+'" target="_blank" rel="noopener">Or go straight to '+esc(d.b)+' &rarr;</a></p>' : '')
+      : (d.u ? '<a class="btn coral" href="'+esc(d.u)+'" target="_blank" rel="noopener">'+(d._kl ? 'Book the kamaʻāina rate' : 'Go to '+esc(d.b))+' &rarr;</a>' : ''))
+   + '<p class="src">'+(d.c ? 'The offer page on HVCB shows the full terms, the coupon and how to book. ' : d._kl ? 'This link opens the business\'s kamaʻāina offer or rate. ' : '')+'Confirm the current rate and terms with the business before booking.</p>'
    + '</div>';
   if(typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open","");
   placeDialog(dlg); dlg.scrollTop = 0;
@@ -863,7 +866,7 @@
    if(KM || !kmHost || !window.HRT_DEALS_MAP) return KM;
    KM = window.HRT_DEALS_MAP.mount(kmHost, { details:function(i){ var d = DEALS[i]; if(d) openDialog(d); },
     deals:DEALS.map(function(d, i){ return { id:i, b:d.b, h:d.h, isl:d._isl, k:d._c === "stay" ? "stay" : (d._c === "dining" || d._c === "svc" || d._c === "around") ? "more" : "act",
-     p:d.p, v:d.v, kk:d.k, s:d.s, r:d.r, e:d.e, m:d.m, u:d.u, d:d.d, ll:locFor(d), fr:d._fr, fd:d._fd }; }) });
+     p:d.p, v:d.v, kk:d.k, s:d.s, r:d.r, e:d.e, m:d.m, u:d.c || d.u, d:d.d, ll:locFor(d), fr:d._fr, fd:d._fd }; }) });
    return KM;
   }
   window.HRT_KAMA = {

@@ -149,6 +149,7 @@ export function fromHvcb(o, today, prev) {
     n: prev[key] ? 0 : 1, x: 0,
     m: (old && old.m) || programFor(b),
     u: o.offerlink ? (/^https?:/i.test(o.offerlink) ? o.offerlink : "https://" + o.offerlink) : "https://www.hvcb.org" + (o._path || "/kamaaina/"),
+    c: o._path ? "https://www.hvcb.org" + o._path : "",
     src: "hvcb"
   };
   if (typeof L.latitude === "number" && typeof L.longitude === "number" && L.latitude) row.ll = [+L.latitude.toFixed(4), +L.longitude.toFixed(4)];
