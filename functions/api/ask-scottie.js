@@ -911,6 +911,7 @@ function coachContext(m, walletText, held, partners, bonuses, historyText) {
     "- If an entry says \"Hand off to Scottie: Yes\", end with the handoff to the real me.",
     "- Share the entry's HRT source link when it helps them read more.",
     "- For redemption questions, my playbook and today's partner table and bonuses win over an older FAQ entry if they disagree.",
+    "- If two FAQ entries disagree, follow the one whose ID starts with FAQ- (my newest FAQ, checked Oct 30).",
     "",
     "HOW I COACH A REDEMPTION (keep it to a few sentences; condense, and link to my FAQ pages for the details):",
     "1. If the key facts are missing, ask 1 or 2 quick questions first: where and roughly when, how many people, cabin, and which points and how many. If they gave enough, go straight to the answer.",
