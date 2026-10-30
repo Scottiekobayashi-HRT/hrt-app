@@ -84,7 +84,7 @@
     fab.className = "asc-fab";
     fab.setAttribute("aria-haspopup", "dialog");
     fab.setAttribute("aria-expanded", "false");
-    fab.innerHTML = '<img src="' + CUT + '" alt="" width="210" height="154"><span>Ask Scottie</span><b class="asc-dot" hidden></b>';
+    fab.innerHTML = '<img src="' + CUT + '" alt="" width="210" height="154"><span>Ask Scottie <i class="asc-ai">AI</i></span><b class="asc-dot" hidden></b>';
     fab.addEventListener("click", function () { toggle(!isOpen); });
 
     pop = document.createElement("div");
@@ -130,9 +130,9 @@
   function header() {
     return '<div class="asc-head">' +
       '<img class="asc-photo" src="' + CUT + '" alt="Scottie" width="106" height="78">' +
-      '<div class="asc-id"><div class="asc-name">Ask Scottie</div>' +
-      '<div class="asc-badges"><span class="asc-badge">ʻOhana Member</span>' + (info && info.pro ? '<span class="asc-badge pro">&#9733; PRO</span>' : "") + "</div></div>" +
-      textBtn("asc-textbtn") +
+      '<div class="asc-id"><div class="asc-name">Ask Scottie <span class="asc-ai">AI</span></div>' +
+      '<div class="asc-badges"><span class="asc-badge">ʻOhana Member</span>' + (info && info.pro ? '<span class="asc-badge pro">&#9733; PRO</span>' : "") + "</div>" +
+      textBtn("asc-textbtn head") + "</div>" +
       '<button type="button" class="asc-x" aria-label="Close chat">' + ICON_X + "</button>" +
       "</div>";
   }
@@ -291,10 +291,10 @@
     var log = document.getElementById("ascLog"); if (!log) return;
     var hello = {
       role: "assistant",
-      content: "Aloha" + (info && info.firstName ? " " + info.firstName : "") + "! Need help redeeming your points or planning your next trip? I can see the cards in your My Wallet, so tell me where you want to go."
+      content: "Aloha" + (info && info.firstName ? " " + info.firstName : "") + "! Heads up, this is my AI, not me live. It's trained on my tips to coach you on redeeming your points: which portal or airline to use, about how many points, and the steps. For anything personal, tap Text Scottie & you'll get the real me."
     };
     log.innerHTML =
-      '<p class="asc-note">Ask Scottie is the AI version of me, trained on my tips. It can make mistakes, so double check before you transfer points. For anything personal, text the real me.</p>' +
+      '<p class="asc-note">Ask Scottie is an AI trained on Scottie\'s tips, not Scottie in person. It coaches you on how to redeem points and doesn\'t look up live award seats. It can make mistakes, so double check before you transfer points.</p>' +
       bubble(hello, -1) + state.msgs.map(bubble).join("") +
       (busy ? '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28"><div class="asc-b asc-typing" aria-label="Scottie is typing"><i></i><i></i><i></i></div></div>' : "");
     var chips = document.getElementById("ascChips");

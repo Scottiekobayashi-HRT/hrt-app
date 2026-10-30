@@ -24,8 +24,11 @@ html.asc-open .asc-fab{display:none}
 .asc-card{background:var(--asc-cream);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;height:100%;
  border:1px solid rgba(242,184,75,.35);box-shadow:0 2px 6px rgba(16,32,54,.12),0 24px 60px rgba(16,32,54,.32)}
 .asc-head{background:var(--asc-navy);padding:14px 12px 14px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-.asc-head{position:relative;min-height:96px;padding-left:116px;overflow:hidden}
-.asc-photo{position:absolute;left:6px;bottom:0;width:106px;height:auto;flex-shrink:0}
+.asc-head{position:relative;min-height:112px;padding-left:122px;align-items:flex-start;overflow:hidden}
+.asc-photo{position:absolute;left:4px;bottom:0;width:116px;height:auto;flex-shrink:0}
+.asc-ai{display:inline-block;vertical-align:middle;margin-left:4px;font:800 10.5px/1 'DM Sans',sans-serif;letter-spacing:.06em;font-style:normal;color:var(--asc-navy);background:#fff;border-radius:5px;padding:3px 5px 2px}
+.asc-fab .asc-ai{background:var(--asc-gold);color:#1a1204}
+.asc-pop .asc-textbtn.head{align-self:flex-start;min-height:30px;padding:0 10px;font-size:12px;margin-top:2px}
 .asc-name{white-space:nowrap}
 .asc-id{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .asc-name{font-family:'Sofia Pro','Sofia Sans','Inter',sans-serif;font-weight:900;font-size:19px;letter-spacing:-.02em;color:#fff;line-height:1}
@@ -82,9 +85,8 @@ html.asc-open .asc-fab{display:none}
  .asc-fab img{width:130px}
  .asc-fab span{right:108px;top:8px;font-size:13px;padding:6px 11px}
  .asc-fab .asc-dot{left:auto;right:100px;top:-4px}
- .asc-head{padding-left:108px}
- .asc-photo{width:100px}
- .asc-pop .asc-textbtn{padding:0 9px;font-size:12px}
+ .asc-head{padding-left:112px}
+ .asc-photo{width:106px}
  html.asc-open .asc-fab{display:none}
  .asc-pop{inset:0;width:auto;max-width:none;height:auto;z-index:1000}
  .asc-card{border-radius:0;border:0;padding-bottom:env(safe-area-inset-bottom)}
