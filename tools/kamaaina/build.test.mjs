@@ -33,6 +33,26 @@ eq("days left", daysLeft("2026-12-31", "2026-10-14"), 78);
 
 eq("headline percent wins", readDeal("Enjoy 30% off room rates, No Amenity Fees. Up to 50% off select stays", true, "Enjoy 30% off room rates, No Amenity Fees").p, 30);
 
+/* honest numbers: "up to", upgrade-only percents, minimum nights */
+const ritzT = "Kamaʻāina Staycation: Waived Resort Fee, Self-Parking & Up to 15% off Dining, Spa, Retail and More";
+const ritz = readDeal(ritzT + ". A quick trip to the North Shore offers the perfect escape for Hawaiʻi Residents to experience the best of our island home. On stays of 2 nights or more, enjoy a special Kama‘āina Rate starting at $519 in 2026 and $539 in 2027, plus up to 40% savings when upgrading to a Premium Room, Suite, or Bungalow.", true, ritzT);
+eq("ritz: upgrade 40% is not the room discount", ritz.p, 0);
+eq("ritz: upgrade 40% kept separately", ritz.pc, 40);
+eq("ritz: rate from", ritz.v, 519);
+eq("ritz: 2 night minimum", ritz.mn, 2);
+eq("ritz: discounted upgrade is not a free upgrade", ritz.k.includes("Room upgrade"), false);
+eq("up to is kept", readDeal("Kamaʻāina save up to 40%. Nestled against Puʻu Kekaʻa", true, "Kamaʻāina save up to 40%").pu, 1);
+eq("flat is flat", readDeal("Enjoy 25% off our Best Available Rate", true).pu, 0);
+const ast = readDeal("Enjoy 30% off room rates, No Amenity Fees. includes: 20-30% off room rates* No amenity fees", true, "Enjoy 30% off room rates, No Amenity Fees");
+eq("range in body makes headline up to", [ast.p, ast.pu], [30, 1]);
+const hap = readDeal("Resort View Rooms from $299 per night plus tax. Higher room categories up to 50% off", true, "Kamaʻāina Starting $299");
+eq("higher category percent is not the room discount", [hap.p, hap.pc, hap.v], [0, 50, 299]);
+eq("aulani select + min nights", (({ p, pu, mn, sel }) => [p, pu, mn, sel])(readDeal("Save up to 35% on select rooms and villas for stays of 2 or more nights", true)), [35, 1, 2, 1]);
+eq("parking price is not a room price", readDeal("Up to 30% off published rates One Time $50 Resort Credit Discounted Valet Parking $30 per night", true).v, null);
+eq("activities count for tour businesses", readDeal("Kama‘āina Discount, 10% Discount on Activities", false).p, 10);
+eq("$199 rates", readDeal("Use promo code HWN to unlock our $199 Kamaʻāina rates", true).v, 199);
+eq("up to scores lower than flat", scoreFor({ p: 40, pu: 1, a: 0, k: [], v: null, g: "Stays" }) < scoreFor({ p: 40, pu: 0, a: 0, k: [], v: null, g: "Stays" }), true);
+
 /* offer page parsing */
 const html = '<script>var data = {"recid":"2856","title":"Enjoy up to 10% off room rate","description":"<p>Up to 10% off room rates</p>","offerlink":"https://www.aquaaston.com/x","categories":[{"categoryid":7}],"udfs_object":{"2724":{"valuearray":[{"listid":5626,"value":"Oʻahu"}]},"3915":{"value":"Accommodations - Oʻahu"},"2703":{"value":"Rates plus tax. {braces} \\"quoted\\""}},"listings":[{"title":"Aston at the Executive Centre Hotel","city":"Honolulu","region":"Oʻahu","latitude":21.30932,"longitude":-157.86,"primary_category":{"catname":"Accommodations"}}]};</script>' +
   '<script type="application/ld+json">{"validFrom":"2026-09-28","priceValidUntil":"2027-09-27"}</script>';
@@ -68,6 +88,8 @@ eq("csv quotes", sheet[0].description, 'Save 25% plus daily breakfast, "for loca
 const rows2 = build({ hvcb: many, sheetRows: sheet, today: "2026-10-14" });
 eq("only approved added", rows2.filter((r) => r.src === "chain").map((r) => r.b), ["Hyatt Regency Maui"]);
 eq("chain perks", rows2.find((r) => r.src === "chain").k, ["Breakfast included"]);
+const upSheet = parseCsv('approved,island,business,title,description,terms,category,percent_off,perks,nightly_from,ends,link,program\nyes,Oʻahu,Hilton Garden Inn Waikiki Beach,Resident Rate,Up to 25% off the Best Available Rate,,Accommodations,25,,,2026-12-31,https://www.hilton.com/z,\n');
+eq("sheet percent keeps up to", build({ hvcb: many, sheetRows: upSheet, today: "2026-10-14" }).find((r) => r.src === "chain").pu, 1);
 eq("expired dropped", build({ hvcb: many, sheetRows: [Object.assign({}, sheet[0], { ends: "2026-10-01" })], today: "2026-10-14" }).filter((r) => r.src === "chain").length, 0);
 
 /* output */

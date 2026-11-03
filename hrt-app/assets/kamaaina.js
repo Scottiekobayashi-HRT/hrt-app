@@ -157,7 +157,10 @@
   else if(ATTR.test(hay)) d._c = "attr";
   else d._c = "tour";
   d._isl = homeIsland(d);
+  /* Older data files have no "up to" flag yet: read it from the offer's own words */
+  if(d.pu == null && d.p) d.pu = new RegExp("up to\\s*" + d.p + "\\s?%|\\d{1,2}\\s?%?\\s*(-|to)\\s*" + d.p + "\\s?%", "i").test(d.t + " " + d.d) ? 1 : 0;
  });
+ window.HRT_DEAL_HEAD = function(d){ return headline(d); };
  /* booking link quality: does the button land on a kamaʻāina offer or rate? */
  var KLINK = /kama|resident|local|love-?hawaii|staycation|special|offer|promo|rate(code)?=|srpcodes|spec_plan|cc=z43|offercode|[?&]rate=|kam\b|deal|discount|la-ohana|keikiday|huakai|gold-card|km-discount|welovekamaaina|affiliate|reservation-link|be\.synxis\.com/i;
  var CODE_RE = [
@@ -231,9 +234,19 @@
   if(d.dl <= 60) return d.dl + " days left";
   return "Through " + new Date(d.e + "T12:00:00").toLocaleDateString("en-US",{month:"short", year:"numeric"});
  }
+ /* HONEST HEADLINES (rules: HRT-Honest-Deal-Language.md in the Project)
+    - The big number is what every resident gets on the base offer.
+    - "Up to" stays "Up to". Never round "up to 40%" into "40% off".
+    - A percent that only applies to upgrades or higher room categories is never the
+      big number. It shows in the deal window as "Upgrade savings".
+    - With no room percent, lead with the real price: "From $519". */
+ function pctText(d){ return (d.pu ? "Up to " : "") + d.p + "% off"; }
  function headline(d){
-  if(d.p) return { big: d.p + "% off", small: d.a ? "+ " + d.a + "% off fees" : (d.k[0] ? "+ " + d.k[0].toLowerCase() : "") };
-  if(d.v) return { big: "From $" + d.v, small: d.k[0] ? "+ " + d.k[0].toLowerCase() : "per night" };
+  var cond = [];
+  if(d.sel) cond.push("select dates");
+  if(d.mn) cond.push(d.mn + " night min");
+  if(d.p) return { big: pctText(d), small: cond.length ? cond.join(" · ") : (d.a ? "+ " + d.a + "% off fees" : (d.k[0] ? "+ " + d.k[0].toLowerCase() : "")) };
+  if(d.v) return { big: "From $" + d.v, small: "a night" + (d.mn ? " · " + d.mn + " night min" : "") };
   if(d.k[0]) return { big: d.k[0], small: d.k[1] ? "+ " + d.k[1].toLowerCase() : "" };
   return { big: "Resident rate", small: "" };
  }
@@ -550,8 +563,12 @@
   var t = tierOf(d), rows = [];
   rows.push("<dt>Where</dt><dd>" + esc(d.i.length > 2 && d._isl === "all" ? "Statewide" : d.i.map(function(k){ return ISL_NAME[k]; }).join(", ")) + (d.h ? ", " + esc(d.h) : "") + "</dd>");
   rows.push("<dt>Type</dt><dd>" + esc(d._c === "stay" ? "Hotel stay" : (CATS.filter(function(c){ return c.k === d._c; })[0]||{name:d.g}).name) + "</dd>");
-  if(d.p) rows.push("<dt>Discount</dt><dd>" + d.p + "% off" + (d.a ? ", plus " + d.a + "% off an add on such as parking or fees" : "") + "</dd>");
-  if(d.v) rows.push("<dt>Rates from</dt><dd>$" + d.v + "</dd>");
+  if(d.p) rows.push("<dt>Discount</dt><dd>" + pctText(d) + " the room or ticket price" + (d.sel ? ", on select dates or rooms only" : "") + (d.a ? ", plus " + d.a + "% off an add on such as parking or fees" : "") + "."
+   + (d.pu ? " <small>“Up to” means only some dates or rooms get the full discount. Many get less.</small>" : "") + "</dd>");
+  else if(d._c === "stay") rows.push("<dt>Discount</dt><dd>A special resident rate. The offer does not promise a set percent off.</dd>");
+  if(d.v) rows.push("<dt>Rates from</dt><dd>$" + d.v + " a night, before taxes and any fees. Check the offer page for your dates.</dd>");
+  if(d.pc) rows.push("<dt>Upgrade savings</dt><dd>Up to " + d.pc + "% off when you upgrade to a higher room category. This is not a discount on the base rate.</dd>");
+  if(d.mn) rows.push("<dt>Minimum stay</dt><dd>" + d.mn + " nights</dd>");
   if(d.k.length) rows.push("<dt>Included</dt><dd>" + d.k.map(esc).join(", ") + "</dd>");
   if(d.m) rows.push("<dt>Loyalty</dt><dd>" + esc(d.m) + ". Confirm points and elite night credit at booking, since some resident rates are excluded.</dd>");
   var exact = new Date(d.e + "T12:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
@@ -866,7 +883,7 @@
    if(KM || !kmHost || !window.HRT_DEALS_MAP) return KM;
    KM = window.HRT_DEALS_MAP.mount(kmHost, { details:function(i){ var d = DEALS[i]; if(d) openDialog(d); },
     deals:DEALS.map(function(d, i){ return { id:i, b:d.b, h:d.h, isl:d._isl, k:d._c === "stay" ? "stay" : (d._c === "dining" || d._c === "svc" || d._c === "around") ? "more" : "act",
-     p:d.p, v:d.v, kk:d.k, s:d.s, r:d.r, e:d.e, m:d.m, u:d.c || d.u, d:d.d, ll:locFor(d), fr:d._fr, fd:d._fd }; }) });
+     p:d.p, hd:headline(d).big, v:d.v, kk:d.k, s:d.s, r:d.r, e:d.e, m:d.m, u:d.c || d.u, d:d.d, ll:locFor(d), fr:d._fr, fd:d._fd }; }) });
    return KM;
   }
   window.HRT_KAMA = {

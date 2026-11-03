@@ -64,21 +64,60 @@ export function clip(s, n) {
   return cut.slice(0, Math.max(cut.lastIndexOf(" "), n - 30)) + "...";
 }
 
-/* What a deal gives: percent off, fee discount, perks, nightly price */
-/* Room or ticket percent off. The headline wins when it names one, because
-   descriptions often mention other percentages (spa, parking, dining). */
-function pctOff(text) {
-  let p = 0;
-  for (const m of (" " + text + " ").matchAll(/(?:up to |save |enjoy |receive |get |a )?(\d{1,2})\s?%\s*(?:off|discount|savings)?([^.;,%]{0,40})/gi)) {
-    const v = +m[1], tail = (m[2] || "").toLowerCase();
-    if (v > 0 && v <= 75 && !/amenity|resort fee|resort charge|parking|valet|spa|dining|food|f&b|retail|restaurant|breakfast/.test(tail)) { p = Math.max(p, v); }
+/* What a deal gives: percent off, fee discount, perks, nightly price.
+
+   HONEST NUMBERS (see HRT-Honest-Deal-Language.md in the Project):
+   p   the room or ticket discount every resident gets on the base offer.
+       Never a percent that only applies to an upgrade, a higher room category,
+       a suite, an add-on (spa, dining, parking, fees) or a different product.
+   pu  1 when the offer says "up to" (or gives a range like 20-30%), so the
+       dashboard must say "Up to 30% off", never "30% off".
+   pc  a percent that only applies when you upgrade or book a higher category.
+       Shown as its own line ("Upgrades up to 40% off"), never as the headline.
+   mn  minimum nights, when the offer names one.
+   sel 1 when the discount is only on "select" dates, rooms or stays. */
+const ADDON = /amenity|resort fee|resort charge|parking|valet|spa|dining|food|f&b|retail|restaurant|breakfast|cabana|daybed|merchandise|gift shop|golf|treatments/;
+const UPGRADE = /upgrad|higher (room )?categor|premium room|bungalow|club level/;
+function pctList(text) {
+  const out = [];
+  const s = " " + text + " ";
+  for (const m of s.matchAll(/(\d{1,2})\s?%\s*(?:off|discount|savings?)?([^.;%]{0,60})/gi)) {
+    const v = +m[1];
+    if (!(v > 0 && v <= 75)) continue;
+    const head = s.slice(Math.max(0, m.index - 45), m.index).toLowerCase();
+    const tail = (m[2] || "").toLowerCase();
+    const near = tail.split(/[,*+&•]|\band\b|\bplus\b|\bno\b/)[0];   /* what this percent is "off" */
+    const clause = head.split(/[.;,•!]/).pop();                       /* words just before it */
+    if (ADDON.test(near)) continue;
+    const upTo = /up to\s*$|(\d{1,2})\s?%?\s*(?:-|to)\s*$/.test(head);
+    const cond = UPGRADE.test(near) || UPGRADE.test(clause);
+    out.push({ v, upTo, cond });
   }
-  return p;
+  return out;
+}
+function pctOff(text) {
+  let p = 0, pu = false, pc = 0;
+  for (const x of pctList(text)) {
+    if (x.cond) { pc = Math.max(pc, x.v); continue; }
+    if (x.v > p) { p = x.v; pu = x.upTo; } else if (x.v === p && x.upTo) pu = true;
+  }
+  return { p, pu, pc };
 }
 
 export function readDeal(text, isStay, headline) {
   const t = " " + text.replace(/\s+/g, " ") + " ";
-  const p = (headline && pctOff(headline)) || pctOff(t);
+  const all = pctOff(t), hd = headline ? pctOff(headline) : { p: 0, pu: false, pc: 0 };
+  /* The headline wins when it names a room percent, because descriptions often
+     mention other percentages. "Up to" still counts if the body says it about
+     the same number (Aston: "Enjoy 30% off" in the title, "20-30% off" below). */
+  const p = hd.p || all.p;
+  const pu = hd.p ? (hd.pu || pctList(t).some((x) => !x.cond && x.upTo && x.v === hd.p)) : all.pu;
+  const pc = Math.max(hd.pc, all.pc) > p ? Math.max(hd.pc, all.pc) : 0;
+  const words = { two: 2, three: 3, four: 4, five: 5, seven: 7 };
+  const nm = t.match(/(?:stays? of|minimum(?: stay)?(?: of)?|min\.?|at least)\s*(\d|two|three|four|five|seven)\+?\s*(?:or more\s*)?nights?/i) ||
+    t.match(/(\d|two|three|four|five|seven)[-\s]night (?:minimum|min)/i) || t.match(/(\d|two|three|four|five|seven)\+?\s*nights? or (?:more|longer)/i);
+  const mn = nm ? (words[nm[1].toLowerCase()] || +nm[1]) : 0;
+  const sel = p && /select (dates|stays|rooms|nights|accommodations|luxury|room types|villas)|on select\b|select\s+\w+\s+accommodations/i.test(t) ? 1 : 0;
   let a = 0;
   const am = t.match(/(\d{1,3})\s?%\s*off[^.%]{0,25}(?:amenity|resort)\s*(?:fee|charge)/i);
   if (am) a = Math.min(100, +am[1]);
@@ -100,14 +139,20 @@ export function readDeal(text, isStay, headline) {
   if (/free (admission|entry)|complimentary (admission|entry)/i.test(t)) add("Free entry");
   let v = null;
   if (isStay) {
-    const pm = t.match(/(?:from|starting at|starting|as low as|rates? (?:of|from)|only)\s*\$(\d{2,4})(?![\d,])/i) || t.match(/\$(\d{2,4})(?![\d,])\s*(?:per night|\/\s?night|a night|nightly)/i);
-    if (pm) v = +pm[1];
+    /* A room price, never a parking, fee or credit amount ("Valet Parking $30 per night") */
+    const room = (re) => { for (const m of t.matchAll(re)) { if (!/parking|valet|fee|credit|charge|deposit/i.test(t.slice(Math.max(0, m.index - 25), m.index + 4))) return +m[1]; } return null; };
+    v = room(/(?:from|starting at|starting|as low as|rates? (?:of|from)|only)\s*\$(\d{2,4})(?![\d,])/gi) ??
+      room(/\$(\d{2,4})(?![\d,])\s*(?:per night|\/\s?night|a night|nightly)/gi) ??
+      room(/\$(\d{2,4})(?![\d,])\s*(?:kama\S*|resident|discounted|special|local)?\s*rates?\b/gi);
   }
-  return { p, a, k, v };
+  return { p, pu: pu ? 1 : 0, pc, mn, sel, a, k, v };
 }
 
+/* "Up to 40%" is worth less than a flat 40% (most dates get less), and an
+   upgrade-only percent does not count toward the score at all. */
 export function scoreFor(d) {
-  const s = Math.round(d.p + 0.12 * d.a + 7 * d.k.length + (d.v ? 9 : 0) + (d.g === "Stays" ? 5 : 7));
+  const pEff = d.pu ? d.p * 0.75 : d.p;
+  const s = Math.round(pEff + 0.12 * d.a + 7 * d.k.length + (d.v ? 9 : 0) + (d.g === "Stays" ? 5 : 7));
   return Math.max(1, Math.min(99, s));
 }
 export function ratingFor(s) {
@@ -144,7 +189,7 @@ export function fromHvcb(o, today, prev) {
   const row = {
     b, t, d: clip(desc, 200), f: clip(terms, 150),
     i: isl.length ? Array.from(new Set(isl)) : [islandKey(L.region) || "oahu"],
-    g, h, p: deal.p, a: deal.a, k: deal.k, v: deal.v, s: 0, r: "",
+    g, h, p: deal.p, pu: deal.pu, pc: deal.pc, mn: deal.mn, sel: deal.sel, a: deal.a, k: deal.k, v: deal.v, s: 0, r: "",
     e: e || "2027-12-31", dl: dl == null ? 365 : dl,
     n: prev[key] ? 0 : 1, x: 0,
     m: (old && old.m) || programFor(b),
@@ -163,7 +208,13 @@ export function fromSheet(r, today, prev) {
   const b = stripHtml(r.business), t = stripHtml(r.title);
   const desc = stripHtml(r.description), terms = stripHtml(r.terms);
   const deal = readDeal([t, desc].join(". "), g === "Stays", t);
-  if (r.percent_off) deal.p = +r.percent_off || deal.p;
+  if (r.percent_off) {
+    deal.p = +r.percent_off || deal.p;
+    /* The sheet holds a number only, so read "up to" from the wording around it */
+    const all = [t, desc, terms].join(". ");
+    deal.pu = new RegExp("up to\\s*" + deal.p + "\\s?%|\\d{1,2}\\s?%?\\s*(-|to)\\s*" + deal.p + "\\s?%", "i").test(all) ? 1 : 0;
+    if (deal.pc && deal.pc <= deal.p) deal.pc = 0;
+  }
   if (r.perks) deal.k = r.perks.split(/\s*;\s*/).filter(Boolean);
   if (r.nightly_from) deal.v = +r.nightly_from || deal.v;
   const key = (b + "|" + t).toLowerCase();
@@ -171,7 +222,7 @@ export function fromSheet(r, today, prev) {
   const row = {
     b, t, d: clip(desc, 200), f: clip(terms, 150),
     i: String(r.island || "oahu").split(/\s*[;,+]\s*/).map(islandKey).filter(Boolean),
-    g, h: areaFor(r.area || ""), p: deal.p, a: deal.a, k: deal.k, v: deal.v, s: 0, r: "",
+    g, h: areaFor(r.area || ""), p: deal.p, pu: deal.pu, pc: deal.pc, mn: deal.mn, sel: deal.sel, a: deal.a, k: deal.k, v: deal.v, s: 0, r: "",
     e, dl, n: prev[key] ? 0 : 1, x: 0, m: r.program || programFor(b), u: r.link, src: "chain"
   };
   if (!row.i.length) row.i = ["oahu"];

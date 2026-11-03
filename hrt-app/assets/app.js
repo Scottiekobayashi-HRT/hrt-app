@@ -492,7 +492,7 @@
   var isl = { oahu:"Oʻahu", maui:"Maui", hawaii:"Hawaiʻi Island", kauai:"Kauaʻi", lanai:"Lānaʻi", molokai:"Molokaʻi" };
   var kl = $("hmKamaList"); if(!kl) return;
   kl.innerHTML = top.map(function(d){
-   var head = d.p ? d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate");
+   var head = window.HRT_DEAL_HEAD ? window.HRT_DEAL_HEAD(d).big : (d.p ? (d.pu ? "Up to " : "") + d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate"));
    return '<button type="button" class="mrow" data-kopen="'+D.indexOf(d)+'"><span class="mi">'+d.s+'</span><span class="mt"><b>'+esc(d.b)+'</b><span>'+esc(d.i.length === 1 ? isl[d.i[0]] : "Several islands")+(d.h ? ", " + esc(d.h) : "")+'</span></span><span class="mv">'+esc(head)+'<small>'+esc(d.r)+'</small></span></button>';
   }).join("");
  }

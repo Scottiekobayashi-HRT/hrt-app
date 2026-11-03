@@ -172,7 +172,7 @@
       return { id: d.id, b: d.b, h: d.h || "", isl: d.isl, k: d.k, p: d.p || 0, v: d.v, kk: d.kk || [], s: d.s || 0, r: d.r || "", m: d.m || "", u: d.u || "",
         d: String(d.d || "").replace(/\s*•\s*/g, ". ").slice(0, 220), ll: d.ll, days: days,
         ends: e ? MN[e.getMonth()] + " " + e.getDate() + ", " + e.getFullYear() : "",
-        fr: d.fr || "", fd: d.fd || "", head: d.p ? d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate"), place: (d.h ? d.h + " · " : "") + (ISLN[d.isl] || "") };
+        fr: d.fr || "", fd: d.fd || "", head: d.hd || (d.p ? d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate")), place: (d.h ? d.h + " · " : "") + (ISLN[d.isl] || "") };
     }).filter(function (d) { return d.days >= 0; });
     /* spread deals that share one spot a little so each can be tapped */
     var seen = {};
