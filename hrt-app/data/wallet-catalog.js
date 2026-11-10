@@ -2,7 +2,7 @@
    Do not hand-edit. Change the sheet, download it, run the script. */
 window.HRT_WALLET_CATALOG={
  "v": 1,
- "built": "2026-10-20",
+ "built": "2026-11-10",
  "cards": [
   {
    "id": "chase-sapphire-preferred",
@@ -349,7 +349,7 @@ window.HRT_WALLET_CATALOG={
    "type": "Personal",
    "phone": "800-432-3117 (recon: 888-609-7805)",
    "cancelAfter": "12",
-   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
    "partners": "Southwest Airlines only."
   },
@@ -380,7 +380,7 @@ window.HRT_WALLET_CATALOG={
    "type": "Personal",
    "phone": "800-432-3117 (recon: 888-609-7805)",
    "cancelAfter": "12",
-   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
    "partners": "Southwest Airlines only."
   },
@@ -399,7 +399,7 @@ window.HRT_WALLET_CATALOG={
    "type": "Business",
    "phone": "800-453-9719",
    "cancelAfter": "12",
-   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
    "partners": "Southwest Airlines only."
   },
@@ -418,7 +418,7 @@ window.HRT_WALLET_CATALOG={
    "type": "Business",
    "phone": "800-453-9719",
    "cancelAfter": "12",
-   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
    "partners": "Southwest Airlines only."
   },
