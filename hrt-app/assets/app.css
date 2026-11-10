@@ -1047,3 +1047,10 @@ button.hw-row:hover{background:rgba(255,255,255,.14)}button.hw-row:focus-visible
 .wl-tp-bank header .wl-tp-dot{background:#fff}
 .wl-tp-bank header .wl-tp-live{background:#f2b84b;color:#14202e}
 .wl-tp-bank{border-color:color-mix(in srgb,var(--c) 40%,var(--line))}
+
+/* Sidebar: one-line hints under tool names, and the Start here group (Nov 2026) */
+.hrt-navi .nm small{display:block;font-size:10.5px;font-weight:500;line-height:1.3;color:#8fa3b8;margin-top:1px}
+.hrt-navi:hover .nm small,.hrt-navi.on .nm small{color:#b9c8d8}
+.hrt-grp.start > .hrt-grph{color:#f2b84b}
+.hrt-grp.start .hrt-navi .hic{color:#f2b84b;opacity:1}
+@media(max-width:900px){.hrt-navi .nm small{display:none}html.nav-open .hrt-navi .nm small{display:block}}
