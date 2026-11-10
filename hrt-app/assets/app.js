@@ -28,7 +28,7 @@
  function setHref(id, url){ var el = $(id); if(el) el.href = url; }
  ["topPro","homePro","atmosPro"].forEach(function(id){ setHref(id, PRO_URL); });
  ["homeCal","atmosCal"].forEach(function(id){ setHref(id, ATMOS_URL); });
- setHref("navHome", SITE); setHref("navDisc", DISCLOSURE_URL); setHref("welcomeCoach", COACHING_URL); setHref("plansCoach", COACHING_URL);
+ setHref("navHome", SITE); setHref("navDisc", DISCLOSURE_URL); setHref("welcomeCoach", COACHING_URL); setHref("plansCoach", COACHING_URL); setHref("startCoach", COACHING_URL);
  setTimeout(function(){ setHref("coachLink", COACHING_URL); }, 0);
 
  /* ============================== ROUTER ============================== */
