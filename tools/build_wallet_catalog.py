@@ -42,6 +42,19 @@ UNITS = {"usd", "points", "passes", "certificates"}
 FEE_BASIS = {"anniversary", "n/a"}
 GROUPS = {"online", "everyday", "dining", "grocery", "gas", "ev", "transit", "streaming", "drugstores", "flights",
           "hotels", "car-rental", "travel", "foreign", "entertainment", "business", "promo", "rotating", "status"}
+# (sheet column, data key, max length). Member-facing text only: never add
+# internal columns (FeeOptInternal, routing notes); the repo is public.
+EXTRA_CARD_TEXT = [
+    ("card_code", "code", 20),
+    ("card_type", "type", 20),
+    ("phone", "phone", 80),
+    ("cancel_after", "cancelAfter", 80),
+    ("cancel_downgrade", "cancelHow", 400),
+    ("best_feature", "best", 400),
+    ("alliances", "alliances", 200),
+    ("transfer_partners", "partners", 400),
+    ("other_perks", "otherPerks", 1500),
+]
 QUARTER_RE = re.compile(r"^\d{4}-Q[1-4]$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -132,6 +145,17 @@ def build_cards(ws):
         }
         if art:
             card["art"] = art
+        # Columns from Eddie's card database (CCDB), added Nov 10 2026. All optional.
+        # cr_name and cr_id stay in the sheet only (the CR pages tab uses them).
+        for col, key, limit in EXTRA_CARD_TEXT:
+            v = text(r.get(col, ""))
+            if not v:
+                continue
+            if len(v) > limit:
+                raise SheetError(f"{where}: {col} is longer than {limit} characters")
+            if "[" in v or "TBD" in v:
+                raise SheetError(f"{where}: {col} still has a placeholder like [..] or TBD; clear it or fill it in")
+            card[key] = v
         ff = text(r.get("foreign_fee", "")).replace("%", "").strip()
         if ff:
             try:

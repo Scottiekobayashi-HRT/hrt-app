@@ -25,6 +25,10 @@
                    when cardId is "custom" (a card not in our catalog),
                    used: { perkId: { periodKey: true or amount used } },
                    bonus: { spend, months, spent, reward } (optional welcome bonus),
+                   pnotes: { perkId: "member's own note" } (Credits page, up to 300 characters),
+                   marks:  { perkId: true } (the free checkbox on the Credits page; the
+                   member decides what it means). perkId "other" is the card's
+                   Other perks & benefits box.
                    ...future fields kept } ],
        points: [ { program, balance, asOf } ] }
 
@@ -38,6 +42,7 @@
   var MAX_BYTES = 900000; /* Memberstack allows 1MB per member; stop well short */
   /* Card status, set by the member or by HRT. Labels live in wallet.js. */
   var STATUSES = ["keep", "keep-for-now", "min-spend", "min-spend-almost", "downgrade", "cancel", "next", "closed"];
+  var PERK_ID_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/;
   var OPENED_RE = /^\d{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01]))?$/;
   var queue = Promise.resolve();
 
@@ -98,6 +103,18 @@
         if (!(typeof bn.months === "number" && bn.months % 1 === 0 && bn.months >= 1 && bn.months <= 24)) throw fail("INVALID", "card " + i + " bonus months");
         if (bn.spent != null && !(typeof bn.spent === "number" && bn.spent >= 0 && bn.spent <= 10000000)) throw fail("INVALID", "card " + i + " bonus spent");
         if (bn.reward != null && (typeof bn.reward !== "string" || bn.reward.length > 40)) throw fail("INVALID", "card " + i + " bonus reward");
+      }
+      if (c.pnotes != null) {
+        if (typeof c.pnotes !== "object" || Array.isArray(c.pnotes)) throw fail("INVALID", "card " + i + " pnotes");
+        Object.keys(c.pnotes).forEach(function (pid) {
+          if (!PERK_ID_RE.test(pid) || typeof c.pnotes[pid] !== "string" || c.pnotes[pid].length > 300) throw fail("INVALID", "card " + i + " pnotes." + pid);
+        });
+      }
+      if (c.marks != null) {
+        if (typeof c.marks !== "object" || Array.isArray(c.marks)) throw fail("INVALID", "card " + i + " marks");
+        Object.keys(c.marks).forEach(function (pid) {
+          if (!PERK_ID_RE.test(pid) || c.marks[pid] !== true) throw fail("INVALID", "card " + i + " marks." + pid);
+        });
       }
       if (c.used != null) {
         if (typeof c.used !== "object" || Array.isArray(c.used)) throw fail("INVALID", "card " + i + " used");

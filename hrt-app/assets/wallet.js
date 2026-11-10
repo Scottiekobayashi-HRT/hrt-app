@@ -159,6 +159,11 @@
      Period keys: "2026-10" month, "2026-Q4" quarter, "2026-H2" half,
      "2026" calendar year, "A2026" card year that began in 2026.
   ------------------------------------------------------------------- */
+  /* Nov 10 2026 (Scottie and Eddie): members no longer tick credits off each
+     month or year. Credits show by card with a notes box and a free checkbox
+     (Credits page), and reminders go by date only. Old ticks stay stored but
+     are ignored while this is false. */
+  var TICKS = false;
   var TRACKED_CADENCE = { monthly: 1, quarterly: 1, semiannual: 1, annual: 1 };
   var TRACKED_TYPE = { credit: 1, discount: 1, activation: 1, passes: 1, certificate: 1 };
   var SHORT_MONTHS = MONTHS.map(function (m) { return m.slice(0, 3); });
@@ -270,8 +275,8 @@
       (byCard[e.cardId] || []).forEach(function (b) {
         var p = perkPeriod(b, e.opened, today);
         var next = b.type === "bonus" && b.resets === "anniversary" ? nextRenewal(e.opened, today) : null;
-        var part = partUsed(e, b, p);
-        out.push({ entry: e, card: cards[e.cardId], perk: b, period: p, used: isUsed(e, b, p), part: part,
+        var part = TICKS ? partUsed(e, b, p) : 0;
+        out.push({ entry: e, card: cards[e.cardId], perk: b, period: p, used: TICKS ? isUsed(e, b, p) : false, part: part,
           left: Math.round((b.amount - part) * 100) / 100, nextArrives: next });
       });
     });
@@ -650,7 +655,7 @@
           if (q && sp.words.some(function (w) { return q.categories.toLowerCase().indexOf(w) > -1; })) {
             var act = perks.filter(function (x) { return x.entry.id === e.id && x.perk.type === "activation"; })[0];
             var extra = ["Up to $" + Number(q.cap || 1500).toLocaleString("en-US") + " of spending this quarter"];
-            if (act && !act.used) extra.push("Activate first, by " + dayText(act.period.end));
+            if (act && !act.used) extra.push(TICKS ? "Activate first, by " + dayText(act.period.end) : "Activate by " + dayText(act.period.end) + " if you have not yet");
             consider(r.rate, r, extra);
           }
         }
@@ -932,7 +937,7 @@
     } else if (b.cadence === "per event" || b.cadence === "per purchase") {
       when = '<div class="wl-pk-when">Automatic when it applies</div>';
     }
-    var tick = p ? '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
+    var tick = p && TICKS ? '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
       '" data-key="' + esc(p.key) + '"' + (r.used ? " checked" : "") + (state.busy ? " disabled" : "") + "> " +
       (p.activateBy ? "Activated" : "Used") + "</label>" : "";
     var src = b.source ? ' <a class="wl-src" href="' + esc(b.source) + '" target="_blank" rel="noopener">Source</a>' : "";
@@ -1046,6 +1051,13 @@
         '<button class="wl-btn" data-wl="bonus-save" data-id="' + esc(e.id) + '"' + (state.busy ? " disabled" : "") + ">Update</button></div>") + "</div>";
   }
   function keepHtml(r) {
+    if (!TICKS) {
+      var offered = usedThisCardYear(r.entry, catalog()).offered, how = r.card.cancelHow;
+      return '<div class="wl-keep"><b class="wl-keep-h">Keep or cancel?</b>' +
+        "<p>The fee is <b>" + esc(money(r.card.fee)) + "</b>." + (offered ? " The card offers up to <b>" + esc(money(offered)) + "</b> a year in credits. Count only the ones you really use." : "") + "</p>" +
+        (how ? '<p class="wl-keep-how"><b>HRT tip:</b> ' + esc(how) + "</p>" :
+          "<p>Before it renews you can keep it, ask " + esc(r.card.issuer) + " for a retention offer, or ask to switch to a card with a lower fee and keep your account history. If you cancel, use or move your points first.</p>") + "</div>";
+    }
     var e = r.entry, c = r.card, u = usedThisCardYear(e, catalog()), fee = c.fee, pct = Math.min(100, Math.round(u.used / fee * 100));
     var verdict = u.used >= fee ? "Your credits have already covered the fee." :
       "That is " + money(fee - u.used) + " less than the fee" + (u.offered > fee ? ", though the card offers up to " + money(u.offered) + " a year if you use every credit." : ".");
@@ -1069,7 +1081,7 @@
   /* "Used part of it": a small amount box under a dollar credit. */
   function partHtml(r) {
     var b = r.perk, p = r.period;
-    if (!p || r.used || b.unit !== "usd" || !(b.amount >= 5) || !{ credit: 1, discount: 1 }[b.type]) return "";
+    if (!TICKS || !p || r.used || b.unit !== "usd" || !(b.amount >= 5) || !{ credit: 1, discount: 1 }[b.type]) return "";
     var key = r.entry.id + "|" + b.id + "|" + p.key, open = state.partOpen === key;
     var line = r.part ? '<div class="wl-pk-part">Used ' + esc(money(r.part)) + " of " + esc(money(b.amount)) + ", <b>" + esc(money(r.left)) + " left</b></div>" : "";
     if (!open) return line + '<button class="wl-partbtn" data-wl="part" data-k="' + esc(key) + '">' + (r.part ? "Change amount used" : "Used part of it") + "</button>";
@@ -1087,13 +1099,13 @@
       (b.type === "activation" ? rotatingLine(b.card) : "") + partHtml(r) +
       (b.id === "resy" ? '<a class="wl-pk-link" href="#resy" data-route="resy">Find a Hawaiʻi Resy spot &rarr;</a>' : "") +
       '<div class="wl-tags">' + perkTags(b, p) + "</div></div>" +
-      '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
-      '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label></li>";
+      (TICKS ? '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
+      '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label>" : "") + "</li>";
   }
   function soonHtml(perks, home) {
     var groups = creditGroups(perks);
     if (!groups.length) return home ? '<section class="wl-card wl-soonbox wl-soon-home"><h3 class="wl-cr-title">Credits to use</h3>' +
-      '<p class="wl-cr-sub">All caught up. You have used every credit that is open right now.</p></section>' : "";
+      '<p class="wl-cr-sub">' + (TICKS ? "All caught up. You have used every credit that is open right now." : "No credits reset soon.") + "</p></section>" : "";
     var total = groups.reduce(function (a, g) { return a + g.usd; }, 0);
     var sel = groups.filter(function (g) { return g.key === state.creditTab; })[0] || groups[0];
     var tabs = groups.length > 1 ? '<div class="wl-ctabs" role="tablist" aria-label="When they end">' + groups.map(function (g) {
@@ -1103,8 +1115,8 @@
     }).join("") + "</div>" : "";
     var limit = 4, shown = state.showAllSoon && !home ? sel.rows : sel.rows.slice(0, limit);
     return '<section class="wl-card wl-soonbox' + (home ? " wl-soon-home" : "") + '"><div class="wl-cr-head"><div><h3 class="wl-cr-title">Credits to use</h3>' +
-      '<p class="wl-cr-sub">' + (home ? "Soonest first. Tick each one once you use it." : "Everything you have not used yet, soonest first. Tick each one once you use it.") + "</p></div>" +
-      (total ? '<div class="wl-cr-total"><b>' + esc(money(total)) + "</b><span>left to use</span></div>" : "") + "</div>" + tabs +
+      '<p class="wl-cr-sub">' + (TICKS ? (home ? "Soonest first. Tick each one once you use it." : "Everything you have not used yet, soonest first. Tick each one once you use it.") : "Credits that reset soon, soonest first. Use them before they reset.") + "</p></div>" +
+      (total ? '<div class="wl-cr-total"><b>' + esc(money(total)) + "</b><span>" + (TICKS ? "left to use" : "resetting") + "</span></div>" : "") + "</div>" + tabs +
       '<ul class="wl-pks wl-pks-soon">' + shown.map(creditItem).join("") + "</ul>" +
       (home ? (sel.rows.length > limit ? '<a class="wl-hm-more" href="#wallet" data-route="wallet">See all ' + sel.rows.length + " in My Wallet</a>" : "") :
         sel.rows.length > limit ? '<button class="wl-perkbtn" data-wl="allsoon">' + (state.showAllSoon ? "Show fewer" : "Show all " + sel.rows.length) + "</button>" : "") +
@@ -1163,7 +1175,7 @@
     var html = demo + acts() + tag + '<div class="hw-boxes">' +
       box("Cards", String(s.count), "in your wallet") +
       box("Annual fees", esc(money(s.yearly)), "a year") +
-      box("Credits to use", due ? esc(money(due)) : "All used", "next " + SOON_PERK_DAYS + " days") +
+      box("Credits to use", due ? esc(money(due)) : TICKS ? "All used" : "None", "next " + SOON_PERK_DAYS + " days") +
       box("Next renewal", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
@@ -1180,8 +1192,8 @@
       var amt = b.unit === "usd" ? money(r.part ? r.left : b.amount) : "";
       return '<li class="hw-row hw-cr' + lvl + '" title="' + esc(shortName(r.card.name) + ": " + b.label) + '"><span class="hw-dot" aria-hidden="true"></span>' +
         '<span class="hw-t"><b>' + esc((amt ? amt + " " : "") + b.label) + "</b><small>" + esc(shortName(r.card.name)) + " · " + esc(daysLeft(p.days)) + "</small></span>" +
-        '<label class="hw-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) + '" data-key="' + esc(p.key) + '"' +
-        (state.busy ? " disabled" : "") + "> Used</label></li>";
+        (TICKS ? '<label class="hw-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) + '" data-key="' + esc(p.key) + '"' +
+        (state.busy ? " disabled" : "") + "> Used</label>" : "") + "</li>";
     }).concat(alerts.map(function (a) {
       return '<li><button class="hw-row ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + '>' +
         '<span class="hw-dot" aria-hidden="true"></span><span class="hw-t"><b>' + esc(a.text.replace(/ fee posts around .*$/, " fee")) + '</b></span><span class="hw-go" aria-hidden="true">&rsaquo;</span></button></li>';
@@ -1210,6 +1222,7 @@
      "This year" = calendar-year periods (2026, 2026-Q4, 2026-10, 2026-H2)
      plus each card's current card year. Counts ticks and part amounts only. */
   function capturedThisYear(V, cat, t) {
+    if (!TICKS) return 0;
     t = t || todayParts();
     var y = String(t.y), total = 0, idx = catIndex();
     (V && V.cards || []).forEach(function (e) {
@@ -1327,7 +1340,7 @@
       var bf = cardBrief(e, c, perks);
       var lines = '<span class="wl-tl-fee">' + (bf.hasFee && !bf.renewal ? esc(money(c.fee)) + " fee" : bf.hasFee ? esc(money(c.fee)) + " fee &middot; renews " + esc(bf.renewal.exact ? dayText(bf.renewal) : MONTHS[bf.renewal.m - 1].slice(0, 3)) : "No annual fee") + "</span>";
       if (bf.next) lines += '<span class="wl-tl-next">Next: ' + esc(bf.next.perk.label) + esc(shortAmount(bf.next.perk)) + ', <b class="' + (bf.next.period.days <= 14 ? "hot" : "") + '">' + esc(daysLeft(bf.next.period.days).replace(" left", "")) + "</b></span>";
-      else if (perks.some(function (r) { return r.entry.id === e.id && r.period; })) lines += '<span class="wl-tl-next ok">All credits used this period</span>';
+      else if (TICKS && perks.some(function (r) { return r.entry.id === e.id && r.period; })) lines += '<span class="wl-tl-next ok">All credits used this period</span>';
       var pills = "";
       if (bf.activate) pills += '<span class="wl-tl-pill">Activate 5% by ' + esc(dayText(bf.activate.period.end)) + "</span>";
       if (bf.renewSoon) pills += '<span class="wl-tl-pill">Renews in ' + bf.renewal.days + (bf.renewal.days === 1 ? " day" : " days") + "</span>";
@@ -1550,7 +1563,7 @@
       '<dl class="wl-sum-stats">' +
       stat("Cards", String(s.count)) +
       stat("Annual fees", esc(money(s.yearly))) +
-      stat("Credits a year", esc(money(credits)), "if you use them all") +
+      stat("Potential credits per year", esc(money(credits)), "if you use them all") +
       stat("Next renewal", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None",
         nx ? esc(shortName(nx.card.name)) : "") +
       "</dl>";
@@ -1604,9 +1617,9 @@
       (m.client ? "" : '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button>') + "</div>" + ohSub +
       famHtml() + hrtLine(V) +
       '<dl class="wl-sl-stats">' +
-      '<div><dt>Credits to use</dt><dd>' + (due ? esc(money(due)) : "All used") + "<small>next " + SOON_PERK_DAYS + " days</small></dd></div>" +
-      "<div><dt>Annual fees</dt><dd>" + esc(money(s.yearly)) + "</dd></div>" +
-      "<div><dt>Next renewal</dt><dd>" + (nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + "<small>" + esc(shortName(nx.card.name)) + "</small>" : "None") + "</dd></div>" +
+      '<div title="Credits on your cards that reset in the next ' + SOON_PERK_DAYS + ' days. Add your notes on the Credits page."><dt>Credits to use</dt><dd>' + (due ? esc(money(due)) : TICKS ? "All used" : "None") + "<small>next " + SOON_PERK_DAYS + " days</small></dd></div>" +
+      '<div title="Worked out by HRT from each card&#39;s current fee."><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
+      '<div title="Worked out by HRT from the open dates you entered."><dt>Next renewal</dt><dd>' + (nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + "<small>" + esc(shortName(nx.card.name)) + "</small>" : "None") + "</dd></div>" +
       "</dl></section>";
   }
 
@@ -1673,6 +1686,23 @@
       (open ? '<div class="wl-more-in">' + inner + "</div>" : "") + "</section>";
   }
 
+  /* Card details from Eddie's card database (CCDB columns on the catalog's Cards tab). */
+  function detailsHtml(c) {
+    var rows = [];
+    if (c.best) rows.push(["Best feature", esc(c.best)]);
+    if (c.type) rows.push(["Card type", esc(c.type)]);
+    if (c.cancelAfter) rows.push(["Cancel or downgrade after", esc(/^\d+$/.test(c.cancelAfter) ? c.cancelAfter + " months" : c.cancelAfter)]);
+    if (c.phone) {
+      var num = String(c.phone).match(/^[\d-]{10,14}/);
+      rows.push(["Customer service", num ? '<a href="tel:' + esc(num[0].replace(/-/g, "")) + '">' + esc(c.phone) + "</a>" : esc(c.phone)]);
+    }
+    if (c.alliances) rows.push(["Airline alliances", esc(c.alliances)]);
+    if (c.partners) rows.push(["Transfer partners", esc(c.partners)]);
+    if (c.otherPerks) rows.push(["Other perks and benefits", esc(c.otherPerks)]);
+    if (!rows.length) return "";
+    return '<dl class="wl-sh-det">' + rows.map(function (r) { return "<div><dt>" + r[0] + "</dt><dd>" + r[1] + "</dd></div>"; }).join("") + "</dl>";
+  }
+
   /* The card sheet: one card's facts, Edit and Remove, then perks and earning folded away. */
   function sheetHtml() {
     var id = state.sel, adding = state.editing === "new";
@@ -1701,7 +1731,7 @@
     if (e.holder) facts.push(["Whose card", e.holder]);
     if (e.nickname) facts.push(["Nickname", e.nickname]);
     var credits = perks.reduce(function (t, x) { return t + perkYearUsd(x.perk); }, 0);
-    if (credits) facts.push(["Credits a year", "Up to " + money(credits)]);
+    if (credits) facts.push(["Potential credits per year", "Up to " + money(credits)]);
     var tags = statusHtml(e) + (e.withHrt ? '<span class="wl-withhrt">' + STAR_SM + " Opened with HRT</span>" : e.withHrt === false ? '<span class="wl-prehrt">Had before HRT</span>' : "");
     var html = '<div class="wl-sh-top">' + (c && !hidden ? artHtml(c, "md") : "") + '<div class="wl-sh-id"><b class="wl-sh-name">' + esc(name) + "</b>" +
       (c && !hidden && c.issuer ? '<span class="wl-sh-sub">' + esc(c.issuer) + "</span>" : "") + (tags ? '<span class="wl-sh-tags">' + tags + "</span>" : "") + "</div></div>" +
@@ -1710,6 +1740,9 @@
       noteHtml(e) + bonusHtml(e) + (r && r.hasFee && r.renewal && r.renewal.days <= SOON_DAYS && !isClient() ? keepHtml(r) : "") +
       '<div class="wl-sh-acts"><button class="wl-btn wl-pri" data-wl="edit" data-id="' + esc(e.id) + '">Edit card</button>' +
       '<button class="wl-link wl-danger" data-wl="remove" data-id="' + esc(e.id) + '">Remove card</button></div>';
+    if (c && !hidden && c.cancelHow) html += '<div class="wl-sh-cancel"><b>Cancel or downgrade</b>' +
+      (cancelWhen(e, c) ? '<span class="wl-sh-cw">' + esc(cancelWhen(e, c).text) + "</span>" : "") + "<p>" + esc(c.cancelHow) + "</p></div>";
+    if (c && !hidden) html += moreBox("d-" + e.id, "Card details", detailsHtml(c), c.type ? c.type + " card" : "");
     if (perks.length) html += moreBox("p-" + e.id, "Credits and perks", '<ul class="wl-pks">' + perks.map(function (x) { return perkHtml(x); }).join("") + "</ul>",
       perks.length + (perks.length === 1 ? " perk" : " perks") + (credits ? ", up to " + money(credits) + " a year" : ""));
     if (c && !hidden && earningFor(catalog(), c.id).length) html += moreBox("e-" + e.id, "How it earns", earnHtml(c.id).replace(/<h4 class="wl-h4">How it earns<\/h4>/, ""));
@@ -1732,49 +1765,80 @@
       tab("cards", "wallet/cards", "Cards", String(s.count)) + tab("credits", "wallet/credits", "Credits", due ? esc(money(due)) : "") + tab("transfers", "wallet/transfers", "Transfer Partners") + "</nav>";
   }
 
+  /* When a fee card can be cancelled or downgraded without upsetting the bank,
+     from Eddie's card database (cancelAfter: "12", "Never", or a sentence).
+     Returns { text, now } or null. Pure. */
+  function cancelWhen(e, c, today) {
+    var a = c && c.cancelAfter ? String(c.cancelAfter) : "";
+    if (!a || !(c.fee > 0)) return null;
+    if (/^never/i.test(a)) return { text: "Keep open", keep: true };
+    var n = parseInt(a, 10), o = parseOpened(e && e.opened);
+    if (!(n > 0)) return null;
+    if (!o) return { text: "After " + n + " months" };
+    var mm = o.m + n, y = o.y + Math.floor((mm - 1) / 12), m = ((mm - 1) % 12) + 1, t = today || todayParts();
+    var due = dayNum(y, m, Math.min(o.d || 1, daysInMonth(y, m)));
+    if (due <= dayNum(t.y, t.m, t.d)) return { text: "Ready now", now: true };
+    return { text: "From " + SHORT_MONTHS[m - 1] + " " + y };
+  }
+  function cpView() {
+    if (!state.cpView) { try { state.cpView = localStorage.getItem("hrt-wl-cpview") === "grid" ? "grid" : "list"; } catch (e) { state.cpView = "list"; } }
+    return state.cpView;
+  }
+
   function cardsPageHtml(s, perks) {
-    var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0), net = credits - s.yearly, m = member();
+    var credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0), m = member(), v = cpView();
     /* navy header like the Overview card, so all My Wallet pages feel like one place */
     var head = '<section class="wl-sum wl-slim wl-pghead" aria-label="Your cards"><div class="wl-sum-top"><h2 class="wl-sum-title">Your cards</h2>' +
       '<div class="wl-cp-acts">' + (m.client ? '<a class="wl-btn wl-ghost" href="' + SCOTTIE_SMS + '">' + CHAT_ICON + "Text Scottie</a>" : "") +
       '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div></div>' +
-      '<p class="wl-sum-lede">Fees, credits and welcome bonuses for every card you hold. Tap a card for the details.</p>' +
-      '<dl class="wl-sum-stats wl-pg-stats"><div class="wl-sum-stat"><dt>Cards</dt><dd>' + s.count + "</dd></div>" +
+      '<p class="wl-sum-lede">Fees, credits and renewals for every card you hold. Tap a card for the details, including how to cancel or downgrade.</p>' +
+      '<dl class="wl-sum-stats wl-pg-stats wl-pg-3"><div class="wl-sum-stat"><dt>Cards</dt><dd>' + s.count + "</dd></div>" +
       '<div class="wl-sum-stat"><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
-      '<div class="wl-sum-stat"><dt>Credits a year</dt><dd>' + esc(money(credits)) + "<small>if you use them all</small></dd></div>" +
-      '<div class="wl-sum-stat"><dt>Net value</dt><dd class="' + (net >= 0 ? "wl-up" : "wl-down") + '">' + (net >= 0 ? "+" : "&minus;") + esc(money(Math.abs(net))) + "<small>credits minus fees</small></dd></div></dl></section>" +
+      '<div class="wl-sum-stat"><dt>Potential credits per year</dt><dd>' + esc(money(credits)) + "<small>if you use them all</small></dd></div></dl></section>" +
       '<section class="wl-card wl-cp">' +
       famHtml() +
       '<div class="wl-cp-bar"><label class="wl-cp-q"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
       '<input id="wlCardQ" type="search" placeholder="Search your cards" aria-label="Search your cards" value="' + esc(state.cardQ || "") + '"></label>' +
-      '<span class="wl-cp-n" id="wlCardN">' + s.count + (s.count === 1 ? " card" : " cards") + "</span></div>";
+      '<span class="wl-cp-n" id="wlCardN">' + s.count + (s.count === 1 ? " card" : " cards") + "</span>" +
+      '<div class="wl-view" role="group" aria-label="Show cards as">' +
+      '<button class="wl-view-b' + (v === "list" ? " on" : "") + '" data-wl="cpview" data-key="list" aria-pressed="' + (v === "list") + '">' + LIST_ICON + "<span>List</span></button>" +
+      '<button class="wl-view-b' + (v === "grid" ? " on" : "") + '" data-wl="cpview" data-key="grid" aria-pressed="' + (v === "grid") + '">' + GRID_ICON + "<span>Grid</span></button></div></div>";
     var q = String(state.cardQ || "").trim().toLowerCase();
-    var rows = s.rows.map(function (r) {
+    var dim = '<span class="wl-ct-dim">&ndash;</span>';
+    var items = s.rows.map(function (r) {
       var e = r.entry, c = r.card;
-      var find = [c ? c.name : "", c ? c.issuer : "", e.holder, e.nickname].join(" ").toLowerCase();
+      var find = [c ? c.name : "", c ? c.issuer : "", e.holder, e.nickname, c && c.type].join(" ").toLowerCase();
       var hide = q && find.indexOf(q) < 0 ? " hidden" : "";
       if (!c) return '<li data-ct-q="' + esc(find) + '"' + hide + '><button class="wl-ct" data-wl="sheet" data-id="' + esc(e.id) + '"><span class="wl-ct-card"><span class="wl-ct-nm"><b>A card we no longer track</b><small>Tap to remove it</small></span></span><span class="wl-ct-go" aria-hidden="true">&rsaquo;</span></button></li>';
       var cr = perks.filter(function (x) { return x.entry.id === e.id; }).reduce(function (t, x) { return t + perkYearUsd(x.perk); }, 0);
-      var rn = r.renewal, soon = r.hasFee && rn && rn.days <= SOON_DAYS;
-      var bs = bonusState(e), bonus = '<span class="wl-ct-dim">&ndash;</span>';
-      if (bs && bs.met) bonus = '<span class="wl-ct-ok">Earned</span>';
-      else if (bs && bs.missed) bonus = '<span class="wl-ct-dim">Missed</span>';
-      else if (bs) bonus = '<span class="wl-ct-bonus"><span class="wl-ct-bt">' + esc(money(bs.spent)) + " of " + esc(money(bs.spend)) + "</span>" +
-        '<span class="wl-ct-track"><i style="width:' + bs.pct + '%"></i></span><small>by ' + esc(dayText(bs.by)) + "</small></span>";
+      var rn = r.renewal, soon = r.hasFee && rn && rn.days <= SOON_DAYS, cw = cancelWhen(e, c);
+      var renews = r.hasFee && rn ? '<span class="' + (soon ? "wl-ct-hot" : "") + '">' + esc(rn.exact ? dayText(rn) : MONTHS[rn.m - 1].slice(0, 3)) + "</span>" : r.hasFee ? '<span class="wl-ct-dim">Add open date</span>' : dim;
+      var cancel = cw ? '<span class="' + (cw.now ? "wl-ct-ok" : cw.keep ? "wl-ct-dim" : "") + '">' + esc(cw.text) + "</span>" : dim;
+      var fee = r.hasFee ? esc(money(c.fee)) : '<span class="wl-ct-dim">None</span>';
+      var credit = cr ? esc(money(cr)) : dim;
+      var who = esc(e.holder || "You");
+      if (v === "grid") return '<li data-ct-q="' + esc(find) + '"' + hide + '><button class="wl-cg' + (soon ? " soon" : "") + '" data-wl="sheet" data-id="' + esc(e.id) + '">' +
+        artHtml(c, "md") + '<span class="wl-cg-nm"><small>' + esc(c.issuer || "") + (c.type ? " &middot; " + esc(c.type) : "") + "</small><b>" + esc(shortName(c.name)) +
+        (e.withHrt ? '<span class="wl-crow-hrt" title="Opened with HRT">' + STAR_SM + "</span>" : "") + "</b>" +
+        (e.nickname || e.holder ? "<small>" + esc([e.holder ? e.holder + "’s card" : "", e.nickname].filter(Boolean).join(", ")) + "</small>" : "") + "</span>" +
+        '<dl class="wl-cg-f"><div><dt>Annual fee</dt><dd>' + fee + "</dd></div><div><dt>Renews</dt><dd>" + renews + "</dd></div>" +
+        "<div><dt>Potential credits per year</dt><dd>" + credit + "</dd></div><div><dt>Cancel or downgrade</dt><dd>" + cancel + "</dd></div></dl></button></li>";
       return '<li data-ct-q="' + esc(find) + '"' + hide + '><button class="wl-ct' + (soon ? " soon" : "") + '" data-wl="sheet" data-id="' + esc(e.id) + '">' +
-        '<span class="wl-ct-card">' + artHtml(c, "sm") + '<span class="wl-ct-nm"><small>' + esc(c.issuer || "") + "</small><b>" + esc(shortName(c.name)) +
+        '<span class="wl-ct-card">' + artHtml(c, "sm") + '<span class="wl-ct-nm"><small>' + esc(c.issuer || "") + (c.type ? " &middot; " + esc(c.type) : "") + "</small><b>" + esc(shortName(c.name)) +
         (e.withHrt ? '<span class="wl-crow-hrt" title="Opened with HRT">' + STAR_SM + "</span>" : "") + "</b>" +
         (e.nickname ? '<small class="wl-ct-nick">' + esc(e.nickname) + "</small>" : "") +
-        (e.holder ? '<small class="wl-ct-pho">' + esc(e.holder) + "\u2019s card</small>" : "") + "</span></span>" +
-        '<span class="wl-ct-c wl-ct-who" data-l="Whose">' + esc(e.holder || "You") + "</span>" +
-        '<span class="wl-ct-c" data-l="Credits a year">' + (cr ? esc(money(cr)) : '<span class="wl-ct-dim">&ndash;</span>') + "</span>" +
-        '<span class="wl-ct-c" data-l="Annual fee">' + (r.hasFee ? esc(money(c.fee)) : '<span class="wl-ct-dim">None</span>') + "</span>" +
-        '<span class="wl-ct-c" data-l="Renews">' + (r.hasFee && rn ? '<span class="' + (soon ? "wl-ct-hot" : "") + '">' + esc(rn.exact ? dayText(rn) : MONTHS[rn.m - 1].slice(0, 3)) + "</span>" : r.hasFee ? '<span class="wl-ct-dim">Add open date</span>' : '<span class="wl-ct-dim">&ndash;</span>') + "</span>" +
-        '<span class="wl-ct-c wl-ct-wb' + (bs ? "" : " nob") + '" data-l="Welcome bonus">' + bonus + "</span>" +
+        (e.holder ? '<small class="wl-ct-pho">' + esc(e.holder) + "’s card</small>" : "") + "</span></span>" +
+        '<span class="wl-ct-c wl-ct-who" data-l="Whose">' + who + "</span>" +
+        '<span class="wl-ct-c" data-l="Annual fee">' + fee + "</span>" +
+        '<span class="wl-ct-c" data-l="Potential credits per year">' + credit + "</span>" +
+        '<span class="wl-ct-c" data-l="Renews">' + renews + "</span>" +
+        '<span class="wl-ct-c" data-l="Cancel or downgrade">' + cancel + "</span>" +
         '<span class="wl-ct-go" aria-hidden="true">&rsaquo;</span></button></li>';
     }).join("");
-    return head + '<div class="wl-ct-head" aria-hidden="true"><span>Card</span><span>Whose</span><span>Credits a year</span><span>Annual fee</span><span>Renews</span><span>Welcome bonus</span><span></span></div>' +
-      '<ul class="wl-ct-list">' + rows + "</ul>" +
+    var list = v === "grid" ? '<ul class="wl-cg-grid">' + items + "</ul>" :
+      '<div class="wl-ct-head" aria-hidden="true"><span>Card</span><span>Whose</span><span>Annual fee</span><span>Credits per year</span><span>Renews</span><span>Cancel or downgrade</span><span></span></div>' +
+      '<ul class="wl-ct-list">' + items + "</ul>";
+    return head + list +
       '<div class="wl-cards-foot"><span></span><button class="wl-link" data-wl="review">Check and fix my cards</button></div></section>' +
       upcomingHtml(s.upcoming || []);
   }
@@ -1840,8 +1904,122 @@
     return out;
   }
 
+  /* ========================= CREDITS PAGE =========================
+     Nov 10 2026 (Eddie's review): every credit and perk shown card by card,
+     in three groups: renewing monthly, renewing annually, other perks and
+     benefits (quarterly and twice-a-year credits get their own group only
+     when a card has them). Nothing to tick off each period. Each item has
+     the member's own note (pnotes) and a checkbox they can use however they
+     like (marks). The card's "other perks" text from the catalog sits in
+     one box at the end. Pure grouping in creditSections() for the tests. */
+  var CR_GROUPS = [
+    { key: "monthly", label: "Credits renewing monthly" },
+    { key: "mid", label: "Credits renewing quarterly or twice a year" },
+    { key: "annual", label: "Credits renewing annually" },
+    { key: "other", label: "Other perks & benefits" }
+  ];
+  function creditGroupOf(b) {
+    if (!isTracked(b)) return "other";
+    if (b.cadence === "monthly") return "monthly";
+    if (b.cadence === "annual") return "annual";
+    return "mid";
+  }
+  function creditSections(perks, entryId) {
+    var out = {};
+    perks.forEach(function (r) {
+      if (r.entry.id !== entryId) return;
+      var g = creditGroupOf(r.perk);
+      (out[g] = out[g] || []).push(r);
+    });
+    return CR_GROUPS.map(function (g) { return { key: g.key, label: g.label, rows: out[g.key] || [] }; });
+  }
+  function resetText(p) {
+    if (!p) return "";
+    var nx = addDays(p.end, 1);
+    if (p.activateBy) return "Activate by " + dayText(p.end) + (p.approx ? " or earlier" : "");
+    return "Resets " + dayText(nx) + (nx.y !== todayParts().y ? ", " + nx.y : "") + (p.approx ? " or earlier" : "");
+  }
+  function noteBox(e, pid, label) {
+    var note = e.pnotes && e.pnotes[pid] || "";
+    return '<input class="wl-cr-note" type="text" maxlength="300" data-wl="pnote" data-id="' + esc(e.id) + '" data-perk="' + esc(pid) + '" value="' + esc(note) + '" placeholder="Add a note" aria-label="Your note for ' + esc(label) + '">';
+  }
+  function markBox(e, pid, label) {
+    var on = !!(e.marks && e.marks[pid]);
+    return '<input class="wl-cr-mark" type="checkbox" data-wl="mark" data-id="' + esc(e.id) + '" data-perk="' + esc(pid) + '"' + (on ? " checked" : "") +
+      ' aria-label="Check off ' + esc(label) + '" title="Use this checkbox however you like">';
+  }
+  function creditRowHtml(r) {
+    var b = r.perk, p = r.period, e = r.entry, amt = perkAmount(b);
+    var when = p ? resetText(p) : r.nextArrives ? "Arrives on your card anniversary, next " + renewalText(r.nextArrives) :
+      b.cadence === "every4years" ? "Once every 4 years" : (b.cadence === "per event" || b.cadence === "per purchase") ? "Automatic when it applies" : "";
+    var soon = p && p.days <= 14 ? " soon" : "";
+    var src = b.source ? ' <a class="wl-src" href="' + esc(b.source) + '" target="_blank" rel="noopener">Source</a>' : "";
+    return '<li class="wl-cr-row' + (e.marks && e.marks[b.id] ? " marked" : "") + '">' + markBox(e, b.id, b.label) +
+      '<div class="wl-cr-body"><div class="wl-cr-top"><b>' + esc(b.label) + "</b>" + (amt ? '<span class="wl-cr-amt">' + esc(amt) + "</span>" : "") + "</div>" +
+      (when ? '<div class="wl-cr-when' + soon + '">' + esc(when) + (p && p.assumed ? ' <span class="wl-cr-dimt">(reset date not confirmed)</span>' : "") + "</div>" : "") +
+      (b.type === "activation" ? rotatingLine(b.card) : "") +
+      (perkTags(b, p) ? '<div class="wl-tags">' + perkTags(b, p) + "</div>" : "") +
+      (b.note ? '<p class="wl-pk-note wl-clamp" data-wl="clamp">' + esc(b.note) + src + "</p>" : src ? '<p class="wl-pk-note">' + src + "</p>" : "") +
+      (b.id === "resy" ? '<a class="wl-pk-link" href="#resy" data-route="resy">Find a Hawaiʻi Resy spot &rarr;</a>' : "") +
+      noteBox(e, b.id, b.label) + "</div></li>";
+  }
+  function otherBoxHtml(e, c) {
+    var txt = c && c.otherPerks ? String(c.otherPerks) : "";
+    var lines = txt.split(/\n|;\s*/).map(function (x) { return x.trim(); }).filter(Boolean);
+    return '<li class="wl-cr-row wl-cr-otherbox' + (e.marks && e.marks.other ? " marked" : "") + '">' + markBox(e, "other", "other perks and benefits") +
+      '<div class="wl-cr-body"><div class="wl-cr-top"><b>More perks and benefits</b></div>' +
+      (lines.length ? '<ul class="wl-cr-olist">' + lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul>" :
+        '<p class="wl-cr-dimt">Use this box for anything else about this card you want to remember.</p>') +
+      noteBox(e, "other", "other perks and benefits") + "</div></li>";
+  }
+  function creditCardHtml(row, perks) {
+    var e = row.entry, c = row.card;
+    if (!c) return "";
+    var secs = creditSections(perks, e.id);
+    var credits = perks.filter(function (x) { return x.entry.id === e.id; }).reduce(function (t, x) { return t + perkYearUsd(x.perk); }, 0);
+    var body = secs.map(function (g) {
+      var rows = g.rows.map(creditRowHtml).join("");
+      if (g.key === "other") rows += otherBoxHtml(e, c);
+      if (!rows) return "";
+      return '<div class="wl-cr-grp"><h4 class="wl-cr-gh">' + esc(g.label) + "</h4><ul class=\"wl-cr-list\">" + rows + "</ul></div>";
+    }).join("");
+    return '<section class="wl-card wl-cr-card" id="wl-cr-' + esc(e.id) + '"><header class="wl-cr-hd">' + artHtml(c, "sm") +
+      '<div class="wl-cr-id"><b>' + esc(shortName(c.name)) + "</b><small>" + esc([e.holder ? e.holder + "’s card" : "", e.nickname, credits ? "Up to " + money(credits) + " a year in credits" : ""].filter(Boolean).join(" · ")) + "</small></div>" +
+      '<button class="wl-link" data-wl="sheet" data-id="' + esc(e.id) + '">Card details</button></header>' + body + "</section>";
+  }
   function creditsPageHtml(perks) {
-    return soonHtml(perks) || '<section class="wl-card wl-soonbox"><h3 class="wl-cr-title">Credits to use</h3><p class="wl-cr-sub">All caught up. You have used every credit that is open right now.</p></section>';
+    var s = summarize(view(), catalog()), monthly = 0, yearly = 0, other = 0;
+    perks.forEach(function (r) {
+      var g = creditGroupOf(r.perk);
+      if (g === "monthly") monthly += perkYearUsd(r.perk) / 12; else if (g === "other") other++; else yearly += perkYearUsd(r.perk);
+    });
+    var head = '<section class="wl-sum wl-slim wl-pghead" aria-label="Credits and perks"><div class="wl-sum-top"><h2 class="wl-sum-title">Credits and perks</h2></div>' +
+      '<p class="wl-sum-lede">Every credit and perk, card by card. Add your own notes, and use the checkboxes however you like.</p>' +
+      '<dl class="wl-sum-stats wl-pg-stats wl-pg-3"><div class="wl-sum-stat"><dt>Monthly credits</dt><dd>' + esc(money(Math.round(monthly))) + "<small>a month</small></dd></div>" +
+      '<div class="wl-sum-stat"><dt>Other credits</dt><dd>' + esc(money(Math.round(yearly))) + "<small>a year</small></dd></div>" +
+      '<div class="wl-sum-stat"><dt>Other perks</dt><dd>' + other + "<small>across your cards</small></dd></div></dl></section>";
+    var fam = famHtml();
+    return head + (fam ? '<div class="wl-cp wl-cr-fam">' + fam + "</div>" : "") + s.rows.map(function (r) { return creditCardHtml(r, perks); }).join("");
+  }
+
+  /* Notes and checkboxes save quietly, without repainting, so typing in the
+     next box is never interrupted. A failed save puts the old value back. */
+  function savePerkField(entryId, pid, field, value) {
+    var apply = function (w) {
+      w.cards.forEach(function (c) {
+        if (c.id !== entryId) return;
+        var o = c[field] || {};
+        if (field === "pnotes") { if (value) o[pid] = value; else delete o[pid]; }
+        else { if (value) o[pid] = true; else delete o[pid]; }
+        if (Object.keys(o).length) c[field] = o; else delete c[field];
+      });
+    };
+    var before = state.wallet, draft = JSON.parse(JSON.stringify(before));
+    apply(draft); state.wallet = draft;
+    if (state.demo) return;
+    store().update(function (w) { apply(w); }).then(function (w) { state.wallet = w; }, function (e) {
+      state.wallet = before; state.msg = errText(e); paint();
+    });
   }
 
   function paintMain() {
@@ -2006,6 +2184,7 @@
       return;
     }
     if (act === "bonus-remove") { save(function (w) { w.cards.forEach(function (k) { if (k.id === id) delete k.bonus; }); }); return; }
+    if (act === "cpview") { state.cpView = b.getAttribute("data-key") === "grid" ? "grid" : "list"; try { localStorage.setItem("hrt-wl-cpview", state.cpView); } catch (e) {} paint(); return; }
     if (act === "view") { state.cardView = b.getAttribute("data-key") === "list" ? "list" : "grid"; try { localStorage.setItem("hrt-wl-view", state.cardView); } catch (e) {} paint(); return; }
     if (act === "fam") { state.holder = b.hasAttribute("data-key") ? b.getAttribute("data-key") : null; state.showAllSoon = false; paint(); return; }
     if (act === "alldates") { state.showAllDates = !state.showAllDates; paint(); return; }
@@ -2022,14 +2201,16 @@
     if (act === "remove") {
       var e = state.wallet.cards.filter(function (c) { return c.id === id; })[0];
       var c = e && cardFor(e, catalog().cards.reduce(function (m, k) { m[k.id] = k; return m; }, {}));
-      if (!window.confirm("Remove " + (c ? c.name : "this card") + " from your wallet? Its ticked-off credits go too.")) return;
+      if (!window.confirm("Remove " + (c ? c.name : "this card") + " from your wallet? Its notes go too.")) return;
       save(function (w) { w.cards = w.cards.filter(function (k) { return k.id !== id; }); },
         function () { if (state.editing === id) state.editing = null; if (state.sel === id) state.sel = null; });
     }
   }
   function onChange(ev) {
-    var t = ev.target;
-    if (!t || t.getAttribute("data-wl") !== "use") return;
+    var t = ev.target, act = t && t.getAttribute("data-wl");
+    if (act === "pnote") { savePerkField(t.getAttribute("data-id"), t.getAttribute("data-perk"), "pnotes", String(t.value || "").trim().slice(0, 300)); return; }
+    if (act === "mark") { var li = t.closest("li"); if (li) li.classList.toggle("marked", t.checked); savePerkField(t.getAttribute("data-id"), t.getAttribute("data-perk"), "marks", t.checked); return; }
+    if (!t || act !== "use") return;
     setUsed(t.getAttribute("data-id"), t.getAttribute("data-perk"), t.getAttribute("data-key"), t.checked);
   }
 
@@ -2526,7 +2707,7 @@
     todayData: todayData,
     /* load the wallet without showing it, so other tools can use it (called by app.js once signed in) */
     ensure: function () { if (!state.wallet && !state.loading) load(); },
-    _test: { importantDates: importantDates, nextFeeDate: nextFeeDate, holderList: holderList, valueTextX: function (v) { return valueText(v); }, creditGroups: creditGroups, findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
+    _test: { creditSections: creditSections, creditGroupOf: creditGroupOf, cancelWhen: cancelWhen, TICKS: TICKS, importantDates: importantDates, nextFeeDate: nextFeeDate, holderList: holderList, valueTextX: function (v) { return valueText(v); }, creditGroups: creditGroups, findStore: findStore, STORES: STORES, usedThisCardYear: usedThisCardYear, cardYearStart: cardYearStart, bonusState: bonusState, artHtml: artHtml, parseOpened: parseOpened, nextRenewal: nextRenewal, isFuture: isFuture, summarize: summarize,
       whenText: whenText, renewalText: renewalText, money: money,
       perkPeriod: perkPeriod, perkRows: perkRows, expiringSoon: expiringSoon, pruneUsed: pruneUsed,
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,

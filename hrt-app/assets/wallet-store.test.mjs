@@ -145,6 +145,11 @@ ok('load returns a copy', f.stored.wallet.cards.length === 1);
   ok('added by HRT is allowed', good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', addedBy: 'hrt' }));
   ok('only hrt can be the adder', !good({ id: 'x', cardId: 'amex-gold', opened: '2026-01', addedBy: 'me' }));
   ok('other card fee must be a sane number', !good({ id: 'x', cardId: 'custom', opened: '', custom: { name: 'X', fee: -1 } }));
+  // Credits page notes and checkboxes (Nov 10 2026)
+  ok('perk notes and marks are allowed', good({ id: 'x', cardId: 'amex-gold', opened: '', pnotes: { dining: 'Use at Zippys', other: 'Lounge at HNL' }, marks: { dining: true, other: true } }));
+  ok('perk note over 300 characters is refused', !good({ id: 'x', cardId: 'amex-gold', opened: '', pnotes: { dining: 'a'.repeat(301) } }));
+  ok('a mark must be true', !good({ id: 'x', cardId: 'amex-gold', opened: '', marks: { dining: 'yes' } }));
+  ok('odd perk ids are refused', !good({ id: 'x', cardId: 'amex-gold', opened: '', pnotes: { '<b>': 'x' } }));
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

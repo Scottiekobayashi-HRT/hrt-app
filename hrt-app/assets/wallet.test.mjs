@@ -147,10 +147,10 @@ const rows = T.perkRows(w2, CAT, TODAY);
 const plat = rows.filter(r => r.entry.id === 'p');
 const platUsd = plat.reduce((s, r) => s + T.perkYearUsd(r.perk), 0);
 ok('Platinum credits add to $3,004.40 a year', Math.abs(platUsd - 3004.4) < 0.001, platUsd);
-ok('ticked Uber shows as used this month', rows.find(r => r.entry.id === 'p' && r.perk.id === 'uber').used === true);
+ok('ticks are ignored while TICKS is off (Nov 10 2026)', T.TICKS ? rows.find(r => r.entry.id === 'p' && r.perk.id === 'uber').used === true : rows.find(r => r.entry.id === 'p' && r.perk.id === 'uber').used === false);
 const soon = T.expiringSoon(rows, 31);
 const ids = soon.map(r => r.entry.id + ':' + r.perk.id);
-ok('used Uber is not in expiring soon', !ids.includes('p:uber'), ids.join());
+ok('Uber reminder goes by date only', T.TICKS ? !ids.includes('p:uber') : ids.includes('p:uber'), ids.join());
 ok('Venture X travel credit (ends Nov 1) is in expiring soon', ids.includes('x:travel'), ids.join());
 ok('monthly credits are in expiring soon', ids.includes('p:digital') && ids.includes('p:walmart'));
 ok('Q4 credits are not (79 days out)', !ids.includes('p:resy'));
@@ -235,11 +235,11 @@ const wc = (w, k, d = TODAY) => T.whichCard(w, CAT, k, d, VALS);
 const top = (w, k, d) => { const w1 = wc(w, k, d); return w1[0] && w1[0].card.id; };
 let w1 = wc(seven, 'grocery');
 ok('groceries in Q4 with a Sapphire: Freedom Flex 5% wins', w1[0].card.id === 'chase-freedom-flex' && Math.abs(w1[0].value - 10.25) < 1e-9, w1.map(x => x.card.id + ' ' + x.value).join(', '));
-ok('...and says activate first by Dec 14', w1[0].notes.some(n => n === 'Activate first, by Dec 14'), JSON.stringify(w1[0].notes));
+ok('...and says activate by Dec 14', w1[0].notes.some(n => n === (T.TICKS ? 'Activate first, by Dec 14' : 'Activate by Dec 14 if you have not yet')), JSON.stringify(w1[0].notes));
 ok('...Amex Gold 4x is second', w1[1].card.id === 'amex-gold' && w1[1].value === 8);
 ok('...Sapphire online grocery says it is online only', w1.find(x => x.card.id === 'chase-sapphire-preferred').notes.some(n => /^Online orders/.test(n)));
 const activated = W([['g','amex-gold','2023-06-08'],['s','chase-sapphire-preferred','2021-11-20'],['f','chase-freedom-flex','2020-01']], { f: { used: { rotating: { '2026-Q4': true } } } });
-ok('once activated, no activate note', !wc(activated, 'grocery')[0].notes.some(n => /Activate/.test(n)));
+ok('once activated, no activate note (only with ticks)', !T.TICKS || !wc(activated, 'grocery')[0].notes.some(n => /Activate/.test(n)));
 const noSapphire = W([['g','amex-gold','2023-06-08'],['f','chase-freedom-flex','2020-01']]);
 w1 = wc(noSapphire, 'grocery');
 ok('without a Sapphire, Flex counts as 5% cash back and Gold wins', w1[0].card.id === 'amex-gold' && w1[1].value === 5, w1.map(x => x.card.id + ' ' + x.value).join(', '));
@@ -316,7 +316,7 @@ const cg = T.creditGroups(T.perkRows(platOnly, CAT, { y: 2026, m: 10, d: 13 }), 
 ok('groups are next 31 days, by Dec 31, later', cg.map(g => g.key).join() === 'soon,quarter', cg.map(g => g.key).join());
 ok('Resy and lululemon quarterly credits show by Dec 31', ['resy', 'lululemon'].every(id => cg[1].rows.some(r => r.perk.id === id)));
 ok('the quarter group has a label with its end date', cg[1].label === 'By Dec 31');
-ok('used credits are left out of every group', !T.creditGroups(T.perkRows({ v: 1, points: [], cards: [{ ...platOnly.cards[0], used: { resy: { '2026-Q4': true } } }] }, CAT, { y: 2026, m: 10, d: 13 }), { y: 2026, m: 10, d: 13 }).some(g => g.rows.some(r => r.perk.id === 'resy')));
+ok('used credits are left out of every group (only with ticks)', !T.TICKS || !T.creditGroups(T.perkRows({ v: 1, points: [], cards: [{ ...platOnly.cards[0], used: { resy: { '2026-Q4': true } } }] }, CAT, { y: 2026, m: 10, d: 13 }), { y: 2026, m: 10, d: 13 }).some(g => g.rows.some(r => r.perk.id === 'resy')));
 const vxOnly = { v: 1, points: [], cards: [{ id: 'v', cardId: 'capone-venture-x', opened: '2022-03-02' }] };
 const cg2 = T.creditGroups(T.perkRows(vxOnly, CAT, { y: 2026, m: 10, d: 13 }), { y: 2026, m: 10, d: 13 });
 ok('a credit ending next year is under Later', cg2.some(g => g.key === 'later' && g.rows.some(r => r.perk.id === 'travel')));
@@ -326,8 +326,8 @@ const pd = { y: 2026, m: 10, d: 15 };
 const partW = { v: 1, points: [], cards: [{ id: 'p', cardId: 'amex-platinum', opened: '2024-03-15', used: { resy: { '2026-Q4': 40 }, uber: { '2026-10': 15 } } }] };
 const pr = T.perkRows(partW, CAT, pd);
 const resyR = pr.find(r => r.perk.id === 'resy'), uberR = pr.find(r => r.perk.id === 'uber');
-ok('part used credit stays open with the rest left', !resyR.used && resyR.part === 40 && resyR.left === 60);
-ok('an amount equal to the credit counts as used', uberR.used);
+ok('part used credit stays open with the rest left (only with ticks)', !T.TICKS || (!resyR.used && resyR.part === 40 && resyR.left === 60));
+ok('an amount equal to the credit counts as used (only with ticks)', !T.TICKS || uberR.used);
 const pg2 = T.creditGroups(pr, pd).find(g => g.key === 'quarter');
 ok('credits left total counts only what is left', pg2.rows.some(r => r.perk.id === 'resy') && pg2.usd === pg2.rows.reduce((a, r) => a + (r.perk.unit === 'usd' ? r.left : 0), 0));
 
@@ -386,6 +386,30 @@ ok('other card gets a renewal from its open date', HS.rows.some(r => r.entry.id 
 ok('unknown open date has no renewal and does not break next renewal', HS.next && HS.next.entry.id === 'a');
 ok('closed Amex Gold credits are not listed', !T.perkRows(hh, CAT, { y: 2026, m: 10, d: 14 }).some(r => r.entry.id === 'e'));
 ok('Which card ignores planned and other cards', !T.whichCard(hh, CAT, 'dining').some(x => x.entry && (x.entry.id === 'd' || x.entry.id === 'b')));
+
+
+/* ---- Nov 10 2026: Eddie's review (Credits by card, cancel or downgrade, CCDB columns) ---- */
+{
+  const plat = { v: 1, points: [], cards: [{ id: 'p', cardId: 'amex-platinum', opened: '2024-03-15' }] };
+  const rows = T.perkRows(plat, CAT, TODAY);
+  const secs = T.creditSections(rows, 'p');
+  const keys = secs.map(g => g.key).join();
+  ok('credit sections are monthly, mid, annual, other', keys === 'monthly,mid,annual,other', keys);
+  ok('Uber Cash is renewing monthly', secs[0].rows.some(r => r.perk.id === 'uber'));
+  ok('every perk lands in exactly one section', secs.reduce((t, g) => t + g.rows.length, 0) === rows.filter(r => r.entry.id === 'p').length);
+  const ev = CAT.benefits.find(b => b.cadence === 'per event');
+  ok('per event perks go to Other perks & benefits', T.creditGroupOf(ev) === 'other');
+  const gold = CAT.cards.find(c => c.id === 'amex-gold');
+  ok('Amex Gold can cancel 12 months after opening', T.cancelWhen({ opened: '2026-01-10' }, gold, { y: 2026, m: 11, d: 10 }).text === 'From Jan 2027');
+  ok('...and is ready once 12 months have passed', T.cancelWhen({ opened: '2024-03-15' }, gold, TODAY).now === true);
+  ok('...no open date says after 12 months', T.cancelWhen({ opened: '' }, gold, TODAY).text === 'After 12 months');
+  const csp = CAT.cards.find(c => c.id === 'chase-sapphire-preferred');
+  ok('Sapphire Preferred says keep open', T.cancelWhen({ opened: '2021-11-20' }, csp, TODAY).text === 'Keep open');
+  ok('no-fee cards have no cancel timing', T.cancelWhen({ opened: '2021-11-20' }, CAT.cards.find(c => c.id === 'chase-freedom-unlimited'), TODAY) === null);
+  const txt = JSON.stringify(CAT.cards);
+  ok('catalog has no internal CCDB notes', !/commission|FeeOptInternal|hold-slot|Miho|\bBBP\b|velocity/i.test(txt));
+  ok('catalog has no placeholders', !/\[|TBD|Scottie input/.test(CAT.cards.map(c => [c.cancelHow, c.best, c.otherPerks, c.phone].join(' ')).join(' ')));
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

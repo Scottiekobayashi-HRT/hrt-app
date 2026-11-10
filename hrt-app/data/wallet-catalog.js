@@ -14,7 +14,15 @@ window.HRT_WALLET_CATALOG={
    "note": "The 10% anniversary points bonus ended for new applicants on June 15, 2026. Existing cardholders get it on purchases through October 1, 2026.",
    "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/c4ecfbb1-64a6-4940-ae32-83819ef7a154/Chase+Sapphire+Preferred%C2%AE+Card+NEW.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/c4ecfbb1-64a6-4940-ae32-83819ef7a154/Chase+Sapphire+Preferred%C2%AE+Card+NEW.png?content-type=image%2Fpng",
+   "code": "CSP",
+   "type": "Personal",
+   "phone": "800-432-3117 (recon: 888-609-7805)",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - this is the card used for all your Chase-points redemptions. If you & your spouse each have a Sapphire, one can go after year 1. Talk to me before calling Chase, so the wrong downgrade doesn't cost you a future welcome bonus.",
+   "best": "Unlocks your ability to transfer points to airline partners or 1 other person; e.g. spouse/friend.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
   },
   {
    "id": "chase-freedom-unlimited",
@@ -27,6 +35,14 @@ window.HRT_WALLET_CATALOG={
    "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
    "checked": "2026-10-13",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/882a1d3e-639a-40ce-a7ef-c1efc4f2d46f/Chase+Freedom+Unlimited%C2%AE.png?content-type=image%2Fpng",
+   "code": "CFU",
+   "type": "Personal",
+   "phone": "800-432-3117 (recon: 888-609-7805)",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee, 1.5x on everything.",
+   "best": "1.5x on every purchase; great card for everyday spending.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (when paired with Sapphire Preferred/Reserve or Ink Preferred for transfer eligibility)",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
    "ftf": 3.0
   },
   {
@@ -52,7 +68,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Launched Aug 2025. No monthly or quarterly dollar credits. Value is dated benefits.",
    "source": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-infinite-credit-card/",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3cf19166-75c2-48ef-9128-92faf4c8975c/Atmos+Rewards+Summit+Visa+Infinite.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3cf19166-75c2-48ef-9128-92faf4c8975c/Atmos+Rewards+Summit+Visa+Infinite.png",
+   "code": "ATM-SUM",
+   "type": "Personal",
+   "phone": "800-732-9194",
+   "cancelHow": "Keep for the companion award if you'll use it; else downgrade to Ascent to cut the fee.",
+   "best": "Earn 3 points per dollar on foreign purchases; includes a 25K-point Global Companion Award",
+   "alliances": "ONEWORLD (Atmos is a Oneworld member program)",
+   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart."
   },
   {
    "id": "atmos-ascent",
@@ -64,7 +87,14 @@ window.HRT_WALLET_CATALOG={
    "note": "This is the renamed Alaska Airlines Visa Signature. Companion Fare now has a $6,000 spend gate. No foreign transaction fee.",
    "source": "https://bankofamerica.com/credit-cards/products/alaska-airlines-credit-card",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e448bf79-0d7f-45c4-ad46-8daa31ad9bdf/Atmos+Rewards+Ascent+Visa+Signature.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e448bf79-0d7f-45c4-ad46-8daa31ad9bdf/Atmos+Rewards+Ascent+Visa+Signature.png",
+   "code": "ATM-ASC",
+   "type": "Personal",
+   "phone": "800-732-9194",
+   "cancelHow": "Keep if you fly Alaska/Hawaiian; else reconsider at renewal.",
+   "best": "Free checked bag (terms apply); includes a $99 Companion Fare",
+   "alliances": "ONEWORLD (Atmos is a Oneworld member program)",
+   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart."
   },
   {
    "id": "amex-gold",
@@ -76,7 +106,15 @@ window.HRT_WALLET_CATALOG={
    "note": "",
    "source": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/60d0730a-f5e7-478e-8a61-fec52c589c49/American+Express+Gold+Card.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/60d0730a-f5e7-478e-8a61-fec52c589c49/American+Express+Gold+Card.png",
+   "code": "AXG",
+   "type": "Personal",
+   "phone": "800-567-1083",
+   "cancelAfter": "12",
+   "cancelHow": "To drop the fee & keep your points: apply for a fresh Blue Business Plus ($0), then cancel Gold just after the anniversary. (Amex won't let you downgrade to a $0 card - you apply fresh.)",
+   "best": "Earn 4X points on groceries & dining",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
   },
   {
    "id": "amex-platinum",
@@ -88,7 +126,15 @@ window.HRT_WALLET_CATALOG={
    "note": "Saks credit appears removed as of July 2026. See To verify.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b8c90877-2aed-4a17-b871-c6d6508d5c3a/The+Platinum+Card+from+American+Express.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b8c90877-2aed-4a17-b871-c6d6508d5c3a/The+Platinum+Card+from+American+Express.png",
+   "code": "AXP",
+   "type": "Personal",
+   "phone": "800-567-1083",
+   "cancelAfter": "12",
+   "cancelHow": "Keep only if you use the credits. To drop the fee: downgrade to Gold or Green, or apply a fresh Blue Business Plus ($0) to keep your points, then cancel after the anniversary.",
+   "best": "Great perks & benefits",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
   },
   {
    "id": "amex-business-gold",
@@ -100,7 +146,15 @@ window.HRT_WALLET_CATALOG={
    "note": "FedEx was replaced by UPS.com on the Flexible Business Credit.",
    "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/cc682c1a-0ba2-402f-a34a-7ddcecc68f34/American+Express+Business+Gold+Card.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/cc682c1a-0ba2-402f-a34a-7ddcecc68f34/American+Express+Business+Gold+Card.png",
+   "code": "AXG-B",
+   "type": "Business",
+   "phone": "800-567-1083",
+   "cancelAfter": "12",
+   "cancelHow": "Apply for a fresh Blue Business Plus ($0) to keep your points, then cancel - or keep if the 4x categories earn their keep.",
+   "best": "Earn 4X points on your top 2 spending categories",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
   },
   {
    "id": "amex-business-platinum",
@@ -112,7 +166,15 @@ window.HRT_WALLET_CATALOG={
    "note": "",
    "source": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ba563ba0-9bf1-4ec6-a9d6-841391adf193/The+Business+Platinum+Card+from+American+Express.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ba563ba0-9bf1-4ec6-a9d6-841391adf193/The+Business+Platinum+Card+from+American+Express.png",
+   "code": "AXP-B",
+   "type": "Business",
+   "phone": "800-567-1083",
+   "cancelAfter": "12",
+   "cancelHow": "Keep only if you use the credits; else apply a fresh Blue Business Plus ($0) to keep points, then cancel.",
+   "best": "Great perks & benefits",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
   },
   {
    "id": "capone-venture",
@@ -124,7 +186,14 @@ window.HRT_WALLET_CATALOG={
    "note": "No recurring statement credits at all. Only the Global Entry credit.",
    "source": "https://www.capitalone.com/credit-cards/venture/",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3ca1ab97-cd21-4514-8ad9-c8fbd937f281/Capital+One+Venture+Rewards+card.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3ca1ab97-cd21-4514-8ad9-c8fbd937f281/Capital+One+Venture+Rewards+card.png",
+   "code": "VR",
+   "type": "Personal",
+   "phone": "800-903-9177 (recon: 800-625-7866; backup: 866-927-5831)",
+   "cancelAfter": "12",
+   "cancelHow": "Downgrade to VentureOne ($0; call them) before the fee posts - keeps all your miles.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
   },
   {
    "id": "capone-venture-x",
@@ -136,7 +205,15 @@ window.HRT_WALLET_CATALOG={
    "note": "Both annual benefits reset on the ANNIVERSARY, not Jan 1. Lounge access for authorized users now costs $125 a year each, and guests pay unless the cardholder spends $75,000 a year.",
    "source": "https://www.capitalone.com/credit-cards/travel-and-miles/",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/18ed6062-a9b1-47d3-b107-13573749ac0e/Capital+One+Venture+X.png"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/18ed6062-a9b1-47d3-b107-13573749ac0e/Capital+One+Venture+X.png",
+   "code": "VX",
+   "type": "Personal",
+   "phone": "800-903-9177 (recon: 800-625-7866; backup: 866-927-5831)",
+   "cancelAfter": "Never. You actually make money on this card's annual fee.",
+   "cancelHow": "Keep if you travel - the $300 credit + 10K miles more than cover the fee. Otherwise downgrade to VentureOne ($0).",
+   "best": "About Venture X: If you spend at least $300/yr in travel you'll never want to cancel this card. The $395 annual fee is offset by a $300 annual credit on travel booked thru their portal. The remaining $95 is further offset by a 10K mile bonus given at year end; worth $100 at minimum. Also includes Priority Pass access to over 1300 airport lounges worldwide.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
   },
   {
    "id": "chase-sapphire-reserve",
@@ -148,7 +225,15 @@ window.HRT_WALLET_CATALOG={
    "note": "Unlimited Chase Sapphire Lounge and Priority Pass visits for you and two guests. Apple TV and Apple Music included if activated by June 22, 2027. Spend $75,000 in a calendar year for Hyatt and IHG status and more. Authorized users cost $195 each.",
    "source": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8149f80c-4f79-4427-8b2b-e873b94a6f0f/Chase+Sapphire+Reserve%C2%AE.PNG?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8149f80c-4f79-4427-8b2b-e873b94a6f0f/Chase+Sapphire+Reserve%C2%AE.PNG?content-type=image%2Fpng",
+   "code": "CSR",
+   "type": "Personal",
+   "phone": "800-432-3117 (recon: 888-609-7805)",
+   "cancelAfter": "12",
+   "cancelHow": "Keep only if the travel credits + lounge beat the fee. Otherwise talk to me before downgrading, so the wrong downgrade doesn't cost you a future welcome bonus. Never cancel a Sapphire outright - combine points out first.",
+   "best": "Unlocks best redemption values; lots of valuable statement credits that can more than offset the fee.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
   },
   {
    "id": "chase-sapphire-reserve-business",
@@ -160,7 +245,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Employee cards are free. Lounges are for the business owner only. Spend $120,000 in a calendar year for Hyatt and IHG status and more. Part of the balance can be carried (Flex for Business); the rest is due in full each month.",
    "source": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
    "checked": "2026-10-13",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/4bf88517-38ca-45c8-9691-ac1ff83aa12e/Sapphire+Reserve+for+Business%E2%84%A0.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/4bf88517-38ca-45c8-9691-ac1ff83aa12e/Sapphire+Reserve+for+Business%E2%84%A0.png?content-type=image%2Fpng",
+   "code": "CSR-B",
+   "type": "Business",
+   "phone": "800-453-9719",
+   "cancelAfter": "12",
+   "cancelHow": "Keep only if the credits beat the fee; else downgrade to a $0 Ink to keep points. (Only if you already hold a $0 Ink - else save the slot for a fresh bonus.)",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
   },
   {
    "id": "chase-ink-business-preferred",
@@ -172,7 +264,15 @@ window.HRT_WALLET_CATALOG={
    "note": "Points transfer to airlines and hotels. Employee cards free. Cell phone protection up to $1,000 a claim when you pay your phone bill with it.",
    "source": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/a583508f-7f75-486c-95ee-f807a01e569f/Ink+Business+Preferred%C2%AE+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/a583508f-7f75-486c-95ee-f807a01e569f/Ink+Business+Preferred%C2%AE+Credit+Card.png?content-type=image%2Fpng",
+   "code": "CBP",
+   "type": "Business",
+   "phone": "800-453-9719",
+   "cancelAfter": "12",
+   "cancelHow": "Keep 1 year to earn the bonus, then cancel. (Only downgrade to a $0 Ink if you already have one - otherwise save that slot for a fresh welcome bonus.)",
+   "best": "This card unlocks your ability to transfer points to airline partners or 1 other person; e.g. spouse/friend.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
   },
   {
    "id": "chase-ink-business-unlimited",
@@ -185,6 +285,14 @@ window.HRT_WALLET_CATALOG={
    "source": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
    "checked": "2026-10-19",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/78fcc13e-89da-4a0e-a8d3-0861b8bd0fb4/Ink+Business+Unlimited%C2%AE+Credit+Card.png?content-type=image%2Fpng",
+   "code": "CBU",
+   "type": "Business",
+   "phone": "800-453-9719",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee.",
+   "best": "1.5x on every purchase; great card for everyday spending.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (when paired with Sapphire Preferred/Reserve or Ink Preferred for transfer eligibility)",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
    "ftf": 3.0
   },
   {
@@ -198,6 +306,14 @@ window.HRT_WALLET_CATALOG={
    "source": "https://creditcards.chase.com/business-credit-cards/ink/cash",
    "checked": "2026-10-19",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/4025faae-8bc2-4561-8399-840df42aca2e/Ink+Business+Cash%C2%AE+Credit+Card.png?content-type=image%2Fpng",
+   "code": "CBC",
+   "type": "Business",
+   "phone": "800-453-9719",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee.",
+   "best": "Great rotating spending categories",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (when paired with Sapphire Preferred/Reserve or Ink Preferred for transfer eligibility)",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
    "ftf": 3.0
   },
   {
@@ -210,7 +326,13 @@ window.HRT_WALLET_CATALOG={
    "note": "Cash back card (points worth 1 cent each), not transferable Ultimate Rewards. Pay in Full card with a Flex for Business option to carry part of the balance.",
    "source": "https://creditcards.chase.com/business-credit-cards/ink/premier",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/fe42075f-75d0-41cc-b067-547e6aae2e3c/Ink+Business+Premier+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/fe42075f-75d0-41cc-b067-547e6aae2e3c/Ink+Business+Premier+Credit+Card.png?content-type=image%2Fpng",
+   "code": "CB-PREM",
+   "type": "Business",
+   "phone": "800-453-9719",
+   "cancelAfter": "12",
+   "cancelHow": "Downgrade to a $0 Ink to keep your points - unless you don't have a $0 Ink yet, then save that slot for a fresh bonus.",
+   "partners": "N/A. Cash-back card; no airline transfer partners."
   },
   {
    "id": "chase-southwest-plus",
@@ -222,7 +344,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Entry Southwest card: free first checked bag for you plus up to 8 on the same reservation, Group 5 boarding, and 3,000 anniversary points. Worth keeping for the bag perk on interisland and mainland trips.",
    "source": "https://creditcards.chase.com/travel-credit-cards/southwest/plus",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/cafe2bf4-3f0a-414f-b3ef-f6a1d591eac5/Southwest+Rapid+Rewards+Plus+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/cafe2bf4-3f0a-414f-b3ef-f6a1d591eac5/Southwest+Rapid+Rewards+Plus+Credit+Card.png?content-type=image%2Fpng",
+   "code": "SW",
+   "type": "Personal",
+   "phone": "800-432-3117 (recon: 888-609-7805)",
+   "cancelAfter": "12",
+   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
+   "partners": "Southwest Airlines only."
   },
   {
    "id": "chase-southwest-premier",
@@ -246,7 +375,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Top personal Southwest card: 7,500 anniversary points, Preferred seat at booking, free Extra Legroom upgrades within 48 hours, and free first checked bag. The old $75 annual Southwest travel credit is no longer listed.",
    "source": "https://creditcards.chase.com/travel-credit-cards/southwest/priority",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/a30a6e2d-09b8-4b0e-8ec6-9d949e62647e/Southwest+Rapid+Rewards+Priority+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/a30a6e2d-09b8-4b0e-8ec6-9d949e62647e/Southwest+Rapid+Rewards+Priority+Credit+Card.png?content-type=image%2Fpng",
+   "code": "SW",
+   "type": "Personal",
+   "phone": "800-432-3117 (recon: 888-609-7805)",
+   "cancelAfter": "12",
+   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
+   "partners": "Southwest Airlines only."
   },
   {
    "id": "chase-southwest-premier-business",
@@ -258,7 +394,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Business version of the Premier: 6,000 anniversary points, 15% off flight code each year, free first checked bag, and Standard or Preferred seat within 48 hours.",
    "source": "https://creditcards.chase.com/business-credit-cards/southwest/premier-business",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a40438a-fe45-4faa-941a-572f86f831b3/Southwest+Rapid+Rewards+Premier+Business+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a40438a-fe45-4faa-941a-572f86f831b3/Southwest+Rapid+Rewards+Premier+Business+Credit+Card.png?content-type=image%2Fpng",
+   "code": "SW",
+   "type": "Business",
+   "phone": "800-453-9719",
+   "cancelAfter": "12",
+   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
+   "partners": "Southwest Airlines only."
   },
   {
    "id": "chase-southwest-performance-business",
@@ -270,7 +413,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Top Southwest business card: 9,000 anniversary points, Preferred seat at booking, free Extra Legroom upgrades within 48 hours, free first checked bag, and a Global Entry or TSA PreCheck credit.",
    "source": "https://creditcards.chase.com/business-credit-cards/southwest/performance-business",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/49db1d24-d24c-4fcf-8d6a-72c0c2d10f6b/Southwest+Rapid+Rewards+Performance+Business+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/49db1d24-d24c-4fcf-8d6a-72c0c2d10f6b/Southwest+Rapid+Rewards+Performance+Business+Credit+Card.png?content-type=image%2Fpng",
+   "code": "SW",
+   "type": "Business",
+   "phone": "800-453-9719",
+   "cancelAfter": "12",
+   "cancelHow": "Companion Pass via card bonuses ENDS with 2026 qualification (Southwest overhaul 10/15/26) - never recommend this card for the pass. Points-only value now: keep if you fly Southwest, else downgrade or cancel at renewal - points stay with Southwest.",
+   "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
+   "partners": "Southwest Airlines only."
   },
   {
    "id": "chase-united-gateway",
@@ -282,7 +432,14 @@ window.HRT_WALLET_CATALOG={
    "note": "No annual fee United card. Spend $10,000 in a calendar year to unlock 2 free checked bag certificates, 8x on United flights and award flight savings.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-gateway",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a7bef34-62d1-46f2-ac99-3005e8efe9dd/United+Gateway+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/8a7bef34-62d1-46f2-ac99-3005e8efe9dd/United+Gateway+Card.png?content-type=image%2Fpng",
+   "code": "UA",
+   "type": "Personal",
+   "phone": "800-432-3117 (recon: 888-609-7805)",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee, the downgrade home for United cards.",
+   "alliances": "STAR ALLIANCE (co-branded with United)",
+   "partners": "N/A. Card earns United MileagePlus miles directly; miles redeem on United flights via United's own award chart."
   },
   {
    "id": "chase-united-explorer",
@@ -294,7 +451,12 @@ window.HRT_WALLET_CATALOG={
    "note": "$0 intro annual fee the first year, then $150. First checked bag free for you and one companion when you buy the ticket with the card, plus 2 United Club passes each year.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-explorer",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/58809098-0140-47a6-b7d3-7535fd38a014/United+Explorer+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/58809098-0140-47a6-b7d3-7535fd38a014/United+Explorer+Card.png?content-type=image%2Fpng",
+   "code": "UA",
+   "type": "Personal",
+   "phone": "800-432-3117 (United cards via Chase)",
+   "alliances": "United (Star Alliance)",
+   "partners": "United"
   },
   {
    "id": "chase-united-quest",
@@ -306,7 +468,12 @@ window.HRT_WALLET_CATALOG={
    "note": "First and second checked bags free for you and one companion. $200 United TravelBank cash each card anniversary covers a big part of the fee if you fly United from HNL.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-quest",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/bb6be301-d16a-4d4e-b93c-7f89b781fb50/United+Quest+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/bb6be301-d16a-4d4e-b93c-7f89b781fb50/United+Quest+Card.png?content-type=image%2Fpng",
+   "code": "UA",
+   "type": "Personal",
+   "phone": "800-432-3117 (United cards via Chase)",
+   "alliances": "United (Star Alliance)",
+   "partners": "United"
   },
   {
    "id": "chase-united-club",
@@ -318,7 +485,12 @@ window.HRT_WALLET_CATALOG={
    "note": "Formerly the United Club Infinite Card, now called the United Club Card. Includes United Club membership (you plus one adult guest) and first and second checked bags free for you and one companion.",
    "source": "https://creditcards.chase.com/travel-credit-cards/united/united-club",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/d5a20e3f-60b9-41a9-a960-3f14db0b1b85/United+Club+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/d5a20e3f-60b9-41a9-a960-3f14db0b1b85/United+Club+Card.png?content-type=image%2Fpng",
+   "code": "UA",
+   "type": "Personal",
+   "phone": "800-432-3117 (United cards via Chase)",
+   "alliances": "United (Star Alliance)",
+   "partners": "United"
   },
   {
    "id": "chase-marriott-boundless",
@@ -354,7 +526,14 @@ window.HRT_WALLET_CATALOG={
    "note": "No annual fee miles card. Miles transfer to Capital One travel partners and never expire while the account is open.",
    "source": "https://www.capitalone.com/credit-cards/ventureone/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/f9b9dc8a-a45b-41f6-b2ec-d46bb2a5c8ad/Capital+One+VentureOne+Rewards.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/f9b9dc8a-a45b-41f6-b2ec-d46bb2a5c8ad/Capital+One+VentureOne+Rewards.png?content-type=image%2Fpng",
+   "code": "V1",
+   "type": "Personal",
+   "phone": "800-903-9177 (recon: 800-625-7866; backup: 866-927-5831)",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee, your Capital One miles home & downgrade target.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
   },
   {
    "id": "capone-venture-x-business",
@@ -366,7 +545,15 @@ window.HRT_WALLET_CATALOG={
    "note": "Designed to be paid in full each month. The $300 Business Travel credit and 10,000 anniversary miles roughly offset the fee if you book through Capital One Business Travel.",
    "source": "https://www.capitalone.com/small-business/credit-cards/venture-x-business/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/86be5474-e82d-4b3d-8780-a0b3fbf75b4e/Capital+One+Venture+X+Business.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/86be5474-e82d-4b3d-8780-a0b3fbf75b4e/Capital+One+Venture+X+Business.png?content-type=image%2Fpng",
+   "code": "VX-B",
+   "type": "Business",
+   "phone": "800-903-9177 (recon: 800-625-7866; backup: 866-927-5831)",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep if you travel (credits cover the fee); else downgrade to a $0 Capital One card.",
+   "best": "$395 annual fee is offset by a $300 annual credit on travel booked thru CapOne portal, further offset by annual 10K mile bonus worth $100+. Includes access to 1,300+ Priority Pass Lounges worldwide. If you spend at least $300/yr in travel you'll never want to cancel this card.",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
   },
   {
    "id": "capone-quicksilver",
@@ -390,7 +577,13 @@ window.HRT_WALLET_CATALOG={
    "note": "Savor is now the $0 fee card (the old $95 Savor and no-fee SavorOne were combined into it). Grocery 3% excludes superstores like Walmart and Target, so Costco and Walmart in Hawaii likely earn 1%.",
    "source": "https://www.capitalone.com/credit-cards/savor/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b9ddc6ce-7837-48bc-a2fc-510dd33bc43f/Capital+One+Savor.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b9ddc6ce-7837-48bc-a2fc-510dd33bc43f/Capital+One+Savor.png?content-type=image%2Fpng",
+   "code": "SAVOR",
+   "type": "Personal",
+   "phone": "800-903-9177 (recon: 800-625-7866; backup: 866-927-5831)",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee.",
+   "partners": "N/A. Cash-back card; no airline transfer partners."
   },
   {
    "id": "amex-delta-blue",
@@ -414,7 +607,14 @@ window.HRT_WALLET_CATALOG={
    "note": "$0 intro annual fee the first year for new cardmembers, then $150. Free first checked bag on Delta, $100 Delta Stays credit, and a $200 Delta flight credit after $10,000 spend in a calendar year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b895a222-0f86-4f5b-9a3c-311af3324e4d/Delta+SkyMiles+Gold+American+Express+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b895a222-0f86-4f5b-9a3c-311af3324e4d/Delta+SkyMiles+Gold+American+Express+Card.png?content-type=image%2Fpng",
+   "code": "DL",
+   "type": "Personal",
+   "phone": "800-567-1083",
+   "cancelAfter": "12",
+   "cancelHow": "Downgrade to Blue ($0) if you're not flying Delta - miles stay in your SkyMiles account.",
+   "alliances": "SKYTEAM (co-branded with Delta)",
+   "partners": "N/A. Card earns Delta SkyMiles directly; miles redeem on Delta flights via Delta's own award chart."
   },
   {
    "id": "amex-delta-platinum",
@@ -438,7 +638,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Delta's top card: 15 Sky Club visits per Medallion Year (unlimited after $75,000 spend in a calendar year), Centurion Lounge access when flying Delta on a ticket bought with the card, and a First/Comfort/Main Companion Certificate each renewal.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-reserve-american-express-card/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/52691a2a-520e-439d-98fd-9b5d25009d1a/Delta+SkyMiles+Reserve+American+Express+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/52691a2a-520e-439d-98fd-9b5d25009d1a/Delta+SkyMiles+Reserve+American+Express+Card.png?content-type=image%2Fpng",
+   "code": "DL",
+   "type": "Personal",
+   "phone": "800-567-1083",
+   "cancelAfter": "12",
+   "cancelHow": "Keep only if you fly Delta a lot; else downgrade to Blue ($0). Your SkyMiles are safe either way - they live with Delta.",
+   "alliances": "SKYTEAM (co-branded with Delta)",
+   "partners": "N/A. Card earns Delta SkyMiles directly; miles redeem on Delta flights via Delta's own award chart."
   },
   {
    "id": "amex-hilton-honors",
@@ -450,7 +657,14 @@ window.HRT_WALLET_CATALOG={
    "note": "No annual fee Hilton card with Silver status (Gold after $20,000 spend in a calendar year). No free night reward or statement credits.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/36fcd6bb-0bf0-4ac2-b053-5ecb7a4b76bc/Hilton+Honors+American+Express+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/36fcd6bb-0bf0-4ac2-b053-5ecb7a4b76bc/Hilton+Honors+American+Express+Card.png?content-type=image%2Fpng",
+   "code": "HH",
+   "type": "Personal",
+   "phone": "800-567-1083",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee (handy if you stay Hilton, harmless if not).",
+   "alliances": "Hotel currency (Hilton); airline transfers exist but at sub-optimal ratios (~10:2). Not recommended for airline redemptions.",
+   "partners": "Hilton Honors transfers to 30+ airline programs at very poor ratios. Not practical for airline use."
   },
   {
    "id": "amex-hilton-surpass",
@@ -474,7 +688,9 @@ window.HRT_WALLET_CATALOG={
    "note": "Diamond status, a Free Night Reward each renewal, $400 resort credit split Jan to Jun and Jul to Dec, and $200 flight credit at $50 per calendar quarter. Good fit for Hilton resorts in Hawaii.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-aspire/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/470da76a-7cd0-4b93-a1cc-94e903667727/Hilton+Honors+American+Express+Aspire+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/470da76a-7cd0-4b93-a1cc-94e903667727/Hilton+Honors+American+Express+Aspire+Card.png?content-type=image%2Fpng",
+   "code": "AX-ASPIRE",
+   "type": "Personal"
   },
   {
    "id": "amex-marriott-bevy",
@@ -498,7 +714,14 @@ window.HRT_WALLET_CATALOG={
    "note": "Platinum Elite status, 25 Elite Night Credits each calendar year, a Free Night Award (up to 85,000 points) after each renewal month, and up to $25 a month in dining credits.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-brilliant/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ad2223cf-5e38-41c7-8e2d-9418fa9242f3/Marriott+Bonvoy+Brilliant+American+Express+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ad2223cf-5e38-41c7-8e2d-9418fa9242f3/Marriott+Bonvoy+Brilliant+American+Express+Card.png?content-type=image%2Fpng",
+   "code": "MAR",
+   "type": "Personal",
+   "phone": "800-567-1083",
+   "cancelAfter": "12",
+   "cancelHow": "Keep if the annual free night + credits beat the fee; else downgrade to a $0 Bonvoy.",
+   "alliances": "Hotel currency (Marriott Bonvoy); transfers to 40+ airlines at 3:1 ratio (sub-optimal vs purpose-built transferable currencies)",
+   "partners": "Marriott Bonvoy transfers to most major airlines across all 3 alliances at 3:1. Includes American, Alaska, ANA, Air Canada, Air France/KLM, British Airways, Cathay, Delta, Emirates, Hawaiian, JAL, Singapore, United, Virgin Atlantic, and ~25 more."
   },
   {
    "id": "atmos-business",
@@ -510,7 +733,13 @@ window.HRT_WALLET_CATALOG={
    "note": "Renamed from the Alaska Airlines Visa Business card, works on Alaska and Hawaiian flights. Fee is $70 per company plus $25 per card, so $95 with one card.",
    "source": "https://business.bankofamerica.com/en/credit-cards/atmos-rewards",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/248caa21-2a6c-4c71-8732-654642061007/Atmos+Rewards+Visa+Signature+Business+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/248caa21-2a6c-4c71-8732-654642061007/Atmos+Rewards+Visa+Signature+Business+Card.png?content-type=image%2Fpng",
+   "code": "ATM-BIZ",
+   "type": "Business",
+   "phone": "800-892-3219",
+   "cancelHow": "Keep if you fly Alaska/Hawaiian.",
+   "alliances": "ONEWORLD (Atmos is a Oneworld member program)",
+   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart."
   },
   {
    "id": "barclays-hawaiian",
@@ -544,7 +773,15 @@ window.HRT_WALLET_CATALOG={
    "note": "No annual fee Bilt Card 2.0, issued by Column N.A. and serviced by Cardless since Feb 7, 2026. Rent and mortgage points scale with how much other spending you put on the card.",
    "source": "https://www.bilt.com/card/blue",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b9aa677a-f5a2-42f0-867d-deb72714651f/Bilt+Blue+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b9aa677a-f5a2-42f0-867d-deb72714651f/Bilt+Blue+Card.png?content-type=image%2Fpng",
+   "code": "BILT",
+   "type": "Personal",
+   "phone": "855-353-3168",
+   "cancelAfter": "Never",
+   "cancelHow": "Keep - $0 fee, your Bilt downgrade home.",
+   "best": "Earns rewards on rent & mortgage payments; no annual fee Bilt entry card",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (Bilt also has Hawaiian + Alaska direct via Atmos)",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red"
   },
   {
    "id": "bilt-obsidian",
@@ -556,7 +793,15 @@ window.HRT_WALLET_CATALOG={
    "note": "Mid tier Bilt Card 2.0 (Column N.A., serviced by Cardless). Pick 3x dining or 3x grocery; grocery choice only changes in January.",
    "source": "https://www.bilt.com/card/obsidian",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/bf3fe1f7-5ad3-4e44-a83c-084f0d18b9c7/Bilt+Obsidian+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/bf3fe1f7-5ad3-4e44-a83c-084f0d18b9c7/Bilt+Obsidian+Card.png?content-type=image%2Fpng",
+   "code": "BILT",
+   "type": "Personal",
+   "phone": "855-353-3168",
+   "cancelAfter": "12",
+   "cancelHow": "Downgrade to Bilt Blue ($0) if you're not using the perks.",
+   "best": "3X points on dining or groceries (your choice; grocery up to $25K/yr); $100 annual hotel credit offsets fee",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (Bilt also has Hawaiian + Alaska direct via Atmos)",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red"
   },
   {
    "id": "bilt-palladium",
@@ -568,7 +813,15 @@ window.HRT_WALLET_CATALOG={
    "note": "Top tier Bilt Card 2.0 (Column N.A., serviced by Cardless) with 2x on everything and Priority Pass. Hotel credits only work on Bilt Travel Portal stays of 2+ nights.",
    "source": "https://www.bilt.com/card/palladium",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/856af1cf-0d63-4d06-9394-97abecf18309/Bilt+Palladium+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/856af1cf-0d63-4d06-9394-97abecf18309/Bilt+Palladium+Card.png?content-type=image%2Fpng",
+   "code": "BILT",
+   "type": "Personal",
+   "phone": "855-353-3168",
+   "cancelAfter": "12",
+   "cancelHow": "Downgrade to Bilt Blue ($0) unless the premium perks pay for themselves.",
+   "best": "2X points on everyday spend; transfer partners include United; Alaska Atmos; Hyatt; $400 annual hotel credit; Priority Pass",
+   "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (Bilt also has Hawaiian + Alaska direct via Atmos)",
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red"
   },
   {
    "id": "boa-customized-cash",
