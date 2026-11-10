@@ -2654,7 +2654,7 @@
       "@keyframes wlUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}",
       "@media (prefers-reduced-motion:reduce){.wl-sheet,.wl-sheet-bg{animation:none}}",
       /* ----- ʻOhana Wallet (Oct 25): premium header for ʻOhana Members ----- */
-      ".wl-sum.wl-ow{border:0;padding-top:20px;background:radial-gradient(900px 260px at 92% -40%,rgba(242,199,102,.30),transparent 60%),radial-gradient(700px 220px at -10% 120%,rgba(217,112,64,.20),transparent 60%),linear-gradient(135deg,#141b24,#1b2430 55%,#232f3e);box-shadow:0 0 0 1.5px rgba(242,184,75,.75),0 0 0 5px rgba(242,184,75,.10),0 22px 46px -22px rgba(9,20,35,.85)}",
+      ".wl-sum.wl-ow{border:0;padding-top:20px;background:radial-gradient(900px 260px at 92% -40%,rgba(242,199,102,.30),transparent 60%),radial-gradient(700px 220px at -10% 120%,rgba(217,112,64,.20),transparent 60%),linear-gradient(135deg,rgba(20,27,36,.93),rgba(27,36,48,.88) 55%,rgba(35,47,62,.84)),url('" + SUMMARY_PHOTO + "') center 60%/cover no-repeat,#1b2430;box-shadow:0 0 0 1.5px rgba(242,184,75,.75),0 0 0 5px rgba(242,184,75,.10),0 22px 46px -22px rgba(9,20,35,.85)}",
       ".wl-sum.wl-ow:before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#b98a2e,#f5d27a 30%,#f2b84b 60%,#d97040);pointer-events:none}",
       ".wl-ow-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}",
       ".wl-sum .wl-ow-eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(90deg,#f5d27a,#f2b84b);-webkit-background-clip:text;background-clip:text;color:transparent}",
