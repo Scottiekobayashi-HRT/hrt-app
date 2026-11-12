@@ -11,7 +11,9 @@ const feed = { window_days: 30, updated: '2026-11-12', economy: [
 const d = T.build(feed, T.ROUTE, '2026-11-12');
 ok('window ends 29 days later', d.end === '2026-12-11');
 ok('past and out-of-window dates dropped', !d.days['2026-11-11'] && !d.days['2026-12-12'] && d.count === 3);
-ok('lowest price is great, others decent', d.days['2026-11-20'].tier === 'great' && d.days['2026-11-12'].tier === 'decent');
+ok('real tiers: 30k great, 35k decent', d.days['2026-11-20'].tier === 'great' && d.days['2026-11-12'].tier === 'decent');
+ok('above 35k is high', T.tierOf(40000) === 'high' && T.tierOf(30000) === 'great' && T.tierOf(35000) === 'decent');
+ok('15 destinations, HND included', T.DESTS.length === 15 && T.DESTS.some(x => x[0] === 'HND'));
 ok('only the HND route used', d.min === 30000);
 ok('months: Nov, Dec plus one locked', JSON.stringify(d.months) === JSON.stringify([[2026, 11], [2026, 12], [2027, 1]]));
 ok('addDays crosses the year', T.addDays('2026-12-20', 15) === '2027-01-04');
