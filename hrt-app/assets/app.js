@@ -28,7 +28,7 @@
  function setHref(id, url){ var el = $(id); if(el) el.href = url; }
  ["topPro","homePro","atmosPro"].forEach(function(id){ setHref(id, PRO_URL); });
  ["homeCal","atmosCal"].forEach(function(id){ setHref(id, ATMOS_URL); });
- setHref("navHome", SITE); setHref("navDisc", DISCLOSURE_URL); setHref("welcomeCoach", COACHING_URL); setHref("plansCoach", COACHING_URL); setHref("startCoach", COACHING_URL);
+ setHref("navHome", SITE); setHref("navDisc", DISCLOSURE_URL); setHref("welcomeCoach", COACHING_URL); setHref("plansCoach", COACHING_URL); /* startCoach now opens #coaching (Nov 11) */
  setTimeout(function(){ setHref("coachLink", COACHING_URL); }, 0);
 
  /* ============================== ROUTER ============================== */
@@ -45,7 +45,8 @@
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
   account:{ title:"My account", hint:"Photo, name, login and billing" },
   plans:{ title:"Plans", hint:"Free, ʻOhana and HRT PRO" },
-  picks:{ title:"Community Picks", hint:"Ranked by Hawaiʻi travelers" }
+  picks:{ title:"Community Picks", hint:"Ranked by Hawaiʻi travelers" },
+  coaching:{ title:"Rewards Card Coaching", hint:"Videos and Scottie AI" }
  };
  var shown = {}, current = null;
  var onShow = {};
@@ -478,6 +479,7 @@
  onShow.communities = function(){ if(window.HRT_COMMUNITIES) window.HRT_COMMUNITIES.show(); };
  onShow.picks = function(){ if(window.HRT_PICKS) window.HRT_PICKS.show(); };
  onShow.wallet = function(first, sub){ if(window.HRT_WALLET) window.HRT_WALLET.show(sub); };
+ onShow.coaching = function(){ if(window.HRT_COACHING) window.HRT_COACHING.show(); };
  /* My Wallet panel on the Dashboard home; wraps any existing home handler */
  (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
 
