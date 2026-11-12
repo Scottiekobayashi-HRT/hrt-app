@@ -209,6 +209,36 @@
     }, 420);
   }
 
+  /* Keep the wall moving (Scottie, Nov 11): every few seconds it slides one tile
+     along, and wraps back to the start at the end. It stops while the member
+     hovers, touches, tabs into it or has a tile open, and for anyone who has
+     asked for less motion. Off-screen or hidden tabs do not scroll. */
+  var AUTO_MS = 3800;
+  function autoScroll(rail, isBusy) {
+    var reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (reduce) return;
+    var hold = false, resumeT = null;
+    function pause() { hold = true; clearTimeout(resumeT); }
+    function resume(ms) { clearTimeout(resumeT); resumeT = setTimeout(function () { hold = false; }, ms || 0); }
+    rail.addEventListener("mouseenter", pause);
+    rail.addEventListener("mouseleave", function () { resume(1200); });
+    rail.addEventListener("focusin", pause);
+    rail.addEventListener("focusout", function () { resume(1200); });
+    rail.addEventListener("touchstart", pause, { passive: true });
+    rail.addEventListener("touchend", function () { resume(6000); }, { passive: true });
+    rail.addEventListener("wheel", function () { pause(); resume(6000); }, { passive: true });
+    setInterval(function () {
+      if (hold || document.hidden || (isBusy && isBusy())) return;
+      if (!rail.isConnected || rail.offsetParent === null) return;
+      var max = rail.scrollWidth - rail.clientWidth;
+      if (max <= 4) return;
+      var card = rail.firstElementChild, step = card ? card.getBoundingClientRect().width + 12 : 230;
+      if (rail.scrollLeft >= max - 4) rail.scrollTo({ left: 0, behavior: "smooth" });
+      else rail.scrollBy({ left: step, behavior: "smooth" });
+    }, AUTO_MS);
+  }
+
   /* Today in Hawaii (no daylight saving, always UTC-10), as YYYY-MM-DD. */
   function hawaiiToday() { return new Date(Date.now() - 10 * 3600e3).toISOString().slice(0, 10); }
 
@@ -412,9 +442,8 @@
 
     var head = el("div", "dw-head");
     head.appendChild(el("h2", null, "Deals, News, Flights"));
-    var pmark = el("a", "dw-pill dw-promark", "\u2605 HRT PRO"); pmark.href = "#atmos"; pmark.setAttribute("data-route", "atmos");
-    pmark.title = "HRT PRO opens business and first class and the full calendar";
-    head.appendChild(pmark);
+    /* No HRT PRO mark here: this wall is only shown to non-PRO members. PRO members
+       get their own wall, which carries the "★ HRT PRO" mark (renderPro). */
     head.appendChild(el("span", "dw-limit dw-lv-sub", "Free · 4 routes, " + win + " days"));
     head.appendChild(el("span", "dw-limit dw-lv-oh", "ʻOhana · every route, " + win + " days"));
     head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
@@ -529,7 +558,7 @@
     }
     wrap.appendChild(exp);
     attachNav(rail, nav);
-    nudge(rail);
+    autoScroll(rail, function () { return openKey !== null; });
 
     /* Nov 11 (Scottie): the separate HRT PRO business class box is gone. Its locked
        tiles now sit inside the wall (proTile), and the wall carries the HRT PRO mark. */
@@ -780,7 +809,7 @@
     var wrap = el("div", "dwp pro-only");
 
     var head = el("div", "dw-head");
-    head.appendChild(el("span", "dwp-pill", "★ PRO"));
+    head.appendChild(el("span", "dwp-pill", "★ HRT PRO"));
     head.appendChild(el("h2", null, "Deals, News, Flights"));
     var subEl = el("span", "dw-sub", ""); head.appendChild(subEl);
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
@@ -1025,6 +1054,7 @@
 
     drawCards();
     attachNav(rail, nav);
+    autoScroll(rail);
     return wrap;
   }
 
