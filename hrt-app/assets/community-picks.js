@@ -36,7 +36,6 @@
     "atmos reward calendar": { route: "atmos", label: "Search Atmos Reward Calendar" },
     "my wallet": { route: "wallet", label: "Open My Wallet" },
     "my wallet store search": { route: "wallet", label: "Which card should I use?" },
-    "points valuations": { route: "values", label: "See Points Valuations" },
     "kamaʻāina deals": { route: "kamaaina", label: "See Kamaʻāina Deals" },
     "communities calculator": { route: "communities", label: "Try the Community Calculator" },
     "choose to earn calculator": { route: "status", label: "Try Choose to Earn" },

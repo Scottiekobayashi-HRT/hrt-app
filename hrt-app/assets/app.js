@@ -36,9 +36,8 @@
   home:{ title:"Dashboard", hint:"Free tools for Hawaiʻi points travelers" },
   kamaaina:{ title:"Kamaʻāina Deals", hint:"Resident staycation rates by island" },
   atmos:{ title:"Atmos Reward Calendar", hint:"HRT PRO \u00b7 $9.99/mo" },
-  lounges:{ title:"HNL Lounge Map", hint:"Every lounge at HNL" },
+  lounges:{ title:"HNL Lounge Map", hint:"Where's the lounge & how do I get in?" },
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
-  values:{ title:"Points Valuations", hint:"Benchmarks for " + VALUATIONS_UPDATED },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
   resy:{ title:"Resy Hawaiʻi Map", hint:"Amex Resy credits in Hawaiʻi" },
   status:{ title:"Atmos Choose to Earn Calculator", hint:"Distance, price or segments" },
@@ -262,44 +261,8 @@
  ];
  /* shared with My Wallet's "Which card should I use?" so both tools use the same values */
  window.HRT_POINT_VALUES = { updated: VALUATIONS_UPDATED, list: VALS };
- var HPICKS = [
-  ["Chase Ultimate Rewards","2.05¢","/ pt","Transfers to United, Hyatt and more. The best all around currency for Hawaiʻi families."],
-  ["Amex Membership Rewards","2.0¢","/ pt","Transfers to ANA, JAL and 17+ partners. Ideal for premium cabins to Japan."],
-  ["ANA Mileage Club","1.4¢","/ mi","HNL to Tokyo routes with Business and First sweet spots from Hawaiʻi."],
-  ["Alaska Atmos Rewards","1.4¢","/ mi","Formerly HawaiianMiles. Covers Hawaiʻi routes plus the Alaska network."],
-  ["United MileagePlus","1.35¢","/ mi","Nonstops to HNL from mainland hubs and good partner space to Asia."],
-  ["World of Hyatt","1.7¢","/ pt","Several Hyatt resorts in Hawaiʻi. The best hotel currency for island stays."]
- ];
- var CATC = { cc:"#d97040", airline:"#3a7bb5", hotel:"#1f9d57" };
- var vCat = "all";
- $("valUpd").textContent = VALUATIONS_UPDATED;
- function vOptions(){ return '<option value="">Select a program</option>' + VALS.map(function(v,i){ return '<option value="'+i+'">'+esc(v[0])+' ('+v[2].toFixed(2)+'¢)</option>'; }).join(""); }
- function vRow(){
-  var r = document.createElement("div"); r.className = "vc-row";
-  r.innerHTML = '<select aria-label="Program">'+vOptions()+'</select><input type="text" inputmode="numeric" placeholder="Balance" aria-label="Balance"><div class="vc-res">$0.00</div><button type="button" class="vc-del" aria-label="Remove">&times;</button>';
-  r.querySelector("select").addEventListener("change", vCalc);
-  r.querySelector("input").addEventListener("input", function(){ var x = this.value.replace(/[^0-9]/g,""); this.value = x ? parseInt(x,10).toLocaleString("en-US") : ""; vCalc(); });
-  r.querySelector(".vc-del").addEventListener("click", function(){ r.remove(); if(!$("vcRows").children.length) vRow(); vCalc(); });
-  $("vcRows").appendChild(r);
- }
- function money(n){ return "$" + n.toLocaleString("en-US",{ minimumFractionDigits:2, maximumFractionDigits:2 }); }
- function vCalc(){
-  var total = 0;
-  Array.prototype.forEach.call($("vcRows").children, function(r){
-   var i = r.querySelector("select").value, pts = parseInt((r.querySelector("input").value || "").replace(/[^0-9]/g,""),10) || 0;
-   var v = (i === "" || !pts) ? 0 : pts * VALS[i][2] / 100; total += v;
-   r.querySelector(".vc-res").textContent = money(v);
-  });
-  $("vcTotal").textContent = money(total).replace(".00","");
- }
- function vList(){
-  var list = VALS.filter(function(v){ return vCat === "all" || v[1] === vCat; }).sort(function(a,b){ return b[2] - a[2]; });
-  $("vList").innerHTML = list.map(function(v){ return '<div class="vitem"><span><i style="background:'+CATC[v[1]]+'"></i>'+esc(v[0])+'</span><b style="color:'+CATC[v[1]]+'">'+v[2].toFixed(2)+'¢</b></div>'; }).join("");
- }
- $("vcAdd").addEventListener("click", vRow);
- document.addEventListener("click", function(ev){ var c = ev.target.closest("[data-v-cat]"); if(!c) return; vCat = c.getAttribute("data-v-cat"); document.querySelectorAll("[data-v-cat]").forEach(function(x){ var on = x === c; x.classList.toggle("plain", !on); x.setAttribute("aria-pressed", on); }); vList(); });
- $("vPicks").innerHTML = HPICKS.map(function(h){ return '<div class="hpick"><b>'+esc(h[0])+'</b><strong>'+h[1]+' <small>'+h[2]+'</small></strong><p>'+esc(h[3])+'</p></div>'; }).join("");
- vRow(); vRow(); vCalc(); vList();
+ /* Nov 11: the Points Valuations page was removed (Eddie review). VALS and
+    HRT_POINT_VALUES stay: My Wallet and the Atmos calculators use them. */
 
  /* ========================== RESY MAP ========================== */
  var V = [
@@ -496,16 +459,6 @@
    return '<button type="button" class="mrow" data-kopen="'+D.indexOf(d)+'"><span class="mi">'+d.s+'</span><span class="mt"><b>'+esc(d.b)+'</b><span>'+esc(d.i.length === 1 ? isl[d.i[0]] : "Several islands")+(d.h ? ", " + esc(d.h) : "")+'</span></span><span class="mv">'+esc(head)+'<small>'+esc(d.r)+'</small></span></button>';
   }).join("");
  }
- function homeVals(){
-  var top = VALS.filter(function(v){ return v[1] === "cc"; }).sort(function(a,b){ return b[2] - a[2]; });
-  var max = 2.4;
-  var vb = $("hmValBars"); if(!vb){ $("ttVal").textContent = "Top: Bilt Rewards at 2.2¢"; return; }
-  vb.innerHTML = top.map(function(v){ return '<div class="bar"><span>'+esc(v[0])+'</span><div class="bartrack"><i style="width:'+(v[2]/max*100).toFixed(1)+'%"></i></div><b>'+v[2].toFixed(2)+'¢</b></div>'; }).join("")
-   + '<div class="bar"><span>World of Hyatt</span><div class="bartrack"><i class="hotel" style="width:'+(1.7/max*100)+'%"></i></div><b>1.70¢</b></div>'
-   + '<div class="bar"><span>American AAdvantage</span><div class="bartrack"><i class="air" style="width:'+(1.6/max*100)+'%"></i></div><b>1.60¢</b></div>';
-  $("hmValNote").textContent = "Cents per point, " + VALUATIONS_UPDATED;
-  $("ttVal").textContent = "Top: Bilt Rewards at 2.2¢";
- }
  function homeLounges(){
   var picks = ["ana","iass","premier","united","deltanew"];
   var hl = $("hmLounge"); if(!hl) return;
@@ -541,7 +494,7 @@
    }).catch(function(){});
   }catch(e){}
  }
- homeKama(); homeVals(); homeLounges(); homeFirst(); tbLoad();
+ homeKama(); homeLounges(); homeFirst(); tbLoad();
  var start = (location.hash || parentHash() || "").replace("#","");
  route(ROUTES[start.split("/")[0]] ? start : "home", true);
 })();

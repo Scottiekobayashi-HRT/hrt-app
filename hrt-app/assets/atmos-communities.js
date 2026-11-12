@@ -450,7 +450,7 @@
     });
     wrap.appendChild(g);
     var how = el("ul", "ac-list ac-howmath");
-    ["Points are worth " + r.cpp.toFixed(1) + "¢ each, the Atmos value from our Points Valuations.",
+    ["Points are worth " + r.cpp.toFixed(1) + "¢ each, the Atmos value HRT uses across the dashboard.",
      "Status points cannot be spent, so they count " + (r.weight === 1 ? "the same as points" : r.weight === 0 ? "for nothing" : "at half the value of points") + ", based on what you said matters to you. Change that under Fine tune.",
      "Bag savings use Alaska's published fees: $30 and $40 between the islands, $45 and $55 on the mainland.",
      "Island and international points depend on how you earn on Atmos (" + EARN[state.earn].label.toLowerCase() + ", " + EARN[state.earn].rule + "), before any elite bonus."].forEach(function (t) { how.appendChild(el("li", null, t)); });

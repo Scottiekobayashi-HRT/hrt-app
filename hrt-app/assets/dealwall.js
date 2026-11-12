@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   dealwall.js - the free 30-day deal wall on the HRT dashboard home page.
+   dealwall.js - "Deals, News, Flights" (was the deal wall; renamed Nov 11), the free 30-day wall on the HRT dashboard home page.
 
    Reads the public marketing feed that refresh.sh rebuilds every morning and
    draws it as a horizontal scrolling row of cards. Economy shows real numbers.
@@ -233,7 +233,7 @@
     var win = feed.window_days || 30;
 
     var head = el("div", "dw-head");
-    head.appendChild(el("h2", null, "Deals in the next " + win + " days"));
+    head.appendChild(el("h2", null, "Deals, News, Flights"));
     head.appendChild(el("span", "dw-limit", "Free · " + win + " days only"));
     head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
@@ -652,7 +652,7 @@
 
     var head = el("div", "dw-head");
     head.appendChild(el("span", "dwp-pill", "★ PRO"));
-    head.appendChild(el("h2", null, "Your award deals"));
+    head.appendChild(el("h2", null, "Deals, News, Flights"));
     var subEl = el("span", "dw-sub", ""); head.appendChild(subEl);
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
     var tune = el("button", "dwp-tune", "Customize");

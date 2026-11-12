@@ -61,13 +61,14 @@
   ];
   var CATS = {
     pp: { label: "Priority Pass", c: "var(--c-pp)", icon: "pp" },
-    air: { label: "Airline lounges", c: "var(--c-air)", icon: "plane" },
+    air: { label: "Airline lounges", c: "var(--c-air)", icon: "drink" },
     resort: { label: "Resort guests", c: "var(--c-resort)", icon: "key" },
     soon: { label: "Coming soon", c: "var(--c-soon)", icon: "clock" }
   };
   var ORDER = ["pp", "air", "resort", "soon"];
   var ICONS = {
     pp: '<path fill-rule="evenodd" d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4zm9 1.4 1.1 2.3 2.5.3-1.8 1.7.4 2.5-2.2-1.2-2.2 1.2.4-2.5-1.8-1.7 2.5-.3z"/>',
+    drink: '<path d="M4 3h16l-7 8.2V19h4v2H7v-2h4v-7.8z"/>',
     plane: '<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>',
     key: '<path fill-rule="evenodd" d="M14.5 3a6.5 6.5 0 0 0-6.2 8.5L2 17.8V22h4.2v-2.2h2.2v-2.2h2.2l1.9-1.9A6.5 6.5 0 1 0 14.5 3zm1.8 3.2a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2z"/>',
     clock: '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5v4.6l3.6 2.1-1 1.7L11 12.7V7z"/>',
@@ -198,6 +199,8 @@
     '.ttl{display:flex;flex-direction:column;line-height:1.1}.ttl b{font-family:var(--d);font-weight:800;font-size:18px}.ttl span{font-size:12px;color:var(--muted);margin-top:3px}',
     '.chips{display:flex;gap:6px;margin-left:auto;overflow-x:auto;scrollbar-width:none;max-width:100%}.chips::-webkit-scrollbar{display:none}',
     '.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;min-height:36px}',
+    '.chip{flex-shrink:0}.achips{display:flex;align-items:center;gap:6px;flex-basis:100%;overflow-x:auto;scrollbar-width:none;padding-top:2px}.achips::-webkit-scrollbar{display:none}',
+    '.achips-l{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;margin-right:2px}.chip.acc{border-style:dashed;min-height:32px;padding:5px 11px}.chip.acc[aria-pressed=true]{border-style:solid}',
     '.chip i{width:9px;height:9px;border-radius:50%;background:var(--c)}.chip em{font-style:normal;font-size:11.5px;opacity:.7}',
     '.chip[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}:host(.dark) .chip[aria-pressed=true]{background:#fff;color:var(--navy2);border-color:#fff}',
     '.map{position:relative;flex:1;overflow:hidden;background:var(--apron);touch-action:pan-y;cursor:grab;outline:none}',
@@ -282,7 +285,7 @@
     ':host(.ph) .card.on{transform:none}:host(.ph) .card .grab{display:block;width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}',
     ':host(.ph) .card h3{font-size:22px}:host(.ph) .card .a{padding:12px 16px;font-size:14px}:host(.ph) .card .x{top:16px;right:14px}',
     '@media (max-height:500px) and (orientation:landscape){',
-    ' :host(.full) .ttl span,:host(.full) .chips{display:none}:host(.full) .top{padding-block:8px}',
+    ' :host(.full) .ttl span,:host(.full) .chips,:host(.full) .achips{display:none}:host(.full) .top{padding-block:8px}',
     ' :host(.full) .tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--navy2);padding:2px 4px calc(2px + env(safe-area-inset-bottom,0px))}:host(.full) .tab{flex-direction:row;justify-content:center;min-height:40px;gap:8px}:host(.full) .tab span{width:26px;height:26px}',
     ' :host(.full) .foot,:host(.full) .quick{display:none!important}',
     ' :host(.full) .card{left:auto;right:12px;bottom:12px;width:min(380px,60%);border-radius:18px;max-height:calc(100% - 24px)}}',
@@ -328,7 +331,7 @@
           '<button type="button" class="havebtn" data-a="pick"><span><b>Pick your cards and status</b><span class="hs">See which lounges open for you</span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>' +
           '<div class="sl"><div class="lh"><b class="scnt"></b><span class="ssort"></span></div><div class="slist"></div></div></aside>' +
         '<div class="mapcol"><div class="w" role="region" aria-label="HNL Lounge Map">' +
-          '<div class="top"><div class="ttl"><b>Find your lounge</b><span>Level 2 · Terminals 1 and 2</span></div><div class="chips" role="toolbar" aria-label="Show"></div></div>' +
+          '<div class="top"><div class="ttl"><b>Find your lounge</b><span>Level 2 · Terminals 1 and 2</span></div><div class="chips" role="toolbar" aria-label="Show"></div><div class="achips" role="toolbar" aria-label="How do I get in?"><span class="achips-l">How do I get in?</span></div></div>' +
           '<div class="map" tabindex="0" aria-label="Airport map. Drag to move, use plus and minus to zoom.">' +
             '<div class="layer">' + drawing() + '</div><div class="pins"></div><div class="quick"></div>' +
             '<div class="minebar" hidden><span class="mtxt"></span><button type="button" data-a="pick">Edit</button><button type="button" data-a="clearhave">Clear</button></div>' +
@@ -364,6 +367,31 @@
       var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.f = c[0]; b.setAttribute("aria-pressed", c[0] === "all");
       b.style.setProperty("--c", c[2]); b.innerHTML = (c[0] === "all" ? "" : "<i></i>") + esc(c[1]) + " <em>" + n + "</em>";
       b.onclick = function () { setFilter(c[0]); }; chips.appendChild(b);
+    });
+    /* "How do I get in?" chips (Nov 11, Eddie review): light up the lounges a card,
+       program or day pass opens. Built from HAVE so they never drift from "What gets you in?".
+       Plumeria Lounge opens its own card, which lists every way in. */
+    function opensOf(ids) { var out = {}; HAVE.forEach(function (g) { g.items.forEach(function (i) { if (ids.indexOf(i.id) > -1) i.opens.forEach(function (o) { out[o[0]] = 1; }); }); });
+      return L.filter(function (l) { return out[l.id]; }); }
+    var ACCESS = [
+      ["chase", "Chase", function () { return opensOf(["chase-sapphire-reserve", "chase-sapphire-reserve-business"]); }],
+      ["capone", "Capital One", function () { return opensOf(["capone-venture-x"]); }],
+      ["amexplat", "Amex Platinum", function () { return opensOf(["amex-platinum", "amex-business-platinum"]); }],
+      ["southwest", "Southwest", function () { return L.filter(function (l) { return l.id === "southwest"; }); }],
+      ["atmos", "Atmos", function () { return opensOf(["atmos", "f-ha"]).concat(L.filter(function (l) { return l.id === "alaskahawaiian"; })); }],
+      ["day", "Buy Day Pass", function () { return opensOf(["day"]); }],
+      ["plumeria", "Plumeria Lounge", null]
+    ];
+    var achips = $(".achips");
+    ACCESS.forEach(function (a) {
+      var arr = a[2] ? a[2]() : null; if (a[2] && !arr.length) return; if (!a[2] && !byId[a[0]]) return;
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip acc"; b.dataset.acc = a[0]; b.setAttribute("aria-pressed", "false");
+      b.innerHTML = esc(a[1]) + (arr ? " <em>" + arr.length + "</em>" : "");
+      b.onclick = function () {
+        setFilter("all"); b.setAttribute("aria-pressed", "true");
+        goFull(function () { if (!a[2]) select(byId[a[0]], true); else highlight(a[2](), true); });
+      };
+      achips.appendChild(b);
     });
     /* quick buttons and phone tabs */
     var QUICK = [
@@ -483,18 +511,20 @@
       } else placePins();
     }
     function setFilter(f) {
-      filter = f;
-      chips.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.f === f); });
+      filter = f; clearTimeout(pulseT);
+      L.forEach(function (l) { l.el.classList.remove("pulse"); });
+      root.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.f === f); });
       if (f !== "all") animateTo(viewFor(L.filter(function (l) { return l.cat === f; })), 450);
       if (selected && f !== "all" && selected.cat !== f) select(null);
       syncRows(); placePins();
     }
     var pulseT;
-    function highlight(arr) {
+    function highlight(arr, keep) {
       clearTimeout(pulseT); select(null);
       L.forEach(function (l) { l.el.classList.remove("pulse"); });
       arr.forEach(function (l) { l.el.classList.add("pulse"); });
       if (arr.length === 1) select(arr[0], true); else if (arr.length) animateTo(viewFor(arr), 450);
+      if (keep) return; /* access chips keep their lounges lit until another chip is picked */
       pulseT = setTimeout(function () { arr.forEach(function (l) { l.el.classList.remove("pulse"); }); }, 4500);
     }
 

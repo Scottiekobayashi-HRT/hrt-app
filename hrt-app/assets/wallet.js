@@ -1432,7 +1432,7 @@
     }
     var upd = window.HRT_POINT_VALUES && window.HRT_POINT_VALUES.updated;
     return res + (tip ? '<p class="wl-wc-tip">' + esc(tip) + "</p>" : "") +
-      '<p class="wl-wc-foot">Ranked by value using HRT point values' + (upd ? " (" + esc(upd) + ")" : "") + '. <a href="#values" data-route="values">How we value points</a></p>';
+      '<p class="wl-wc-foot">Ranked by value using HRT point values' + (upd ? " (" + esc(upd) + ")" : "") + '.</p>';
   }
   /* Typing a store updates only the answer, so the keyboard stays open. */
   function onInput(ev) {
@@ -1780,6 +1780,39 @@
     if (due <= dayNum(t.y, t.m, t.d)) return { text: "Ready now", now: true };
     return { text: "From " + SHORT_MONTHS[m - 1] + " " + y };
   }
+  /* ---------- Sample card (Nov 11, Eddie review) ----------
+     Every wallet starts with one sample card with every field filled in, so members see
+     what a full wallet looks like. It is static: never saved, never counted in stats or
+     card limits. Based on a Chase Sapphire Preferred with the name disguised.
+     SCOTTIE EDITS THE TEXT BELOW. Keep it member-facing: no em dashes. */
+  var SAMPLE_CARD = {
+    name: "Preferred Travel Card",
+    issuer: "Sample Bank",
+    type: "Personal",
+    whose: "You",
+    fee: "$95 a year",
+    opened: "March 2025",
+    renews: "Every March. The $95 fee posts on your statement after your card anniversary.",
+    cancel: "Keep it while you are using its transfer partners. If you stop using it, downgrade to a no annual fee card from the same bank before the fee posts, so you keep your points. Text us before you call the bank, so the wrong downgrade does not cost you a future welcome bonus.",
+    best: "Moves your points to airline and hotel partners, or to one other person like a spouse.",
+    earns: ["5x on travel booked through the bank's travel site", "3x on dining, online groceries and select streaming", "2x on other travel", "1x on everything else"],
+    credits: ["$100 a year in hotel credit through the bank's travel site", "$10 a month toward a delivery app order", "Up to $120 for Global Entry or TSA PreCheck, every 4 years"],
+    partners: "United, Southwest, Air Canada Aeroplan, British Airways, Virgin Atlantic and more airline and hotel partners",
+    bonus: "Spend $5,000 in 3 months to earn the welcome bonus. Spent so far: $3,200. 34 days left.",
+    service: "Call the number on the back of your card",
+    notes: "Your own notes go here, like \"Use this one for dining and groceries.\""
+  };
+  function sampleHtml() {
+    var S = SAMPLE_CARD, row = function (k, v) { return "<div><dt>" + esc(k) + "</dt><dd>" + v + "</dd></div>"; };
+    var ul = function (a) { return '<ul class="wl-smp-ul">' + a.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"; };
+    return '<details class="wl-smp"><summary>' + artHtml({ issuer: S.issuer }, "sm") +
+      '<span class="wl-smp-nm"><small>' + esc(S.issuer) + " &middot; " + esc(S.type) + '</small><b>' + esc(S.name) + ' <span class="wl-smp-tag">Sample</span></b>' +
+      '<small>Tap to see every field filled in. This card is not in your wallet.</small></span><span class="wl-smp-fee">' + esc(S.fee.split(" ")[0]) + '<small>a year</small></span></summary>' +
+      '<dl class="wl-smp-f">' + row("Whose", esc(S.whose)) + row("Annual fee", esc(S.fee)) + row("Opened", esc(S.opened)) + row("Renews", esc(S.renews)) +
+      row("Cancel or downgrade", esc(S.cancel)) + row("Best feature", esc(S.best)) + row("How it earns", ul(S.earns)) + row("Credits and perks", ul(S.credits)) +
+      row("Transfer partners", esc(S.partners)) + row("Welcome bonus tracker", esc(S.bonus)) + row("Customer service", esc(S.service)) + row("Your notes", esc(S.notes)) +
+      "</dl></details>";
+  }
   function cpView() {
     if (!state.cpView) { try { state.cpView = localStorage.getItem("hrt-wl-cpview") === "grid" ? "grid" : "list"; } catch (e) { state.cpView = "list"; } }
     return state.cpView;
@@ -1838,7 +1871,7 @@
     var list = v === "grid" ? '<ul class="wl-cg-grid">' + items + "</ul>" :
       '<div class="wl-ct-head" aria-hidden="true"><span>Card</span><span>Whose</span><span>Annual fee</span><span>Credits per year</span><span>Renews</span><span>Cancel or downgrade</span><span></span></div>' +
       '<ul class="wl-ct-list">' + items + "</ul>";
-    return head + list +
+    return head + sampleHtml() + list +
       '<div class="wl-cards-foot"><span></span><button class="wl-link" data-wl="review">Check and fix my cards</button></div></section>' +
       upcomingHtml(s.upcoming || []);
   }
@@ -2040,6 +2073,7 @@
       html = transfersPageHtml();
     } else if (!s.count && !(s.upcoming || []).length) {
       html = summaryHtml("page"); /* empty wallet: the summary card invites them to add cards */
+      if (!state.demo) html += '<section class="wl-card wl-smp-wrap"><h3 class="wl-h3">Start here: a sample card</h3>' + sampleHtml() + "</section>";
       if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     } else {
       var tab = s.count ? (state.tab || "overview") : "overview";
@@ -2318,6 +2352,14 @@
       ".wl-cardnote{margin-top:8px}",
       ".wl-src{font-size:11.5px;color:var(--muted)}",
       ".wl-tags{display:flex;flex-wrap:wrap;gap:5px}.wl-tags:empty{display:none}",
+      ".wl-smp{border:1.5px dashed var(--line);border-radius:14px;margin:0 0 12px;background:var(--surface)}.wl-smp-wrap .wl-smp{margin:12px 0 0}",
+      ".wl-smp summary{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;list-style:none}.wl-smp summary::-webkit-details-marker{display:none}",
+      ".wl-smp-nm{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.wl-smp-nm b{font-size:14.5px;color:var(--text)}.wl-smp-nm small{font-size:12px;color:var(--muted)}",
+      ".wl-smp-tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#f2b84b;color:#14202e;border-radius:999px;padding:1px 8px;margin-left:4px;vertical-align:2px}",
+      ".wl-smp-fee{font-weight:800;color:var(--text);text-align:right;display:flex;flex-direction:column}.wl-smp-fee small{font-size:11px;color:var(--muted);font-weight:600}",
+      ".wl-smp-f{margin:0;padding:4px 14px 14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;border-top:1px solid var(--line)}",
+      ".wl-smp-f>div{padding-top:10px}.wl-smp-f dt{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}.wl-smp-f dd{margin:3px 0 0;font-size:13.5px;line-height:1.5;color:var(--text)}",
+      ".wl-smp-ul{margin:0;padding-left:18px}@media (max-width:640px){.wl-smp-f{grid-template-columns:1fr}}",
       ".wl-tag{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted)}",
       ".wl-tag.warn{border-color:rgba(217,112,64,.5);color:#b4580f}",
       "[data-theme=dark] .wl-tag.warn{color:#f2b84b}",

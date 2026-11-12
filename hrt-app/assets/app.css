@@ -44,6 +44,7 @@
 .fp{position:absolute;inset:0;pointer-events:none}
 .hero h1{color:#fff;margin:0;font-size:26px;font-weight:800;line-height:1.1;position:relative;z-index:2}.hero h1 .wave{color:var(--blue)}
 .hero p{margin:9px 0 0;color:#bccde0;max-width:52ch;position:relative;z-index:2}
+.hero p.lg-sub{margin-top:6px;color:#f2b84b;font-weight:700;font-size:17px}
 .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;position:relative;z-index:2}
 .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;border-radius:11px;padding:11px 16px;cursor:pointer;border:1px solid transparent}
 .hrt-app .btn.coral{background:linear-gradient(160deg,#ef7833,#c25c26);color:#fff;box-shadow:0 10px 26px rgba(217,112,64,.44)}

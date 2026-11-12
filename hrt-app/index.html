@@ -3,10 +3,10 @@
  HAWAII REWARD TRAVEL: FREE TOOLS DASHBOARD
  -----------------------------------------------------------
  One app, one design system, one sidebar. Tools (each a "view"):
-   home, kamaaina, atmos (PRO teaser), lounges, transfers, values, welcome (soon), resy
+   home, kamaaina, atmos (PRO teaser), lounges, transfers, welcome (soon), resy
  Links and feeds: EDIT POINTS at the top of the "APP SHELL" script.
  Kamaʻāina deal data: the single DEAL DATA line (replace only that array).
- Deep links: add #resy, #transfers, #lounges, #values, #kamaaina to the page URL.
+ Deep links: add #resy, #transfers, #lounges, #kamaaina to the page URL.
 -->
 <html lang="en"><head><script>try{if(localStorage.getItem('hrtToolsTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -413,7 +413,7 @@ html.ms-client .pl.ohana .btn{display:none}
   <div class="ttiles">
    <a class="ttile c1" href="#kamaaina" data-route="kamaaina"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="11" r="1.6"/></svg></span><span class="tt"><b>Kamaʻāina Deals</b><small>Hotel deals first, then activities and dining</small><em id="ttKama">&nbsp;</em></span></a>
    <a class="ttile c2" href="#transfers" data-route="transfers"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></span><span class="tt"><b>Transfer Bonuses</b><small>Every live bank transfer bonus, plus a calculator</small><em id="ttTb">&nbsp;</em></span></a>
-   <a class="ttile c3" href="#values" data-route="values"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="tt"><b>Points Valuations</b><small>What your points are worth in 2026</small><em id="ttVal">&nbsp;</em></span></a>
+   <a class="ttile c3" href="#communities" data-route="communities"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"/><circle cx="16.5" cy="9.5" r="2.1"/><path d="M3.5 19.5v-1.2A4 4 0 0 1 7.5 14.3h1a4 4 0 0 1 4 4v1.2M13.5 19.5v-1a3.3 3.3 0 0 1 3.3-3.3h.4a3.3 3.3 0 0 1 3.3 3.3v1"/></svg></span><span class="tt"><b>Atmos Community Calculator</b><small>Which Atmos Community pays you the most</small><em>Free, takes about a minute</em></span></a>
    <a class="ttile c4" href="#resy" data-route="resy"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 21V3c-2 1.5-3 4-3 7h3"/></svg></span><span class="tt"><b>Resy Hawaiʻi Map</b><small>Spend your $100 quarterly Amex Platinum Resy credit</small><em id="ttResy">&nbsp;</em></span></a>
    <a class="ttile c5" href="#lounges" data-route="lounges"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 12a2 2 0 0 1 4 0v3h10v-3a2 2 0 0 1 4 0v5H3Z"/></svg></span><span class="tt"><b>HNL Lounge Map</b><small>Every lounge at HNL and how to get in</small><em id="ttLounge">&nbsp;</em></span></a>
    <a class="ttile c6" href="#atmos" data-route="atmos"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="tt"><b>Atmos Reward Calendar <span class="pro-b">PRO</span></b><small>Saver award dates for Hawaiʻi routes</small><em class="free-only">HRT PRO &middot; $9.99/mo</em><em class="pro-only">Unlocked &middot; Open &rarr;</em></span></a>
@@ -491,59 +491,6 @@ html.ms-client .pl.ohana .btn{display:none}
 
  <div class="card srcnote">
   <p><b>How this data works.</b> Our automated check searches each bank separately every day. Bonuses marked "Verified by HRT" were confirmed by our team; the rest are published automatically. Always confirm the current offer with the transfer partner before moving points. Hawaii Reward Travel may be compensated by card issuers and affiliate partners.</p>
- </div>
-</div>
-</section>
-
-<!-- ================= VALUATIONS ================= -->
-<section class="view" data-page="values" id="v-values">
-<div class="content">
- <div class="hero slim">
-  <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
-  <div class="hs-text">
-   <h1>Points &amp; Miles <span class="wave">Valuations</span></h1>
-   <p>What your points are worth in 2026, and which currencies matter most for flying from Hawaiʻi.</p>
-  </div>
-  <div class="hstats">
-   <div class="hstat"><b class="tnum">2.2¢</b><span><i style="background:#9fc1d4"></i>Top card currency</span></div>
-   <div class="hstat"><b class="tnum">1.6¢</b><span><i style="background:#d97040"></i>Top airline</span></div>
-   <div class="hstat"><b class="tnum">1.7¢</b><span><i style="background:#3fce7f"></i>Top hotel</span></div>
-   <div class="hstat"><b class="tnum" id="valUpd">&ndash;</b><span><i style="background:#e8c15e"></i>Last updated</span></div>
-  </div>
- </div>
-
- <div class="card">
-  <div class="sec-h"><h2>What are your points worth <span class="hl">right now?</span></h2><span class="note">Estimated cash value using our benchmark valuations</span></div>
-  <div class="vc-rows" id="vcRows"></div>
-  <div class="vc-actions"><button type="button" class="chipf plain" id="vcAdd">+ Add another program</button></div>
-  <div class="vc-total"><span>Estimated total value</span><b id="vcTotal">$0</b></div>
-  <p class="calc-note">Estimates only. Real value depends on how and when you redeem. Premium cabin awards from Hawaiʻi often beat these benchmarks, and poor redemptions fall below them.</p>
- </div>
-
- <div class="tips vtop">
-  <div class="tool t1"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg></div><h3>Top card currency</h3><p><b class="vbig">2.2¢</b> Bilt Rewards, the highest value flexible currency in 2026.</p></div>
-  <div class="tool t2"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div><h3>Top airline currency</h3><p><b class="vbig">1.6¢</b> American Airlines AAdvantage, the top airline program.</p></div>
-  <div class="tool t3"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-6h4v6"/></svg></div><h3>Top hotel currency</h3><p><b class="vbig">1.7¢</b> World of Hyatt, worth about four times Hilton Honors.</p></div>
-  <div class="tool t4"><div class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg></div><h3>Built for Hawaiʻi</h3><p>Island-friendly picks are below, based on routes from HNL, OGG and KOA.</p></div>
- </div>
-
- <div class="card">
-  <div class="sec-h"><h2>All 2026 valuations</h2><span class="note">The numbers behind the calculator</span>
-   <div class="right" id="vlCats">
-    <button type="button" class="chipf" data-v-cat="all" aria-pressed="true">All</button>
-    <button type="button" class="chipf plain" data-v-cat="cc" aria-pressed="false">Cards</button>
-    <button type="button" class="chipf plain" data-v-cat="airline" aria-pressed="false">Airlines</button>
-    <button type="button" class="chipf plain" data-v-cat="hotel" aria-pressed="false">Hotels</button>
-   </div>
-  </div>
-  <div class="vlist" id="vList"></div>
- </div>
-
- <div class="navycard">
-  <div class="hrt-eyebrow">Built for Hawaiʻi travelers</div>
-  <h3>Best programs for flying <span>from the islands</span></h3>
-  <p>These programs stand out for HNL, OGG, KOA and interisland travel, based on transpacific routes, transfer partners and award space.</p>
-  <div class="hpicks" id="vPicks"></div>
  </div>
 </div>
 </section>
@@ -641,7 +588,8 @@ html.ms-client .pl.ohana .btn{display:none}
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#9fc1d4" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".55"/></svg>
   <div class="hs-text">
    <h1>The HNL <span class="wave">Lounge Map</span></h1>
-   <p>Every lounge at Daniel K. Inouye International Airport. Tap a lounge to see where it is, or pick your cards and status and the lounges you can use light up.</p>
+   <p class="lg-sub">Where's the lounge &amp; how do I get in?</p>
+   <p>Every lounge at Daniel K. Inouye International Airport. Tap a lounge to see where it is, tap a card or program to see where it gets you in, or pick everything you have and the lounges you can use light up.</p>
   </div>
   <div class="hstats">
    <div class="hstat"><b class="tnum" id="lgS1">&ndash;</b><span><i style="background:#9fc1d4"></i>Open lounges</span></div>
@@ -781,7 +729,7 @@ html.ms-client .pl.ohana .btn{display:none}
    <ul>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Kamaʻāina Deals by island</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>HNL Lounge Map and Resy Hawaiʻi Map</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Transfer Bonuses and Points Valuations</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Transfer Bonuses</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>My Wallet for your card fees, perks and credits</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Atmos Choose to Earn and Community calculators</span></li>
    </ul>
@@ -813,7 +761,7 @@ html.ms-client .pl.ohana .btn{display:none}
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Atmos Reward Calendar, about 270 days out</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Fresh award space every morning</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deals Search and Points Explorer</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Customize the deal wall on your Dashboard</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Customize Deals, News, Flights on your Dashboard</span></li>
    </ul>
    <button type="button" class="btn coral free-only" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock HRT PRO &rarr;</button>
    <a class="btn coral pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Open the Atmos Reward Calendar &rarr;</a>
