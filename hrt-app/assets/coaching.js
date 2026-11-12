@@ -39,18 +39,16 @@
       why: "That changes which card should come first, second and third." }
   ];
 
-  /* Scottie AI free preview. kind "video" answers with a video; "join" leads to ʻOhana coaching. */
+  /* Scottie AI free preview: 3 starter questions (Scottie, Nov 12). kind "video" answers
+     with a video; "join" is the dead end that leads to ʻOhana coaching. The same 3 show
+     in the Ask Scottie pop-up for everyone who is not an ʻOhana Member (ask-scottie.js). */
   var STARTERS = [
     { q: "How do I get started?", kind: "video", video: 0,
       a: "Hey, glad you're here! Start with this short video on how we'd work together. Then add your cards to My Wallet so you can see where you stand." },
     { q: "How do I redeem points for free travel?", kind: "video", video: 1,
       a: "Good one. Watch my Redeeming 101 first. The short version: check your bank's travel portal first, then look at moving points to an airline partner. Only move points once you've found the seat, because transfers can't be undone." },
     { q: "Which card should I get next?", kind: "join",
-      a: "That depends on every card you've opened, what you spend each month and where you want to go. It's exactly what I map out one-on-one with ʻOhana Members." },
-    { q: "When is the best time to apply for my next card?", kind: "join",
-      a: "Timing is everything with the bank rules above. The right month can be the difference between a big bonus and nothing. I plan that timing with ʻOhana Members, card by card." },
-    { q: "Can I get a card's bonus again?", kind: "join",
-      a: "Sometimes. It depends on the bank and your history with that exact card. Let's look at your cards together so you don't waste an application." }
+      a: "That depends on every card you've opened, what you spend each month and where you want to go. It's exactly what I map out one-on-one with ʻOhana Members." }
   ];
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -150,7 +148,7 @@
       '<p class="co-lede">Pick a question to start. This is my AI, not me live.</p>' +
       '<div class="co-qs" role="group" aria-label="Questions">' + STARTERS.map(function (s, i) { return '<button type="button" class="co-q" data-co-q="' + i + '" aria-pressed="false">' + esc(s.q) + "</button>"; }).join("") + "</div>" +
       '<div class="co-chat" id="coChat" aria-live="polite"></div>' +
-      '<p class="co-ainote">The free preview answers these starter questions. ʻOhana Members get the full Scottie AI for their own questions.</p></section>';
+      '<p class="co-ainote">The free preview answers these 3 starter questions. You can also find them in the Ask Scottie button at the bottom of every page. ʻOhana Members get the full Scottie AI for their own questions.</p></section>';
   }
 
   var mounted = false;
@@ -167,5 +165,11 @@
     });
   }
 
-  window.HRT_COACHING = { show: mount, _test: { STARTERS: STARTERS, RULES: RULES, VIDEOS: VIDEOS } };
+  /* Open this page and play video i (used by the Ask Scottie free preview). */
+  function watch(i) {
+    if (location.hash !== "#coaching") location.hash = "coaching";
+    var tries = 0;
+    (function go() { mount(); if (document.getElementById("coVid" + i)) play(i); else if (tries++ < 20) setTimeout(go, 100); })();
+  }
+  window.HRT_COACHING = { show: mount, watch: watch, STARTERS: STARTERS, _test: { STARTERS: STARTERS, RULES: RULES, VIDEOS: VIDEOS } };
 })();

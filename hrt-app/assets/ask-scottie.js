@@ -1,5 +1,13 @@
 /* ---------------------------------------------------------------------------
-   ask-scottie.js - Ask Scottie, the pop-up chat for ʻOhana Members.
+   ask-scottie.js - Ask Scottie, the pop-up chat.
+
+   Who gets what (Scottie, Nov 12, Eddie review):
+     ʻOhana Members  the full AI coach (this chat talks to /api/ask-scottie)
+     Everyone else   (free Subscribers and PRO-only members) a free preview:
+                     the same button, 3 starter questions with set answers,
+                     no typing and no AI call; every path ends at ʻOhana
+                     coaching. Starters come from assets/coaching.js.
+   Each mode says plainly what it can and cannot do ("What can I ask?").
 
    A round "Ask Scottie" button with Scottie's photo sits in the bottom right
    for ʻOhana Members only. Tapping it opens a chat window (full screen on a
@@ -113,13 +121,18 @@
     }
   }
 
-  /* Show the button only to signed-in ʻOhana Members. */
+  /* Everyone signed in gets the button. ʻOhana Members get the full coach;
+     everyone else gets the free preview (mode "free"). */
+  var mode = "free";
   function sync() {
     var mem = window.HRT_MEMBER;
-    var show = !!(mem && mem.signedIn && mem.client);
+    var show = !!(mem && mem.signedIn);
+    var next = mem && mem.client ? "ohana" : "free";
+    if (next !== mode) { mode = next; info = null; state = null; if (host) host.innerHTML = ""; }
     if (show) build();
     if (fab) fab.hidden = !show;
     if (!show && isOpen) toggle(false);
+    show = show && mode === "ohana";
     /* seat alerts are off while Ask Scottie is coaching only */
     if (show && !alerts && ALERTS_ON) loadAlerts();
     if (!show) { var c = document.getElementById("ascAlerts"); if (c) c.remove(); }
@@ -131,10 +144,64 @@
     return '<div class="asc-head">' +
       '<img class="asc-photo" src="' + CUT + '" alt="Scottie" width="106" height="78">' +
       '<div class="asc-id"><div class="asc-name">Ask Scottie <span class="asc-ai">AI</span></div>' +
-      '<div class="asc-badges"><span class="asc-badge">ʻOhana Member</span>' + (info && info.pro ? '<span class="asc-badge pro">&#9733; PRO</span>' : "") + "</div>" +
+      '<div class="asc-badges">' + (mode === "ohana" ? '<span class="asc-badge">ʻOhana Member</span>' : '<span class="asc-badge">Free preview</span>') +
+      (info && info.pro ? '<span class="asc-badge pro">&#9733; PRO</span>' : "") + "</div>" +
       textBtn("asc-textbtn head") + "</div>" +
       '<button type="button" class="asc-x" aria-label="Close chat">' + ICON_X + "</button>" +
       "</div>";
+  }
+
+  /* What this mode can and cannot do, in plain words (Scottie: "very clear on what it can do"). */
+  var CAN = {
+    ohana: { can: ["Coach you on redeeming your points: which portal or airline, about how many points, and the steps", "Use the cards in your ʻOhana Wallet and today's transfer bonuses", "Explain transfer partners, rules and how bookings work"],
+      cant: ["Search live award seats, book or hold flights", "Pick your next credit card (text Scottie for that)", "Promise prices: always double check before you transfer points"] },
+    free: { can: ["Answer 3 starter questions", "Point you to Scottie's free videos"],
+      cant: ["Answer your own questions", "Look at your wallet or coach you on a trip", "Pick your next card"],
+      more: "ʻOhana Members get the full Ask Scottie coach and one-on-one help from Scottie." }
+  };
+  function canHtml() {
+    var c = CAN[mode] || CAN.free;
+    return '<details class="asc-can"><summary>What can I ask?</summary><div class="asc-can-in">' +
+      "<b>I can</b><ul>" + c.can.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" +
+      "<b>I can't</b><ul>" + c.cant.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" +
+      (c.more ? "<p>" + esc(c.more) + "</p>" : "") + "</div></details>";
+  }
+
+  /* ------------------------------ free preview ------------------------------ */
+  var JOIN_URL = "https://www.hawaiirewardtravel.com/our-accelerated-program";
+  var freeAsked = [];
+  function starters() { var C = window.HRT_COACHING; return (C && C.STARTERS) || []; }
+  function freeChat() {
+    host.innerHTML = '<div class="asc-card">' + header() + canHtml() +
+      '<div class="asc-log" id="ascLog" aria-live="polite"></div>' +
+      '<div class="asc-chips" id="ascChips"></div>' +
+      '<div class="asc-lock"><p><b>Want to ask your own question?</b> ʻOhana Members can ask me anything about redeeming their points.</p>' +
+      '<a class="asc-lock-btn" href="' + JOIN_URL + '" target="_top">Join our ʻOhana</a></div></div>';
+    wireClose();
+    host.querySelector(".asc-card").addEventListener("click", function (e) {
+      var q = e.target.closest("[data-fq]"); if (q) { freeAsked.push(+q.getAttribute("data-fq")); freeDraw(); return; }
+      var v = e.target.closest("[data-fvid]"); if (v) { toggle(false); if (window.HRT_COACHING && window.HRT_COACHING.watch) window.HRT_COACHING.watch(+v.getAttribute("data-fvid")); return; }
+      if (e.target.closest("[data-asc-close]")) toggle(false);
+    });
+    freeDraw();
+  }
+  function botB(html) { return '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28"><div class="asc-b">' + html + "</div></div>"; }
+  function freeDraw() {
+    var log = document.getElementById("ascLog"), chips = document.getElementById("ascChips"); if (!log) return;
+    var S = starters(), out = botB("<p>Aloha! Heads up, this is my AI, not me live. On the free plan I can answer these 3 starter questions. For your own questions and real coaching, join our ʻOhana.</p>");
+    freeAsked.forEach(function (i) {
+      var st = S[i]; if (!st) return;
+      out += '<div class="asc-msg me"><div class="asc-b">' + esc(st.q) + "</div></div>";
+      var acts = st.kind === "video"
+        ? '<button type="button" class="asc-chip" data-fvid="' + st.video + '">Watch the video</button>' + (st.video === 0 ? '<a class="asc-chip" href="#wallet" data-route="wallet" data-asc-close>Open My Wallet</a>' : "")
+        : '<a class="asc-chip gold" href="' + JOIN_URL + '" target="_top">Join our ʻOhana</a><a class="asc-chip" href="' + JOIN_URL + '" target="_top">Book a free call</a>';
+      out += botB("<p>" + esc(st.a) + '</p><div class="asc-facts">' + acts + "</div>");
+    });
+    log.innerHTML = out;
+    chips.innerHTML = S.map(function (st, i) { return freeAsked.indexOf(i) > -1 ? "" : '<button type="button" class="asc-chip" data-fq="' + i + '">' + esc(st.q) + "</button>"; }).join("");
+    /* scroll to the newest answer once the chips row and photos have settled */
+    var down = function () { log.scrollTop = log.scrollHeight; };
+    down(); setTimeout(down, 60); setTimeout(down, 300);
   }
 
   function notice(text) {
@@ -147,7 +214,7 @@
   }
 
   function chat() {
-    host.innerHTML = '<div class="asc-card">' + header() +
+    host.innerHTML = '<div class="asc-card">' + header() + canHtml() +
       '<div class="asc-log" id="ascLog" aria-live="polite"></div>' +
       '<div class="asc-chips" id="ascChips"></div>' +
       '<form class="asc-compose" id="ascForm" autocomplete="off">' +
@@ -349,6 +416,7 @@
 
   /* First open: ask the server who this is, then draw the chat. */
   function start() {
+    if (mode !== "ohana") { if (!document.getElementById("ascLog")) freeChat(); return; }
     if (info) { if (!document.getElementById("ascLog")) chat(); return; }
     if (loading) return;
     loading = true;

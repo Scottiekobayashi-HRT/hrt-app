@@ -149,3 +149,17 @@ html.asc-open .asc-fab{display:none}
 .asc-pop .asc-b a.asc-atmos{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;min-height:44px;padding:0 14px;border-radius:10px;
  background:linear-gradient(135deg,#f5c75a,#f2b84b 55%,#D97040);color:#1a1204;font-size:14px;font-weight:800;text-decoration:none}
 .asc-pop .asc-b a.asc-atmos:hover{filter:brightness(1.05);color:#1a1204}
+
+/* Nov 12: "What can I ask?" panel and the free preview (no typing) */
+.asc-can{margin:0 14px;border:1px solid var(--asc-hair);border-radius:12px;background:var(--asc-chip);font-size:13px;flex-shrink:0}
+.asc-can summary{cursor:pointer;padding:8px 12px;font-weight:700;color:var(--asc-navy)}
+:root[data-theme="dark"] .asc-can summary{color:var(--asc-text)}
+.asc-can-in{padding:0 12px 10px;color:var(--asc-text);line-height:1.45}
+.asc-can-in b{display:block;margin-top:6px;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.asc-can-in ul{margin:4px 0 0;padding-left:18px}.asc-can-in p{margin:8px 0 0;font-weight:600}
+.asc-facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.asc-facts .asc-chip{min-height:34px;text-decoration:none!important;display:inline-flex;align-items:center}
+.asc-chip.gold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;border-color:transparent}
+.asc-lock{margin:10px 14px 14px;padding:12px;border-radius:14px;background:var(--asc-navy);color:#fff;flex-shrink:0}
+.asc-lock p{margin:0 0 8px;font-size:13.5px;line-height:1.45}
+.asc-lock-btn{display:inline-block;font-weight:800;font-size:13.5px;text-decoration:none;border-radius:999px;padding:8px 14px;background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204}
