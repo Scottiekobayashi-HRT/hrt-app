@@ -83,7 +83,7 @@
     "#atTry .at-d.high{background:#fbe0dd;border-color:#ec9c94;color:#8f2a20;cursor:pointer}",
     "[data-theme=dark] #atTry .at-d.high{background:rgba(242,114,110,.18);color:#f4a39f;border-color:rgba(242,114,110,.4)}",
     "#atTry .at-d.conn{position:relative}#atTry .at-d.conn:after{content:'';position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:currentColor}",
-    "#atTry .at-ctrl{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) minmax(0,.8fr) minmax(0,.8fr) minmax(0,.8fr)!important;align-items:stretch}",
+    "#atTry .at-ctrl{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) minmax(0,.8fr) minmax(0,.8fr)!important;align-items:stretch}",
     "#atTry .at-swap{font:inherit;font-size:20px;font-weight:800;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:#d97040;padding:0 14px;cursor:pointer}",
     "@media (max-width:900px){#atTry .at-ctrl{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important}#atTry .at-ctrl .at-f.wide{grid-column:span 1}}",
     "#atTry .at-d.on{outline:2.5px solid #14202e;outline-offset:1px}",
@@ -134,7 +134,7 @@
       '<label class="at-f"><small>To</small><select data-atlock="to">' + to + "</select></label>" +
       '<label class="at-f"><small>Cabin class</small><select data-atlock="cabin"><option selected>Economy</option><option>&#128274; Business</option></select></label>' +
       '<label class="at-f"><small>Flights</small><select data-atstops><option value="best" selected>Best deals</option><option value="nonstop">Nonstop</option><option value="conn">Connections</option></select></label>' +
-      '<label class="at-f"><small>Airline</small><select data-atlock="air"><option selected>Any airline</option><option>&#128274; Alaska</option><option>&#128274; JAL</option></select></label></div>' +
+      "</div>" + /* no Airline filter (Scottie, Nov 12) */
       '<div class="at-legend"><span><i style="background:#9fd6b1"></i>Great &le; 30,000</span><span><i style="background:#efd27c"></i>Decent &le; 35,000</span><span><i style="background:#ec9c94"></i>High &gt; 35,000</span>' +
       '<span>priced in Atmos points · a dot means a connection (1 stop) · faded day means no saver space</span>' +
       "<span>" + data.count + " deal days in the next " + data.win + (upd ? " · updated " + upd : "") + "</span></div>" +
