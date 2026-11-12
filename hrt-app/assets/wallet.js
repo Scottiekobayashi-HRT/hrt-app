@@ -731,7 +731,7 @@
      adding their own cards. Lives only in this page; nothing is ever saved. */
   function exampleWallet() {
     var c = function (id, cardId, opened, nickname) { return { id: "ex-" + id, cardId: cardId, opened: opened, nickname: nickname || "" }; };
-    var w = { v: 1, points: [], cards: [
+    var w = { v: 1, points: [{ program: "chase", balance: 182400, asOf: "2026-11-02" }, { program: "atmos", balance: 64250, asOf: "2026-11-02" }, { program: "united", balance: 23000, asOf: "2026-10-18" }], cards: [
       c("plat", "amex-platinum", "2024-03-15"), c("gold", "amex-gold", "2023-06-08"),
       c("csp", "chase-sapphire-preferred", "2021-11-20"), c("flex", "chase-freedom-flex", "2020-01"),
       c("vx", "capone-venture-x", "2022-11-02"), c("summit", "atmos-summit", "2025-08-20"),
@@ -1436,6 +1436,8 @@
   }
   /* Typing a store updates only the answer, so the keyboard stays open. */
   function onInput(ev) {
+    var pt = ev.target;
+    if (pt && pt.getAttribute && pt.getAttribute("data-wl") === "pts") { var nb = parseBal(pt.value); pt.value = nb == null ? "" : fmtNum(nb); return; }
     var t = ev.target;
     if (t && t.id === "wlCardQ") {
       state.cardQ = t.value;
@@ -1762,7 +1764,7 @@
         (extra ? '<span class="wl-tab-n">' + extra + "</span>" : "") + "</a>";
     };
     return '<nav class="wl-tabs" aria-label="My Wallet">' + tab("overview", "wallet", "Overview") +
-      tab("cards", "wallet/cards", "Cards", String(s.count)) + tab("credits", "wallet/credits", "Credits", due ? esc(money(due)) : "") + tab("transfers", "wallet/transfers", "Transfer Partners") + "</nav>";
+      tab("cards", "wallet/cards", "Cards", String(s.count)) + tab("credits", "wallet/credits", "Credits", due ? esc(money(due)) : "") + tab("points", "wallet/points", "Points & Miles") + tab("transfers", "wallet/transfers", "Transfer Partners") + "</nav>";
   }
 
   /* When a fee card can be cancelled or downgraded without upsetting the bank,
@@ -1874,6 +1876,94 @@
     return head + sampleHtml() + list +
       '<div class="wl-cards-foot"><span></span><button class="wl-link" data-wl="review">Check and fix my cards</button></div></section>' +
       upcomingHtml(s.upcoming || []);
+  }
+
+  /* ---------- Points and miles (#wallet/points, Nov 11, Eddie review) ----------
+     The member types each balance; nothing is pulled from bank or airline sites.
+     No limit on programs at any level. Program ids must match POINT_PROGRAMS in
+     wallet-store.js. "earn" marks programs the member's cards earn into. */
+  var PROGRAMS = [
+    { id: "chase", label: "Chase Ultimate Rewards", unit: "points", earn: /Ultimate Rewards/ },
+    { id: "capone", label: "Capital One Miles", unit: "miles", earn: /Capital One miles/ },
+    { id: "amex", label: "Amex Membership Rewards", unit: "points", earn: /Membership Rewards/ },
+    { id: "atmos", label: "Atmos Rewards", sub: "Alaska and Hawaiian", unit: "points", earn: /Atmos Rewards points/ },
+    { id: "delta", label: "Delta SkyMiles", unit: "miles", earn: /SkyMiles/ },
+    { id: "united", label: "United MileagePlus", unit: "miles", earn: /MileagePlus/ },
+    { id: "american", label: "American AAdvantage", unit: "miles" },
+    { id: "virgin", label: "Virgin Atlantic Flying Club", unit: "points" },
+    { id: "jal", label: "JAL Mileage Bank", unit: "miles" }
+  ];
+  function isoToday(t) { t = t || todayParts(); return t.y + "-" + (t.m < 10 ? "0" : "") + t.m + "-" + (t.d < 10 ? "0" : "") + t.d; }
+  function fmtNum(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function parseBal(v) { var x = String(v == null ? "" : v).replace(/[^0-9]/g, "").slice(0, 10); return x ? parseInt(x, 10) : null; }
+  /* Which programs the wallet's cards earn into. Pure. */
+  function earnedPrograms(wallet, cat) {
+    var held = {}, out = {};
+    (wallet && wallet.cards || []).forEach(function (e) { if (isHeld(e)) held[e.cardId] = 1; });
+    (cat && cat.earning || []).forEach(function (r) {
+      if (!held[r.card]) return;
+      PROGRAMS.forEach(function (p) { if (p.earn && p.earn.test(r.currency || "")) out[p.id] = 1; });
+    });
+    return out;
+  }
+  /* One row per main program (in PROGRAMS order) plus every "other" the member added. Pure. */
+  function pointsRows(wallet, cat) {
+    var pts = wallet && wallet.points || [], earned = earnedPrograms(wallet, cat), by = {};
+    pts.forEach(function (p) { if (p.program !== "other") by[p.program] = p; });
+    var rows = PROGRAMS.map(function (p) { var e = by[p.id] || {};
+      return { key: p.id, program: p.id, label: p.label, sub: p.sub || "", unit: p.unit, balance: e.balance == null ? null : e.balance, asOf: e.asOf || "", earned: !!earned[p.id] }; });
+    pts.forEach(function (p) { if (p.program === "other")
+      rows.push({ key: p.id, program: "other", id: p.id, label: p.name || "", sub: "", unit: "points", balance: p.balance == null ? null : p.balance, asOf: p.asOf || "", earned: false, other: true }); });
+    return rows;
+  }
+  /* Apply one balance or name edit to a wallet copy. Pure (changes w). */
+  function setPoint(w, key, field, value, today) {
+    w.points = w.points || [];
+    var other = /^o-/.test(key), i = -1;
+    w.points.forEach(function (p, j) { if (other ? p.id === key : (p.program === key && p.program !== "other")) i = j; });
+    if (field === "balance") {
+      if (i < 0 && !other) { if (value == null) return w; w.points.push({ program: key, balance: value, asOf: isoToday(today) }); return w; }
+      if (i < 0) return w;
+      if (value == null && !other) { w.points.splice(i, 1); return w; }
+      w.points[i].balance = value; w.points[i].asOf = isoToday(today);
+    } else if (field === "name" && i > -1 && other) {
+      var nm = String(value || "").trim().slice(0, 40); if (nm) w.points[i].name = nm; else delete w.points[i].name;
+    }
+    return w;
+  }
+  function asOfText(iso) { var o = parseOpened(iso); return o && o.d ? SHORT_MONTHS[o.m - 1] + " " + o.d + ", " + o.y : ""; }
+  function savePoint(key, field, value) {
+    var apply = function (w) { setPoint(w, key, field, value); };
+    var before = state.wallet, draft = JSON.parse(JSON.stringify(before));
+    apply(draft); state.wallet = draft;
+    var row = host && host.querySelector('[data-pm="' + key + '"] .wl-pm-asof');
+    if (row && field === "balance") row.textContent = value == null ? "" : "Updated " + asOfText(isoToday());
+    if (state.demo) return;
+    store().update(function (w) { apply(w); }).then(function (w) { state.wallet = w; }, function (e) {
+      state.wallet = before; state.msg = errText(e); paint();
+    });
+  }
+  function pointsPageHtml() {
+    var rows = pointsRows(state.wallet, catalog()), withBal = rows.filter(function (r) { return r.balance != null; });
+    var last = withBal.map(function (r) { return r.asOf; }).filter(Boolean).sort().pop();
+    var head = '<section class="wl-sum wl-slim wl-pghead" aria-label="Points and miles"><div class="wl-sum-top"><h2 class="wl-sum-title">Points and miles</h2></div>' +
+      '<p class="wl-sum-lede">Every balance in one place. Type a balance and it saves on its own. Check your accounts once a month and update the numbers here.</p>' +
+      '<dl class="wl-sum-stats wl-pg-stats"><div class="wl-sum-stat"><dt>Programs with a balance</dt><dd>' + withBal.length + "</dd></div>" +
+      '<div class="wl-sum-stat"><dt>Last updated</dt><dd>' + (last ? esc(asOfText(last)) : "&ndash;") + "</dd></div></dl></section>";
+    var li = function (r) {
+      var name = r.other ? '<input class="wl-pm-name" data-wl="pts-name" data-key="' + esc(r.key) + '" maxlength="40" placeholder="Program name, like World of Hyatt" aria-label="Program name" value="' + esc(r.label) + '">' :
+        "<b>" + esc(r.label) + "</b>" + (r.sub ? "<small>" + esc(r.sub) + "</small>" : "");
+      var tag = r.earned ? '<span class="wl-pm-tag">Your cards earn this</span>' : "";
+      return '<li class="wl-pm-row' + (r.balance != null ? " has" : "") + '" data-pm="' + esc(r.key) + '"><span class="wl-pm-nm">' + name + tag + "</span>" +
+        '<label class="wl-pm-bal"><input data-wl="pts" data-key="' + esc(r.key) + '" inputmode="numeric" autocomplete="off" placeholder="Add balance" aria-label="' + esc((r.label || "Program") + " balance") + '" value="' + (r.balance != null ? fmtNum(r.balance) : "") + '"><span>' + esc(r.unit) + "</span></label>" +
+        '<span class="wl-pm-asof">' + (r.balance != null && r.asOf ? "Updated " + esc(asOfText(r.asOf)) : "") + "</span>" +
+        (r.other ? '<button class="wl-pm-del" data-wl="pts-del" data-key="' + esc(r.key) + '" aria-label="Remove this program">&times;</button>' : '<span class="wl-pm-del-sp"></span>') + "</li>";
+    };
+    return head + '<section class="wl-card wl-pm">' + (state.msg ? '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>" : "") +
+      '<div class="wl-pm-head" aria-hidden="true"><span>Program</span><span>Balance</span><span>Updated</span><span></span></div>' +
+      '<ul class="wl-pm-list">' + rows.map(li).join("") + "</ul>" +
+      '<button class="wl-btn" data-wl="pts-add">+ Add another program</button>' +
+      '<p class="wl-dimtxt wl-pm-foot">Balances are only what you type here. HRT never logs in to your bank or airline accounts.</p></section>';
   }
 
   /* Transfer Partners (#wallet/transfers): where this wallet's points can go.
@@ -2069,7 +2159,9 @@
     s.credits = perks.reduce(function (t, r) { return t + perkYearUsd(r.perk); }, 0);
     setStats(s);
     var html;
-    if (state.tab === "transfers" && !s.count) {
+    if (state.tab === "points") {
+      html = (s.count ? tabsHtml(s, perks) : "") + pointsPageHtml(); /* balances never need cards */
+    } else if (state.tab === "transfers" && !s.count) {
       html = transfersPageHtml();
     } else if (!s.count && !(s.upcoming || []).length) {
       html = summaryHtml("page"); /* empty wallet: the summary card invites them to add cards */
@@ -2206,6 +2298,13 @@
     }
     if ((act === "go-add" || act === "add") && state.demo) { endExample(); state.sel = null; state.editing = "new"; if (act === "go-add") location.hash = "wallet"; return; }
     if (act === "go-add") { state.sel = null; state.editing = "new"; state.msg = ""; location.hash = "wallet"; return; }
+    if (act === "pts-add") {
+      var nid = "o-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      save(function (w) { w.points = w.points || []; w.points.push({ program: "other", id: nid, balance: null, asOf: isoToday() }); }, function () {
+        setTimeout(function () { var f = host && host.querySelector('[data-pm="' + nid + '"] .wl-pm-name'); if (f) f.focus(); }, 0); }, true);
+      return;
+    }
+    if (act === "pts-del") { var dk = b.getAttribute("data-key"); save(function (w) { w.points = (w.points || []).filter(function (p) { return p.id !== dk; }); }, null, true); return; }
     if (act === "add") { state.sel = null; state.editing = "new"; state.msg = ""; paint(); return; }
     if (act === "cancel") { state.editing = null; paint(); return; }
     if (act === "edit") { state.sel = id; state.editing = id; state.msg = ""; paint(); return; }
@@ -2242,6 +2341,8 @@
   }
   function onChange(ev) {
     var t = ev.target, act = t && t.getAttribute("data-wl");
+    if (act === "pts") { savePoint(t.getAttribute("data-key"), "balance", parseBal(t.value)); return; }
+    if (act === "pts-name") { savePoint(t.getAttribute("data-key"), "name", t.value); return; }
     if (act === "pnote") { savePerkField(t.getAttribute("data-id"), t.getAttribute("data-perk"), "pnotes", String(t.value || "").trim().slice(0, 300)); return; }
     if (act === "mark") { var li = t.closest("li"); if (li) li.classList.toggle("marked", t.checked); savePerkField(t.getAttribute("data-id"), t.getAttribute("data-perk"), "marks", t.checked); return; }
     if (!t || act !== "use") return;
@@ -2352,6 +2453,19 @@
       ".wl-cardnote{margin-top:8px}",
       ".wl-src{font-size:11.5px;color:var(--muted)}",
       ".wl-tags{display:flex;flex-wrap:wrap;gap:5px}.wl-tags:empty{display:none}",
+      ".wl-pm-head,.wl-pm-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(150px,1fr) 150px 34px;gap:12px;align-items:center}",
+      ".wl-pm-head{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 4px 8px;border-bottom:1px solid var(--line)}",
+      ".wl-pm-list{list-style:none;margin:0 0 14px;padding:0}.wl-pm-row{padding:10px 4px;border-bottom:1px solid var(--line)}",
+      ".wl-pm-nm{display:flex;flex-direction:column;gap:2px;min-width:0}.wl-pm-nm b{font-size:14.5px;color:var(--text)}.wl-pm-nm small{font-size:12px;color:var(--muted)}",
+      ".wl-pm-tag{align-self:flex-start;margin-top:3px;font-size:11px;font-weight:800;color:#2f855a;background:rgba(47,133,90,.12);border-radius:999px;padding:2px 8px}[data-theme=dark] .wl-pm-tag{color:#8fe0b4}",
+      ".wl-pm-name{font:inherit;font-size:14px;font-weight:700;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);color:var(--text);width:100%}",
+      ".wl-pm-bal{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--surface)}.wl-pm-row.has .wl-pm-bal{border-color:color-mix(in srgb,#f2b84b 55%,var(--line))}",
+      ".wl-pm-bal input{font:inherit;font-size:16px;font-weight:800;border:0;background:none;color:var(--text);padding:9px 0;width:100%;min-width:0;text-align:right;font-variant-numeric:tabular-nums}.wl-pm-bal input:focus{outline:none}.wl-pm-bal:focus-within{outline:2px solid #f2b84b;outline-offset:1px}",
+      ".wl-pm-bal input::placeholder{color:var(--muted);opacity:.55;font-weight:600;font-size:14px}",
+      ".wl-pm-bal span{font-size:12px;color:var(--muted);font-weight:700}.wl-pm-asof{font-size:12.5px;color:var(--muted)}",
+      ".wl-pm-del{font:inherit;font-size:20px;line-height:1;border:0;background:none;color:var(--muted);cursor:pointer;width:34px;height:34px;border-radius:8px}.wl-pm-del:hover{background:var(--surface-2,rgba(0,0,0,.05));color:var(--text)}",
+      ".wl-pm-foot{margin:12px 0 0}",
+      "@media (max-width:640px){.wl-pm-head{display:none}.wl-pm-row{grid-template-columns:minmax(0,1fr) 34px;row-gap:8px}.wl-pm-nm{grid-column:1/2}.wl-pm-bal{grid-column:1/2}.wl-pm-asof{grid-column:1/3}.wl-pm-del,.wl-pm-del-sp{grid-column:2;grid-row:1}}",
       ".wl-smp{border:1.5px dashed var(--line);border-radius:14px;margin:0 0 12px;background:var(--surface)}.wl-smp-wrap .wl-smp{margin:12px 0 0}",
       ".wl-smp summary{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;list-style:none}.wl-smp summary::-webkit-details-marker{display:none}",
       ".wl-smp-nm{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.wl-smp-nm b{font-size:14.5px;color:var(--text)}.wl-smp-nm small{font-size:12px;color:var(--muted)}",
@@ -2755,9 +2869,9 @@
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
       shortName: shortName, cardBrief: cardBrief, topAlerts: topAlerts,
       whichCard: whichCard, exampleWallet: exampleWallet, centsPer: centsPer, valueText: valueText, SPEND: SPEND,
-      rateText: rateText, earningFor: earningFor, quartersFor: quartersFor, quarterName: quarterName },
+      rateText: rateText, earningFor: earningFor, pointsRows: pointsRows, setPoint: setPoint, parseBal: parseBal, earnedPrograms: earnedPrograms, PROGRAMS: PROGRAMS, quartersFor: quartersFor, quarterName: quarterName },
     show: function (sub) {
-      state.tab = sub === "cards" || sub === "credits" || sub === "transfers" ? sub : "overview";
+      state.tab = sub === "cards" || sub === "credits" || sub === "transfers" || sub === "points" ? sub : "overview";
       styles();
       host = document.getElementById("wl-host");
       if (host && !host.getAttribute("data-ready")) {

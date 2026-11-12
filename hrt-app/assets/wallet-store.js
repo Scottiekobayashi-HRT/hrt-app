@@ -31,6 +31,9 @@
                    Other perks & benefits box.
                    ...future fields kept } ],
        points: [ { program, balance, asOf } ] }
+         program: one of POINT_PROGRAMS ("chase", "atmos", ...) once each, or "other"
+         with its own id ("o-...") and name (up to 40 characters). balance: whole
+         number or null. asOf: "YYYY-MM-DD", the day the member last typed it.
 
    Memberstack's docs say never gate access on Member JSON. Nothing here does.
    Exposes window.HRT_WALLET_STORE.
@@ -44,6 +47,10 @@
   var STATUSES = ["keep", "keep-for-now", "min-spend", "min-spend-almost", "downgrade", "cancel", "next", "closed"];
   var PERK_ID_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/;
   var OPENED_RE = /^\d{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01]))?$/;
+  /* Points and miles programs (Nov 11, Eddie review). Labels live in wallet.js. */
+  var POINT_PROGRAMS = ["chase", "capone", "amex", "atmos", "delta", "united", "american", "virgin", "jal"];
+  var DAY_RE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  var OTHER_ID_RE = /^o-[a-z0-9]{4,20}$/;
   var queue = Promise.resolve();
 
   function fail(code, msg) { var e = new Error(msg || code); e.code = code; return e; }
@@ -127,6 +134,20 @@
         });
       }
     });
+    var progs = {};
+    w.points.forEach(function (p, i) {
+      if (!p || typeof p !== "object" || Array.isArray(p)) throw fail("INVALID", "points " + i);
+      if (p.balance != null && !(typeof p.balance === "number" && Math.floor(p.balance) === p.balance && p.balance >= 0 && p.balance < 1e10)) throw fail("INVALID", "points " + i + " balance");
+      if (p.asOf != null && !(typeof p.asOf === "string" && DAY_RE.test(p.asOf))) throw fail("INVALID", "points " + i + " asOf");
+      if (p.program === "other") {
+        if (typeof p.id !== "string" || !OTHER_ID_RE.test(p.id) || progs[p.id]) throw fail("INVALID", "points " + i + " id");
+        if (p.name != null && (typeof p.name !== "string" || p.name.length > 40)) throw fail("INVALID", "points " + i + " name");
+        progs[p.id] = 1;
+      } else {
+        if (POINT_PROGRAMS.indexOf(p.program) < 0 || progs[p.program]) throw fail("INVALID", "points " + i + " program");
+        progs[p.program] = 1;
+      }
+    });
     return w;
   }
 
@@ -179,6 +200,7 @@
     update: update,
     newId: newId,
     STATUSES: STATUSES,
+    POINT_PROGRAMS: POINT_PROGRAMS,
     _test: { validate: validate, normalize: normalize, unwrap: unwrap, MAX_BYTES: MAX_BYTES }
   };
 })(typeof window !== "undefined" ? window : globalThis);

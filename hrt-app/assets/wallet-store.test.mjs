@@ -152,5 +152,23 @@ ok('load returns a copy', f.stored.wallet.cards.length === 1);
   ok('odd perk ids are refused', !good({ id: 'x', cardId: 'amex-gold', opened: '', pnotes: { '<b>': 'x' } }));
 }
 
+
+// points and miles balances (Nov 11)
+{
+  const V = S._test.validate, okW = pts => { try { V({ v: 1, cards: [], points: pts }); return true; } catch (e) { return false; } };
+  ok('points: known program with balance', okW([{ program: 'chase', balance: 125000, asOf: '2026-11-11' }]));
+  ok('points: null balance allowed', okW([{ program: 'atmos', balance: null }]));
+  ok('points: other with id and name', okW([{ program: 'other', id: 'o-ab12', name: 'World of Hyatt', balance: 40000, asOf: '2026-11-11' }]));
+  ok('points: two others allowed', okW([{ program: 'other', id: 'o-ab12', name: 'A' }, { program: 'other', id: 'o-cd34', name: 'B' }]));
+  ok('points: unknown program refused', !okW([{ program: 'bilt', balance: 1 }]));
+  ok('points: program twice refused', !okW([{ program: 'chase', balance: 1 }, { program: 'chase', balance: 2 }]));
+  ok('points: negative refused', !okW([{ program: 'chase', balance: -5 }]));
+  ok('points: decimal refused', !okW([{ program: 'chase', balance: 1.5 }]));
+  ok('points: text balance refused', !okW([{ program: 'chase', balance: '1000' }]));
+  ok('points: bad date refused', !okW([{ program: 'chase', balance: 1, asOf: '11/11/2026' }]));
+  ok('points: other without id refused', !okW([{ program: 'other', name: 'X' }]));
+  ok('points: other id repeated refused', !okW([{ program: 'other', id: 'o-ab12' }, { program: 'other', id: 'o-ab12' }]));
+  ok('points: long name refused', !okW([{ program: 'other', id: 'o-ab12', name: 'x'.repeat(41) }]));
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

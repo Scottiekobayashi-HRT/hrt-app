@@ -51,7 +51,7 @@
  var onShow = {};
  function parentHash(){ try{ if(window.parent !== window) return window.parent.location.hash; }catch(e){} return ""; }
  /* Sub pages: "wallet/cards" and "wallet/credits" are pages inside My Wallet. */
- var SUBS = { wallet: { cards: "Cards", credits: "Credits", transfers: "Transfer Partners" } };
+ var SUBS = { wallet: { cards: "Cards", credits: "Credits", points: "Points & Miles", transfers: "Transfer Partners" } };
  function route(name, noScroll){
   var parts = String(name || "").split("/"), sub = parts[1] || "";
   name = parts[0];

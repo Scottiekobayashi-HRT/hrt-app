@@ -411,5 +411,33 @@ ok('Which card ignores planned and other cards', !T.whichCard(hh, CAT, 'dining')
   ok('catalog has no placeholders', !/\[|TBD|Scottie input/.test(CAT.cards.map(c => [c.cancelHow, c.best, c.otherPerks, c.phone].join(' ')).join(' ')));
 }
 
+
+// --- points and miles (Nov 11) ---
+{
+  const w = { v: 1, cards: [{ id: 'a', cardId: 'chase-sapphire-preferred', opened: '2024-01' }, { id: 'b', cardId: 'amex-gold', opened: '2024-01', status: 'closed' }], points: [] };
+  let rows = T.pointsRows(w, CAT);
+  ok('points: 9 main programs listed', rows.length === 9 && rows[0].program === 'chase' && rows[8].program === 'jal');
+  ok('points: Chase marked as earned by a held card', rows[0].earned === true);
+  ok('points: closed Amex card does not mark Amex', rows.find(r => r.program === 'amex').earned === false);
+  const t = day(2026, 11, 11);
+  T.setPoint(w, 'chase', 'balance', 125000, t);
+  ok('points: new balance saved with date', w.points.length === 1 && w.points[0].balance === 125000 && w.points[0].asOf === '2026-11-11');
+  T.setPoint(w, 'chase', 'balance', 130000, day(2026, 12, 2));
+  ok('points: balance updated in place, date moves', w.points.length === 1 && w.points[0].balance === 130000 && w.points[0].asOf === '2026-12-02');
+  T.setPoint(w, 'chase', 'balance', null, t);
+  ok('points: clearing a main program removes it', w.points.length === 0);
+  T.setPoint(w, 'atmos', 'balance', null, t);
+  ok('points: clearing an empty program adds nothing', w.points.length === 0);
+  w.points.push({ program: 'other', id: 'o-abcd', balance: null, asOf: '2026-11-11' });
+  T.setPoint(w, 'o-abcd', 'name', '  World of Hyatt  ', t);
+  T.setPoint(w, 'o-abcd', 'balance', 40000, t);
+  rows = T.pointsRows(w, CAT);
+  ok('points: other program listed after the main ones', rows.length === 10 && rows[9].label === 'World of Hyatt' && rows[9].balance === 40000);
+  T.setPoint(w, 'o-abcd', 'balance', null, t);
+  ok('points: clearing an other balance keeps the row', w.points.length === 1 && w.points[0].balance === null);
+  ok('points: parseBal strips commas', T.parseBal('1,234,567 pts') === 1234567 && T.parseBal('') === null);
+  ok('points: example wallet has balances', T.exampleWallet().points.length === 3);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
