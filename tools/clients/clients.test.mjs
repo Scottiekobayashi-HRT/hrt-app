@@ -72,5 +72,29 @@ eq("csv cell", csvCell('a,"b"'), '"a,""b"""');
   eq("exact codes all in catalog", exact.length, 23);
   console.log("  codes:", JSON.stringify(got));
 }
+// sideways member card tracker (Nov 2026)
+{
+  const side = 'Field,Card 1,Card 2,Card 3,Card 4\n' +
+    'Cardholder,Chris,Chris,Chris,Chris\n' +
+    'Card,Chase Sapphire Preferred,Atmos Ascent,Atmos Summit (applying),3rd annual-fee card (which one?)\n' +
+    'Bank,Chase,Bank of America,Bank of America,?\n' +
+    "Opened,Before HRT,Aug 2026,Apply by Nov 15'ish,?\n" +
+    'Annual fee,$95,$95,$395,?\n' +
+    "Fee comes up,Check statement (every year),Aug 30'ish (every year),~1 year after approval,?\n" +
+    'Notes,The card that moves your points.,"Spend $6,000 and get a $99 fare.",An addition.,Tell Scottie.\n' +
+    'Renewal / downgrade / cancel instructions,Keep. Text Scottie first.,"Keep at least until next Aug.",Decide before renewal.,Judge it.\n';
+  const rows = parseCsv(side);
+  eq("sideways: one row per card", rows.length, 4);
+  eq("sideways: fields mapped", [rows[1].who, rows[1].card, rows[1].fee_renews], ["Chris", "Atmos Ascent", "Aug 30'ish (every year)"]);
+  const ids2 = new Set(["chase-sapphire-preferred", "atmos-ascent", "atmos-summit"]);
+  const r2 = toWallet(rows, ids2, "rhoades");
+  eq("sideways: unknown card skipped", r2.wallet.cards.length, 3);
+  const [csp, asc, sum] = r2.wallet.cards;
+  eq("sideways: before HRT", [csp.cardId, csp.opened, csp.withHrt, csp.plan], ["chase-sapphire-preferred", "", false, "Keep. Text Scottie first."]);
+  eq("sideways: opened with HRT", [asc.cardId, asc.opened, asc.withHrt, asc.feeDate, asc.note], ["atmos-ascent", "2026-08", true, "08-30", "Spend $6,000 and get a $99 fare."]);
+  eq("sideways: applying = next, no plan", [sum.status, sum.custom.name, sum.plan, sum.feeDate], ["next", "Your next card", undefined, undefined]);
+  eq("sideways: warns about the unknown card", r2.warnings.some((w) => /which one/.test(w)), true);
+}
+
 console.log(pass + " passed, " + fail + " failed");
 if (fail) process.exit(1);

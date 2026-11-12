@@ -1,6 +1,10 @@
 /* Turn Eddie's household card tracker (CSV) into a My Wallet for that household.
 
    Eddie's columns: Who, Card, Opened, Annual Fee, Fee Renews, Status, Next Step
+   Also reads the sideways "member card tracker" (Nov 2026): first column "Field",
+   then one column per card, with rows Cardholder, Card, Bank, Opened, Annual fee,
+   Fee comes up, Points earned as, Best for, Notes, Renewal / downgrade / cancel
+   instructions. parseCsv turns it into the same one-row-per-card shape.
    Output: the wallet object My Wallet stores in the member's Memberstack JSON,
    under "wallet", plus warnings for anything a person should look at.
 
@@ -82,6 +86,20 @@ const STATUS_MAP = [
 
 const MON = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12 };
 
+/* Sideways tracker rows -> the keys toWallet reads */
+const SIDE_FIELDS = { "cardholder": "who", "card": "card", "bank": "bank", "opened": "opened", "annual fee": "annual_fee",
+  "fee comes up": "fee_renews", "points earned as": "points", "best for": "best_for", "notes": "notes",
+  "renewal / downgrade / cancel instructions": "plan" };
+function sideways(rows) {
+  const cols = Math.max(...rows.map((r) => r.length)), out = [];
+  for (let c = 1; c < cols; c++) {
+    const rec = {};
+    rows.forEach((r) => { const k = SIDE_FIELDS[String(r[0] || "").trim().toLowerCase().replace(/\s+/g, " ")]; if (k) rec[k] = (r[c] || "").trim(); });
+    if (Object.values(rec).some(Boolean)) out.push(rec);
+  }
+  return out;
+}
+
 export function parseCsv(text) {
   const rows = []; let row = [], f = "", q = false;
   for (let i = 0; i < text.length; i++) {
@@ -93,6 +111,7 @@ export function parseCsv(text) {
     else f += c;
   }
   if (f || row.length) { row.push(f); rows.push(row); }
+  if (rows.length && String(rows[0][0] || "").replace(/^\uFEFF/, "").trim().toLowerCase() === "field") return sideways(rows.slice(1));
   const head = (rows.shift() || []).map((h) => h.replace(/^﻿/, "").trim().toLowerCase().replace(/\s+/g, "_"));
   return rows.filter((r) => r.some((x) => x.trim())).map((r) => Object.fromEntries(head.map((h, i) => [h, (r[i] || "").trim()])));
 }
@@ -136,7 +155,12 @@ export function toWallet(rows, catalogIds, household = "") {
     const line = i + 2;
     let name = (r.card || "").trim();
     if (!name) { warnings.push("Row " + line + ": no card name, skipped."); return; }
+    if (/\?|which one/i.test(name)) { warnings.push("Row " + line + ': "' + name + '" is not a known card yet, skipped. Ask the member which card it is.'); return; }
     let status = statusFor(r.status);
+    /* sideways tracker: "(applying)" in the name or "Apply by ..." as the open date means the next card */
+    if (/\(applying\)/i.test(name) || /^apply/i.test(r.opened || "")) { status = "next"; if (/^apply/i.test(r.opened || "")) r = { ...r, opened: "" }; }
+    if (/^before hrt$/i.test(String(r.opened || "").trim())) r = { ...r, opened: "", origin: r.origin || "pre" };
+    else if (!r.origin && r.plan !== undefined && parseDate(r.opened)) r = { ...r, origin: "hrt" };
     if (/^next\s*:/i.test(name)) { name = name.replace(/^next\s*:\s*/i, ""); status = "next"; }
     if (status === null) { warnings.push("Row " + line + ': status "' + r.status + '" not recognized, kept in the note.'); }
     const opened = parseDate(r.opened);
@@ -173,8 +197,13 @@ export function toWallet(rows, catalogIds, household = "") {
     if (status === "next") { entry.cardId = "custom"; entry.custom = { name: "Your next card" }; }
     if (r.who) entry.holder = r.who.slice(0, 30);
     if (status) entry.status = status;
-    const note = status === "next" ? "" : [status === null ? "Status: " + r.status : "", r.next_step || ""].filter(Boolean).join(". ").slice(0, 500);
+    const note = status === "next" ? "" : [status === null ? "Status: " + r.status : "", r.next_step || "", r.notes || ""].filter(Boolean).join(". ").slice(0, 500);
     if (note) entry.note = note;
+    /* this member's own renewal / downgrade / cancel plan (shown in place of the catalog tip) */
+    if (r.plan && status !== "next") entry.plan = r.plan.slice(0, 600);
+    /* "Aug 30'ish (every year)" -> feeDate "08-30" */
+    const fd = String(r.fee_renews || "").match(/\b([A-Za-z]{3,9})\.?\s+(\d{1,2})\b/);
+    if (fd && MON[fd[1].slice(0, 3).toLowerCase()] && status !== "next") entry.feeDate = String(MON[fd[1].slice(0, 3).toLowerCase()]).padStart(2, "0") + "-" + fd[2].padStart(2, "0");
     if (/\(was /i.test(r.card)) entry.nickname = (r.card.match(/\((was [^)]*)\)/i) || [])[1].slice(0, 40);
     if (seen[entry.id]) { warnings.push("Row " + line + ": same card, person and date as row " + seen[entry.id] + ", skipped."); return; }
     seen[entry.id] = line;
