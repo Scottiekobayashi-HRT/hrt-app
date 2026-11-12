@@ -115,6 +115,16 @@
     ".dw-bph{background:linear-gradient(135deg,#1f9d57,#14202e)!important;display:flex;align-items:center;justify-content:center}.dw-bpct{font-size:34px;font-weight:900;color:#fff;letter-spacing:-.02em}",
     "html:not(.ms-client) .dw-bonus .dw-bopen{display:none}html.ms-client .dw-bonus .dw-block{display:none}",
     "html:not(.ms-client) .dw-bonus .dw-bph{background:linear-gradient(135deg,#8a96a3,#3a4552)!important}html:not(.ms-client) .dw-bonus .dw-bpct{filter:blur(6px);opacity:.8}html:not(.ms-client) .dw-bonus .dw-tt{color:var(--muted)}",
+    /* navy wall with the HRT PRO mark (Nov 11) */
+    ".dw-navy{background:linear-gradient(135deg,#14202e 0%,#1b2f4a 100%);border:1px solid rgba(242,184,75,.32);border-radius:var(--radius,18px);padding:18px 16px 14px;box-shadow:var(--shadow)}",
+    ".dw-navy .dw-head h2{color:#fff}.dw-navy .dw-head .dw-sub,.dw-navy .dw-head .dw-when{color:#bccde0}.dw-navy .dw-lede{color:#c7d4e2}",
+    ".dw-navy .dw-limit{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#e3ebf4}",
+    ".dw-navy .dw-nav button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff;box-shadow:none}",
+    ".dw-navy .dw-rail::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}.dw-navy .dw-note{color:#c7d4e2}",
+    ".dw-navy a.dw-promark{text-decoration:none;background:linear-gradient(135deg,#f5c75a,#d97040)!important;color:#1a1204!important}",
+    ".dw-kpro{background:linear-gradient(135deg,#f5c75a,#d97040)!important;color:#1a1204!important}",
+    ".dw-pblur{filter:blur(5px) grayscale(.5);transform:scale(1.1);background-color:#24354d!important}.dw-protile .dw-tt{color:var(--text)}",
+    ".dw a.dw-tbtn.dw-tgold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;border-color:transparent}",
     ".dw-q{margin:0;font-size:13.5px;line-height:1.45;color:var(--text);font-style:italic}"
   ].join("");
   document.head.appendChild(css);
@@ -261,7 +271,7 @@
      bonus tiles. Done with CSS classes so it is right even when Memberstack
      answers after the wall is drawn.
   ===================================================================== */
-  var MIX = { japan: 25, other: 25, bonus: 10, testimonial: 5, flight: 10, news: 15, kama: 10 };
+  var MIX = { japan: 25, other: 25, pro: 8, bonus: 10, testimonial: 5, flight: 10, news: 15, kama: 10 };
   var MIX_MAX = 18;
   var JAPAN = { HND: 1, NRT: 1, KIX: 1, ITM: 1, NGO: 1, FUK: 1, CTS: 1, OKA: 1 };
   var SUB_ROUTES = { HND: 1, LAS: 1, LAX: 1, JFK: 1 };
@@ -368,6 +378,22 @@
     acts.appendChild(open); acts.appendChild(promo); t.appendChild(acts);
     return t;
   }
+  /* Business / first class space HRT PRO members see. Locked here: the feed sends
+     no dates or points for these, so there is nothing behind the blur. */
+  function proTile(t) {
+    var c = el("div", "dw-card dw-t dw-protile");
+    var ph = photo("dw-ph dw-pblur", t.image);
+    c.appendChild(ph);
+    var lab = el("span", "dw-kind dw-kpro", "\u2605 HRT PRO"); c.appendChild(lab);
+    var body = el("div", "dw-body");
+    body.appendChild(el("b", "dw-tt", (t.city || t.dest || "") + " in " + (/first/i.test(t.cabin || "") ? "first class" : "business class")));
+    body.appendChild(el("span", "dw-tsub", (t.origin || "HNL") + " \u2192 " + (t.dest || "") + ". PRO members see the dates and the points."));
+    c.appendChild(body);
+    var acts = el("div", "dw-tacts");
+    var go = el("a", "dw-tbtn dw-tgold", "\uD83D\uDD12 Unlock with HRT PRO"); go.href = "#atmos"; go.setAttribute("data-route", "atmos");
+    acts.appendChild(go); c.appendChild(acts);
+    return c;
+  }
   function testimonialTile(q) {
     var t = el("div", "dw-card dw-t dw-quote");
     var ph = photo("dw-ph", q.image);
@@ -381,11 +407,14 @@
   }
 
   function render(feed) {
-    var wrap = el("div", "dw free-only");
+    var wrap = el("div", "dw dw-navy free-only");
     var win = feed.window_days || 30;
 
     var head = el("div", "dw-head");
     head.appendChild(el("h2", null, "Deals, News, Flights"));
+    var pmark = el("a", "dw-pill dw-promark", "\u2605 HRT PRO"); pmark.href = "#atmos"; pmark.setAttribute("data-route", "atmos");
+    pmark.title = "HRT PRO opens business and first class and the full calendar";
+    head.appendChild(pmark);
     head.appendChild(el("span", "dw-limit dw-lv-sub", "Free · 4 routes, " + win + " days"));
     head.appendChild(el("span", "dw-limit dw-lv-oh", "ʻOhana · every route, " + win + " days"));
     head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
@@ -400,13 +429,14 @@
     var exp = el("div", "dw-exp");   /* the panel a card opens, under the rail */
     var openKey = null;
     var g = dealGroups(feed.economy);
-    var tiles = mixOrder({ japan: g.japan, other: g.other, bonus: feed._bonuses || [], testimonial: TESTIMONIALS, flight: [],
+    var tiles = mixOrder({ japan: g.japan, other: g.other, pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS, flight: [],
       news: feed._news || [], kama: feed._kama || [] }, MIX, MIX_MAX);
     tiles.forEach(function (tile) {
       if (tile.kind === "news") return rail.appendChild(newsTile(tile.item));
       if (tile.kind === "kama") return rail.appendChild(kamaTile(tile.item));
       if (tile.kind === "bonus") return rail.appendChild(bonusTile(tile.item));
       if (tile.kind === "testimonial") return rail.appendChild(testimonialTile(tile.item));
+      if (tile.kind === "pro") return rail.appendChild(proTile(tile.item));
       var d = tile.item;
       var card = el("button", "dw-card" + (subRoute(d) ? "" : " dw-oh"));
       card.type = "button";
@@ -501,74 +531,8 @@
     attachNav(rail, nav);
     nudge(rail);
 
-    /* business class: locked, and genuinely empty behind the blur */
-    var teasers = feed._teasers || feed.premium_teasers || [];
-    if (teasers.length) {
-      var pro = el("div", "dw-pro");
-      var ph2 = el("div", "dw-pro-h");
-      ph2.appendChild(el("span", "dw-pill", "★ HRT PRO"));
-      var hasFirst = teasers.some(function (t) { return /first/i.test(t.cabin || ""); });
-      ph2.appendChild(el("h3", null, hasFirst ? "Business and first class award space" : "Business class award space"));
-      var cities = teasers.map(function (t) { return t.city; }).filter(Boolean);
-      ph2.appendChild(el("p", null,
-        cities.length
-          ? "We track " + (hasFirst ? "premium cabin" : "business class") + " award space to " + cities.join(", ") + ". PRO members see the dates and the points."
-          : "PRO members see the dates and the points."));
-      pro.appendChild(ph2);
-
-      var prail = el("div", "dw-rail pro");
-      teasers.forEach(function (t) {
-        var lock = el("div", "dw-lock");
-        var blur = el("div", "dw-blur");
-        if (t.image) blur.style.backgroundImage = "url('" + String(t.image).replace(/'/g, "%27") + "')";
-        lock.appendChild(blur);
-        var lc = el("div", "dw-lc");
-        lc.appendChild(el("b", null, t.city || t.dest || ""));
-        lc.appendChild(el("span", null, (t.origin || "HNL") + " → " + (t.dest || "") + " · " + (/first/i.test(t.cabin || "") ? "first class" : "business")));
-        lc.appendChild(el("span", null, "🔒 PRO members only"));
-        lock.appendChild(lc);
-        prail.appendChild(lock);
-      });
-      pro.appendChild(prail);
-
-      /* What the paid calendar covers, measured from the data by the feed. */
-      var sc = feed.pro_scope || {};
-      if (sc.pro_days || sc.pro_destinations) {
-        var scope = el("div", "dw-scope");
-        function stat(big, label) {
-          var d = document.createElement("div");
-          d.appendChild(el("b", null, big));
-          d.appendChild(el("span", null, label));
-          scope.appendChild(d);
-        }
-        if (sc.pro_days) stat(sc.pro_days + "+ days", "booking window");
-        if (sc.pro_destinations) stat(String(sc.pro_destinations), "destinations");
-        stat("Atmos Rewards", "award space");
-        pro.appendChild(scope);
-
-        /* Count what the free wall is actually showing rather than hard coding
-           it, so this line cannot drift when ECON_ROUTES changes. */
-        var freeDests = (feed.economy || []).length;
-        var vs = el("p", "dw-note", "This free wall shows " +
-          (freeDests ? freeDests + " destination" + (freeDests === 1 ? "" : "s") : "a sample") +
-          " for the next " + win + " days. HRT PRO opens the full calendar: " +
-          (sc.pro_days ? sc.pro_days + "+ days ahead" : "the full booking window") +
-          " across all " + (sc.pro_destinations || "15") + " destinations on Atmos Rewards, both directions.");
-        vs.style.color = "#c7d4e2";
-        vs.style.marginTop = "10px";
-        pro.appendChild(vs);
-      }
-
-      var cta = el("div", "dw-cta");
-      var btn = el("button", "btn gold", "Unlock the full calendar · $9.99/mo →");
-      btn.type = "button";
-      btn.setAttribute("data-ms-price:add", ATMOS_PRICE);
-      cta.appendChild(btn);
-      pro.appendChild(cta);
-
-      wrap.appendChild(pro);
-    }
-
+    /* Nov 11 (Scottie): the separate HRT PRO business class box is gone. Its locked
+       tiles now sit inside the wall (proTile), and the wall carries the HRT PRO mark. */
     if (feed.note) wrap.appendChild(el("p", "dw-note", feed.note));
     return wrap;
   }
