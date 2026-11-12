@@ -946,7 +946,29 @@
     var foot = b.note ? '<p class="wl-pk-note wl-clamp" data-wl="clamp">' + esc(b.note) + src + "</p>" :
       (src ? '<p class="wl-pk-note">' + src + "</p>" : "");
     return '<li class="wl-pk' + (r.used ? " done" : "") + '"><div class="wl-pk-main">' + head + when +
-      partHtml(r) + '<div class="wl-tags">' + perkTags(b, p) + "</div>" + foot + "</div>" + tick + "</li>";
+      partHtml(r) + '<div class="wl-tags">' + perkTags(b, p) + "</div>" + enrollHtml(b) + foot + "</div>" + tick + "</li>";
+  }
+  /* Card sheet: perks grouped like the Credits page, so long lists are easy to scan (Nov 12). */
+  var SHEET_GROUPS = [["monthly", "Monthly credits"], ["mid", "Quarterly or twice a year"], ["annual", "Yearly credits"], ["other", "Other perks and benefits"]];
+  function sheetPerksHtml(perks) {
+    var by = {};
+    perks.forEach(function (r) { var g = creditGroupOf(r.perk); (by[g] = by[g] || []).push(r); });
+    return SHEET_GROUPS.filter(function (g) { return by[g[0]]; }).map(function (g) {
+      return '<div class="wl-shg"><h4 class="wl-shg-h">' + esc(g[1]) + "<span>" + by[g[0]].length + '</span></h4><ul class="wl-pks wl-pks-sheet">' +
+        by[g[0]].map(function (x) { return perkHtml(x); }).join("") + "</ul></div>";
+    }).join("");
+  }
+  /* Where to enroll or activate a perk. Banks only let members do this signed in to
+     their own account or app, so this links to the right sign-in page (Nov 12). */
+  var ENROLL = {
+    "American Express": { url: "https://global.americanexpress.com/card-benefits/view-all", label: "Enroll in your Amex account" },
+    "Chase": { url: "https://www.chase.com/freedomflex", label: "Activate on chase.com", only: "activation" }
+  };
+  function enrollHtml(b) {
+    if (!(b.enroll === "yes" || b.type === "activation")) return "";
+    var c = catIndex()[b.card], iss = c && c.issuer, e = ENROLL[iss];
+    if (e && (!e.only || e.only === b.type)) return '<a class="wl-enroll" href="' + e.url + '" target="_blank" rel="noopener">' + esc(e.label) + " &rsaquo;</a>";
+    return '<span class="wl-enroll-t">' + (b.type === "activation" ? "Activate" : "Enroll") + " in your " + esc(iss || "card") + " account or app first</span>";
   }
   function rotatingLine(cardId) {
     var qs = quartersFor(catalog(), cardId), t = "";
@@ -1778,7 +1800,7 @@
     else if (c && !hidden && c.cancelHow) html += '<div class="wl-sh-cancel"><b>Cancel or downgrade</b>' +
       (cancelWhen(e, c) ? '<span class="wl-sh-cw">' + esc(cancelWhen(e, c).text) + "</span>" : "") + "<p>" + esc(c.cancelHow) + "</p></div>";
     if (c && !hidden) html += moreBox("d-" + e.id, "Card details", detailsHtml(c), c.type ? c.type + " card" : "");
-    if (perks.length) html += moreBox("p-" + e.id, "Credits and perks", '<ul class="wl-pks">' + perks.map(function (x) { return perkHtml(x); }).join("") + "</ul>",
+    if (perks.length) html += moreBox("p-" + e.id, "Credits and perks", sheetPerksHtml(perks),
       perks.length + (perks.length === 1 ? " perk" : " perks") + (credits ? ", up to " + money(credits) + " a year" : ""));
     if (c && !hidden && earningFor(catalog(), c.id).length) html += moreBox("e-" + e.id, "How it earns", earnHtml(c.id).replace(/<h4 class="wl-h4">How it earns<\/h4>/, ""));
     if (c && c.note && !perks.length) html += '<p class="wl-pk-note wl-cardnote">' + esc(c.note) + "</p>";
@@ -2781,6 +2803,24 @@
       ".wl-crow-go{flex:0 0 auto;font-size:24px;line-height:1;color:var(--muted)}",
       ".wl-cards-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}",
       ".wl-cards-key{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}",
+      /* card sheet: bolder lines and clearer perk groups (Nov 12) */
+      ".wl-sheet .wl-more{border:1.5px solid rgba(20,32,46,.18);box-shadow:none}[data-theme=dark] .wl-sheet .wl-more{border-color:rgba(255,255,255,.2)}",
+      ".wl-sheet .wl-more.open{border-color:#f2b84b}",
+      ".wl-sheet .wl-sh-facts{border-width:1.5px;border-color:rgba(20,32,46,.18)}.wl-sheet .wl-sh-facts>div{border-bottom-width:1.5px;border-color:rgba(20,32,46,.14)!important}",
+      "[data-theme=dark] .wl-sheet .wl-sh-facts,[data-theme=dark] .wl-sheet .wl-sh-facts>div{border-color:rgba(255,255,255,.18)!important}",
+      ".wl-sh-det{margin:0}.wl-sh-det>div{padding:10px 0;border-bottom:1.5px solid var(--line)}.wl-sh-det>div:last-child{border-bottom:0}",
+      ".wl-sh-det dt{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}.wl-sh-det dd{margin:0;font-size:14.5px;line-height:1.5;color:var(--text)}",
+      ".wl-shg{margin-top:14px}.wl-shg:first-child{margin-top:4px}",
+      ".wl-shg-h{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}",
+      ".wl-shg-h span{font-size:11px;background:#14202e;color:#fff;border-radius:999px;padding:1px 8px;letter-spacing:0}[data-theme=dark] .wl-shg-h span{background:#f2b84b;color:#14202e}",
+      ".wl-pks-sheet{margin:0;gap:8px}",
+      ".wl-pks-sheet .wl-pk{background:var(--surface);border:1.5px solid rgba(20,32,46,.14);box-shadow:inset 4px 0 0 #f2b84b;padding:12px 14px}",
+      "[data-theme=dark] .wl-pks-sheet .wl-pk{border-color:rgba(255,255,255,.16)}",
+      ".wl-pks-sheet .wl-pk-top{font-size:14.5px}.wl-pks-sheet .wl-pk-top b{font-weight:800}",
+      ".wl-pks-sheet .wl-pk-amt{font-size:13.5px;font-weight:800;color:#1f6b3d}[data-theme=dark] .wl-pks-sheet .wl-pk-amt{color:#8fe0b4}",
+      "a.wl-enroll{align-self:flex-start;margin-top:6px;font-size:12.5px;font-weight:800;text-decoration:none!important;border-radius:999px;padding:5px 11px;background:#14202e!important;color:#fff!important}",
+      "[data-theme=dark] a.wl-enroll{background:#f2b84b!important;color:#14202e!important}",
+      ".wl-enroll-t{margin-top:4px;font-size:12px;font-weight:700;color:#8a5a10}[data-theme=dark] .wl-enroll-t{color:#f2c56b}",
       ".wl-more-title{margin:22px 0 10px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}",
       ".wl-more{padding:0;margin-bottom:10px;overflow:hidden}",
       ".wl-more-h{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;min-height:56px}",
