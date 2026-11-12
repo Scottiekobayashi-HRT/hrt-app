@@ -2,7 +2,7 @@
    Do not hand-edit. Change the sheet, download it, run the script. */
 window.HRT_WALLET_CATALOG={
  "v": 1,
- "built": "2026-11-10",
+ "built": "2026-11-12",
  "cards": [
   {
    "id": "chase-sapphire-preferred",
@@ -22,7 +22,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep - this is the card used for all your Chase-points redemptions. If you & your spouse each have a Sapphire, one can go after year 1. Talk to me before calling Chase, so the wrong downgrade doesn't cost you a future welcome bonus.",
    "best": "Unlocks your ability to transfer points to airline partners or 1 other person; e.g. spouse/friend.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
+   "otherPerks": "No foreign transaction fees; Primary rental car coverage up to $60,000 (decline the rental company's collision coverage and pay with the card); Trip cancellation and interruption up to $10,000 per person, $20,000 per trip; Trip delay up to $500 per ticket (12+ hours or overnight); Baggage delay up to $100 a day for 5 days (6+ hours); Lost luggage reimbursement; Emergency evacuation and transportation coverage; Purchase protection and extended warranty; Free 1-year Apple TV subscription when you activate by Dec 31, 2026; Free authorized users"
   },
   {
    "id": "chase-freedom-unlimited",
@@ -43,6 +44,7 @@ window.HRT_WALLET_CATALOG={
    "best": "1.5x on every purchase; great card for everyday spending.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (when paired with Sapphire Preferred/Reserve or Ink Preferred for transfer eligibility)",
    "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
+   "otherPerks": "3% foreign transaction fee, so leave it home on trips abroad; Purchase protection (120 days, up to $500 per item); Extended warranty (adds 1 year to warranties of 3 years or less); Trip cancellation and interruption up to $1,500 per person, $6,000 per trip; Secondary rental car coverage; Travel and emergency assistance; Lyft and DoorDash DashPass promos (check Chase offers)",
    "ftf": 3.0
   },
   {
@@ -56,6 +58,7 @@ window.HRT_WALLET_CATALOG={
    "source": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
    "checked": "2026-10-13",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/85855236-dde8-415d-bcdc-1299e0a2fb78/Chase+Freedom+Flex%C2%AE.png?content-type=image%2Fpng",
+   "otherPerks": "3% foreign transaction fee, so leave it home on trips abroad; Cell phone protection up to $800 per claim, $1,000 a year ($50 deductible) when you pay your phone bill with the card; Purchase protection (120 days, up to $500 per item); Extended warranty (adds 1 year to warranties of 3 years or less); Trip cancellation and interruption up to $1,500 per person, $6,000 per trip; Secondary rental car coverage; Mastercard World Elite perks like ID theft protection",
    "ftf": 3.0
   },
   {
@@ -75,7 +78,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep for the companion award if you'll use it; else downgrade to Ascent to cut the fee.",
    "best": "Earn 3 points per dollar on foreign purchases; includes a 25K-point Global Companion Award",
    "alliances": "ONEWORLD (Atmos is a Oneworld member program)",
-   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart."
+   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart.",
+   "otherPerks": "No foreign transaction fees and 3x points on foreign purchases; Free checked bag for you and up to 6 guests on the same reservation on Alaska and Hawaiian flights paid with the card; Preferred boarding; 8 Alaska Lounge day passes a year (2 per quarter, shareable); 8 inflight Wi-Fi passes a year; 20% back on inflight purchases; Waived same-day confirmed change fees; Waived partner award booking fees; Instant travel delay credit; Free points sharing; 10,000 status points each card anniversary plus 1 status point per $2 spent; Visa Infinite travel and purchase protections"
   },
   {
    "id": "atmos-ascent",
@@ -94,7 +98,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep if you fly Alaska/Hawaiian; else reconsider at renewal.",
    "best": "Free checked bag (terms apply); includes a $99 Companion Fare",
    "alliances": "ONEWORLD (Atmos is a Oneworld member program)",
-   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart."
+   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart.",
+   "otherPerks": "Free checked bag for you and up to 6 guests on the same reservation on Alaska and Hawaiian flights paid with the card; Preferred boarding; $99 Companion Fare (plus taxes from $23) each anniversary after $6,000 spend; 20% back on Alaska and Hawaiian inflight purchases; $100 off an Alaska Lounge+ membership; 1 status point per $3 spent; Free points sharing"
   },
   {
    "id": "amex-gold",
@@ -114,7 +119,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "To drop the fee & keep your points: apply for a fresh Blue Business Plus ($0), then cancel Gold just after the anniversary. (Amex won't let you downgrade to a $0 card - you apply fresh.)",
    "best": "Earn 4X points on groceries & dining",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic",
+   "otherPerks": "No foreign transaction fees; Hertz Five Star status (enroll in your Amex account); The Hotel Collection: $100 property credit and room upgrade when available on 2+ night stays booked through Amex Travel; Trip delay insurance; Baggage insurance up to $1,250 carry-on and $500 checked; Secondary car rental loss and damage coverage; Purchase protection up to $10,000 per item (90 days); Extended warranty (adds up to 1 year); Global Assist Hotline; Amex Venue Collection and preferred seating at events; Amex Offers"
   },
   {
    "id": "amex-platinum",
@@ -134,7 +140,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep only if you use the credits. To drop the fee: downgrade to Gold or Green, or apply a fresh Blue Business Plus ($0) to keep your points, then cancel after the anniversary.",
    "best": "Great perks & benefits",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic",
+   "otherPerks": "Global Lounge Collection: Centurion Lounges, Priority Pass Select (enroll), 10 Delta Sky Club visits a year when flying Delta, plus Plaza Premium and other partner lounges (Lufthansa lounges ended Oct 1, 2026); Marriott Bonvoy Gold Elite status (enroll); Hilton Honors Gold status (enroll); Leaders Club Sterling status with Leading Hotels of the World (enroll); Premium car rental status at Avis, Hertz and National (enroll); Fine Hotels + Resorts perks: breakfast for two, room upgrade when available, late checkout, property credit; The Hotel Collection $100 property credit on 2+ night stays; No foreign transaction fees; Trip delay up to $500 (6+ hours, 2 claims per 12 months); Trip cancellation and interruption up to $10,000 per trip; Cell phone protection up to $800 per claim ($50 deductible); Purchase protection up to $10,000 per item; Extended warranty; Return protection up to $300 per item; Secondary car rental loss and damage coverage; Premium Global Assist Hotline; Platinum Travel Service; Resy Global Dining Access"
   },
   {
    "id": "amex-business-gold",
@@ -154,7 +161,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Apply for a fresh Blue Business Plus ($0) to keep your points, then cancel - or keep if the 4x categories earn their keep.",
    "best": "Earn 4X points on your top 2 spending categories",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic",
+   "otherPerks": "No foreign transaction fees; The Hotel Collection: $100 property credit and room upgrade when available on 2+ night stays booked through Amex Travel; Trip delay insurance; Baggage insurance; Secondary car rental loss and damage coverage; Cell phone protection up to $800 per claim (2 claims per 12 months) when you pay your phone bill with the card; Purchase protection (90 days, up to $1,000 per item); Extended warranty (adds up to 1 year); Global Assist Hotline; Employee cards with spending controls"
   },
   {
    "id": "amex-business-platinum",
@@ -174,7 +182,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep only if you use the credits; else apply a fresh Blue Business Plus ($0) to keep points, then cancel.",
    "best": "Great perks & benefits",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic"
+   "partners": "Aer Lingus, Aeromexico, Air Canada (Aeroplan), Air France, KLM, ANA, Avianca, British Airways, Cathay Pacific, Delta, Emirates, Etihad, Iberia, JetBlue, Qantas, Qatar, Singapore, Virgin Atlantic",
+   "otherPerks": "Global Lounge Collection: Centurion Lounges, Priority Pass Select (enroll), 10 Delta Sky Club visits a year when flying Delta, plus partner lounges; 35% points back when you pay with points for flights on your selected airline through Amex Travel (up to 1 million points back a year); Marriott Bonvoy Gold Elite status (enroll); Hilton Honors Gold status (enroll); Leaders Club Sterling status with Leading Hotels of the World (enroll); Premium car rental status at Avis, Hertz and National (enroll); Fine Hotels + Resorts and The Hotel Collection perks; No foreign transaction fees; Cell phone protection up to $800 per claim ($50 deductible, 2 claims per 12 months); Purchase protection, extended warranty and return protection; Trip delay insurance; Baggage insurance; Secondary car rental loss and damage coverage; Business Platinum Travel Service; Employee Platinum cards available for a fee"
   },
   {
    "id": "capone-venture",
@@ -193,7 +202,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Downgrade to VentureOne ($0; call them) before the fee posts - keeps all your miles.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red",
+   "otherPerks": "No foreign transaction fees; 2 free visits a year to Capital One Lounges or Plaza Premium lounges; Hertz Five Star status (enroll in your Capital One account); Lifestyle Collection hotels: $50 experience credit and extra perks when booked through Capital One Travel; Secondary rental car coverage; Travel accident insurance; Extended warranty; Capital One Dining and Entertainment access; 50% off drinks at Capital One Cafes"
   },
   {
    "id": "capone-venture-x",
@@ -213,7 +223,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep if you travel - the $300 credit + 10K miles more than cover the fee. Otherwise downgrade to VentureOne ($0).",
    "best": "About Venture X: If you spend at least $300/yr in travel you'll never want to cancel this card. The $395 annual fee is offset by a $300 annual credit on travel booked thru their portal. The remaining $95 is further offset by a 10K mile bonus given at year end; worth $100 at minimum. Also includes Priority Pass access to over 1300 airport lounges worldwide.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red",
+   "otherPerks": "Capital One Lounge and Landing access plus Priority Pass Select (enroll). Since Feb 1, 2026 guests and authorized users pay extra for lounges; Hertz President's Circle status (enroll in your Capital One account); Premier Collection hotels: $100 experience credit, daily breakfast for two, room upgrade when available; Lifestyle Collection: $50 experience credit; No foreign transaction fees; Primary rental car coverage; Cell phone protection up to $800 per claim ($50 deductible, 2 claims a year); Trip cancellation and interruption; Trip delay reimbursement; Lost luggage reimbursement; Travel accident insurance; Purchase protection, extended warranty and return protection; Capital One Entertainment and Dining access"
   },
   {
    "id": "chase-sapphire-reserve",
@@ -233,7 +244,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep only if the travel credits + lounge beat the fee. Otherwise talk to me before downgrading, so the wrong downgrade doesn't cost you a future welcome bonus. Never cancel a Sapphire outright - combine points out first.",
    "best": "Unlocks best redemption values; lots of valuable statement credits that can more than offset the fee.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
+   "otherPerks": "Priority Pass Select plus every Chase Sapphire Lounge, with up to 2 guests; Air Canada Maple Leaf Lounge access when flying Star Alliance; IHG One Rewards Platinum Elite status through Dec 31, 2027; Free Apple TV and Apple Music through June 22, 2027 (link your Apple ID); The Edit hotel perks: breakfast for two, $100 property credit, upgrade when available; Reserve Travel Designers booking help; No foreign transaction fees; Primary rental car coverage up to $75,000; Trip delay up to $500 per ticket (6+ hours or overnight); Trip cancellation and interruption up to $10,000 per person, $20,000 per trip; Lost luggage up to $3,000 per person; Baggage delay insurance; Emergency evacuation, medical and dental coverage; Roadside assistance; Purchase protection, return protection and extended warranty; Exclusive Tables restaurant reservations; Big spender extras at $75,000 a year: IHG Diamond, Southwest A-List and more"
   },
   {
    "id": "chase-sapphire-reserve-business",
@@ -252,7 +264,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Keep only if the credits beat the fee; else downgrade to a $0 Ink to keep points. (Only if you already hold a $0 Ink - else save the slot for a fresh bonus.)",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
+   "otherPerks": "Priority Pass Select plus every Chase Sapphire Lounge, with up to 2 guests (employee cards get no lounge access of their own); Air Canada Maple Leaf Lounge access when flying Star Alliance; IHG One Rewards Platinum Elite status through Dec 31, 2027; The Edit hotel perks: breakfast for two, $100 property credit, upgrade when available; Reserve Travel Designers booking help; Dedicated business customer service 7 days a week; No foreign transaction fees; Rental car coverage (primary when renting for business); Trip delay, trip cancellation and interruption, lost luggage and baggage delay coverage; Cell phone protection; Purchase protection, return protection and extended warranty; Roadside assistance; Exclusive Tables restaurant reservations; Big spender extras at $120,000 a year, including IHG Diamond status"
   },
   {
    "id": "chase-ink-business-preferred",
@@ -272,7 +285,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep 1 year to earn the bonus, then cancel. (Only downgrade to a $0 Ink if you already have one - otherwise save that slot for a fresh welcome bonus.)",
    "best": "This card unlocks your ability to transfer points to airline partners or 1 other person; e.g. spouse/friend.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic"
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
+   "otherPerks": "No foreign transaction fees; Cell phone protection up to $1,000 per claim ($100 deductible, 3 claims a year) for you and employees on a phone bill paid with the card; Primary rental car coverage when renting for business; Trip cancellation and interruption up to $5,000 per person; Trip delay reimbursement; Purchase protection; Extended warranty (adds 1 year to warranties of 3 years or less); Free employee cards with spending limits"
   },
   {
    "id": "chase-ink-business-unlimited",
@@ -293,6 +307,7 @@ window.HRT_WALLET_CATALOG={
    "best": "1.5x on every purchase; great card for everyday spending.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (when paired with Sapphire Preferred/Reserve or Ink Preferred for transfer eligibility)",
    "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
+   "otherPerks": "3% foreign transaction fee, so leave it home on trips abroad; Primary rental car coverage when renting for business; Purchase protection; Extended warranty (adds 1 year to warranties of 3 years or less); Travel and emergency assistance; Free employee cards with spending limits; Pairs with a Sapphire or Ink Preferred to turn cash back into transferable points",
    "ftf": 3.0
   },
   {
@@ -314,6 +329,7 @@ window.HRT_WALLET_CATALOG={
    "best": "Great rotating spending categories",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (when paired with Sapphire Preferred/Reserve or Ink Preferred for transfer eligibility)",
    "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, British Airways, Emirates, Iberia, JetBlue, Singapore, Southwest, United, Virgin Atlantic",
+   "otherPerks": "3% foreign transaction fee, so leave it home on trips abroad; Primary rental car coverage when renting for business; Purchase protection; Extended warranty (adds 1 year to warranties of 3 years or less); Travel and emergency assistance; Free employee cards with spending limits; Pairs with a Sapphire or Ink Preferred to turn cash back into transferable points",
    "ftf": 3.0
   },
   {
@@ -332,7 +348,8 @@ window.HRT_WALLET_CATALOG={
    "phone": "800-453-9719",
    "cancelAfter": "12",
    "cancelHow": "Downgrade to a $0 Ink to keep your points - unless you don't have a $0 Ink yet, then save that slot for a fresh bonus.",
-   "partners": "N/A. Cash-back card; no airline transfer partners."
+   "partners": "N/A. Cash-back card; no airline transfer partners.",
+   "otherPerks": "No foreign transaction fees; Cell phone protection ($100 deductible) on phones paid with the card; Primary rental car coverage when renting for business; Trip cancellation and interruption; Trip delay reimbursement; Baggage delay insurance; Purchase protection; Extended warranty; Roadside dispatch; Free employee cards; Flex for Business lets you pay some large purchases over time; Cash back only, points do not transfer to airlines or hotels"
   },
   {
    "id": "chase-southwest-plus",
@@ -351,7 +368,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
-   "partners": "Southwest Airlines only."
+   "partners": "Southwest Airlines only.",
+   "otherPerks": "No foreign transaction fees; Free first checked bag for you and up to 8 people on the same reservation (put your Rapid Rewards number on the booking); Group 5 boarding; Free Standard seat within 48 hours of departure when available; 10,000 Companion Pass qualifying points each year; 25% back on inflight purchases; Travel accident insurance and lost luggage reimbursement; Purchase protection and extended warranty"
   },
   {
    "id": "chase-southwest-premier",
@@ -363,7 +381,8 @@ window.HRT_WALLET_CATALOG={
    "note": "Mid tier Southwest card: 6,000 anniversary points, a 15% off flight code each year, free first checked bag, and Preferred seat selection within 48 hours of departure.",
    "source": "https://creditcards.chase.com/travel-credit-cards/southwest/premier",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/858e1723-e6a0-492c-bc0e-a4d471ac2a38/Southwest+Rapid+Rewards+Premier+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/858e1723-e6a0-492c-bc0e-a4d471ac2a38/Southwest+Rapid+Rewards+Premier+Credit+Card.png?content-type=image%2Fpng",
+   "otherPerks": "No foreign transaction fees; Free first checked bag for you and up to 8 people on the same reservation; Group 5 boarding; Free Preferred seat within 48 hours of departure when available; 10,000 Companion Pass qualifying points each year; Earns tier qualifying points toward A-List with spend; 25% back on inflight purchases; Travel accident insurance and lost luggage reimbursement; Purchase protection and extended warranty"
   },
   {
    "id": "chase-southwest-priority",
@@ -382,7 +401,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
-   "partners": "Southwest Airlines only."
+   "partners": "Southwest Airlines only.",
+   "otherPerks": "No foreign transaction fees; Free first checked bag for you and up to 8 people on the same reservation; Group 5 boarding; Free Preferred seat at booking when available; Free Extra Legroom upgrades within 48 hours of departure for you and up to 8 people on the reservation, when available; 10,000 Companion Pass qualifying points each year; Earns tier qualifying points toward A-List with spend; 25% back on inflight purchases; Travel accident insurance and lost luggage reimbursement"
   },
   {
    "id": "chase-southwest-premier-business",
@@ -401,7 +421,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
-   "partners": "Southwest Airlines only."
+   "partners": "Southwest Airlines only.",
+   "otherPerks": "No foreign transaction fees; Free first checked bag for you and up to 8 people on the same reservation; Group 5 boarding; Free Standard or Preferred seat within 48 hours of departure when available; 10,000 Companion Pass qualifying points each year; Earns tier qualifying points toward A-List with spend; 25% back on inflight purchases; Free employee cards (employees flying alone do not get the bag, seat or boarding perks)"
   },
   {
    "id": "chase-southwest-performance-business",
@@ -420,7 +441,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Card bonuses no longer earn the Companion Pass after 2026 (Southwest changes, Oct 15 2026). Keep if you fly Southwest, else downgrade or cancel at renewal - your points stay with Southwest.",
    "alliances": "None - Southwest is independent (no alliance affiliation, no inter-airline partnerships)",
-   "partners": "Southwest Airlines only."
+   "partners": "Southwest Airlines only.",
+   "otherPerks": "No foreign transaction fees; Free first checked bag for you and up to 8 people on the same reservation; Group 5 boarding; Free Preferred seat at booking when available; Free Extra Legroom upgrades within 48 hours of departure for you and up to 8 people, when available; 10,000 Companion Pass qualifying points each year; 2,500 tier qualifying points for every $5,000 spent; 25% back on inflight purchases; Lost luggage reimbursement; Free employee cards"
   },
   {
    "id": "chase-united-gateway",
@@ -439,7 +461,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "Never",
    "cancelHow": "Keep - $0 fee, the downgrade home for United cards.",
    "alliances": "STAR ALLIANCE (co-branded with United)",
-   "partners": "N/A. Card earns United MileagePlus miles directly; miles redeem on United flights via United's own award chart."
+   "partners": "N/A. Card earns United MileagePlus miles directly; miles redeem on United flights via United's own award chart.",
+   "otherPerks": "No foreign transaction fees; At least 10% off United award flights booked with miles; 25% back on United inflight and United Club drink purchases; Earn 2 free checked bag certificates after $10,000 spend in a calendar year; Trip cancellation and interruption coverage; Purchase protection and extended warranty"
   },
   {
    "id": "chase-united-explorer",
@@ -456,7 +479,8 @@ window.HRT_WALLET_CATALOG={
    "type": "Personal",
    "phone": "800-432-3117 (United cards via Chase)",
    "alliances": "United (Star Alliance)",
-   "partners": "United"
+   "partners": "United",
+   "otherPerks": "No foreign transaction fees; Free first checked bag for you and 1 companion on the same reservation (buy the ticket with the card); Group 2 priority boarding; 2 United Club one-time passes each year; Expanded award availability, more saver seats than non-cardholders see; At least 10% off United award flights booked with miles; Earns Premier qualifying points with spend; 25% back on inflight purchases; Travel protections including trip delay, trip cancellation and baggage delay, plus rental car coverage"
   },
   {
    "id": "chase-united-quest",
@@ -473,7 +497,8 @@ window.HRT_WALLET_CATALOG={
    "type": "Personal",
    "phone": "800-432-3117 (United cards via Chase)",
    "alliances": "United (Star Alliance)",
-   "partners": "United"
+   "partners": "United",
+   "otherPerks": "No foreign transaction fees; Free first and second checked bags for you and 1 companion on the same reservation (buy the ticket with the card); Priority boarding; Expanded award availability; At least 10% off United award flights booked with miles; Earns Premier qualifying points with spend, up to Platinum; 1,500 bonus Premier qualifying points each year; 25% back on inflight purchases; Travel and purchase protections including trip delay, trip cancellation, baggage and rental car coverage"
   },
   {
    "id": "chase-united-club",
@@ -490,7 +515,8 @@ window.HRT_WALLET_CATALOG={
    "type": "Personal",
    "phone": "800-432-3117 (United cards via Chase)",
    "alliances": "United (Star Alliance)",
-   "partners": "United"
+   "partners": "United",
+   "otherPerks": "United Club membership with guest access for 1 adult and dependents under 18 (upgrades to All Access with Star Alliance lounges at Premier Gold or $50,000 spend); Free first and second checked bags for you and 1 companion on the same reservation; Premier Access: priority check-in, security lanes where available, boarding and bags; Complimentary Premier upgrades on award tickets when available; Avis President's Club status (enroll); IHG One Rewards Platinum Elite status; Expanded award availability and at least 10% off award flights; No foreign transaction fees; 25% back on inflight purchases; Travel and purchase protections"
   },
   {
    "id": "chase-marriott-boundless",
@@ -502,7 +528,8 @@ window.HRT_WALLET_CATALOG={
    "note": "Free Night Award (up to 35,000 points) every year after your card anniversary, plus Silver Elite status and 15 Elite Night Credits each calendar year. Great for Marriott stays in Waikiki and on the neighbor islands.",
    "source": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/boundless",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ffcc4433-1b5d-444a-acea-5a48c40ef9bf/Marriott+Bonvoy+Boundless+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/ffcc4433-1b5d-444a-acea-5a48c40ef9bf/Marriott+Bonvoy+Boundless+Credit+Card.png?content-type=image%2Fpng",
+   "otherPerks": "No foreign transaction fees; Automatic Marriott Bonvoy Silver Elite status; 15 Elite Night Credits each year plus 1 more for every $5,000 spent; Gold Elite status after $35,000 spend in a calendar year; Free Night Award each anniversary (up to 35,000 points, top off with points); Points do not expire while you use the card at least every 24 months; Visa Signature travel and purchase protections"
   },
   {
    "id": "chase-marriott-bold",
@@ -514,7 +541,8 @@ window.HRT_WALLET_CATALOG={
    "note": "No annual fee Marriott card with Silver Elite status and 5 Elite Night Credits each calendar year. No free night certificate.",
    "source": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/bold",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/71b294ad-0fb9-4c2c-bdce-573192e97cd2/Marriott+Bonvoy+Bold+Credit+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/71b294ad-0fb9-4c2c-bdce-573192e97cd2/Marriott+Bonvoy+Bold+Credit+Card.png?content-type=image%2Fpng",
+   "otherPerks": "No annual fee and no foreign transaction fees; Automatic Marriott Bonvoy Silver Elite status; 5 Elite Night Credits each year; No free night certificate on this card; Visa Signature travel and purchase protections"
   },
   {
    "id": "capone-ventureone",
@@ -533,7 +561,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "Never",
    "cancelHow": "Keep - $0 fee, your Capital One miles home & downgrade target.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red",
+   "otherPerks": "No annual fee and no foreign transaction fees; Miles transfer to Capital One airline and hotel partners; Lifestyle Collection hotel perks when booked through Capital One Travel; Secondary rental car coverage; Travel accident insurance; Extended warranty; Capital One Dining and Entertainment access"
   },
   {
    "id": "capone-venture-x-business",
@@ -553,7 +582,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep if you travel (credits cover the fee); else downgrade to a $0 Capital One card.",
    "best": "$395 annual fee is offset by a $300 annual credit on travel booked thru CapOne portal, further offset by annual 10K mile bonus worth $100+. Includes access to 1,300+ Priority Pass Lounges worldwide. If you spend at least $300/yr in travel you'll never want to cancel this card.",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM",
-   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red"
+   "partners": "Aeromexico, Air Canada (Aeroplan), Air France, KLM, Avianca, British Airways, Cathay Pacific, Emirates, Etihad, EVA Air, Finnair, JAL, JetBlue, Singapore, Turkish Airlines, Virgin Red",
+   "otherPerks": "Capital One Lounge and Landing access plus Priority Pass Select (enroll) with 2 free guests; employee lounge access costs $125 a year each; Hertz President's Circle status; Premier Collection hotels: $100 experience credit, breakfast for two, upgrade when available; No foreign transaction fees; No preset spending limit, balance due in full each month; Primary rental car coverage when renting for business; Cell phone protection when you pay your phone bill with the card; Trip cancellation and interruption; Purchase protection and extended warranty; Free employee cards; Itemized spending reports"
   },
   {
    "id": "capone-quicksilver",
@@ -565,7 +595,8 @@ window.HRT_WALLET_CATALOG={
    "note": "Flat 1.5% cash back, no annual fee. Starting May 2026 some cards moved to the Discover network (which is less widely accepted abroad) with new 3% grocery and gas rates, so check which version you hold.",
    "source": "https://www.capitalone.com/learn-grow/money-management/quicksilver-card-benefits/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/9bc076c5-83ad-41a9-85b6-aa94a3865f1e/Capital+One+Quicksilver+Rewards.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/9bc076c5-83ad-41a9-85b6-aa94a3865f1e/Capital+One+Quicksilver+Rewards.png?content-type=image%2Fpng",
+   "otherPerks": "No annual fee and no foreign transaction fees; Cash back can move to a Venture or Venture X account and become transferable miles; Extended warranty; Travel accident insurance; Rental car coverage, price protection and other Mastercard World Elite perks if your card is that tier; 24-hour travel assistance"
   },
   {
    "id": "capone-savor",
@@ -583,7 +614,8 @@ window.HRT_WALLET_CATALOG={
    "phone": "800-903-9177 (recon: 800-625-7866; backup: 866-927-5831)",
    "cancelAfter": "Never",
    "cancelHow": "Keep - $0 fee.",
-   "partners": "N/A. Cash-back card; no airline transfer partners."
+   "partners": "N/A. Cash-back card; no airline transfer partners.",
+   "otherPerks": "No annual fee and no foreign transaction fees; Capital One Entertainment access for ticket presales; Extended warranty; Travel accident insurance; Concierge service; Cash back can move to a Venture or Venture X account and become transferable miles"
   },
   {
    "id": "amex-delta-blue",
@@ -595,7 +627,8 @@ window.HRT_WALLET_CATALOG={
    "note": "No annual fee starter Delta card. No free checked bag or companion certificate, but 20% back on Delta in-flight food and drinks.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-blue-american-express-card/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/12e3fe62-4a83-4289-85b3-fe65bc3d1ae3/Delta+SkyMiles+Blue+American+Express+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/12e3fe62-4a83-4289-85b3-fe65bc3d1ae3/Delta+SkyMiles+Blue+American+Express+Card.png?content-type=image%2Fpng",
+   "otherPerks": "No foreign transaction fees; 20% back on Delta inflight food and drinks; Pay with Miles on delta.com; Secondary car rental loss and damage coverage; Purchase protection and extended warranty; Global Assist Hotline; No free checked bag or priority boarding on this card"
   },
   {
    "id": "amex-delta-gold",
@@ -614,7 +647,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Downgrade to Blue ($0) if you're not flying Delta - miles stay in your SkyMiles account.",
    "alliances": "SKYTEAM (co-branded with Delta)",
-   "partners": "N/A. Card earns Delta SkyMiles directly; miles redeem on Delta flights via Delta's own award chart."
+   "partners": "N/A. Card earns Delta SkyMiles directly; miles redeem on Delta flights via Delta's own award chart.",
+   "otherPerks": "No foreign transaction fees; Free first checked bag on Delta flights for you and up to 8 people on the same reservation; Second checked bag free on domestic Delta flights for the cardholder; Zone 5 priority boarding; 15% off Delta award flights booked on delta.com or the Fly Delta app (TakeOff 15); 20% back on Delta inflight purchases; Pay with Miles; Secondary car rental coverage, baggage insurance, purchase protection and extended warranty"
   },
   {
    "id": "amex-delta-platinum",
@@ -626,7 +660,8 @@ window.HRT_WALLET_CATALOG={
    "note": "Companion Certificate each year after renewal (Main Cabin, U.S. incl. Hawaii, Mexico, Caribbean, Central America), plus monthly Resy and rideshare credits that need enrollment. Also $2,500 MQD Headstart each Medallion Qualification Year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-platinum-american-express-card/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b6d9a57b-89f8-48e5-9bfa-a80eb1a48f32/Delta+SkyMiles+Platinum+American+Express+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b6d9a57b-89f8-48e5-9bfa-a80eb1a48f32/Delta+SkyMiles+Platinum+American+Express+Card.png?content-type=image%2Fpng",
+   "otherPerks": "No foreign transaction fees; Free first checked bag on Delta flights for you and up to 8 people on the same reservation; Second checked bag free on domestic Delta flights; Zone 5 priority boarding; Complimentary upgrade list after Medallion members and Reserve cardholders; Main Cabin round-trip Companion Certificate each renewal (domestic, Caribbean or Central America); 15% off Delta award flights (TakeOff 15); $2,500 Medallion Qualification Dollars head start each year; 20% back on Delta inflight purchases; Trip delay insurance; Cell phone protection; Car rental, baggage and purchase protections"
   },
   {
    "id": "amex-delta-reserve",
@@ -645,7 +680,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Keep only if you fly Delta a lot; else downgrade to Blue ($0). Your SkyMiles are safe either way - they live with Delta.",
    "alliances": "SKYTEAM (co-branded with Delta)",
-   "partners": "N/A. Card earns Delta SkyMiles directly; miles redeem on Delta flights via Delta's own award chart."
+   "partners": "N/A. Card earns Delta SkyMiles directly; miles redeem on Delta flights via Delta's own award chart.",
+   "otherPerks": "15 Delta Sky Club visits each Medallion Year when flying Delta, unlimited after $75,000 spend in a calendar year; 4 Sky Club one-time guest passes a year; Centurion Lounge and Escape Lounge access when your Delta flight is bought with the card; Upgrade priority over others at your Medallion level; Companion Certificate each renewal for First, Comfort or Main Cabin; Free first checked bag for you and up to 8 people, second bag free on domestic flights; Zone 5 priority boarding; 15% off Delta award flights (TakeOff 15); Medallion Qualification Dollars head start and boost from spend; No foreign transaction fees; Trip delay insurance; Cell phone protection; Car rental, baggage and purchase protections"
   },
   {
    "id": "amex-hilton-honors",
@@ -664,7 +700,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "Never",
    "cancelHow": "Keep - $0 fee (handy if you stay Hilton, harmless if not).",
    "alliances": "Hotel currency (Hilton); airline transfers exist but at sub-optimal ratios (~10:2). Not recommended for airline redemptions.",
-   "partners": "Hilton Honors transfers to 30+ airline programs at very poor ratios. Not practical for airline use."
+   "partners": "Hilton Honors transfers to 30+ airline programs at very poor ratios. Not practical for airline use.",
+   "otherPerks": "No annual fee and no foreign transaction fees; Automatic Hilton Honors Silver status: 20% bonus on base points, fifth night free on standard room award stays; Hilton Gold status after $20,000 spend in a calendar year; Secondary car rental loss and damage coverage; Purchase protection and extended warranty; Global Assist Hotline; Amex Offers"
   },
   {
    "id": "amex-hilton-surpass",
@@ -676,7 +713,8 @@ window.HRT_WALLET_CATALOG={
    "note": "$0 intro annual fee the first year for new cardmembers, then $150. Gold status, $50 Hilton credit each quarter, and a Free Night Reward after $15,000 spend in a calendar year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-surpass/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3052f642-7dd9-4723-b378-b810f9b767b5/Hilton+Honors+American+Express+Surpass+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3052f642-7dd9-4723-b378-b810f9b767b5/Hilton+Honors+American+Express+Surpass+Card.png?content-type=image%2Fpng",
+   "otherPerks": "Automatic Hilton Honors Gold status: 80% bonus on base points, food and beverage credit or breakfast at many brands, upgrades when available, fifth night free on award stays; Diamond status through next year after $40,000 spend in a calendar year; National Car Rental Emerald Club Executive status (enroll); No foreign transaction fees; Car rental, baggage and purchase protections; Global Assist Hotline"
   },
   {
    "id": "amex-hilton-aspire",
@@ -690,7 +728,8 @@ window.HRT_WALLET_CATALOG={
    "checked": "2026-10-19",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/470da76a-7cd0-4b93-a1cc-94e903667727/Hilton+Honors+American+Express+Aspire+Card.png?content-type=image%2Fpng",
    "code": "AX-ASPIRE",
-   "type": "Personal"
+   "type": "Personal",
+   "otherPerks": "Automatic Hilton Honors Diamond status: top upgrades, executive lounge access, daily food credit, fifth night free on award stays; National Car Rental Emerald Club Executive status (enroll); No foreign transaction fees; Cell phone protection; Trip delay insurance; Car rental, baggage and purchase protections; Global Assist Hotline"
   },
   {
    "id": "amex-marriott-bevy",
@@ -702,7 +741,8 @@ window.HRT_WALLET_CATALOG={
    "note": "Gold Elite status and 15 Elite Night Credits each calendar year. No automatic free night; you earn one (up to 50,000 points) after $15,000 spend in a calendar year.",
    "source": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-bevy/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e22db910-8408-4608-8272-879af23e5b3b/Marriott+Bonvoy+Bevy+American+Express+Card.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/e22db910-8408-4608-8272-879af23e5b3b/Marriott+Bonvoy+Bevy+American+Express+Card.png?content-type=image%2Fpng",
+   "otherPerks": "Automatic Marriott Bonvoy Gold Elite status: 25% bonus points on stays, 2 pm late checkout, enhanced upgrades when available; 15 Elite Night Credits each calendar year; No foreign transaction fees; Car rental, baggage and purchase protections"
   },
   {
    "id": "amex-marriott-brilliant",
@@ -721,7 +761,8 @@ window.HRT_WALLET_CATALOG={
    "cancelAfter": "12",
    "cancelHow": "Keep if the annual free night + credits beat the fee; else downgrade to a $0 Bonvoy.",
    "alliances": "Hotel currency (Marriott Bonvoy); transfers to 40+ airlines at 3:1 ratio (sub-optimal vs purpose-built transferable currencies)",
-   "partners": "Marriott Bonvoy transfers to most major airlines across all 3 alliances at 3:1. Includes American, Alaska, ANA, Air Canada, Air France/KLM, British Airways, Cathay, Delta, Emirates, Hawaiian, JAL, Singapore, United, Virgin Atlantic, and ~25 more."
+   "partners": "Marriott Bonvoy transfers to most major airlines across all 3 alliances at 3:1. Includes American, Alaska, ANA, Air Canada, Air France/KLM, British Airways, Cathay, Delta, Emirates, Hawaiian, JAL, Singapore, United, Virgin Atlantic, and ~25 more.",
+   "otherPerks": "Automatic Marriott Bonvoy Platinum Elite status: 50% bonus points, lounge access or breakfast, suite upgrades when available, 4 pm late checkout; 25 Elite Night Credits each calendar year; Priority Pass Select membership (enroll; confirm still included); No foreign transaction fees; Cell phone protection; Trip delay insurance; Car rental, baggage and purchase protections"
   },
   {
    "id": "atmos-business",
@@ -739,7 +780,8 @@ window.HRT_WALLET_CATALOG={
    "phone": "800-892-3219",
    "cancelHow": "Keep if you fly Alaska/Hawaiian.",
    "alliances": "ONEWORLD (Atmos is a Oneworld member program)",
-   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart."
+   "partners": "N/A. Card earns Atmos miles directly; miles redeem on Atmos flights (Hawaiian + Alaska metal) via Atmos's own award chart.",
+   "otherPerks": "Free checked bag for any cardholder and up to 6 guests on the same reservation on Alaska and Hawaiian flights paid with the card; Preferred boarding; $99 Companion Fare (plus taxes from $23) each anniversary after $6,000 spend; 20% back on inflight purchases; $100 off an Alaska Lounge+ membership; 1 status point per $3 spent; No foreign transaction fees; Employee cards $25 each"
   },
   {
    "id": "barclays-hawaiian",
@@ -750,7 +792,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Closed to new applicants since Oct 1, 2025, but existing cards still work and now earn Atmos Rewards points. Bank of America plans to become the only Atmos card issuer, no conversion date announced yet.",
    "source": "https://cards.barclaycardus.com/banking/cards/hawaiian-airlines-world-elite-mastercard/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "otherPerks": "No foreign transaction fees; Two free checked bags for the primary cardholder on eligible Hawaiian and Alaska flights booked with the card (not international Hawaiian flights, not authorized users); $100 companion discount each anniversary plus a one-time 50% off companion ticket; Free points sharing with up to 10 Atmos members; Status points from card spend (1 per $3); Mastercard World Elite perks including cell phone protection on eligible plans"
   },
   {
    "id": "barclays-hawaiian-business",
@@ -761,7 +804,8 @@ window.HRT_WALLET_CATALOG={
    "feeBasis": "anniversary",
    "note": "Closed to new applicants since Oct 1, 2025 (Barclays page now redirects to Atmos). Existing cards still work and earn Atmos Rewards points until a Bank of America transition is announced.",
    "source": "https://cards.barclaycardus.com/banking/cards/hawaiian-airlines-business-mastercard/",
-   "checked": "2026-10-19"
+   "checked": "2026-10-19",
+   "otherPerks": "No foreign transaction fees; Earns Atmos Rewards points, transfer is 1:1; Status points from card spend; Annual spend bonus points at $50,000 and $100,000; Does not include the free checked bags the personal Hawaiian card has; Mastercard business perks"
   },
   {
    "id": "bilt-blue",
@@ -781,7 +825,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Keep - $0 fee, your Bilt downgrade home.",
    "best": "Earns rewards on rent & mortgage payments; no annual fee Bilt entry card",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (Bilt also has Hawaiian + Alaska direct via Atmos)",
-   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red"
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red",
+   "otherPerks": "No annual fee and no foreign transaction fees; Earn points on rent or mortgage with no transaction fee (use Bilt Cash); Cell phone protection; Purchase assurance; Secondary rental car coverage (MasterRental); Bilt Neighborhood Benefits at partner restaurants and shops; Only one Bilt card per person"
   },
   {
    "id": "bilt-obsidian",
@@ -801,7 +846,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Downgrade to Bilt Blue ($0) if you're not using the perks.",
    "best": "3X points on dining or groceries (your choice; grocery up to $25K/yr); $100 annual hotel credit offsets fee",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (Bilt also has Hawaiian + Alaska direct via Atmos)",
-   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red"
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red",
+   "otherPerks": "No foreign transaction fees; Earn points on rent or mortgage with no transaction fee (use Bilt Cash); Cell phone protection; Trip cancellation and interruption; Trip delay reimbursement; Lost or damaged luggage coverage; Purchase assurance and extended warranty; Secondary rental car coverage (MasterRental); Bilt Neighborhood Benefits; Authorized users $50 each; Only one Bilt card per person"
   },
   {
    "id": "bilt-palladium",
@@ -821,7 +867,8 @@ window.HRT_WALLET_CATALOG={
    "cancelHow": "Downgrade to Bilt Blue ($0) unless the premium perks pay for themselves.",
    "best": "2X points on everyday spend; transfer partners include United; Alaska Atmos; Hyatt; $400 annual hotel credit; Priority Pass",
    "alliances": "STAR ALLIANCE, ONEWORLD, SKYTEAM (Bilt also has Hawaiian + Alaska direct via Atmos)",
-   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red"
+   "partners": "Aer Lingus, Air Canada (Aeroplan), Air France, KLM, Alaska (Atmos), American Airlines, Avianca, British Airways, Cathay Pacific, Emirates, Hawaiian (Atmos), Iberia, Singapore, Turkish Airlines, United, Virgin Atlantic, Virgin Red",
+   "otherPerks": "No foreign transaction fees; Mastercard World Legend perks: cell phone protection, trip cancellation and interruption, trip delay, baggage delay, lost or damaged luggage, price drop protection, purchase assurance and extended warranty; Secondary rental car coverage (MasterRental); Earn points on rent or mortgage with no transaction fee; Bilt Neighborhood Benefits; Peacock and Instacart+ promos; Authorized users $95 each (includes Priority Pass); Only one Bilt card per person"
   },
   {
    "id": "boa-customized-cash",
@@ -834,6 +881,7 @@ window.HRT_WALLET_CATALOG={
    "source": "https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/",
    "checked": "2026-10-19",
    "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/50b5520a-579c-41e2-a282-ec30c26a6622/Bank+of+America+Customized+Cash+Rewards.png?content-type=image%2Fpng",
+   "otherPerks": "3% foreign transaction fee, so leave it home on trips abroad; Choose and change your 3% category once a month; BofA Rewards bonus if you have Bank of America or Merrill balances; Free FICO score; Visa Signature benefits like rental car coverage and baggage delay on some versions",
    "ftf": 3.0
   },
   {
@@ -846,7 +894,8 @@ window.HRT_WALLET_CATALOG={
    "note": "Solid flat earner with no foreign fee, plus a $100 airline fee credit each year.",
    "source": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-credit-card/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3e7896da-63ec-40c0-842e-2b5fb0eda7cd/Bank+of+America+Premium+Rewards.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/3e7896da-63ec-40c0-842e-2b5fb0eda7cd/Bank+of+America+Premium+Rewards.png?content-type=image%2Fpng",
+   "otherPerks": "No foreign transaction fees; Trip delay up to $500 per ticket (12+ hours); Trip cancellation and interruption; Baggage delay up to $100 a day for 5 days (6+ hours); Lost luggage reimbursement; Emergency evacuation and transportation; Rental car collision coverage; Purchase protection and extended warranty; Visa Signature luxury hotel collection and concierge; BofA Rewards bonus if you have Bank of America or Merrill balances"
   },
   {
    "id": "boa-travel-rewards",
@@ -858,7 +907,8 @@ window.HRT_WALLET_CATALOG={
    "note": "No fee, no foreign fee, 1.5 points everywhere, redeem against travel purchases.",
    "source": "https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
    "checked": "2026-10-19",
-   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/c002e75b-a264-4ac0-957b-6e313848ad3b/Bank+of+America+Travel+Rewards.png?content-type=image%2Fpng"
+   "art": "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/c002e75b-a264-4ac0-957b-6e313848ad3b/Bank+of+America+Travel+Rewards.png?content-type=image%2Fpng",
+   "otherPerks": "No annual fee and no foreign transaction fees; Points cover any travel or dining purchase, no blackout dates; BofA Rewards bonus if you have Bank of America or Merrill balances; Visa Signature travel protections such as rental car coverage; Points do not expire while the account is open"
   }
  ],
  "benefits": [
