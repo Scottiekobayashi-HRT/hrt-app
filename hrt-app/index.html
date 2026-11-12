@@ -276,6 +276,8 @@ html.ms-client .pl.ohana .pl-tag.pop{display:none}
 .pl.pro h2,.pl.pro .pl-price,.pl.pro li{color:#fff}.pl.pro .pl-for,.pl.pro .pl-price small{color:#bccde0}
 .pl.pro li svg{color:#f2b84b}
 .pl.pro .pl-on{color:#bccde0}
+.pl.pro .pl-req.pl-today{color:#d8e3ee;font-weight:600;font-size:12.5px;line-height:1.5}
+.pl.ohana .pl-price{font-size:20px}
 html:not(.ms-pro):not(.ms-client) .pl.free .pl-tag.you,html.ms-client .pl.ohana .pl-tag.you,html.ms-pro .pl.pro .pl-tag.you{display:inline-block}
 html:not(.ms-pro):not(.ms-client) .pl.free .pl-on,html.ms-client .pl.ohana .pl-on{display:block}
 html.ms-client .pl.ohana .btn{display:none}
@@ -372,6 +374,7 @@ html.ms-client .pl.ohana .btn{display:none}
    <a class="hrt-navi" href="#picks" data-route="picks"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg></span><span class="nm">Community Picks<small>Local travelers rank</small></span><span class="cnt">NEW</span></a>
   </div>
  </div>
+ <a class="hrt-navi minor" href="#plans" data-route="plans"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V10M10 20V6M15 20v-8M20 20V4"/></svg></span><span class="nm">Membership levels<small>Subscriber, ʻOhana, Pro</small></span></a>
  <a class="hrt-navi minor" id="navHome" href="#" target="_top"><span class="hic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7M6 9.5V20h12V9.5"/></svg></span><span class="nm">Back to main site</span></a>
 </nav><div class="hrt-foot"><div class="hrt-disc"><a id="navDisc" href="#" target="_top">&#9432; Advertiser Disclosure</a><button class="hrt-theme" id="hrtThemeBtn" type="button" title="Light / dark" aria-label="Toggle dark mode"></button></div><a class="hrt-me" id="sbMe" href="#account" data-route="account" aria-label="My account"><span class="hrt-me-av" id="sbMeAv"></span><span class="hrt-me-t"><b class="ms-first-name">Aloha!</b><small class="hrt-me-plan"><span class="pl-free">Free account</span><span class="pl-pro">HRT PRO member</span><span class="pl-oh">ʻOhana Member</span><span class="pl-both">ʻOhana · HRT PRO</span></small></span><span class="hrt-me-gear" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></span></a></div></aside><main class="hrt-main" id="main">
 
@@ -731,62 +734,72 @@ html.ms-client .pl.ohana .btn{display:none}
  claude/HRT-Plans-Page.md.
 -->
 <section class="view" data-page="plans" id="v-plans">
+<!-- Membership levels (Nov 12, Eddie review): Subscriber < ʻOhana < Pro, each includes the one before.
+     Features from Eddie's notes. Prices are decided LAST, so only today's real prices show. -->
 <div class="content">
  <div class="hero slim">
   <svg class="fp" viewBox="0 0 1000 220" preserveAspectRatio="none"><path d="M-40 190 C 240 110, 470 60, 1100 22" fill="none" stroke="#f2b84b" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".45"/></svg>
   <div class="hs-text">
-   <h1>Pick how you travel <span class="wave">with HRT</span></h1>
-   <p>Every plan starts with our free tools. Become an ʻOhana Member for 1 to 1 coaching, add HRT PRO, or both.</p>
+   <h1>Pick your level. <span class="wave">Coaching comes with every one.</span></h1>
+   <p>Built for kamaʻāina flying out of HNL. Start free and move up when you are ready. Each level includes everything in the one before it.</p>
   </div>
  </div>
  <div class="pl-grid">
   <div class="pl free">
-   <span class="pl-tag you">Your plan</span>
-   <h2>Free Tools</h2><p class="pl-for">For every Hawaiʻi traveler</p>
-   <div class="pl-price">$0<small>always free</small></div>
+   <span class="pl-tag you">Your level</span>
+   <h2>Subscriber</h2><p class="pl-for">Get your bearings and track your first cards</p>
+   <div class="pl-price">$0<small>free</small></div>
    <ul>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Kamaʻāina Deals by island</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>HNL Lounge Map and Resy Hawaiʻi Map</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Transfer Bonuses</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>My Wallet for your card fees, perks and credits</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Atmos Choose to Earn and Community calculators</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>My Wallet for up to 2 cards, plus a sample card that shows every field</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Points and miles balances for every program</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deals, News, Flights: 4 routes, 30 days out (Tokyo Haneda, Las Vegas, Los Angeles, New York)</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Transfer Bonuses page</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Which card to use where</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Rewards card coaching videos and the Ask Scottie free preview</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Kamaʻāina Deals, HNL Lounge Map, Resy Hawaiʻi Map and the Atmos calculators</span></li>
    </ul>
    <a class="btn line" href="#home" data-route="home">Open the free tools</a>
   </div>
   <div class="pl ohana">
-   <span class="pl-tag pop">Our best plan &middot; 1 to 1</span><span class="pl-tag you">Your plan</span>
+   <span class="pl-tag pop">Our best level &middot; 1 to 1</span><span class="pl-tag you">Your level</span>
    <h2>ʻOhana Member</h2><p class="pl-for">1 to 1 coaching with Scottie and the HRT team</p>
-   <div class="pl-price">$0<small>no fees</small></div>
+   <div class="pl-price">Price coming soon</div>
    <ul>
-    <li class="pl-inc"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Free Tools</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>One on one help picking your next best card, over text</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>A card strategy built around your travel goals</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>The ʻOhana Wallet: your cards managed for you by Scottie, with your strategy and last review at the top</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Ask Scottie, an AI coach trained on Scottie's tips, to answer your points questions and show you how to redeem them <em class="pl-soon">Coming soon</em></span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Alerts that are always right, because we keep your wallet current: transfer bonuses for your points, credits to use, lounges your cards open</span></li>
+    <li class="pl-inc"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Subscriber, plus:</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>One on one help picking your next card and when to apply, over text</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Your ʻOhana Wallet for up to 6 cards, kept up to date by HRT</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Ask Scottie, an AI coach trained on Scottie's tips, for your own points questions</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Live transfer bonuses on your Deals, News, Flights wall</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deals, News, Flights: 10 routes</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>60 days out on your wall <em class="pl-soon">Coming soon</em></span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Text alerts for your next card, minimum spend and fee renewals <em class="pl-soon">Coming soon</em></span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Atmos Reward Calendar in economy, 30 days out <em class="pl-soon">Coming soon</em></span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Trip planning playbooks for each destination <em class="pl-soon">Coming soon</em></span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Gold star ʻOhana badge on your account</span></li>
    </ul>
    <p class="pl-req">Joining starts with a free onboarding call with Scottie.</p>
-   <a class="btn coral" id="plansCoach" href="https://www.hawaiirewardtravel.com/our-accelerated-program" target="_blank" rel="noopener">Book an onboarding call &rarr;</a>
+   <a class="btn coral" id="plansCoach" href="https://www.hawaiirewardtravel.com/our-accelerated-program" target="_blank" rel="noopener">Book a free call &rarr;</a>
    <div class="pl-on">You are an ʻOhana Member</div>
   </div>
   <div class="pl pro">
-   <span class="pl-tag you">Your plan</span>
-   <h2>HRT PRO</h2><p class="pl-for">For finding award seats out of Hawaiʻi</p>
-   <div class="pl-price">$9.99<small>per month</small></div>
+   <span class="pl-tag you">Your level</span>
+   <h2>HRT PRO</h2><p class="pl-for">Scottie finds the flights and walks you through booking</p>
+   <div class="pl-price">$9.99<small>per month today</small></div>
    <ul>
-    <li class="pl-inc"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in Free Tools</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Atmos Reward Calendar, about 270 days out</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Fresh award space every morning</span></li>
+    <li class="pl-inc"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Everything in ʻOhana Member, plus:</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Atmos Reward Calendar, about 270 days out, with business and first class</span></li>
     <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deals Search and Points Explorer</span></li>
-    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Customize Deals, News, Flights on your Dashboard</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deals, News, Flights: 15 routes you choose, with business class</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Wallet for up to 15 cards</span></li>
+    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Trip booking help: real flights, step by step <em class="pl-soon">Coming soon</em></span></li>
    </ul>
+   <p class="pl-req pl-today">Today HRT PRO is the Atmos Reward Calendar, Deals Search and Points Explorer for $9.99 a month. The full Pro level, with everything in ʻOhana, is coming soon.</p>
    <button type="button" class="btn coral free-only" data-ms-price:add="prc_atmos-monthly-zec10c3r">Unlock HRT PRO &rarr;</button>
    <a class="btn coral pro-only" href="#atmos" data-route="atmos" data-cal="calendar.html">Open the Atmos Reward Calendar &rarr;</a>
    <div class="pl-on free-only" style="display:block;padding-top:0;font-size:12px">Cancel any time in one click.</div>
   </div>
  </div>
- <p class="pl-note">ʻOhana and PRO are separate. ʻOhana Members can add HRT PRO any time.</p>
+ <p class="pl-note"><b>Getting your cards through us is still free.</b> The banks pay us a small commission when you apply through our links. It never costs you a thing, and it is how we keep the lights on.</p>
 </div>
 </section>
 

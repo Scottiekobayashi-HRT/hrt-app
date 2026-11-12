@@ -297,7 +297,7 @@
      news = hawaiirewardtravel.com/bloghome via /api/site-news;
      kamaʻāina = the Kamaʻāina Deals tool (window.HRT_KAMA.top).
      Levels: Subscriber sees 4 routes (SUB_ROUTES) and locked transfer bonus
-     tiles; ʻOhana (html.ms-client) sees every route in the feed and open
+     tiles; ʻOhana (html.ms-client) sees every feed route except OHANA_SKIP and open
      bonus tiles. Done with CSS classes so it is right even when Memberstack
      answers after the wall is drawn.
   ===================================================================== */
@@ -305,6 +305,9 @@
   var MIX_MAX = 18;
   var JAPAN = { HND: 1, NRT: 1, KIX: 1, ITM: 1, NGO: 1, FUK: 1, CTS: 1, OKA: 1 };
   var SUB_ROUTES = { HND: 1, LAS: 1, LAX: 1, JFK: 1 };
+  /* ʻOhana sees every route except these (Scottie, Nov 12): San Diego, the Philippines,
+     Australia, Salt Lake City and Osaka. PRO members choose their own routes on their wall. */
+  var OHANA_SKIP = { SAN: 1, MNL: 1, SYD: 1, BNE: 1, MEL: 1, SLC: 1, KIX: 1, ITM: 1 };
   var NEWS_ALL = "https://www.hawaiirewardtravel.com/bloghome";
   var SITE_NEWS = "/api/site-news";
   /* Member photos and words, added by Scottie once members say yes.
@@ -447,7 +450,7 @@
     /* No HRT PRO mark here: this wall is only shown to non-PRO members. PRO members
        get their own wall, which carries the "★ HRT PRO" mark (renderPro). */
     head.appendChild(el("span", "dw-limit dw-lv-sub", "Free · 4 routes, " + win + " days"));
-    head.appendChild(el("span", "dw-limit dw-lv-oh", "ʻOhana · every route, " + win + " days"));
+    head.appendChild(el("span", "dw-limit dw-lv-oh", "ʻOhana · 10 routes, " + win + " days"));
     head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
     var nav = el("div", "dw-nav");
@@ -459,7 +462,7 @@
     var rail = el("div", "dw-rail");
     var exp = el("div", "dw-exp");   /* the panel a card opens, under the rail */
     var openKey = null;
-    var g = dealGroups(feed.economy);
+    var g = dealGroups((feed.economy || []).filter(function (d) { return !OHANA_SKIP[String(d.dest || "").toUpperCase()]; }));
     var tiles = mixOrder({ japan: g.japan, other: g.other, pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS, flight: [],
       news: feed._news || [], kama: feed._kama || [] }, MIX, MIX_MAX);
     tiles.forEach(function (tile) {

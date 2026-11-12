@@ -44,7 +44,7 @@
   communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
   account:{ title:"My account", hint:"Photo, name, login and billing" },
-  plans:{ title:"Plans", hint:"Free, ʻOhana and HRT PRO" },
+  plans:{ title:"Membership levels", hint:"Subscriber, ʻOhana and HRT PRO" },
   picks:{ title:"Community Picks", hint:"Ranked by Hawaiʻi travelers" },
   coaching:{ title:"Rewards Card Coaching", hint:"Videos and Scottie AI" }
  };
