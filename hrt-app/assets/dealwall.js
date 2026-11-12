@@ -929,7 +929,7 @@
       var dealNodes = Array.prototype.slice.call(rail.children);
       if (dealNodes.length && (EXTRAS.news.length || EXTRAS.bonuses.length || EXTRAS.kama.length || TESTIMONIALS.length)) {
         var order = mixOrder({ deals: dealNodes, bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama },
-          { deals: 50, bonus: 10, testimonial: 5, news: 15, kama: 10 }, dealNodes.length + 12);
+          { deals: 50, bonus: 10, testimonial: 5, news: 15, kama: 10 }, Math.max(dealNodes.length * 2, 8)); /* keep deals about half the wall */
         rail.innerHTML = "";
         order.forEach(function (t) {
           rail.appendChild(t.kind === "deals" ? t.item : t.kind === "news" ? newsTile(t.item) : t.kind === "kama" ? kamaTile(t.item) :
