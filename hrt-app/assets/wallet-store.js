@@ -19,7 +19,9 @@
      { v:1,
        cards:  [ { id, cardId, opened:"2024-03-15" or "2024-03" or "" (unknown), nickname,
                    holder (whose card, e.g. "Janice"), status (see STATUSES),
-                   note (next step, free text), addedBy:"hrt" when our team added it,
+                   note (next step, free text),
+                   plan (this member's renewal / downgrade / cancel plan, up to 600
+                   characters; shown in place of the catalog tip), addedBy:"hrt" when our team added it,
                    withHrt:true when the card was opened with HRT's help,
                    custom: { name, issuer, fee }
                    when cardId is "custom" (a card not in our catalog),
@@ -92,6 +94,7 @@
       if (c.holder != null && (typeof c.holder !== "string" || c.holder.length > 30)) throw fail("INVALID", "card " + i + " holder");
       if (c.status != null && STATUSES.indexOf(c.status) < 0) throw fail("INVALID", "card " + i + " status");
       if (c.note != null && (typeof c.note !== "string" || c.note.length > 500)) throw fail("INVALID", "card " + i + " note");
+      if (c.plan != null && (typeof c.plan !== "string" || c.plan.length > 600)) throw fail("INVALID", "card " + i + " plan");
       if (c.addedBy != null && c.addedBy !== "hrt") throw fail("INVALID", "card " + i + " addedBy");
       if (c.withHrt != null && typeof c.withHrt !== "boolean") throw fail("INVALID", "card " + i + " withHrt");
       if (c.cardId === "custom" || c.custom != null) {

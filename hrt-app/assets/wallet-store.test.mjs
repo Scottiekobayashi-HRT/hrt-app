@@ -170,5 +170,12 @@ ok('load returns a copy', f.stored.wallet.cards.length === 1);
   ok('points: other id repeated refused', !okW([{ program: 'other', id: 'o-ab12' }, { program: 'other', id: 'o-ab12' }]));
   ok('points: long name refused', !okW([{ program: 'other', id: 'o-ab12', name: 'x'.repeat(41) }]));
 }
+// member plan per card (Nov 11)
+{
+  const V = S._test.validate, okC = c => { try { V({ v: 1, cards: [c], points: [] }); return true; } catch (e) { return false; } };
+  ok('plan: text allowed', okC({ ...card('p1'), plan: 'Keep until the fee comes up next Aug.' }));
+  ok('plan: over 600 refused', !okC({ ...card('p2'), plan: 'x'.repeat(601) }));
+  ok('plan: non-text refused', !okC({ ...card('p3'), plan: 5 }));
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

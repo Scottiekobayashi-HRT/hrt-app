@@ -789,7 +789,7 @@
     for (var d = 1; d <= 31; d++) days += '<option value="' + d + '"' + (o && o.d === d ? " selected" : "") + ">" + d + "</option>";
     var ec = entry ? cardFor(entry, catIndex()) : null;
     var holders = holderList(state.wallet).filter(Boolean);
-    var more = entry && (entry.status || entry.note || entry.feeDate || entry.nickname || entry.withHrt) ? " open" : "";
+    var more = entry && (entry.status || entry.note || entry.plan || entry.feeDate || entry.nickname || entry.withHrt) ? " open" : "";
     return '<form class="wl-form" id="wlForm" novalidate>' +
       '<h3 class="wl-h3">' + (entry ? "Edit card" : "Add a card") + "</h3>" +
       (entry ? '<div class="wl-pick-cur">' + (ec ? artHtml(ec, "sm") : "") + "<b>" + esc(ec ? ec.name : "Card") + "</b></div>" +
@@ -811,6 +811,8 @@
       '<label class="wl-lab">Status (optional)<select id="wlStatus">' + stOpts + "</select></label>" +
       '<label class="wl-check"><input type="checkbox" id="wlWithHrt"' + (entry && entry.withHrt ? " checked" : "") + "> Opened with HRT\u2019s help</label>" +
       '<label class="wl-lab">Next step (optional)<textarea id="wlNote" maxlength="500" rows="2" placeholder="e.g. Call Capital One in December to switch to the no-fee VentureOne">' + esc(entry && entry.note || "") + "</textarea></label>" +
+      '<label class="wl-lab">Renewal, downgrade or cancel plan (optional)<textarea id="wlPlan" maxlength="600" rows="3" placeholder="e.g. Keep until the fee comes up next August. Keep it if you spent $6,000 on it that year. If not, text Scottie.">' + esc(entry && entry.plan || "") + "</textarea>" +
+      '<small class="wl-help">Shows on this card in place of the general tip.</small></label>' +
       feeDateFields(entry) +
       '<label class="wl-lab">Nickname (optional)<input id="wlNick" maxlength="40" placeholder="e.g. Business card, Spouse\'s card" value="' + esc(entry && entry.nickname || "") + '"></label>' +
       bonusFields(entry) + "</div></details>" +
@@ -893,11 +895,11 @@
     if ((fm && !fdy) || (fdy && !fm)) return { err: "For the fee date, choose both the month and the day, or leave both blank." };
     if (fm && fdy) { if (fdy > daysInMonth(2024, fm)) return { err: MONTHS[fm - 1] + " does not have " + fdy + " days." }; fd.val = (fm < 10 ? "0" : "") + fm + "-" + (fdy < 10 ? "0" : "") + fdy; }
     return { cardId: cardId, opened: opened, nickname: $("wlNick").value.trim().slice(0, 40), bonus: bn.bonus, custom: custom,
-      holder: $("wlHolder").value.trim().slice(0, 30), status: status, note: $("wlNote").value.trim().slice(0, 500), feeDate: fd.val, withHrt: !!($("wlWithHrt") && $("wlWithHrt").checked) };
+      holder: $("wlHolder").value.trim().slice(0, 30), status: status, note: $("wlNote").value.trim().slice(0, 500), plan: ($("wlPlan") ? $("wlPlan").value.trim().slice(0, 600) : (entry && entry.plan) || ""), feeDate: fd.val, withHrt: !!($("wlWithHrt") && $("wlWithHrt").checked) };
   }
   /* Copy the optional fields onto a saved card, dropping empty ones. */
   function applyExtras(c, v) {
-    ["holder", "status", "note", "feeDate", "withHrt"].forEach(function (k) { if (v[k]) c[k] = v[k]; else delete c[k]; });
+    ["holder", "status", "note", "plan", "feeDate", "withHrt"].forEach(function (k) { if (v[k]) c[k] = v[k]; else delete c[k]; });
     if (v.custom) c.custom = v.custom;
   }
 
@@ -1052,10 +1054,10 @@
   }
   function keepHtml(r) {
     if (!TICKS) {
-      var offered = usedThisCardYear(r.entry, catalog()).offered, how = r.card.cancelHow;
+      var offered = usedThisCardYear(r.entry, catalog()).offered, how = r.entry.plan || r.card.cancelHow, mine = !!r.entry.plan;
       return '<div class="wl-keep"><b class="wl-keep-h">Keep or cancel?</b>' +
         "<p>The fee is <b>" + esc(money(r.card.fee)) + "</b>." + (offered ? " The card offers up to <b>" + esc(money(offered)) + "</b> a year in credits. Count only the ones you really use." : "") + "</p>" +
-        (how ? '<p class="wl-keep-how"><b>HRT tip:</b> ' + esc(how) + "</p>" :
+        (how ? '<p class="wl-keep-how"><b>' + (mine ? "Your plan:" : "HRT tip:") + "</b> " + esc(how) + "</p>" :
           "<p>Before it renews you can keep it, ask " + esc(r.card.issuer) + " for a retention offer, or ask to switch to a card with a lower fee and keep your account history. If you cancel, use or move your points first.</p>") + "</div>";
     }
     var e = r.entry, c = r.card, u = usedThisCardYear(e, catalog()), fee = c.fee, pct = Math.min(100, Math.round(u.used / fee * 100));
@@ -1742,7 +1744,10 @@
       noteHtml(e) + bonusHtml(e) + (r && r.hasFee && r.renewal && r.renewal.days <= SOON_DAYS && !isClient() ? keepHtml(r) : "") +
       '<div class="wl-sh-acts"><button class="wl-btn wl-pri" data-wl="edit" data-id="' + esc(e.id) + '">Edit card</button>' +
       '<button class="wl-link wl-danger" data-wl="remove" data-id="' + esc(e.id) + '">Remove card</button></div>';
-    if (c && !hidden && c.cancelHow) html += '<div class="wl-sh-cancel"><b>Cancel or downgrade</b>' +
+    /* Member-specific plan (from the Ops card tracker or typed in Edit card) wins over the catalog tip */
+    if (e.plan) html += '<div class="wl-sh-cancel"><b>Your plan for this card</b>' +
+      (c && !hidden && cancelWhen(e, c) ? '<span class="wl-sh-cw">' + esc(cancelWhen(e, c).text) + "</span>" : "") + "<p>" + esc(e.plan) + "</p></div>";
+    else if (c && !hidden && c.cancelHow) html += '<div class="wl-sh-cancel"><b>Cancel or downgrade</b>' +
       (cancelWhen(e, c) ? '<span class="wl-sh-cw">' + esc(cancelWhen(e, c).text) + "</span>" : "") + "<p>" + esc(c.cancelHow) + "</p></div>";
     if (c && !hidden) html += moreBox("d-" + e.id, "Card details", detailsHtml(c), c.type ? c.type + " card" : "");
     if (perks.length) html += moreBox("p-" + e.id, "Credits and perks", '<ul class="wl-pks">' + perks.map(function (x) { return perkHtml(x); }).join("") + "</ul>",
@@ -1830,8 +1835,7 @@
       '<dl class="wl-sum-stats wl-pg-stats wl-pg-3"><div class="wl-sum-stat"><dt>Cards</dt><dd>' + s.count + "</dd></div>" +
       '<div class="wl-sum-stat"><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
       '<div class="wl-sum-stat"><dt>Potential credits per year</dt><dd>' + esc(money(credits)) + "<small>if you use them all</small></dd></div></dl></section>" +
-      '<section class="wl-card wl-cp">' +
-      famHtml() +
+      '<section class="wl-card wl-cp">' + /* no Everyone / You / name filter here (Scottie, Nov 11): the Whose column and search cover it */
       '<div class="wl-cp-bar"><label class="wl-cp-q"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
       '<input id="wlCardQ" type="search" placeholder="Search your cards" aria-label="Search your cards" value="' + esc(state.cardQ || "") + '"></label>' +
       '<span class="wl-cp-n" id="wlCardN">' + s.count + (s.count === 1 ? " card" : " cards") + "</span>" +
@@ -2872,6 +2876,7 @@
       rateText: rateText, earningFor: earningFor, pointsRows: pointsRows, setPoint: setPoint, parseBal: parseBal, earnedPrograms: earnedPrograms, PROGRAMS: PROGRAMS, quartersFor: quartersFor, quarterName: quarterName },
     show: function (sub) {
       state.tab = sub === "cards" || sub === "credits" || sub === "transfers" || sub === "points" ? sub : "overview";
+      if (state.tab === "cards") state.holder = null; /* Cards always shows everyone's cards */
       styles();
       host = document.getElementById("wl-host");
       if (host && !host.getAttribute("data-ready")) {
