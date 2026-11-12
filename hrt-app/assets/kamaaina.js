@@ -889,6 +889,9 @@
   window.HRT_KAMA = {
    show:function(){ if(kmHost){ if(KM) KM.resize(); else kmMount(); } else if(!map) initMap(); else map.resize(); },
    open:function(i){ var d = DEALS[i]; if(!d) return; if(kmMount()) KM.show(i); else openDialog(d); },
+   /* the n best-scored deals, hotels first, for the "Deals, News, Flights" wall (dealwall.js) */
+   top:function(n){ var list = DEALS.slice().sort(function(a, b){ return ((b._c === "stay") - (a._c === "stay")) || ((b.s || 0) - (a.s || 0)); }).slice(0, n || 4);
+    return list.map(function(d){ var h = headline(d); return { name:d.b, offer:d.t, big:h.big, small:h.small || "", image:imgFor(d) || "", where:where(d), idx:DEALS.indexOf(d) }; }); },
    /* today's Deal of the Day, for the Dashboard's "Today for you" tile (today.js) */
    today:function(){ var d = pickDeal(); if(!d) return null; var h = headline(d);
     return { name:d.b, offer:d.t, big:h.big, small:h.small || "", image:imgFor(d) || "", where:where(d), idx:DEALS.indexOf(d), tag:d._fr || "" }; }

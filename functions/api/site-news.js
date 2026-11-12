@@ -2,7 +2,8 @@
    /api/site-news  (Cloudflare Pages Function, Oct 25 2026)
 
    The newest blog article and the newest travel deal from hawaiirewardtravel.com,
-   for the Dashboard's "Today for you" lines.
+   for the Dashboard's "Today for you" lines, plus the 8 newest articles
+   ("articles") for the news tiles on the "Deals, News, Flights" wall.
 
    Why this exists: the Dashboard runs on tools.hawaiirewardtravel.com, and
    Squarespace's ?format=json feeds do not allow other sites to read them from
@@ -71,6 +72,19 @@ export function dropOf(datas, nowMs) {
   };
 }
 
+/* The newest n blog articles, for the "Deals, News, Flights" wall's news tiles (Nov 11). */
+export function latest(data, n) {
+  const items = (data && Array.isArray(data.items) ? data.items : []).filter((i) => i && i.title && i.fullUrl);
+  items.sort((a, b) => (+b.publishOn || 0) - (+a.publishOn || 0));
+  return items.slice(0, n || 8).map((i) => ({
+    title: clean(i.title, 120),
+    text: clean(i.excerpt, 140),
+    url: absUrl(i.fullUrl),
+    date: +i.publishOn || 0,
+    image: /^https:\/\//i.test(i.assetUrl || "") ? i.assetUrl : ""
+  }));
+}
+
 /* The newest published item of one feed, trimmed to what the Dashboard needs. */
 export function newest(data) {
   const items = (data && Array.isArray(data.items) ? data.items : []).filter((i) => i && i.title && i.fullUrl);
@@ -103,13 +117,13 @@ async function grabRaw(path) {
 
 export async function onRequestGet(ctx) {
   const cache = caches.default;
-  const key = new Request(new URL(ctx.request.url).origin + "/api/site-news?v=2");
+  const key = new Request(new URL(ctx.request.url).origin + "/api/site-news?v=3");
   const hit = await cache.match(key);
   if (hit) return hit;
   const [blog, deals] = await Promise.all([grabRaw(FEEDS.article), grabRaw(FEEDS.deal)]);
-  const article = newest(blog), deal = newest(deals), drop = dropOf([deals, blog]);
+  const article = newest(blog), deal = newest(deals), drop = dropOf([deals, blog]), articles = latest(blog, 8);
   const ok = !!(article || deal);
-  const res = new Response(JSON.stringify({ article, deal, drop, at: Date.now() }), {
+  const res = new Response(JSON.stringify({ article, deal, drop, articles, at: Date.now() }), {
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=" + (ok ? TTL : 60) }
   });
   ctx.waitUntil(cache.put(key, res.clone()));

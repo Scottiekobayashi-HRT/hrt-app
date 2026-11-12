@@ -139,5 +139,23 @@ ok('nonstop flag saved only when true', JSON.stringify(T.cleanRoutes([{ o: 'HNL'
 const nsC = T.applyRoutes(T.entriesFrom({ deals: [{ origin: 'HNL', dest: 'SEA', city: 'Seattle', cabin: 'economy', dates: [{ date: '2026-11-01', miles: 12500 }] }] }), T.cleanRoutes([{ o: 'HNL', d: 'SEA', nonstop: true }]), '2026-10-16');
 ok('nonstop only with no nonstop dates shows the empty card', nsC[0].none === true);
 
+// --- Deals, News, Flights mix (Nov 11) ---
+{
+  const X = window.HRT_DEALWALL._test;
+  const many = (k, n) => Array.from({ length: n }, (_, i) => k + i);
+  const o = X.mixOrder({ japan: many("j", 10), other: many("o", 10), bonus: many("b", 10), testimonial: [], flight: [], news: many("n", 10), kama: many("k", 10) }, X.MIX, 17);
+  const count = (k) => o.filter((t) => t.kind === k).length;
+  ok("mix: 17 tiles", o.length === 17);
+  ok("mix: Japan and other get the biggest shares", count("japan") >= 4 && count("other") >= 4 && count("japan") > count("bonus"));
+  ok("mix: news more than bonuses", count("news") > count("bonus"));
+  ok("mix: no empty kinds", count("testimonial") === 0 && count("flight") === 0);
+  ok("mix: kinds spread out (no 3 in a row)", !o.some((t, i) => i > 1 && o[i - 1].kind === t.kind && o[i - 2].kind === t.kind));
+  const few = X.mixOrder({ japan: ["j"], other: [], bonus: [], testimonial: [], flight: [], news: ["n1", "n2"], kama: [] }, X.MIX, 18);
+  ok("mix: runs out gracefully", few.length === 3);
+  const g = X.dealGroups([{ dest: "HND" }, { dest: "LAX" }, { dest: "kix" }, { dest: "LAS" }]);
+  ok("mix: Japan split", g.japan.length === 2 && g.other.length === 2);
+  ok("mix: subscriber routes", X.subRoute({ dest: "HND" }) && X.subRoute({ dest: "JFK" }) && !X.subRoute({ dest: "SEA" }));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

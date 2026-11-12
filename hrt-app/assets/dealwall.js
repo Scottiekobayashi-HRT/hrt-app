@@ -99,7 +99,23 @@
     ".dw-expf{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}",
     ".dw-expf>span{font-size:11.5px;color:var(--muted);font-weight:600}",
     ".dw-unlock{margin-left:auto;font-size:12.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:8px 15px;text-decoration:none;white-space:nowrap}",
-    "@media (max-width:520px){.dw-unlock{margin-left:0}}"
+    "@media (max-width:520px){.dw-unlock{margin-left:0}}",
+    /* Deals, News, Flights tiles (Nov 11) */
+    "html:not(.ms-client) .dw-oh{display:none}html.ms-client .dw-lv-sub,html:not(.ms-client) .dw-lv-oh{display:none}",
+    ".dw-lede{margin:-4px 0 10px;font-size:13.5px;color:var(--muted);max-width:70ch;line-height:1.5}",
+    ".dw-cityrt{display:block;font-size:10.5px;font-weight:700;opacity:.9;letter-spacing:.03em}",
+    ".dw-brand{z-index:1;position:absolute;left:10px;top:10px;display:flex;flex-direction:column;line-height:1.05;font-size:12.5px;font-weight:800;color:#fff;background:rgba(10,18,28,.62);border-radius:9px;padding:5px 8px;text-shadow:none}.dw-brand small{font-size:9.5px;font-weight:700;opacity:.85;letter-spacing:.02em}",
+    ".dw-t{display:flex;flex-direction:column;text-align:left;cursor:default}.dw-t .dw-body{flex:1}",
+    ".dw-kind{z-index:1;position:absolute;left:10px;top:10px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#14202e;background:#f2b84b;border-radius:999px;padding:3px 9px}",
+    ".dw-tt{display:block;font-size:14px;line-height:1.3;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}",
+    ".dw-tsub{display:block;margin-top:5px;font-size:12px;color:var(--muted)}",
+    ".dw-tacts{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}",
+    ".dw a.dw-tbtn{font-size:12px;font-weight:800;border-radius:999px;padding:7px 11px;text-decoration:none;background:#14202e;color:#fff;border:1px solid #14202e}.dw a.dw-tbtn.ghost{background:none;color:var(--text);border-color:var(--line)}",
+    "[data-theme=dark] .dw a.dw-tbtn{background:#f2b84b;color:#14202e;border-color:#f2b84b}[data-theme=dark] .dw a.dw-tbtn.ghost{background:none;color:var(--text);border-color:var(--line)}",
+    ".dw-bph{background:linear-gradient(135deg,#1f9d57,#14202e)!important;display:flex;align-items:center;justify-content:center}.dw-bpct{font-size:34px;font-weight:900;color:#fff;letter-spacing:-.02em}",
+    "html:not(.ms-client) .dw-bonus .dw-bopen{display:none}html.ms-client .dw-bonus .dw-block{display:none}",
+    "html:not(.ms-client) .dw-bonus .dw-bph{background:linear-gradient(135deg,#8a96a3,#3a4552)!important}html:not(.ms-client) .dw-bonus .dw-bpct{filter:blur(6px);opacity:.8}html:not(.ms-client) .dw-bonus .dw-tt{color:var(--muted)}",
+    ".dw-q{margin:0;font-size:13.5px;line-height:1.45;color:var(--text);font-style:italic}"
   ].join("");
   document.head.appendChild(css);
 
@@ -228,25 +244,171 @@
     return list;
   }
 
+
+  /* =====================================================================
+     "Deals, News, Flights" mix (Nov 11, Eddie review). One rail, many kinds
+     of tile, in these shares (Eddie's plan):
+       Japan points deals 25, other points deals 25, transfer bonuses 10,
+       testimonials 5, flights 10, news 15, kamaʻāina deals 10.
+     Flights are on hold (no live flight tiles yet) and testimonials start
+     empty, so their share simply goes to the others.
+     Sources: points deals = the Atmos Reward Calendar feed (FEED);
+     transfer bonuses = the Transfer Bonuses page (window.HRT_TB_LIVE);
+     news = hawaiirewardtravel.com/bloghome via /api/site-news;
+     kamaʻāina = the Kamaʻāina Deals tool (window.HRT_KAMA.top).
+     Levels: Subscriber sees 4 routes (SUB_ROUTES) and locked transfer bonus
+     tiles; ʻOhana (html.ms-client) sees every route in the feed and open
+     bonus tiles. Done with CSS classes so it is right even when Memberstack
+     answers after the wall is drawn.
+  ===================================================================== */
+  var MIX = { japan: 25, other: 25, bonus: 10, testimonial: 5, flight: 10, news: 15, kama: 10 };
+  var MIX_MAX = 18;
+  var JAPAN = { HND: 1, NRT: 1, KIX: 1, ITM: 1, NGO: 1, FUK: 1, CTS: 1, OKA: 1 };
+  var SUB_ROUTES = { HND: 1, LAS: 1, LAX: 1, JFK: 1 };
+  var NEWS_ALL = "https://www.hawaiirewardtravel.com/bloghome";
+  var SITE_NEWS = "/api/site-news";
+  /* Member photos and words, added by Scottie once members say yes.
+     { quote: "...", name: "Leilani K.", trip: "HNL to Tokyo in business", image: "https://..." } */
+  var TESTIMONIALS = [];
+
+  /* Smooth weighted round robin: the order of tile kinds, so each kind shows up
+     in its share and evenly spread. Kinds that run out drop out. Pure. */
+  function mixOrder(groups, weights, max) {
+    var left = {}, cur = {}, out = [];
+    Object.keys(weights).forEach(function (k) { left[k] = (groups[k] || []).slice(); cur[k] = 0; });
+    while (out.length < max) {
+      var live = Object.keys(weights).filter(function (k) { return weights[k] > 0 && left[k].length; });
+      if (!live.length) break;
+      var total = 0, best = null;
+      live.forEach(function (k) { cur[k] += weights[k]; total += weights[k]; if (best === null || cur[k] > cur[best]) best = k; });
+      cur[best] -= total;
+      out.push({ kind: best, item: left[best].shift() });
+    }
+    return out;
+  }
+  /* Split the feed's economy deals into Japan and everywhere else. Pure. */
+  function dealGroups(economy) {
+    var g = { japan: [], other: [] };
+    (economy || []).forEach(function (d) { (JAPAN[String(d.dest || "").toUpperCase()] ? g.japan : g.other).push(d); });
+    return g;
+  }
+  function subRoute(d) { return !!SUB_ROUTES[String(d && d.dest || "").toUpperCase()]; }
+  function bonusTitle(b) { return (BANK_SHORT[b.bank] || b.bank || "") + " to " + (b.partner || "") ; }
+  var BANK_SHORT = { "amex": "Amex", "bilt": "Bilt", "capital-one": "Capital One", "chase": "Chase", "citi": "Citi", "rove": "Rove" };
+  function newsDate(ms) { if (!ms) return ""; var d = new Date(+ms); return isNaN(d) ? "" : d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
+
+  /* Wait up to ms for a value to show up (window globals filled by other scripts). */
+  function waitFor(get, evt, ms) {
+    return new Promise(function (res) {
+      var v = get(); if (v) return res(v);
+      var done = false, t = setTimeout(function () { if (!done) { done = true; res(get() || null); } }, ms);
+      if (evt) window.addEventListener(evt, function () { if (done) return; var x = get(); if (x) { done = true; clearTimeout(t); res(x); } });
+    });
+  }
+  function getNews() {
+    return fetch(SITE_NEWS, { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return j && Array.isArray(j.articles) ? j.articles.filter(function (a) { return a && a.title && /^https:\/\//.test(a.url || ""); }) : []; })
+      .catch(function () { return []; });
+  }
+
+  function photo(cls, url) {
+    var ph = el("div", cls);
+    if (url && /^https:\/\//.test(url)) ph.style.backgroundImage = "url('" + String(url).replace(/'/g, "%27") + "')";
+    return ph;
+  }
+  function newsTile(a) {
+    var t = el("div", "dw-card dw-t dw-news");
+    var ph = photo("dw-ph", a.image);
+    ph.appendChild(el("span", "dw-kind", "Hawaiʻi travel news"));
+    t.appendChild(ph);
+    var body = el("div", "dw-body");
+    body.appendChild(el("b", "dw-tt", a.title));
+    if (a.date) body.appendChild(el("span", "dw-tsub", newsDate(a.date)));
+    t.appendChild(body);
+    var acts = el("div", "dw-tacts");
+    var read = el("a", "dw-tbtn", "Read it"); read.href = a.url; read.target = "_blank"; read.rel = "noopener";
+    var all = el("a", "dw-tbtn ghost", "All news"); all.href = NEWS_ALL; all.target = "_blank"; all.rel = "noopener";
+    acts.appendChild(read); acts.appendChild(all); t.appendChild(acts);
+    return t;
+  }
+  function kamaTile(k) {
+    var t = el("div", "dw-card dw-t dw-kama");
+    var ph = photo("dw-ph", k.image);
+    ph.appendChild(el("span", "dw-kind", "Kamaʻāina deal"));
+    ph.appendChild(el("span", "dw-city", k.where || ""));
+    t.appendChild(ph);
+    var body = el("div", "dw-body");
+    body.appendChild(el("b", "dw-tt", k.name));
+    var big = el("div", "dw-pts", k.big || "Resident rate");
+    if (k.small) big.appendChild(el("small", null, k.small));
+    body.appendChild(big);
+    t.appendChild(body);
+    var acts = el("div", "dw-tacts");
+    var more = el("a", "dw-tbtn", "See more kamaʻāina deals"); more.href = "#kamaaina"; more.setAttribute("data-route", "kamaaina");
+    acts.appendChild(more); t.appendChild(acts);
+    return t;
+  }
+  function bonusTile(b) {
+    var t = el("div", "dw-card dw-t dw-bonus");
+    var ph = el("div", "dw-ph dw-bph");
+    ph.appendChild(el("span", "dw-kind", "Transfer bonus"));
+    ph.appendChild(el("span", "dw-bpct", "+" + (b.bonusPct || "") + "%"));
+    t.appendChild(ph);
+    var body = el("div", "dw-body dw-bopen");
+    body.appendChild(el("b", "dw-tt", bonusTitle(b)));
+    if (b.expiresDate) body.appendChild(el("span", "dw-tsub", "Ends " + shortDate(b.expiresDate)));
+    t.appendChild(body);
+    var locked = el("div", "dw-body dw-block");
+    locked.appendChild(el("b", "dw-tt", "A live transfer bonus"));
+    locked.appendChild(el("span", "dw-tsub", "ʻOhana Members see every bonus the day it starts"));
+    t.appendChild(locked);
+    var acts = el("div", "dw-tacts");
+    var open = el("a", "dw-tbtn dw-bopen", "See all transfer bonuses"); open.href = "#transfers"; open.setAttribute("data-route", "transfers");
+    var promo = el("a", "dw-tbtn dw-block", "Read more"); promo.href = "#plans"; promo.setAttribute("data-route", "plans");
+    acts.appendChild(open); acts.appendChild(promo); t.appendChild(acts);
+    return t;
+  }
+  function testimonialTile(q) {
+    var t = el("div", "dw-card dw-t dw-quote");
+    var ph = photo("dw-ph", q.image);
+    ph.appendChild(el("span", "dw-kind", "From our ʻohana"));
+    t.appendChild(ph);
+    var body = el("div", "dw-body");
+    body.appendChild(el("p", "dw-q", "“" + q.quote + "”"));
+    body.appendChild(el("span", "dw-tsub", [q.name, q.trip].filter(Boolean).join(", ")));
+    t.appendChild(body);
+    return t;
+  }
+
   function render(feed) {
     var wrap = el("div", "dw free-only");
     var win = feed.window_days || 30;
 
     var head = el("div", "dw-head");
     head.appendChild(el("h2", null, "Deals, News, Flights"));
-    head.appendChild(el("span", "dw-limit", "Free · " + win + " days only"));
+    head.appendChild(el("span", "dw-limit dw-lv-sub", "Free · 4 routes, " + win + " days"));
+    head.appendChild(el("span", "dw-limit dw-lv-oh", "ʻOhana · every route, " + win + " days"));
     head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
     var nav = el("div", "dw-nav");
     head.appendChild(nav);
     wrap.appendChild(head);
+    wrap.appendChild(el("p", "dw-lede", "Points deals from Honolulu, plus the news that matters to Hawaiʻi travelers. We sort through all the travel news so you only see what fits your trips."));
 
     /* economy: real numbers, scrolling rail */
     var rail = el("div", "dw-rail");
     var exp = el("div", "dw-exp");   /* the panel a card opens, under the rail */
     var openKey = null;
-    (feed.economy || []).forEach(function (d) {
-      var card = el("button", "dw-card");
+    var g = dealGroups(feed.economy);
+    var tiles = mixOrder({ japan: g.japan, other: g.other, bonus: feed._bonuses || [], testimonial: TESTIMONIALS, flight: [],
+      news: feed._news || [], kama: feed._kama || [] }, MIX, MIX_MAX);
+    tiles.forEach(function (tile) {
+      if (tile.kind === "news") return rail.appendChild(newsTile(tile.item));
+      if (tile.kind === "kama") return rail.appendChild(kamaTile(tile.item));
+      if (tile.kind === "bonus") return rail.appendChild(bonusTile(tile.item));
+      if (tile.kind === "testimonial") return rail.appendChild(testimonialTile(tile.item));
+      var d = tile.item;
+      var card = el("button", "dw-card" + (subRoute(d) ? "" : " dw-oh"));
       card.type = "button";
       card.setAttribute("aria-expanded", "false");
       card.addEventListener("click", function () {
@@ -262,8 +424,11 @@
       });
       var ph = el("div", "dw-ph");
       if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
-      ph.appendChild(el("span", "dw-rt", (d.origin || "") + " → " + (d.dest || "")));
-      ph.appendChild(el("span", "dw-city", d.city || d.dest || ""));
+      var brand = el("span", "dw-brand"); brand.appendChild(el("small", null, "From Scottie's")); brand.appendChild(document.createTextNode("Atmos Reward Calendar"));
+      ph.appendChild(brand);
+      var cityEl = el("span", "dw-city", d.city || d.dest || "");
+      cityEl.appendChild(el("small", "dw-cityrt", (d.origin || "") + " → " + (d.dest || "")));
+      ph.appendChild(cityEl);
       card.appendChild(ph);
 
       var body = el("div", "dw-body");
@@ -944,13 +1109,26 @@
         if (!feed) return;
         var fresh = freshen(feed);
         fresh._teasers = teasersFor(feed);
-        if (!(fresh.economy || []).length) return; // nothing to show, show nothing
+        return Promise.all([
+          getNews(),
+          waitFor(function () { return window.HRT_TB_LIVE && window.HRT_TB_LIVE.length ? window.HRT_TB_LIVE : null; }, "hrt:bonuses", 4000),
+          waitFor(function () { return window.HRT_KAMA && window.HRT_KAMA.top ? window.HRT_KAMA : null; }, "hrt:kama", 4000)
+        ]).then(function (src) {
+          fresh._news = src[0] || [];
+          fresh._bonuses = (src[1] || []).slice().sort(function (a, b) { return (+b.bonusPct || 0) - (+a.bonusPct || 0); }).slice(0, 4);
+          try { fresh._kama = src[2] ? src[2].top(4) : []; } catch (e) { fresh._kama = []; }
+          return fresh;
+        });
+      })
+      .then(function (fresh) {
+        if (!fresh) return;
+        if (!(fresh.economy || []).length && !(fresh._news || []).length) return; // nothing to show, show nothing
         var node = render(fresh);
         if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor.nextSibling);
         else home.appendChild(node);
         /* PRO wall, right where the free one sits. Built only for PRO members:
            the free wall is hidden for them by its free-only class. */
-        mountPro(feed, node);
+        mountPro(fresh, node);
       })
       .catch(function (e) {
         // PRO members can still get their wall from the PRO feed.
@@ -961,7 +1139,7 @@
       });
   }
 
-  window.HRT_DEALWALL = { _test: { freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs, routeChoices: routeChoices, cleanRoutes: cleanRoutes, applyRoutes: applyRoutes, migratePrefs: migratePrefs } };
+  window.HRT_DEALWALL = { _test: { mixOrder: mixOrder, dealGroups: dealGroups, subRoute: subRoute, MIX: MIX, freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs, routeChoices: routeChoices, cleanRoutes: cleanRoutes, applyRoutes: applyRoutes, migratePrefs: migratePrefs } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
