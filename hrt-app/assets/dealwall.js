@@ -113,8 +113,8 @@
     ".dw a.dw-tbtn{font-size:12px;font-weight:800;border-radius:999px;padding:7px 11px;text-decoration:none;background:#14202e;color:#fff;border:1px solid #14202e}.dw a.dw-tbtn.ghost{background:none;color:var(--text);border-color:var(--line)}",
     "[data-theme=dark] .dw a.dw-tbtn{background:#f2b84b;color:#14202e;border-color:#f2b84b}[data-theme=dark] .dw a.dw-tbtn.ghost{background:none;color:var(--text);border-color:var(--line)}",
     ".dw-bph{background:linear-gradient(135deg,#1f9d57,#14202e)!important;display:flex;align-items:center;justify-content:center}.dw-bpct{font-size:34px;font-weight:900;color:#fff;letter-spacing:-.02em}",
-    "html:not(.ms-client) .dw-bonus .dw-bopen{display:none}html.ms-client .dw-bonus .dw-block{display:none}",
-    "html:not(.ms-client) .dw-bonus .dw-bph{background:linear-gradient(135deg,#8a96a3,#3a4552)!important}html:not(.ms-client) .dw-bonus .dw-bpct{filter:blur(6px);opacity:.8}html:not(.ms-client) .dw-bonus .dw-tt{color:var(--muted)}",
+    "html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-bopen{display:none}html.ms-client .dw-bonus .dw-block,html.ms-pro .dw-bonus .dw-block{display:none}",
+    "html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-bph{background:linear-gradient(135deg,#8a96a3,#3a4552)!important}html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-bpct{filter:blur(6px);opacity:.8}html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-tt{color:var(--muted)}",
     /* navy wall with the HRT PRO mark (Nov 11) */
     ".dw-navy{background:linear-gradient(135deg,#14202e 0%,#1b2f4a 100%);border:1px solid rgba(242,184,75,.32);border-radius:var(--radius,18px);padding:18px 16px 14px;box-shadow:var(--shadow)}",
     ".dw-navy .dw-head h2{color:#fff}.dw-navy .dw-head .dw-sub,.dw-navy .dw-head .dw-when{color:#bccde0}.dw-navy .dw-lede{color:#c7d4e2}",
@@ -310,6 +310,8 @@
   /* Member photos and words, added by Scottie once members say yes.
      { quote: "...", name: "Leilani K.", trip: "HNL to Tokyo in business", image: "https://..." } */
   var TESTIMONIALS = [];
+  /* News, bonuses and kamaʻāina picks, filled once in mount() and shared with the PRO wall. */
+  var EXTRAS = { news: [], bonuses: [], kama: [] };
 
   /* Smooth weighted round robin: the order of tile kinds, so each kind shows up
      in its share and evenly spread. Kinds that run out drop out. Pure. */
@@ -922,6 +924,18 @@
         if (!d.none) card.appendChild(el("span", "dw-more", "See the dates"));
         rail.appendChild(card);
       });
+      /* Nov 12: PRO members get the same Deals, News, Flights mix: their own deals
+         plus news, transfer bonuses (open for PRO) and kamaʻāina deals. */
+      var dealNodes = Array.prototype.slice.call(rail.children);
+      if (dealNodes.length && (EXTRAS.news.length || EXTRAS.bonuses.length || EXTRAS.kama.length || TESTIMONIALS.length)) {
+        var order = mixOrder({ deals: dealNodes, bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama },
+          { deals: 50, bonus: 10, testimonial: 5, news: 15, kama: 10 }, dealNodes.length + 12);
+        rail.innerHTML = "";
+        order.forEach(function (t) {
+          rail.appendChild(t.kind === "deals" ? t.item : t.kind === "news" ? newsTile(t.item) : t.kind === "kama" ? kamaTile(t.item) :
+            t.kind === "bonus" ? bonusTile(t.item) : testimonialTile(t.item));
+        });
+      }
       rail.hidden = !list.length;
       empty.hidden = !!list.length;
       if (!list.length) {
@@ -1111,6 +1125,7 @@
           fresh._news = src[0] || [];
           fresh._bonuses = (src[1] || []).slice().sort(function (a, b) { return (+b.bonusPct || 0) - (+a.bonusPct || 0); }).slice(0, 4);
           try { fresh._kama = src[2] ? src[2].top(4) : []; } catch (e) { fresh._kama = []; }
+          EXTRAS = { news: fresh._news, bonuses: fresh._bonuses, kama: fresh._kama };
           return fresh;
         });
       })
