@@ -439,5 +439,17 @@ ok('Which card ignores planned and other cards', !T.whichCard(hh, CAT, 'dining')
   ok('points: example wallet has balances', T.exampleWallet().points.length === 3);
 }
 
+// --- card limits per level (Nov 11) ---
+{
+  const c = (id, status) => ({ id, cardId: 'amex-gold', opened: '2024-01', ...(status ? { status } : {}) });
+  ok('limits: 2 / 6 / 15', T.CARD_LIMITS.subscriber === 2 && T.CARD_LIMITS.ohana === 6 && T.CARD_LIMITS.pro === 15);
+  ok('limits: one card is under the free limit', !T.atLimit({ cards: [c('a')] }, 'subscriber'));
+  ok('limits: two cards hit the free limit', T.atLimit({ cards: [c('a'), c('b')] }, 'subscriber'));
+  ok('limits: closed cards do not count', !T.atLimit({ cards: [c('a'), c('b', 'closed')] }, 'subscriber'));
+  ok('limits: next cards count', T.atLimit({ cards: [c('a'), c('b', 'next')] }, 'subscriber'));
+  ok('limits: two cards fine for ʻOhana', !T.atLimit({ cards: [c('a'), c('b')] }, 'ohana'));
+  ok('limits: unknown level falls back to free', T.atLimit({ cards: [c('a'), c('b')] }, 'x'));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

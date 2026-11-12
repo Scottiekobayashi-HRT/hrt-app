@@ -1707,12 +1707,40 @@
     return '<dl class="wl-sh-det">' + rows.map(function (r) { return "<div><dt>" + r[0] + "</dt><dd>" + r[1] + "</dd></div>"; }).join("") + "</dl>";
   }
 
+  /* ---------- Card limits per level (Nov 11, Eddie review) ----------
+     Subscriber (free) 2, ʻOhana 6, Pro 15. Closed cards and the sample card never
+     count. Only blocks the member's own "Add a card"; HRT can still add cards from
+     the back end, and nothing is ever removed when a wallet is over its limit. */
+  var CARD_LIMITS = { subscriber: 2, ohana: 6, pro: 15 };
+  var LEVEL_NAMES = { subscriber: "free", ohana: "ʻOhana", pro: "Pro" };
+  function level() {
+    var cl = document.documentElement && document.documentElement.classList;
+    if (cl && cl.contains("ms-pro")) return "pro";
+    if (member().client || (cl && cl.contains("ms-client"))) return "ohana";
+    return "subscriber";
+  }
+  function activeCount(w) { return (w && w.cards || []).filter(function (e) { return e.status !== "closed"; }).length; }
+  function atLimit(w, lvl) { return activeCount(w) >= (CARD_LIMITS[lvl] || CARD_LIMITS.subscriber); }
+  function limitHtml(lvl) {
+    var n = CARD_LIMITS[lvl], have = activeCount(state.wallet);
+    var more = lvl === "subscriber" ? "ʻOhana Members can keep up to " + CARD_LIMITS.ohana + " cards, kept up to date for them by Scottie. Pro Members can keep up to " + CARD_LIMITS.pro + "." :
+      lvl === "ohana" ? "Pro Members can keep up to " + CARD_LIMITS.pro + " cards. Or text Scottie and we will sort out your wallet together." :
+      "Text Scottie and we will help you make room.";
+    return '<div class="wl-limit"><span class="wl-limit-n">' + have + " of " + n + "</span>" +
+      '<h3 class="wl-h3">Your ' + LEVEL_NAMES[lvl] + " wallet holds " + n + " cards</h3>" +
+      "<p>You have " + have + (have === 1 ? " card" : " cards") + " in your wallet. " + esc(more) + "</p>" +
+      '<p class="wl-dimtxt">Cards you mark as closed do not count. To make room, open a card you no longer have and mark it closed or remove it.</p>' +
+      '<div class="wl-limit-acts">' + (lvl === "pro" ? "" : '<a class="wl-btn wl-pri" href="#plans" data-route="plans">See the levels</a>') +
+      '<a class="wl-btn wl-ghost" href="' + SCOTTIE_SMS + '">' + CHAT_ICON + "Text Scottie</a>" +
+      '<button class="wl-btn" data-wl="sheet-close">Close</button></div></div>';
+  }
+
   /* The card sheet: one card's facts, Edit and Remove, then perks and earning folded away. */
   function sheetHtml() {
     var id = state.sel, adding = state.editing === "new";
     if (!adding && !id && !state.editing) return "";
     var inner;
-    if (adding) inner = formHtml(null);
+    if (adding) inner = !state.demo && atLimit(state.wallet, level()) ? limitHtml(level()) : formHtml(null);
     else {
       var eid = state.editing || id, e = state.wallet.cards.filter(function (k) { return k.id === eid; })[0];
       if (!e) { state.sel = null; state.editing = null; return ""; }
@@ -1832,7 +1860,7 @@
       '<div class="wl-cp-acts">' + (m.client ? '<a class="wl-btn wl-ghost" href="' + SCOTTIE_SMS + '">' + CHAT_ICON + "Text Scottie</a>" : "") +
       '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div></div>' +
       '<p class="wl-sum-lede">Fees, credits and renewals for every card you hold. Tap a card for the details, including how to cancel or downgrade.</p>' +
-      '<dl class="wl-sum-stats wl-pg-stats wl-pg-3"><div class="wl-sum-stat"><dt>Cards</dt><dd>' + s.count + "</dd></div>" +
+      '<dl class="wl-sum-stats wl-pg-stats wl-pg-3"><div class="wl-sum-stat"><dt>Cards</dt><dd>' + s.count + (state.demo ? "" : "<small>" + activeCount(state.wallet) + " of " + CARD_LIMITS[level()] + " on your level</small>") + "</dd></div>" +
       '<div class="wl-sum-stat"><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
       '<div class="wl-sum-stat"><dt>Potential credits per year</dt><dd>' + esc(money(credits)) + "<small>if you use them all</small></dd></div></dl></section>" +
       '<section class="wl-card wl-cp">' + /* no Everyone / You / name filter here (Scottie, Nov 11): the Whose column and search cover it */
@@ -2199,7 +2227,7 @@
     var onTab = host.querySelector(".wl-tab.on"); if (onTab && onTab.parentNode) onTab.parentNode.scrollLeft = Math.max(0, onTab.offsetLeft - 8);
     var sheetOpen = !!host.querySelector(".wl-sheet");
     document.documentElement.classList.toggle("wl-sheet-open", sheetOpen);
-    if (state.editing) bindForm(state.editing === "new" ? null : state.wallet.cards.filter(function (c) { return c.id === state.editing; })[0]);
+    if (state.editing && host.querySelector("#wlForm")) bindForm(state.editing === "new" ? null : state.wallet.cards.filter(function (c) { return c.id === state.editing; })[0]);
     if (state.focus) {
       var row = host.querySelector('[data-entry="' + state.focus + '"]');
       state.focus = null;
@@ -2470,6 +2498,9 @@
       ".wl-pm-del{font:inherit;font-size:20px;line-height:1;border:0;background:none;color:var(--muted);cursor:pointer;width:34px;height:34px;border-radius:8px}.wl-pm-del:hover{background:var(--surface-2,rgba(0,0,0,.05));color:var(--text)}",
       ".wl-pm-foot{margin:12px 0 0}",
       "@media (max-width:640px){.wl-pm-head{display:none}.wl-pm-row{grid-template-columns:minmax(0,1fr) 34px;row-gap:8px}.wl-pm-nm{grid-column:1/2}.wl-pm-bal{grid-column:1/2}.wl-pm-asof{grid-column:1/3}.wl-pm-del,.wl-pm-del-sp{grid-column:2;grid-row:1}}",
+      ".wl-limit{padding:6px 2px 2px}.wl-limit p{color:var(--muted);line-height:1.55;font-size:14px;margin:10px 0 0}.wl-limit .wl-h3{margin-top:8px}",
+      ".wl-limit-n{display:inline-block;font-size:12px;font-weight:800;background:#f2b84b;color:#14202e;border-radius:999px;padding:3px 10px}",
+      ".wl-limit-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.wl-limit-acts .wl-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none}",
       ".wl-smp{border:1.5px dashed var(--line);border-radius:14px;margin:0 0 12px;background:var(--surface)}.wl-smp-wrap .wl-smp{margin:12px 0 0}",
       ".wl-smp summary{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;list-style:none}.wl-smp summary::-webkit-details-marker{display:none}",
       ".wl-smp-nm{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.wl-smp-nm b{font-size:14.5px;color:var(--text)}.wl-smp-nm small{font-size:12px;color:var(--muted)}",
@@ -2873,7 +2904,7 @@
       perkAmount: perkAmount, perkYearUsd: perkYearUsd, isTracked: isTracked, state: state,
       shortName: shortName, cardBrief: cardBrief, topAlerts: topAlerts,
       whichCard: whichCard, exampleWallet: exampleWallet, centsPer: centsPer, valueText: valueText, SPEND: SPEND,
-      rateText: rateText, earningFor: earningFor, pointsRows: pointsRows, setPoint: setPoint, parseBal: parseBal, earnedPrograms: earnedPrograms, PROGRAMS: PROGRAMS, quartersFor: quartersFor, quarterName: quarterName },
+      rateText: rateText, earningFor: earningFor, pointsRows: pointsRows, activeCount: activeCount, atLimit: atLimit, CARD_LIMITS: CARD_LIMITS, setPoint: setPoint, parseBal: parseBal, earnedPrograms: earnedPrograms, PROGRAMS: PROGRAMS, quartersFor: quartersFor, quarterName: quarterName },
     show: function (sub) {
       state.tab = sub === "cards" || sub === "credits" || sub === "transfers" || sub === "points" ? sub : "overview";
       if (state.tab === "cards") state.holder = null; /* Cards always shows everyone's cards */
