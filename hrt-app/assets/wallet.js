@@ -1197,10 +1197,10 @@
     } else {
       if (!client) { pts = NEXT_DEFAULT.pts; name = NEXT_DEFAULT.name; }
       big = "+" + pts.toLocaleString("en-US") + " points";
-      sub = (client ? "will go in your piggy bank" : "could go in your piggy bank") + (name ? " with the " + name : "");
+      sub = "to your piggy bank" + (name ? " with the " + name : "");
       go = client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">See how ʻOhana Members get their next card &rsaquo;</a>';
     }
-    return '<div class="hw-box hw-next"><span class="hw-l">' + (client ? "Your next card" : "Your next card could add") + '</span><b class="hw-v">' + esc(big) + '</b>' +
+    return '<div class="hw-box hw-next"><span class="hw-l">' + (client ? (pts ? "Your next card will add" : "Your next card") : "Your next card could add") + '</span><b class="hw-v">' + esc(big) + '</b>' +
       '<span class="hw-s">' + esc(sub) + "</span>" + go + "</div>";
   }
   function miniHtml() {
