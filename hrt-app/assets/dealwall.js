@@ -104,7 +104,11 @@
     ".dw-unlock{margin-left:auto;font-size:12.5px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f5c75a,#d97040);border-radius:999px;padding:8px 15px;text-decoration:none;white-space:nowrap}",
     "@media (max-width:520px){.dw-unlock{margin-left:0}}",
     /* Deals, News, Flights tiles (Nov 11) */
-    "html:not(.ms-client) .dw-oh{display:none}html.ms-client .dw-lv-sub,html:not(.ms-client) .dw-lv-oh{display:none}",
+    /* Nov 12: Subscribers now see every route's points deal (the main reason they came);
+       the dates for ʻOhana routes stay an ʻOhana perk, marked with a small tag */
+    "html.ms-client .dw-lv-sub,html:not(.ms-client) .dw-lv-oh{display:none}html.ms-client .dw-ohtag{display:none}",
+    ".dw-chip.dw-ohtag{background:rgba(242,184,75,.18);color:#8a5a12;border-color:rgba(242,184,75,.5)}",
+    ".dw-oklock{padding:14px 4px 6px;font-size:13.5px;line-height:1.5}.dw-oklock a{font-weight:800;color:var(--coral);text-decoration:none;margin-left:4px}",
     ".dw-lede{margin:-4px 0 10px;font-size:13.5px;color:var(--muted);max-width:70ch;line-height:1.5}",
     ".dw-cityrt{display:block;font-size:10.5px;font-weight:700;opacity:.9;letter-spacing:.03em}",
     ".dw-brand{z-index:1;position:absolute;left:10px;top:10px;display:flex;flex-direction:column;line-height:1.05;font-size:12.5px;font-weight:800;color:#fff;background:rgba(10,18,28,.62);border-radius:9px;padding:5px 8px;text-shadow:none}.dw-brand small{font-size:9.5px;font-weight:700;opacity:.85;letter-spacing:.02em}",
@@ -538,7 +542,7 @@
       builtFor = oh;
       closeExp();
       rail.innerHTML = "";
-      var mine = pointsTiles.filter(function (t) { return oh || subRoute(t.item); });
+      var mine = pointsTiles; /* every viewer gets every route (Nov 12) */
       var tiles = rhythmOrder(mine, { pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
         news: feed._news || [], kama: feed._kama || [] }, MIX_MAX);
       tiles.forEach(addTile);
@@ -584,6 +588,7 @@
       if (d.deal_dates) meta.appendChild(el("span", "dw-chip ok", d.deal_dates + (d.deal_dates === 1 ? " date open" : " dates open")));
       if (d.soonest) meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
       if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
+      if (!subRoute(d)) meta.appendChild(el("span", "dw-chip dw-ohtag", "ʻOhana route"));
       body.appendChild(meta);
 
       card.appendChild(body);
@@ -631,6 +636,12 @@
         c.appendChild(tags);
         grid.appendChild(c);
       });
+      if (!subRoute(d) && !isOhana()) {
+        /* Subscriber on an ʻOhana route: they see the deal, the dates are an ʻOhana perk */
+        grid = el("p", "dw-oklock", "The open dates on this route are for ʻOhana Members. Your free routes are Tokyo, Las Vegas, Los Angeles and New York.");
+        var lm = el("a", null, "Learn more \u2192"); lm.href = "#coaching"; lm.setAttribute("data-route", "coaching");
+        grid.appendChild(lm);
+      }
       exp.appendChild(grid);
 
       var foot = el("div", "dw-expf");
