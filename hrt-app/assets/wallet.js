@@ -1275,7 +1275,7 @@
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
-      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") +
+      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", "&nbsp;") + /* no card names in this box (Scottie's secrecy rule, Nov 13) */
       box("My Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>') + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
