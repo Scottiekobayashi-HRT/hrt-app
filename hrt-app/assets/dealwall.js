@@ -350,7 +350,11 @@
   var SUB_ROUTES = { HND: 1, LAS: 1, LAX: 1, JFK: 1 };
   /* ʻOhana sees every route except these (Scottie, Nov 12): San Diego, the Philippines,
      Australia, Salt Lake City and Osaka. PRO members choose their own routes on their wall. */
-  var OHANA_SKIP = { SAN: 1, MNL: 1, SYD: 1, BNE: 1, MEL: 1, SLC: 1, KIX: 1, ITM: 1 };
+  var OHANA_SKIP = { SAN: 1, MNL: 1, SYD: 1, BNE: 1, MEL: 1, SLC: 1, ITM: 1 }; /* KIX back in (Nov 12) */
+  /* Points deal order (Scottie, Nov 12): mostly Japan (Tokyo Haneda and Osaka first), then
+     Las Vegas, San Francisco, Los Angeles and New York, then the rest. */
+  var ROUTE_RANK = { HND: 1, KIX: 2, NRT: 3, LAS: 10, SFO: 11, LAX: 12, JFK: 13 };
+  function byRank(a, b) { return (ROUTE_RANK[String(a.dest || "").toUpperCase()] || 50) - (ROUTE_RANK[String(b.dest || "").toUpperCase()] || 50); }
   var NEWS_ALL = "https://www.hawaiirewardtravel.com/bloghome";
   var SITE_NEWS = "/api/site-news";
   /* Member photos and words, added by Scottie once members say yes.
@@ -531,7 +535,8 @@
     var exp = el("div", "dw-exp");   /* the panel a card opens, under the rail */
     var openKey = null;
     var g = dealGroups((feed.economy || []).filter(function (d) { return !OHANA_SKIP[String(d.dest || "").toUpperCase()]; }));
-    var pointsTiles = mixOrder({ japan: g.japan, other: g.other }, { japan: 1, other: 1 }, 1000);
+    g.japan.sort(byRank); g.other.sort(byRank);
+    var pointsTiles = mixOrder({ japan: g.japan, other: g.other }, { japan: 2, other: 1 }, 1000); /* two Japan deals for every other one */
     /* Subscribers only see their 4 routes, so the 2-then-1 rhythm is worked out from the
        points tiles this viewer can see, and redone if the level arrives late. */
     function isOhana() { return document.documentElement.classList.contains("ms-client"); }
