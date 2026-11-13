@@ -81,6 +81,8 @@
     ".dw-more{display:block;padding:0 12px 11px;font-size:11px;font-weight:800;color:var(--coral)}",
     ".dw-more:after{content:' \\2192'}",
     ".dw-card.on .dw-more{visibility:hidden}",
+    ".dw-calbtn{display:block;margin:auto 12px 11px;padding:7px 10px;border-radius:999px;background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;font-size:11.5px;font-weight:800;text-align:center;line-height:1.25}",
+    ".dw-calbtn:after{content:' \\203A'}",
     /* the panel a card opens */
     ".dw-exp{display:none}",
     ".dw-exp.on{display:block;border:1px solid var(--coral);border-radius:var(--radius,16px);background:var(--surface);box-shadow:var(--shadow);padding:14px 16px 15px;margin:2px 0 4px}",
@@ -430,7 +432,7 @@
   function bonusTile(b) {
     var t = el("div", "dw-card dw-t dw-bonus");
     var ph = el("div", "dw-ph dw-bph");
-    ph.appendChild(el("span", "dw-kind", "Transfer bonus"));
+    ph.appendChild(el("span", "dw-kind", "Transfer deal"));
     ph.appendChild(el("span", "dw-bpct", "+" + (b.bonusPct || "") + "%"));
     t.appendChild(ph);
     var body = el("div", "dw-body dw-bopen");
@@ -522,8 +524,8 @@
       });
       var ph = el("div", "dw-ph");
       if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
-      var brand = el("span", "dw-brand"); brand.appendChild(el("small", null, "From Scottie's")); brand.appendChild(document.createTextNode("Atmos Points Calendar"));
-      ph.appendChild(brand);
+      /* top label says what kind of tile it is; the calendar name is the button (Nov 12) */
+      ph.appendChild(el("span", "dw-kind", "Points deal"));
       var cityEl = el("span", "dw-city", d.city || d.dest || "");
       cityEl.appendChild(el("small", "dw-cityrt", (d.origin || "") + " → " + (d.dest || "")));
       ph.appendChild(cityEl);
@@ -541,7 +543,7 @@
       body.appendChild(meta);
 
       card.appendChild(body);
-      card.appendChild(el("span", "dw-more", "See the open dates"));
+      card.appendChild(el("span", "dw-calbtn", "Scottie’s Atmos Points Calendar"));
       rail.appendChild(card);
     });
     wrap.appendChild(rail);
