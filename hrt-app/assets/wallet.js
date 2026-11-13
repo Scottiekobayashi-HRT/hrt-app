@@ -1195,7 +1195,7 @@
     } else if (client) { big = "Ask Scottie"; sub = "for your next application date"; }
     else { big = "Now"; sub = ""; }
     /* Subscribers get Learn more; ʻOhana Members already have Scottie (Nov 12) */
-    return '<div class="hw-box hw-elig"><span class="hw-l">Your Next Card: When to apply</span><b class="hw-v">' + esc(big) + '</b>' +
+    return '<div class="hw-box hw-elig"><span class="hw-l">When to apply for your next card</span><b class="hw-v">' + esc(big) + '</b>' +
       (sub ? '<span class="hw-s">' + esc(sub) + "</span>" : "") +
       (client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>') + "</div>";
   }
@@ -1251,7 +1251,7 @@
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + eligibleBox(V, cl) + nextCardBox(V, cl) +
       box("Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>') +
-      box("Next annual fee", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
+      box("When to downgrade or cancel", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +
