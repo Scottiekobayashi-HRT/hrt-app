@@ -1152,3 +1152,7 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 @media (prefers-reduced-motion:reduce){.hw-boxes .hw-act{animation:none}}
 .hw-act .hw-act-t{text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:#ffb3b3}
 .hw-act .hw-s b{color:#fff}
+
+/* Update Scottie button on the wallet tile boxes, ʻOhana Members (Nov 13) */
+.hw-box .hw-upd{display:block;margin-top:8px;padding:6px 12px;border-radius:999px;border:1px solid rgba(245,199,90,.7);background:rgba(245,199,90,.12);color:#f5c75a;font:800 12px 'DM Sans',sans-serif;cursor:pointer;width:max-content;max-width:100%}
+.hw-box .hw-upd:hover{background:rgba(245,199,90,.25)}

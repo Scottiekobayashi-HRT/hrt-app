@@ -1128,6 +1128,13 @@ export async function onRequestPost({ request, env }) {
     ? memberContext(m, describeWallet(wallet, catalog), { searchesLeft, alertsText: describeAlerts(alerts) }, describePartners(ctx.held, partners))
     : coachContext(m, describeWallet(wallet, catalog), ctx.held, partners, bonuses, describeHistory(await bonusHistory(env, bonuses)));
   system[2].text += "\n\nMY FAQ KNOWLEDGE BASE: the entries that best match this question (my approved answers):\n\n" + kbText;
+  /* "Update Scottie" button (Nov 13): the member is telling us what changed. Reply first,
+     the team follows up by text. Secrecy rule: never name a card they have not named. */
+  const topic = typeof body.topic === "string" ? body.topic.replace(/[^\w\sʻ'&,.:-]/g, "").slice(0, 60) : "";
+  if (topic) system[2].text += "\n\nUPDATE FOR SCOTTIE: the member tapped \"Update Scottie\" on the \"" + topic + "\" part of their dashboard and is telling me what changed (for example approved, denied, hit the minimum spend, bonus posted, canceled or downgraded, got a retention offer). " +
+    "Thank them in one short line and say back what I understood. Answer anything simple about what it means and what usually happens next. " +
+    "If something needs a person (a denial, a reconsideration call, a change to their plan, timing of their next card), tell them my team has it and will follow up by text. " +
+    "Never name a card they did not name themselves, and never suggest a specific card to apply for next.";
 
   let convo = messages.slice();
   let seats = null;

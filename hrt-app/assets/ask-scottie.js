@@ -384,6 +384,22 @@
     pro_coming_soon: "The Atmos Reward Seat Finder for HRT PRO is coming soon."
   };
 
+  /* "Update Scottie" (Scottie, Nov 13): a member tells us what changed (approved, hit the
+     spend, canceled...). Ask Scottie replies first; the team closes the loop by text.
+     The box the member came from rides along as the topic for the next message. */
+  var updateTopic = "";
+  function startUpdate(box) {
+    updateTopic = String(box || "my cards").slice(0, 60);
+    toggle(true);
+    var tries = 0;
+    (function fill() {
+      var i = document.getElementById("ascInput");
+      if (!i) { if (tries++ < 40) setTimeout(fill, 100); return; }
+      i.placeholder = "What's new? For example: I got approved, I hit the spend, I canceled";
+      try { i.focus(); } catch (e) {}
+    })();
+  }
+  window.HRT_ASK_UPDATE = startUpdate;
   function send(text) {
     text = String(text || "").trim();
     if (!text || busy) return;
@@ -395,7 +411,7 @@
     fetch(API, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: "Bearer " + token() },
-      body: JSON.stringify({ messages: history })
+      body: JSON.stringify({ messages: history, topic: updateTopic || undefined })
     }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (b) { return { ok: r.ok, b: b }; });
     }).then(function (res) {
@@ -411,7 +427,7 @@
       }
     }).catch(function () {
       state.msgs.push({ role: "assistant", error: true, content: ERRORS.ai_unavailable });
-    }).then(function () { busy = false; save(); draw(); });
+    }).then(function () { busy = false; updateTopic = ""; save(); draw(); });
   }
 
   /* First open: ask the server who this is, then draw the chat. */

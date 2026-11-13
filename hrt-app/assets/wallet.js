@@ -1211,6 +1211,10 @@
      (By date), apply for the next card (On date, ʻOhana date from Eddie's "Apply by").
      The bold line is one of three: "By <date>", "On <date>" or "Due today". */
   function longDate(p) { return SHORT_MONTHS[p.m - 1] + " " + p.d + ", " + p.y; }
+  /* "Update Scottie" on each box for ʻOhana Members (Nov 13): opens Ask Scottie, which replies first */
+  function updBtn(client, box) {
+    return client ? '<button type="button" class="hw-upd" data-upd="' + esc(box) + '">Update Scottie</button>' : "";
+  }
   function nextActionBox(V, client, s, firstName) {
     var t = todayParts(), acts = [];
     (V.cards || []).forEach(function (e) {
@@ -1234,13 +1238,13 @@
     var when = a.days <= 0 ? "Due today" : a.how === "by" ? "By " + longDate(a.date) : a.how === "on" ? "On " + longDate(a.date) : "Nothing due";
     var who = firstName ? "Next action for " + firstName : "Your next action";
     return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who) + '</span><b class="hw-v">' + esc(when) + '</b>' +
-      '<span class="hw-s"><b>' + esc(a.what) + "</b><br>" + esc(a.sub) + "</span></div>";
+      '<span class="hw-s"><b>' + esc(a.what) + "</b><br>" + esc(a.sub) + updBtn(client, "Next action") + "</span></div>";
   }
   function nextCardBox(V, client) {
     var nx = nextEntry(V);
     var pts = client ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
     var bonus = pts ? pts.toLocaleString("en-US") + " points" : "Ask Scottie";
-    var bottom = client ? (pts && nx && nx.eligible ? "" : '<a class="hw-nx-go" href="' + SCOTTIE_SMS + '">Text Scottie &rsaquo;</a>')
+    var bottom = client ? updBtn(client, "Your next card")
       : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>';
     return '<div class="hw-box hw-next"><span class="hw-l hw-nx-t">Your next card</span>' +
       '<div class="hw-v hw-nx-rows"><span><small>When to apply:</small> ' + esc(whenToApply(nx, client)) + "</span>" +
@@ -1275,8 +1279,8 @@
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
-      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", "&nbsp;") + /* no card names in this box (Scottie's secrecy rule, Nov 13) */
-      box("My Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>') + "</div>";
+      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", updBtn(cl, "Downgrade or cancel") || "&nbsp;") + /* no card names in this box (Scottie's secrecy rule, Nov 13) */
+      box("My Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>' + updBtn(cl, "My Rewards Cards")) + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +

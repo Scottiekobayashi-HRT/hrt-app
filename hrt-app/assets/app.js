@@ -511,3 +511,11 @@ document.addEventListener("click", function (e) {
     location.hash = "#plans";
   }
 }, true);
+/* Update Scottie buttons (Nov 13): open Ask Scottie ready for the member's update */
+document.addEventListener("click", function (e) {
+  var b = e.target.closest && e.target.closest("[data-upd]");
+  if (!b) return;
+  e.preventDefault();
+  if (typeof window.HRT_ASK_UPDATE === "function") window.HRT_ASK_UPDATE(b.getAttribute("data-upd"));
+});
+
