@@ -1163,3 +1163,4 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hero .hero-date.hero-howzit{display:block}
 .hw-next .hw-nx-rows{justify-content:center;align-self:center}
 .hw-box .hw-dc{display:block;color:#c9d6e3}
+.hero-howzit .hw-ask a{color:#f5c75a;font-weight:800;text-decoration:none}.hero-howzit .hw-ask a:hover{text-decoration:underline}
