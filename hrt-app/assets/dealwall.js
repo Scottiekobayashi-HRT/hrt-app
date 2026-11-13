@@ -509,7 +509,8 @@
     /* Nov 12 (Scottie and Eddie): no title, level pill or intro. Just the date on the
        left and the wall buttons on the right; the tiles speak for themselves. */
     head.classList.add("dw-head-min");
-    head.appendChild(el("span", "dw-when dw-upd", feed.updated ? "Updated " + shortDate(feed.updated) : ""));
+    head.appendChild(el("h2", null, "Scottie's Wall"));
+    head.appendChild(el("span", "dw-when dw-upd", feed.updated ? "updated " + shortDate(feed.updated) : ""));
     var nav = el("div", "dw-nav");
     head.appendChild(nav);
     wrap.appendChild(head);
