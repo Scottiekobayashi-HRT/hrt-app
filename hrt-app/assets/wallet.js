@@ -1193,8 +1193,11 @@
       big = days <= 0 ? "Now" : days === 1 ? "Tomorrow" : "In " + days + " days";
       sub = days <= 0 ? "You can apply now" : SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) + ", " : " ") + p[0];
     } else if (client) { big = "Ask Scottie"; sub = "for your next application date"; }
-    else { big = "Now"; sub = "ʻOhana Members time it with Scottie"; }
-    return '<div class="hw-box hw-elig"><span class="hw-l">Your next application</span><b class="hw-v">' + esc(big) + '</b><span class="hw-s">' + esc(sub) + "</span></div>";
+    else { big = "Now"; sub = ""; }
+    /* Subscribers get Learn more; ʻOhana Members already have Scottie (Nov 12) */
+    return '<div class="hw-box hw-elig"><span class="hw-l">Your Next Card: When to apply</span><b class="hw-v">' + esc(big) + '</b>' +
+      (sub ? '<span class="hw-s">' + esc(sub) + "</span>" : "") +
+      (client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>') + "</div>";
   }
   function nextCardBox(V, client) {
     var idx = catIndex(), nx = null;
@@ -1216,7 +1219,7 @@
       sub = "to your FREE Travel Rewards Piggy bank";
       go = client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>';
     }
-    return '<div class="hw-box hw-next"><span class="hw-l">' + (client ? (pts ? "Your next card will add" : "Your next card") : "Your next card would add") + '</span><b class="hw-v">' + esc(big) + '</b>' +
+    return '<div class="hw-box hw-next"><span class="hw-l">' + (client ? (pts ? "Your next card will add" : "Your next card") : "Your next card will add") + '</span><b class="hw-v">' + esc(big) + '</b>' +
       '<span class="hw-s">' + esc(sub) + "</span>" + go + "</div>";
   }
   function miniHtml() {

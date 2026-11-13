@@ -913,8 +913,8 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .hw-boxes:has(.hw-next){grid-template-columns:minmax(0,1fr) minmax(0,1.7fr) minmax(0,.8fr) minmax(0,1fr)}
 @media (max-width:760px){.hw-boxes:has(.hw-next){grid-template-columns:1fr 1fr}}
 .hw-next .hw-s,.hw-elig .hw-s{white-space:normal}
-.hw-next .hw-nx-go{margin-top:4px;font-size:12.5px;font-weight:700;color:#f5c75a;text-decoration:none}
-.hw-next .hw-nx-go:hover{text-decoration:underline}
+.hw-box .hw-nx-go{margin-top:4px;font-size:12.5px;font-weight:700;color:#f5c75a;text-decoration:none}
+.hw-box .hw-nx-go:hover{text-decoration:underline}
 .hw-cap{margin-top:12px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.05)}
 .hw-cap-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:15px;color:#cfe0ee}
 .hw-cap-top b{font-family:'Montserrat',sans-serif;font-size:21px;font-weight:800;color:#fff;margin-right:5px}
