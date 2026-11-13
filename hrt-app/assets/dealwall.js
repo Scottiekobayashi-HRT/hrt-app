@@ -72,7 +72,8 @@
     ".dw-lock .dw-lc span{font-size:11px;color:#e3ebf4;font-weight:600}",
     ".dw-cta{margin-top:11px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}",
     ".dw-note{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.45;padding:0 2px}",
-    "@media (max-width:640px){.dw-nav{display:none}.dw-card{flex-basis:78vw;max-width:260px}.dw-lock{flex-basis:62vw;max-width:220px}}",
+    ".dw-nav .dw-ctl{width:auto;min-width:30px;padding:0 8px;font-size:12px;font-weight:800;letter-spacing:.02em}",
+    "@media (max-width:640px){.dw-nav .dw-arrow{display:none}.dw-card{flex-basis:78vw;max-width:260px}.dw-lock{flex-basis:62vw;max-width:220px}}",
     /* a card is a button now: say so, and show which one is open */
     ".dw-card:hover{border-color:var(--coral)}",
     ".dw-card:focus-visible{outline:2px solid var(--coral);outline-offset:2px}",
@@ -150,8 +151,8 @@
   // Arrow buttons that page the rail. They hide themselves when everything
   // already fits, so they never look broken on a short wall.
   function attachNav(rail, nav) {
-    var prev = el("button", null, "‹");
-    var next = el("button", null, "›");
+    var prev = el("button", "dw-arrow", "‹");
+    var next = el("button", "dw-arrow", "›");
     prev.type = next.type = "button";
     prev.setAttribute("aria-label", "Scroll left");
     next.setAttribute("aria-label", "Scroll right");
@@ -214,11 +215,14 @@
      hovers, touches, tabs into it or has a tile open, and for anyone who has
      asked for less motion. Off-screen or hidden tabs do not scroll. */
   var AUTO_MS = 3800;
-  function autoScroll(rail, isBusy) {
+  /* Play / pause and speed buttons (Scottie and Eddie, Nov 12). Speed is
+     remembered per browser; pause from the button stays paused until Play. */
+  var SPEEDS = [[1, AUTO_MS], [2, 1900], [3, 1270]];
+  function savedSpeed() { try { var i = parseInt(localStorage.getItem("hrt_dw_speed"), 10); return i >= 0 && i < SPEEDS.length ? i : 0; } catch (e) { return 0; } }
+  function autoScroll(rail, isBusy, nav) {
     var reduce = false;
     try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
-    if (reduce) return;
-    var hold = false, resumeT = null;
+    var hold = false, resumeT = null, stopped = !!reduce, sp = savedSpeed();
     function pause() { hold = true; clearTimeout(resumeT); }
     function resume(ms) { clearTimeout(resumeT); resumeT = setTimeout(function () { hold = false; }, ms || 0); }
     rail.addEventListener("mouseenter", pause);
@@ -228,15 +232,43 @@
     rail.addEventListener("touchstart", pause, { passive: true });
     rail.addEventListener("touchend", function () { resume(6000); }, { passive: true });
     rail.addEventListener("wheel", function () { pause(); resume(6000); }, { passive: true });
-    setInterval(function () {
-      if (hold || document.hidden || (isBusy && isBusy())) return;
+    if (nav) {
+      var play = el("button", "dw-ctl dw-play"), speed = el("button", "dw-ctl dw-speed");
+      play.type = speed.type = "button";
+      function paint() {
+        play.textContent = stopped ? "▶" : "❚❚";
+        play.setAttribute("aria-label", stopped ? "Play the wall" : "Pause the wall");
+        play.setAttribute("aria-pressed", stopped ? "false" : "true");
+        speed.textContent = SPEEDS[sp][0] + "x";
+        speed.setAttribute("aria-label", "Scroll speed " + SPEEDS[sp][0] + "x, tap to change");
+      }
+      play.addEventListener("click", function () { stopped = !stopped; paint(); if (!stopped) { hold = false; tick(true); } });
+      speed.addEventListener("click", function () {
+        sp = (sp + 1) % SPEEDS.length; paint();
+        try { localStorage.setItem("hrt_dw_speed", String(sp)); } catch (e) {}
+        if (stopped) { stopped = false; paint(); }
+        hold = false; tick(true);
+      });
+      paint();
+      nav.insertBefore(speed, nav.firstChild);
+      nav.insertBefore(play, nav.firstChild);
+    }
+    var timer = null;
+    function step() {
+      if (stopped || hold || document.hidden || (isBusy && isBusy())) return;
       if (!rail.isConnected || rail.offsetParent === null) return;
       var max = rail.scrollWidth - rail.clientWidth;
       if (max <= 4) return;
-      var card = rail.firstElementChild, step = card ? card.getBoundingClientRect().width + 12 : 230;
+      var card = rail.firstElementChild, w = card ? card.getBoundingClientRect().width + 12 : 230;
       if (rail.scrollLeft >= max - 4) rail.scrollTo({ left: 0, behavior: "smooth" });
-      else rail.scrollBy({ left: step, behavior: "smooth" });
-    }, AUTO_MS);
+      else rail.scrollBy({ left: w, behavior: "smooth" });
+    }
+    function tick(now) {
+      clearTimeout(timer);
+      if (now) step();
+      timer = setTimeout(function () { step(); tick(false); }, SPEEDS[sp][1]);
+    }
+    tick(false);
   }
 
   /* Today in Hawaii (no daylight saving, always UTC-10), as YYYY-MM-DD. */
@@ -405,7 +437,7 @@
     t.appendChild(body);
     var locked = el("div", "dw-body dw-block");
     locked.appendChild(el("b", "dw-tt", "A live transfer bonus"));
-    locked.appendChild(el("span", "dw-tsub", "ʻOhana Members see every bonus the day it starts"));
+    locked.appendChild(el("span", "dw-tsub", "ʻOhana Members see it weekly, HRT PRO members see it daily"));
     t.appendChild(locked);
     var acts = el("div", "dw-tacts");
     var open = el("a", "dw-tbtn dw-bopen", "See all transfer bonuses"); open.href = "#transfers"; open.setAttribute("data-route", "transfers");
@@ -563,7 +595,7 @@
     }
     wrap.appendChild(exp);
     attachNav(rail, nav);
-    autoScroll(rail, function () { return openKey !== null; });
+    autoScroll(rail, function () { return openKey !== null; }, nav);
 
     /* Nov 11 (Scottie): the separate HRT PRO business class box is gone. Its locked
        tiles now sit inside the wall (proTile), and the wall carries the HRT PRO mark. */
@@ -1071,7 +1103,7 @@
 
     drawCards();
     attachNav(rail, nav);
-    autoScroll(rail);
+    autoScroll(rail, null, nav);
     return wrap;
   }
 
