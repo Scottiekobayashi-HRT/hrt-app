@@ -449,7 +449,14 @@
     body.appendChild(big);
     t.appendChild(body);
     var acts = el("div", "dw-tacts");
-    var more = el("a", "dw-tbtn", "See more kamaʻāina deals"); more.href = "#kamaaina"; more.setAttribute("data-route", "kamaaina");
+    /* Nov 12: the button goes to this deal's own offer page, not the tracker */
+    var more;
+    if (/^https:\/\//.test(k.url || "")) {
+      more = el("a", "dw-tbtn", "See this deal"); more.href = k.url; more.target = "_blank"; more.rel = "noopener";
+    } else {
+      more = el("a", "dw-tbtn", "See this deal"); more.href = "#kamaaina"; more.setAttribute("data-route", "kamaaina");
+      more.addEventListener("click", function () { setTimeout(function () { try { if (window.HRT_KAMA && k.idx >= 0) window.HRT_KAMA.open(k.idx); } catch (e) {} }, 300); });
+    }
     acts.appendChild(more); t.appendChild(acts);
     return t;
   }
