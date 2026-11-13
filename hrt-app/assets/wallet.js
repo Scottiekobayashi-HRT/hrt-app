@@ -1195,9 +1195,9 @@
     } else if (client) { big = "Ask Scottie"; sub = "for your next application date"; }
     else { big = "Now"; sub = ""; }
     /* Subscribers get Learn more; ʻOhana Members already have Scottie (Nov 12) */
+    /* three rows in every box (title, number, bottom line) so the four line up (Nov 12) */
     return '<div class="hw-box hw-elig"><span class="hw-l">When to apply for your next card</span><b class="hw-v">' + esc(big) + '</b>' +
-      (sub ? '<span class="hw-s">' + esc(sub) + "</span>" : "") +
-      (client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>') + "</div>";
+      '<span class="hw-s">' + (client ? esc(sub) : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>') + "</span></div>";
   }
   function nextCardBox(V, client) {
     var idx = catIndex(), nx = null;
@@ -1216,11 +1216,11 @@
     } else {
       if (!client) { pts = NEXT_DEFAULT.pts; name = NEXT_DEFAULT.name; }
       big = "+" + pts.toLocaleString("en-US") + " points";
-      sub = "to your FREE Travel Rewards Piggy bank";
       go = client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>';
     }
-    return '<div class="hw-box hw-next"><span class="hw-l">' + (client ? (pts ? "Your next card will add" : "Your next card") : "Your next card will add") + '</span><b class="hw-v">' + esc(big) + '</b>' +
-      '<span class="hw-s">' + esc(sub) + "</span>" + go + "</div>";
+    var label = (client && !pts) ? "Your next card" : "Your next card will add to your FREE Travel Rewards Piggy Bank";
+    var bottom = (client && !pts) ? esc(sub) + " " + go : go;
+    return '<div class="hw-box hw-next"><span class="hw-l">' + esc(label) + '</span><b class="hw-v">' + esc(big) + '</b><span class="hw-s">' + bottom + "</span></div>";
   }
   function miniHtml() {
     var cl = member().client;
