@@ -1251,7 +1251,7 @@
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + eligibleBox(V, cl) + nextCardBox(V, cl) +
       box("Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>') +
-      box("When to downgrade or cancel", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
+      box("Next card to downgrade or cancel", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +
