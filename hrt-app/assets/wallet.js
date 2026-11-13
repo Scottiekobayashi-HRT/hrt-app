@@ -1214,7 +1214,10 @@
      every box reads its own sheet field. Otherwise the boxes work it out from the wallet. */
   /* Only wording Scottie has approved can show under the bold line (Nov 13: "no rogue
      sentence"). Anything else is hidden. Filled in once he approves the list. */
-  var APPROVED_ACTION_TEXT = [];
+  var APPROVED_ACTION_TEXT = [ /* approved by Scottie, Nov 13 */
+    "Apply with the link Scottie sent you", "Tell Scottie when the bank decides", "Finish your minimum spend",
+    "Tell Scottie when your bonus points post", "Apply for your next card", "Decide to keep, downgrade or cancel a card",
+    "Text Scottie about your next step", "Reply to Scottie's last text", "Scottie will text you when it's time"];
   function approvedText(t) { return APPROVED_ACTION_TEXT.indexOf(String(t || "").trim()) > -1 ? String(t).trim() : ""; }
   function opsData() { var w = state.wallet; return w && !state.demo && w.ops && typeof w.ops === "object" ? w.ops : null; }
   function isoParts(x) { var p = String(x || "").split("-"); return p.length === 3 ? { y: +p[0], m: +p[1], d: +p[2] } : null; }
@@ -1245,35 +1248,41 @@
     (V.cards || []).forEach(function (e) {
       if (e.status === "next" || e.status === "closed") return;
       var bs = bonusState(e, t);
-      if (bs && !bs.met && !bs.missed) acts.push({ days: bs.days, how: "by", date: bs.by, what: "Finish your welcome bonus spend", sub: money(bs.left) + " to go" });
+      if (bs && !bs.met && !bs.missed) acts.push({ days: bs.days, how: "by", date: bs.by, what: "Finish your minimum spend" });
     });
     if (s.next && s.next.renewal && s.next.renewal.days <= 60) {
       var r = s.next.renewal;
-      acts.push({ days: r.days, how: "by", date: { y: r.y, m: r.m, d: r.d || 1 }, what: "Decide to keep, downgrade or cancel a card", sub: "before the annual fee posts" });
+      acts.push({ days: r.days, how: "by", date: { y: r.y, m: r.m, d: r.d || 1 }, what: "Decide to keep, downgrade or cancel a card" });
     }
     var nx = nextEntry(V);
     if (client && nx && nx.eligible) {
       var p = nx.eligible.split("-"), d = { y: +p[0], m: +p[1], d: p[2] ? +p[2] : 1 };
-      acts.push({ days: dayNum(d.y, d.m, d.d) - dayNum(t.y, t.m, t.d), how: "on", date: d, what: "Apply for your next card", sub: "Text Scottie before you apply" });
+      acts.push({ days: dayNum(d.y, d.m, d.d) - dayNum(t.y, t.m, t.d), how: "on", date: d, what: "Apply for your next card" });
     }
     acts.sort(function (a, b) { return a.days - b.days; });
     var a = acts[0];
-    if (!a) a = { days: 9999, how: "set", what: "" };
+    if (!a) a = { days: 9999, how: "set", what: "" }; /* nothing open: bold line only */
     var when = a.how === "set" ? "You're all set" : a.days < 0 ? "OVERDUE" : a.days === 0 ? "Due today" : a.how === "by" ? "By " + longDate(a.date) : "On " + longDate(a.date);
     var who = firstName ? "Next action for " + firstName : "Your next action";
     return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who) + '</span><b class="hw-v">' + esc(when) + '</b>' +
       '<span class="hw-s">' + (approvedText(a.what) ? "<b>" + esc(approvedText(a.what)) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
   }
+  /* "Scott's" style possessive, written the way Scottie typed it (Nov 13) */
+  function firstOf() { return String(member().firstName || "").trim().split(/\s+/)[0] || ""; }
+  function poss(n, fallback) { return n ? n + "ʻs" : fallback; }
   function nextCardBox(V, client) {
     var nx = nextEntry(V), ops = opsData();
     if (ops && ops.nextCard) nx = { eligible: ops.nextCard.date || "", bonus: { reward: ops.nextCard.bonusPts ? String(ops.nextCard.bonusPts) : "" } };
     var pts = client || ops ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
     var bonus = pts ? pts.toLocaleString("en-US") + " points" : "Ask Scottie";
-    var bottom = client ? updBtn(client, "Your next card")
-      : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>';
-    return '<div class="hw-box hw-next"><span class="hw-l hw-nx-t">Your next card</span>' +
-      '<div class="hw-v hw-nx-rows"><span><small>When to apply:</small> ' + esc(whenToApply(nx, client || !!ops)) + "</span>" +
-      '<span><small>Bonus:</small> <em>' + esc(bonus) + "</em></span></div>" +
+    /* Learn more by level (Nov 13): Subscribers go to the ʻOhana pitch (Membership levels for now).
+       ʻOhana and Pro will get the link and info to apply; that form is still to be decided, so no
+       button for them yet (ʻOhana keep Update Scottie). */
+    var lvl = level();
+    var bottom = lvl === "subscriber" ? '<a class="hw-nx-go" href="#plans" data-route="plans">Learn more &rsaquo;</a>' : updBtn(client, "Next card");
+    return '<div class="hw-box hw-next"><span class="hw-l hw-nx-t">' + esc(poss(firstOf(), "Your") + " Next card") + '</span>' +
+      '<div class="hw-v hw-nx-rows"><span><small>Bonus:</small> <em>' + esc(bonus) + "</em></span>" +
+      '<span><small>When to apply:</small> ' + esc(whenToApply(nx, client || !!ops)) + "</span></div>" +
       '<span class="hw-s">' + bottom + "</span></div>";
   }
   function miniHtml() {
@@ -1281,7 +1290,7 @@
     var tag = cl ? '<span class="hw-tag"><span class="hw-star">' + OH_STAR + "</span>ʻOhana Wallet · Managed by Scottie</span>" : "";
     var acts = function () {
       return '<div class="hw-acts">' + (cl ? '<a class="hw-btn ghost" href="' + SCOTTIE_SMS + '">Text Scottie</a>' : "") +
-        '<a class="hw-btn gold" href="#wallet" data-route="wallet">' + (cl ? "Open wallet" : "Open My Wallet") + ' <span aria-hidden="true">&rsaquo;</span></a></div>';
+        '<a class="hw-btn gold" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "My") + " Wallet") + ' <span aria-hidden="true">&rsaquo;</span></a></div>';
     };
     miniMode = "";
     if (state.error) { miniMode = "empty"; return tag + '<p class="hw-lede">' + esc(errText(state.error)) + "</p>" +
@@ -1304,9 +1313,9 @@
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
-      (opsData() ? box("Next card to downgrade or cancel", (function (f) { return f ? esc((f.d ? dayText(f) : SHORT_MONTHS[f.m - 1]) + " " + f.y) : "None"; })(isoParts(opsData().feeDate)), updBtn(cl, "Downgrade or cancel") || "&nbsp;") :
-      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", updBtn(cl, "Downgrade or cancel") || "&nbsp;")) + /* no card names in this box (Scottie's secrecy rule, Nov 13) */
-      box("My Rewards Cards", String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>' + updBtn(cl, "My Rewards Cards")) + "</div>";
+      (opsData() ? box("Next card to downgrade or cancel", (function (f) { return f ? esc((f.d ? dayText(f) : SHORT_MONTHS[f.m - 1]) + " " + f.y) : "None"; })(isoParts(opsData().feeDate)), (opsData().feeCard ? '<span class="hw-dc">' + esc(String(opsData().feeCard).slice(0, 40)) + "</span>" : "") + (updBtn(cl, "Downgrade or cancel") || (opsData().feeCard ? "" : "&nbsp;"))) :
+      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", (nx ? '<span class="hw-dc">' + esc(shortName(nx.card.name)) + "</span>" : "&nbsp;") + updBtn(cl, "Downgrade or cancel"))) + /* the member's own card, named again (Scottie, Nov 13) */
+      box(esc(poss(firstOf(), "My") + " Rewards Cards"), String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "my") + " Wallet") + ' &rsaquo;</a>' + updBtn(cl, "Rewards Cards")) + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +

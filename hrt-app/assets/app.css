@@ -1158,3 +1158,8 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hw-box .hw-upd:hover{background:rgba(245,199,90,.25)}
 
 .hw-act .hw-s .hw-nx-go{display:block;margin-top:6px}
+
+/* Howzit line (Nov 13): always shows, now that the big Aloha heading is gone */
+.hero .hero-date.hero-howzit{display:block}
+.hw-next .hw-nx-rows{justify-content:center;align-self:center}
+.hw-box .hw-dc{display:block;color:#c9d6e3}

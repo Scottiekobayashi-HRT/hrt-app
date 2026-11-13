@@ -2,7 +2,7 @@
    Field map (Scottie and Eddie, Nov 13):
      Next action for <first_name>  first_name, member_action_type, member_action_date, member_action_text
      Your next card                 next_card_pitch_date (When to apply), next_card_bonus_pts (Bonus)
-     Next card to downgrade/cancel  fee_anniversary ("CSP:2027-05-01", the date only; never the card)
+     Next card to downgrade/cancel  fee_date (or the date in fee_anniversary) + fee_card (the member's own card)
      My Rewards Cards               wallet (count of entries, not counting cxld)
    Secrecy rule: no card names ever leave this file. next_card_plan, mrs_terms, wallet text
    and fee_anniversary codes are read for dates and counts only.
@@ -25,7 +25,8 @@ export function toOps(r) {
   const ops = {
     action: { type, date: type === "all_set" ? "" : day(r.member_action_date), text: String(r.member_action_text || "").slice(0, 80) },
     nextCard: { date: day(r.next_card_pitch_date), bonusPts: Number.isFinite(pts) ? pts : null },
-    feeDate: day(r.fee_anniversary),
+    feeDate: day(r.fee_date || r.fee_anniversary),
+    feeCard: String(r.fee_card || "").slice(0, 40), /* the member's own card to downgrade or cancel (Scottie, Nov 13) */
     cardCount: cardCount(r.wallet)
   };
   if (ops.nextCard.bonusPts == null) delete ops.nextCard.bonusPts;

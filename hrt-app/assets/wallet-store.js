@@ -167,6 +167,7 @@
         if (o.nextCard.bonusPts != null && !(typeof o.nextCard.bonusPts === "number" && o.nextCard.bonusPts >= 0 && o.nextCard.bonusPts < 1e7)) throw fail("INVALID", "ops next card bonus");
       }
       if (!isDay(o.feeDate)) throw fail("INVALID", "ops fee date");
+      if (o.feeCard != null && (typeof o.feeCard !== "string" || o.feeCard.length > 40)) throw fail("INVALID", "ops fee card");
       if (o.cardCount != null && !(typeof o.cardCount === "number" && o.cardCount >= 0 && o.cardCount < 100)) throw fail("INVALID", "ops card count");
     }
     return w;
