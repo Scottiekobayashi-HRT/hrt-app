@@ -152,6 +152,13 @@ ok('nonstop only with no nonstop dates shows the empty card', nsC[0].none === tr
   ok("mix: kinds spread out (no 3 in a row)", !o.some((t, i) => i > 1 && o[i - 1].kind === t.kind && o[i - 2].kind === t.kind));
   const few = X.mixOrder({ japan: ["j"], other: [], bonus: [], testimonial: [], flight: [], news: ["n1", "n2"], kama: [] }, X.MIX, 18);
   ok("mix: runs out gracefully", few.length === 3);
+  /* Nov 12 rhythm: 2 points deals, then 1 other tile taking turns */
+  const pts = many("p", 10).map((x) => ({ kind: "points", item: x }));
+  const r = X.rhythmOrder(pts, { news: many("n", 5), bonus: many("b", 5), kama: many("k", 5), pro: many("t", 5), testimonial: [] }, 15);
+  ok("rhythm: 2 of every 3 are points deals", r.every((t, i) => (i % 3 < 2) === (t.kind === "points")));
+  ok("rhythm: others take turns, empty skipped", r.filter((t, i) => i % 3 === 2).map((t) => t.kind).join() === "news,bonus,kama,pro,news");
+  const r2 = X.rhythmOrder(pts.slice(0, 2), { news: ["n"], bonus: [], kama: [], pro: [], testimonial: [] }, 21);
+  ok("rhythm: runs out gracefully", r2.length === 3);
   const g = X.dealGroups([{ dest: "HND" }, { dest: "LAX" }, { dest: "kix" }, { dest: "LAS" }]);
   ok("mix: Japan split", g.japan.length === 2 && g.other.length === 2);
   ok("mix: subscriber routes", X.subRoute({ dest: "HND" }) && X.subRoute({ dest: "JFK" }) && !X.subRoute({ dest: "SEA" }));

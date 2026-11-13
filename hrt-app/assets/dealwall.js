@@ -338,7 +338,7 @@
      answers after the wall is drawn.
   ===================================================================== */
   var MIX = { japan: 25, other: 25, pro: 8, bonus: 10, testimonial: 5, flight: 10, news: 15, kama: 10 };
-  var MIX_MAX = 18;
+  var MIX_MAX = 21;
   var JAPAN = { HND: 1, NRT: 1, KIX: 1, ITM: 1, NGO: 1, FUK: 1, CTS: 1, OKA: 1 };
   var SUB_ROUTES = { HND: 1, LAS: 1, LAX: 1, JFK: 1 };
   /* ʻOhana sees every route except these (Scottie, Nov 12): San Diego, the Philippines,
@@ -364,6 +364,27 @@
       live.forEach(function (k) { cur[k] += weights[k]; total += weights[k]; if (best === null || cur[k] > cur[best]) best = k; });
       cur[best] -= total;
       out.push({ kind: best, item: left[best].shift() });
+    }
+    return out;
+  }
+  /* Wall rhythm (Scottie and Eddie, Nov 12): two points deals, then one other tile.
+     The other tile takes turns evenly: HRT news, transfer deal, kamaʻāina deal, HRT PRO,
+     testimonial (empty kinds are skipped). When one side runs out the other keeps going. */
+  var EXTRA_CYCLE = ["news", "bonus", "kama", "pro", "testimonial"];
+  function rhythmOrder(points, groups, max) {
+    var pts = points.slice(), left = {}, out = [], turn = 0;
+    EXTRA_CYCLE.forEach(function (k) { left[k] = (groups[k] || []).slice(); });
+    function nextExtra() {
+      for (var i = 0; i < EXTRA_CYCLE.length; i++) {
+        var k = EXTRA_CYCLE[(turn + i) % EXTRA_CYCLE.length];
+        if (left[k].length) { turn = (turn + i + 1) % EXTRA_CYCLE.length; return { kind: k, item: left[k].shift() }; }
+      }
+      return null;
+    }
+    while (out.length < max) {
+      var slot = out.length % 3, t = slot < 2 ? (pts.shift() || nextExtra()) : (nextExtra() || pts.shift());
+      if (!t) break;
+      out.push(t);
     }
     return out;
   }
@@ -499,8 +520,9 @@
     var exp = el("div", "dw-exp");   /* the panel a card opens, under the rail */
     var openKey = null;
     var g = dealGroups((feed.economy || []).filter(function (d) { return !OHANA_SKIP[String(d.dest || "").toUpperCase()]; }));
-    var tiles = mixOrder({ japan: g.japan, other: g.other, pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS, flight: [],
-      news: feed._news || [], kama: feed._kama || [] }, MIX, MIX_MAX);
+    var pointsTiles = mixOrder({ japan: g.japan, other: g.other }, { japan: 1, other: 1 }, 1000);
+    var tiles = rhythmOrder(pointsTiles, { pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
+      news: feed._news || [], kama: feed._kama || [] }, MIX_MAX);
     tiles.forEach(function (tile) {
       if (tile.kind === "news") return rail.appendChild(newsTile(tile.item));
       if (tile.kind === "kama") return rail.appendChild(kamaTile(tile.item));
@@ -967,8 +989,9 @@
          plus news, transfer bonuses (open for PRO) and kamaʻāina deals. */
       var dealNodes = Array.prototype.slice.call(rail.children);
       if (dealNodes.length && (EXTRAS.news.length || EXTRAS.bonuses.length || EXTRAS.kama.length || TESTIMONIALS.length)) {
-        var order = mixOrder({ deals: dealNodes, bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama },
-          { deals: 50, bonus: 10, testimonial: 5, news: 15, kama: 10 }, Math.max(dealNodes.length * 2, 8)); /* keep deals about half the wall */
+        var order = rhythmOrder(dealNodes.map(function (n) { return { kind: "deals", item: n }; }),
+          { bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama },
+          dealNodes.length + Math.ceil(dealNodes.length / 2)); /* every deal shows, one other tile after each two */
         rail.innerHTML = "";
         order.forEach(function (t) {
           rail.appendChild(t.kind === "deals" ? t.item : t.kind === "news" ? newsTile(t.item) : t.kind === "kama" ? kamaTile(t.item) :
@@ -1187,7 +1210,7 @@
       });
   }
 
-  window.HRT_DEALWALL = { _test: { mixOrder: mixOrder, dealGroups: dealGroups, subRoute: subRoute, MIX: MIX, freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs, routeChoices: routeChoices, cleanRoutes: cleanRoutes, applyRoutes: applyRoutes, migratePrefs: migratePrefs } };
+  window.HRT_DEALWALL = { _test: { mixOrder: mixOrder, rhythmOrder: rhythmOrder, dealGroups: dealGroups, subRoute: subRoute, MIX: MIX, freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs, routeChoices: routeChoices, cleanRoutes: cleanRoutes, applyRoutes: applyRoutes, migratePrefs: migratePrefs } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
