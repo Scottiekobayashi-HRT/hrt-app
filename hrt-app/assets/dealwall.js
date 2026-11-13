@@ -125,7 +125,10 @@
     ".dw-navy .dw-nav button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff;box-shadow:none}",
     ".dw-navy .dw-rail::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}.dw-navy .dw-note{color:#c7d4e2}",
     ".dw-navy a.dw-promark{text-decoration:none;background:linear-gradient(135deg,#f5c75a,#d97040)!important;color:#1a1204!important}",
-    ".dw-kpro{background:linear-gradient(135deg,#f5c75a,#d97040)!important;color:#1a1204!important}",
+    /* label colours (Nov 12): points deals stand out in gold-orange, every other label is the same white pill */
+    ".dw .dw-kind{background:rgba(255,255,255,.94);color:#14202e}",
+    ".dw .dw-kind.dw-kpts{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;box-shadow:0 2px 8px rgba(217,112,64,.45)}",
+    ".dw-head-min{margin-bottom:10px}.dw-navy .dw-head-min .dw-upd{color:#bccde0;font-size:12.5px;font-weight:700}",
     ".dw-pblur{filter:blur(5px) grayscale(.5);transform:scale(1.1);background-color:#24354d!important}.dw-protile .dw-tt{color:var(--text)}",
     ".dw a.dw-tbtn.dw-tgold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;border-color:transparent}",
     ".dw-q{margin:0;font-size:13.5px;line-height:1.45;color:var(--text);font-style:italic}"
@@ -503,17 +506,13 @@
     var win = feed.window_days || 30;
 
     var head = el("div", "dw-head");
-    head.appendChild(el("h2", null, "Deals, News, Flights"));
-    /* No HRT PRO mark here: this wall is only shown to non-PRO members. PRO members
-       get their own wall, which carries the "★ HRT PRO" mark (renderPro). */
-    head.appendChild(el("span", "dw-limit dw-lv-sub", "Free · 4 routes, " + win + " days"));
-    head.appendChild(el("span", "dw-limit dw-lv-oh", "ʻOhana · 10 routes, " + win + " days"));
-    head.appendChild(el("span", "dw-sub", (feed.hub || "HNL") + " departures"));
-    if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
+    /* Nov 12 (Scottie and Eddie): no title, level pill or intro. Just the date on the
+       left and the wall buttons on the right; the tiles speak for themselves. */
+    head.classList.add("dw-head-min");
+    head.appendChild(el("span", "dw-when dw-upd", feed.updated ? "Updated " + shortDate(feed.updated) : ""));
     var nav = el("div", "dw-nav");
     head.appendChild(nav);
     wrap.appendChild(head);
-    wrap.appendChild(el("p", "dw-lede", "Points deals from Honolulu, plus the news that matters to Hawaiʻi travelers. We sort through all the travel news so you only see what fits your trips."));
 
     /* economy: real numbers, scrolling rail */
     var rail = el("div", "dw-rail");
@@ -562,7 +561,7 @@
       var ph = el("div", "dw-ph");
       if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
       /* top label says what kind of tile it is; the calendar name is the button (Nov 12) */
-      ph.appendChild(el("span", "dw-kind", "Points deal"));
+      ph.appendChild(el("span", "dw-kind dw-kpts", "Points deal"));
       var cityEl = el("span", "dw-city", d.city || d.dest || "");
       cityEl.appendChild(el("small", "dw-cityrt", (d.origin || "") + " → " + (d.dest || "")));
       ph.appendChild(cityEl);
