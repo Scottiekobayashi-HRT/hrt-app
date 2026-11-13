@@ -326,7 +326,7 @@
        testimonials 5, flights 10, news 15, kamaʻāina deals 10.
      Flights are on hold (no live flight tiles yet) and testimonials start
      empty, so their share simply goes to the others.
-     Sources: points deals = the Atmos Reward Calendar feed (FEED);
+     Sources: points deals = Scottie’s Atmos Points Calendar feed (FEED);
      transfer bonuses = the Transfer Bonuses page (window.HRT_TB_LIVE);
      news = hawaiirewardtravel.com/bloghome via /api/site-news;
      kamaʻāina = the Kamaʻāina Deals tool (window.HRT_KAMA.top).
@@ -522,7 +522,7 @@
       });
       var ph = el("div", "dw-ph");
       if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
-      var brand = el("span", "dw-brand"); brand.appendChild(el("small", null, "From Scottie's")); brand.appendChild(document.createTextNode("Atmos Reward Calendar"));
+      var brand = el("span", "dw-brand"); brand.appendChild(el("small", null, "From Scottie's")); brand.appendChild(document.createTextNode("Atmos Points Calendar"));
       ph.appendChild(brand);
       var cityEl = el("span", "dw-city", d.city || d.dest || "");
       cityEl.appendChild(el("small", "dw-cityrt", (d.origin || "") + " → " + (d.dest || "")));

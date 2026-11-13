@@ -499,7 +499,7 @@
       wrap.appendChild(rankCard(r));
       wrap.appendChild(Q.next([
         ["communities", "Atmos Community Calculator", "See which Community gives you the most each year"],
-        ["atmos", "Atmos Reward Calendar", "Find award seats to use your points (HRT PRO)"],
+        ["atmos", "Scottie’s Atmos Points Calendar", "Find award seats to use your points (HRT PRO)"],
         ["wallet", "My Wallet", "Track your Atmos card's perks and renewal date"]
       ]));
       wrap.appendChild(Q.more("ap-tiers", "How to reach each tier", "Silver, Gold, Platinum, Titanium", function () { return pathwaysCard(compute()); }));

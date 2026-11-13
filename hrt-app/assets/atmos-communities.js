@@ -635,7 +635,7 @@
       wrap.appendChild(rankCard(r));
       wrap.appendChild(Q.next([
         ["status", "Atmos Choose to Earn Calculator", "Distance, price or segments: which earns you more"],
-        ["atmos", "Atmos Reward Calendar", "Find award seats to use your points (HRT PRO)"],
+        ["atmos", "Scottie’s Atmos Points Calendar", "Find award seats to use your points (HRT PRO)"],
         ["wallet", "My Wallet", "Track your Atmos card's perks and renewal date"]
       ]));
       wrap.appendChild(Q.more("ac-math", "See the math", "Your top two, line by line", function () { return compareBody(compute()); }));

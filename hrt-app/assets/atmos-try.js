@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   atmos-try.js - "Try the Atmos Reward Calendar" (Nov 12, Scottie)
+   atmos-try.js - "Try Scottie’s Atmos Points Calendar" (Nov 12, Scottie)
 
    Free Subscribers and ʻOhana Members can touch the calendar before they buy:
    one route (HNL to Tokyo Haneda), economy, the next 30 days, laid out like

@@ -35,7 +35,7 @@
  var ROUTES = {
   home:{ title:"Dashboard", hint:"Free tools for Hawaiʻi points travelers" },
   kamaaina:{ title:"Kamaʻāina Deals", hint:"Resident staycation rates by island" },
-  atmos:{ title:"Atmos Reward Calendar", hint:"HRT PRO \u00b7 $9.99/mo" },
+  atmos:{ title:"Scottie’s Atmos Points Calendar", hint:"HRT PRO \u00b7 $9.99/mo" },
   lounges:{ title:"HNL Lounge Map", hint:"Where's the lounge & how do I get in?" },
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },

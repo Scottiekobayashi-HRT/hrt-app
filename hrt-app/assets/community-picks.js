@@ -33,7 +33,7 @@
   };
   var LINKS = {
     "hnl lounge map": { route: "lounges", label: "Open HNL Lounge Map" },
-    "atmos reward calendar": { route: "atmos", label: "Search Atmos Reward Calendar" },
+    "atmos reward calendar": { route: "atmos", label: "Search Scottie’s Atmos Points Calendar" }, "atmos points calendar": { route: "atmos", label: "Search Scottie’s Atmos Points Calendar" },
     "my wallet": { route: "wallet", label: "Open My Wallet" },
     "my wallet store search": { route: "wallet", label: "Which card should I use?" },
     "kamaʻāina deals": { route: "kamaaina", label: "See Kamaʻāina Deals" },

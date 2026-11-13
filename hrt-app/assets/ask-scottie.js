@@ -350,7 +350,7 @@
     if (m.role === "user") return '<div class="asc-msg me"><div class="asc-b">' + esc(m.content) + "</div></div>";
     return '<div class="asc-msg bot"><img class="asc-av" src="' + PHOTO + '" alt="" width="28" height="28">' +
       '<div class="asc-b' + (m.error ? " err" : "") + (m.alert ? " alert" : "") + '">' + fmt(m.content) + tripCard(m.trip) + seatCards(m.seats) +
-      watchOffer(m, i) + (m.atmos ? '<a class="asc-atmos" href="#atmos" data-route="atmos" data-asc-close>&#9733; Unlock the Atmos Reward Calendar</a>' : "") +
+      watchOffer(m, i) + (m.atmos ? '<a class="asc-atmos" href="#atmos" data-route="atmos" data-asc-close>&#9733; Unlock Scottie’s Atmos Points Calendar</a>' : "") +
       (m.handoff ? textBtn("asc-textbtn inline") : "") + "</div></div>";
   }
 
