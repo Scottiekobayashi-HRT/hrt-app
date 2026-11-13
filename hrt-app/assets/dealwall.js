@@ -116,8 +116,8 @@
     ".dw a.dw-tbtn{font-size:12px;font-weight:800;border-radius:999px;padding:7px 11px;text-decoration:none;background:#14202e;color:#fff;border:1px solid #14202e}.dw a.dw-tbtn.ghost{background:none;color:var(--text);border-color:var(--line)}",
     "[data-theme=dark] .dw a.dw-tbtn{background:#f2b84b;color:#14202e;border-color:#f2b84b}[data-theme=dark] .dw a.dw-tbtn.ghost{background:none;color:var(--text);border-color:var(--line)}",
     ".dw-bph{background:linear-gradient(135deg,#1f9d57,#14202e)!important;display:flex;align-items:center;justify-content:center}.dw-bpct{font-size:34px;font-weight:900;color:#fff;letter-spacing:-.02em}",
-    "html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-bopen{display:none}html.ms-client .dw-bonus .dw-block,html.ms-pro .dw-bonus .dw-block{display:none}",
-    "html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-bph{background:linear-gradient(135deg,#8a96a3,#3a4552)!important}html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-bpct{filter:blur(6px);opacity:.8}html:not(.ms-client):not(.ms-pro) .dw-bonus .dw-tt{color:var(--muted)}",
+    /* Nov 12: every level sees the real transfer bonus (no more locked tile) */
+    ".dw-bonus .dw-block{display:none}",
     /* navy wall with the HRT PRO mark (Nov 11) */
     ".dw-navy{background:linear-gradient(135deg,#14202e 0%,#1b2f4a 100%);border:1px solid rgba(242,184,75,.32);border-radius:var(--radius,18px);padding:18px 16px 14px;box-shadow:var(--shadow)}",
     ".dw-navy .dw-head h2{color:#fff}.dw-navy .dw-head .dw-sub,.dw-navy .dw-head .dw-when{color:#bccde0}.dw-navy .dw-lede{color:#c7d4e2}",
@@ -468,7 +468,7 @@
     locked.appendChild(el("span", "dw-tsub", "ʻOhana Members see it weekly, HRT PRO members see it daily"));
     t.appendChild(locked);
     var acts = el("div", "dw-tacts");
-    var open = el("a", "dw-tbtn dw-bopen", "See all transfer bonuses"); open.href = "#transfers"; open.setAttribute("data-route", "transfers");
+    var open = el("a", "dw-tbtn dw-bopen", "See more transfer bonuses"); open.href = "#transfers"; open.setAttribute("data-route", "transfers");
     var promo = el("a", "dw-tbtn dw-block", "Read more"); promo.href = "#plans"; promo.setAttribute("data-route", "plans");
     acts.appendChild(open); acts.appendChild(promo); t.appendChild(acts);
     return t;
