@@ -1136,3 +1136,12 @@ button.hw-row:hover{background:rgba(255,255,255,.14)}button.hw-row:focus-visible
 .hw-next .hw-nx-rows{display:flex;flex-direction:column;gap:2px;font-size:20px;color:#fff}
 .hw-next .hw-nx-rows small{font-size:13px;font-weight:700;color:#d8c49a;font-family:'DM Sans',sans-serif}
 .hw-next .hw-nx-rows em{font-style:normal;color:#f5c75a}
+
+/* Your included tools (Nov 12): Subscribers see ʻOhana and PRO tools too, marked off limits */
+.oh-b{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.8px;padding:2px 7px;border-radius:6px;background:#14202e;color:#f5c75a;vertical-align:middle}
+.ttile .t-lockl{display:none;align-items:center;gap:5px;color:var(--muted)!important}
+html:not(.ms-client):not(.ms-pro) .ttile.t-oh .t-open,html:not(.ms-pro) .ttile.t-pro .t-open{display:none}
+html:not(.ms-client):not(.ms-pro) .ttile.t-oh .t-lockl,html:not(.ms-pro) .ttile.t-pro .t-lockl{display:inline-flex}
+html:not(.ms-client):not(.ms-pro) .ttile.t-oh,html:not(.ms-pro) .ttile.t-pro{background:var(--surface-2);box-shadow:none}
+html:not(.ms-client):not(.ms-pro) .ttile.t-oh .ti,html:not(.ms-client):not(.ms-pro) .ttile.t-oh b,html:not(.ms-client):not(.ms-pro) .ttile.t-oh small,
+html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms-pro) .ttile.t-pro small{opacity:.6}

@@ -500,3 +500,14 @@
  var start = (location.hash || parentHash() || "").replace("#","");
  route(ROUTES[start.split("/")[0]] ? start : "home", true);
 })();
+
+/* Your included tools (Nov 12): a locked ʻOhana or PRO tile opens Membership levels instead */
+document.addEventListener("click", function (e) {
+  var t = e.target.closest && e.target.closest(".ttile.t-oh, .ttile.t-pro");
+  if (!t) return;
+  var cl = document.documentElement.classList, pro = cl.contains("ms-pro"), oh = cl.contains("ms-client") || pro;
+  if ((t.classList.contains("t-pro") && !pro) || (t.classList.contains("t-oh") && !oh)) {
+    e.preventDefault(); e.stopImmediatePropagation();
+    location.hash = "#plans";
+  }
+}, true);
