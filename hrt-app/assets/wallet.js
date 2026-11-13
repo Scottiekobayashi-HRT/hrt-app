@@ -1180,6 +1180,22 @@
     var n = parseFloat(m[1]) * (m[2] ? 1000 : 1);
     return n >= 1000 ? Math.round(n) : 0;
   }
+  /* "Eligible for your next card" (Nov 12): the date HRT set for the member's next
+     application (eligible on the status "next" card, from Eddie's "Apply by" column). */
+  function eligibleBox(V, client) {
+    var nx = null;
+    (V.cards || []).some(function (e) { if (e.status === "next") { nx = e; return true; } return false; });
+    var big, sub;
+    if (client && nx && nx.eligible) {
+      var p = nx.eligible.split("-"), t = todayParts();
+      var today = t.y + "-" + String(t.m).padStart(2, "0") + "-" + String(t.d).padStart(2, "0");
+      var now = nx.eligible.slice(0, p.length === 3 ? 10 : 7) <= today.slice(0, p.length === 3 ? 10 : 7);
+      big = now ? "Now" : SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) : " " + p[0]);
+      sub = now ? "You can apply now" : "the date you can apply";
+    } else if (client) { big = "Ask Scottie"; sub = "for your next card date"; }
+    else { big = "Find out"; sub = "ʻOhana Members get their date from Scottie"; }
+    return '<div class="hw-box hw-elig"><span class="hw-l">Eligible for your next card</span><b class="hw-v">' + esc(big) + '</b><span class="hw-s">' + esc(sub) + "</span></div>";
+  }
   function nextCardBox(V, client) {
     var idx = catIndex(), nx = null;
     (V.cards || []).some(function (e) { if (e.status === "next") { nx = e; return true; } return false; });
@@ -1230,9 +1246,9 @@
     var box = function (label, value, sub) {
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
-    var html = demo + acts() + tag + '<div class="hw-boxes">' + nextCardBox(V, cl) +
+    var html = demo + acts() + tag + '<div class="hw-boxes">' + eligibleBox(V, cl) + nextCardBox(V, cl) +
       box("Cards", String(s.count), "in your wallet") +
-      box("Next renewal", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
+      box("Next annual fee", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +
@@ -1622,7 +1638,7 @@
       stat("Cards", String(s.count)) +
       stat("Annual fees", esc(money(s.yearly))) +
       stat("Potential credits per year", esc(money(credits)), "if you use them all") +
-      stat("Next renewal", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None",
+      stat("Next annual fee", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None",
         nx ? esc(shortName(nx.card.name)) : "") +
       "</dl>";
     if (s.yearly > 0 && credits > 0) {
@@ -1677,7 +1693,7 @@
       '<dl class="wl-sl-stats">' +
       '<div title="Credits on your cards that reset in the next ' + SOON_PERK_DAYS + ' days. Add your notes on the Credits page."><dt>Credits to use</dt><dd>' + (due ? esc(money(due)) : TICKS ? "All used" : "None") + "<small>next " + SOON_PERK_DAYS + " days</small></dd></div>" +
       '<div title="Worked out by HRT from each card&#39;s current fee."><dt>Annual fees</dt><dd>' + esc(money(s.yearly)) + "</dd></div>" +
-      '<div title="Worked out by HRT from the open dates you entered."><dt>Next renewal</dt><dd>' + (nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + "<small>" + esc(shortName(nx.card.name)) + "</small>" : "None") + "</dd></div>" +
+      '<div title="Worked out by HRT from the open dates you entered."><dt>Next annual fee</dt><dd>' + (nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + "<small>" + esc(shortName(nx.card.name)) + "</small>" : "None") + "</dd></div>" +
       "</dl></section>";
   }
 

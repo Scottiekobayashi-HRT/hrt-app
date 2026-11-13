@@ -908,9 +908,9 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .hw-l{font-size:13px;color:#9fb4c8}
 .hw-v{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;line-height:1.15;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hw-s{font-size:12.5px;color:#b9cbdc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hw-boxes .hw-next{grid-column:span 2;background:linear-gradient(135deg,rgba(245,199,90,.2),rgba(217,112,64,.16));border:1px solid rgba(245,199,90,.45)}
+.hw-boxes .hw-next{background:linear-gradient(135deg,rgba(245,199,90,.2),rgba(217,112,64,.16));border:1px solid rgba(245,199,90,.45)}
 .hw-next .hw-v{color:#f5c75a}
-.hw-next .hw-s{white-space:normal}
+.hw-next .hw-s,.hw-elig .hw-s{white-space:normal}
 .hw-next .hw-nx-go{margin-top:4px;font-size:12.5px;font-weight:700;color:#f5c75a;text-decoration:none}
 .hw-next .hw-nx-go:hover{text-decoration:underline}
 .hw-cap{margin-top:12px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.05)}

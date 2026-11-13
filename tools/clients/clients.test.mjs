@@ -1,4 +1,4 @@
-import { parseCsv, parseDate, statusFor, toWallet, cardKey, stableId } from "./eddie_to_wallet.mjs";
+import { parseCsv, parseDate, statusFor, toWallet, cardKey, stableId, applyDate } from "./eddie_to_wallet.mjs";
 import { buildImport, csvCell } from "./make_import.mjs";
 
 let pass = 0, fail = 0;
@@ -95,6 +95,13 @@ eq("csv cell", csvCell('a,"b"'), '"a,""b"""');
   eq("sideways: applying = next, no plan", [sum.status, sum.custom.name, sum.plan, sum.feeDate], ["next", "Your next card", undefined, undefined]);
   eq("sideways: warns about the unknown card", r2.warnings.some((w) => /which one/.test(w)), true);
 }
+
+/* next card eligible date (Nov 12) */
+eq("apply by, no year, later this year", applyDate("Apply by Nov 15'ish", "2026-11-12"), "2026-11-15");
+eq("apply, January seen in November = next year", applyDate("Apply Jan 5", "2026-11-12"), "2027-01-05");
+eq("apply after a full date", applyDate("Apply after 3/1/27", "2026-11-12"), "2027-03-01");
+eq("apply month and year", applyDate("Apply Feb 2027", "2026-11-12"), "2027-02");
+eq("apply with no date", applyDate("Apply", "2026-11-12"), "");
 
 console.log(pass + " passed, " + fail + " failed");
 if (fail) process.exit(1);

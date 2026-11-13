@@ -97,6 +97,7 @@
       if (c.plan != null && (typeof c.plan !== "string" || c.plan.length > 600)) throw fail("INVALID", "card " + i + " plan");
       if (c.addedBy != null && c.addedBy !== "hrt") throw fail("INVALID", "card " + i + " addedBy");
       if (c.withHrt != null && typeof c.withHrt !== "boolean") throw fail("INVALID", "card " + i + " withHrt");
+      if (c.eligible != null && (typeof c.eligible !== "string" || !OPENED_RE.test(c.eligible))) throw fail("INVALID", "card " + i + " eligible date");
       if (c.cardId === "custom" || c.custom != null) {
         var cu = c.custom;
         if (!cu || typeof cu !== "object" || Array.isArray(cu)) throw fail("INVALID", "card " + i + " custom card");

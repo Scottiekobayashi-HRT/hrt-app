@@ -131,6 +131,25 @@ export function parseDate(s) {
   return null; /* could not read it */
 }
 
+/* "Apply by Nov 15'ish", "Apply after 3/1/27", "Apply Jan 2027": the date the member can
+   apply for the next card. With no year, the next time that date comes round (Hawaii time). */
+export function applyDate(s, today) {
+  let t = String(s || "").replace(/^\s*apply\s*(by|after|on|from|in)?\s*/i, "").replace(/['’]?\s*ish\b/i, "").replace(/\(.*?\)/g, "").trim();
+  const full = parseDate(t);
+  if (full) return full;
+  const m = t.match(/^([A-Za-z]{3,9})\.?\s+(\d{1,2})$/) || null;
+  const md = t.match(/^(\d{1,2})\/(\d{1,2})$/);
+  let mon = 0, day = 0;
+  if (m && MON[m[1].slice(0, 3).toLowerCase()]) { mon = MON[m[1].slice(0, 3).toLowerCase()]; day = +m[2]; }
+  else if (md) { mon = +md[1]; day = +md[2]; }
+  if (!mon || mon > 12 || day < 1 || day > 31) return "";
+  const now = today || new Date(Date.now() - 10 * 3600e3).toISOString().slice(0, 10);
+  let y = +now.slice(0, 4);
+  const iso = (yy) => yy + "-" + String(mon).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+  if (iso(y) < now.slice(0, 10) && +now.slice(5, 7) - mon > 6) y += 1; /* Jan date seen in Nov = next year */
+  return iso(y);
+}
+
 export function cardKey(name) {
   return String(name || "").toLowerCase().replace(/®|™/g, "").replace(/\(.*?\)/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -158,7 +177,11 @@ export function toWallet(rows, catalogIds, household = "") {
     if (/\?|which one/i.test(name)) { warnings.push("Row " + line + ': "' + name + '" is not a known card yet, skipped. Ask the member which card it is.'); return; }
     let status = statusFor(r.status);
     /* sideways tracker: "(applying)" in the name or "Apply by ..." as the open date means the next card */
-    if (/\(applying\)/i.test(name) || /^apply/i.test(r.opened || "")) { status = "next"; if (/^apply/i.test(r.opened || "")) r = { ...r, opened: "" }; }
+    let eligible = "";
+    if (/\(applying\)/i.test(name) || /^apply/i.test(r.opened || "")) {
+      status = "next";
+      if (/^apply/i.test(r.opened || "")) { eligible = applyDate(r.opened); r = { ...r, opened: "" }; }
+    }
     if (/^before hrt$/i.test(String(r.opened || "").trim())) r = { ...r, opened: "", origin: r.origin || "pre" };
     else if (!r.origin && r.plan !== undefined && parseDate(r.opened)) r = { ...r, origin: "hrt" };
     if (/^next\s*:/i.test(name)) { name = name.replace(/^next\s*:\s*/i, ""); status = "next"; }
@@ -197,6 +220,8 @@ export function toWallet(rows, catalogIds, household = "") {
     if (status === "next") { entry.cardId = "custom"; entry.custom = { name: "Your next card" }; }
     if (r.who) entry.holder = r.who.slice(0, 30);
     if (status) entry.status = status;
+    /* "Apply by Nov 15'ish" -> eligible "2026-11-15": when this member can apply for the next card */
+    if (status === "next" && eligible) entry.eligible = eligible;
     const note = status === "next" ? "" : [status === null ? "Status: " + r.status : "", r.next_step || "", r.notes || ""].filter(Boolean).join(". ").slice(0, 500);
     if (note) entry.note = note;
     /* this member's own renewal / downgrade / cancel plan (shown in place of the catalog tip) */
