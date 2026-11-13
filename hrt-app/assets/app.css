@@ -1164,3 +1164,7 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hw-next .hw-nx-rows{justify-content:center;align-self:center}
 .hw-box .hw-dc{display:block;color:#c9d6e3}
 .hero-howzit .hw-ask a{color:#f5c75a;font-weight:800;text-decoration:none}.hero-howzit .hw-ask a:hover{text-decoration:underline}
+/* Dashboard wallet tile (Nov 13): same navy as Scottie's Wall, no Hawaiʻi photo */
+#v-home .toprow .hero{background:linear-gradient(135deg,#14202e 0%,#1b2f4a 100%);border:1px solid rgba(242,184,75,.32);box-shadow:var(--shadow)}
+#v-home .toprow .hero::before,#v-home .toprow .hero::after{display:none}
+#v-home .toprow .hero .fp,#v-home .toprow .hero .plane{display:none}
