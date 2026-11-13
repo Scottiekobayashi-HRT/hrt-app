@@ -1187,14 +1187,14 @@
     (V.cards || []).some(function (e) { if (e.status === "next") { nx = e; return true; } return false; });
     var big, sub;
     if (client && nx && nx.eligible) {
+      /* "Now", "In 10 days", "In 73 days" (Scottie, Nov 12). A month-only date counts from the 1st. */
       var p = nx.eligible.split("-"), t = todayParts();
-      var today = t.y + "-" + String(t.m).padStart(2, "0") + "-" + String(t.d).padStart(2, "0");
-      var now = nx.eligible.slice(0, p.length === 3 ? 10 : 7) <= today.slice(0, p.length === 3 ? 10 : 7);
-      big = now ? "Now" : SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) : " " + p[0]);
-      sub = now ? "You can apply now" : "the date you can apply";
-    } else if (client) { big = "Ask Scottie"; sub = "for your next card date"; }
-    else { big = "Find out"; sub = "ʻOhana Members get their date from Scottie"; }
-    return '<div class="hw-box hw-elig"><span class="hw-l">Eligible for your next card</span><b class="hw-v">' + esc(big) + '</b><span class="hw-s">' + esc(sub) + "</span></div>";
+      var days = Math.round((Date.UTC(+p[0], +p[1] - 1, p[2] ? +p[2] : 1) - Date.UTC(t.y, t.m - 1, t.d)) / 864e5);
+      big = days <= 0 ? "Now" : days === 1 ? "Tomorrow" : "In " + days + " days";
+      sub = days <= 0 ? "You can apply now" : SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) + ", " : " ") + p[0];
+    } else if (client) { big = "Ask Scottie"; sub = "for your next application date"; }
+    else { big = "Now"; sub = "ʻOhana Members time it with Scottie"; }
+    return '<div class="hw-box hw-elig"><span class="hw-l">Your next application</span><b class="hw-v">' + esc(big) + '</b><span class="hw-s">' + esc(sub) + "</span></div>";
   }
   function nextCardBox(V, client) {
     var idx = catIndex(), nx = null;
