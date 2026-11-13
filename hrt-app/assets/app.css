@@ -898,7 +898,7 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .hero.has-wallet .hero-pills .client-pill{display:none}
 .hw-tag{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13.5px;font-weight:700;color:#f2b84b}
 .hw-star svg{width:14px;height:14px;display:block}
-.hw-acts{position:absolute;top:-62px;right:0;display:flex;gap:8px}
+.hw-acts{position:absolute;top:-36px;right:0;display:flex;gap:8px}
 .hw-btn{display:inline-flex;align-items:center;gap:4px;min-height:42px;padding:0 14px;border-radius:10px;font-size:13.5px;font-weight:800;text-decoration:none;white-space:nowrap}
 .hw-btn.ghost{border:1px solid rgba(255,255,255,.3);color:#fff}.hw-btn.ghost:hover{background:rgba(255,255,255,.1)}
 .hw-btn.gold{background:#f2b84b;color:#14202e}.hw-btn.gold:hover{background:#f5c75a}
