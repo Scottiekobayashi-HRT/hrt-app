@@ -1128,3 +1128,5 @@ button.hw-row:hover{background:rgba(255,255,255,.14)}button.hw-row:focus-visible
 }
 .hw-boxes .hw-l{white-space:normal;line-height:1.3}
 .hw-boxes .hw-s:empty::after{content:"\00a0"}
+/* Wallet tile: every line wraps to fit the box, no "..." cut-offs (Nov 12) */
+.hw-boxes .hw-l,.hw-boxes .hw-v,.hw-boxes .hw-s{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;min-width:0}
