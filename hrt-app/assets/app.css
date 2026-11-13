@@ -1168,3 +1168,12 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 #v-home .toprow .hero{background:linear-gradient(135deg,#14202e 0%,#1b2f4a 100%);border:1px solid rgba(242,184,75,.32);box-shadow:var(--shadow)}
 #v-home .toprow .hero::before,#v-home .toprow .hero::after{display:none}
 #v-home .toprow .hero .fp,#v-home .toprow .hero .plane{display:none}
+/* Four boxes read across in lines (Nov 13): same title size in every box, the big
+   number on one line right under the titles, the bottom links on one line */
+.hw-boxes>.hw-box>.hw-l,.hw-boxes .hw-next .hw-nx-t,.hw-boxes .hw-act .hw-act-t{font-size:12.5px;line-height:1.3;font-family:'DM Sans',sans-serif;letter-spacing:.04em;text-transform:uppercase;font-weight:700}
+.hw-boxes .hw-next .hw-nx-t{color:#f5c75a}
+@supports (grid-template-rows:subgrid){.hw-boxes>.hw-box>.hw-v,.hw-next .hw-nx-rows{align-self:start}}
+.hw-boxes .hw-v{font-size:22px;line-height:1.2}
+.hw-next .hw-nx-rows{font-size:22px;line-height:1.2;gap:4px}
+.hw-next .hw-nx-rows span:last-child{font-size:16px}
+.hw-boxes .hw-s{line-height:1.4}
