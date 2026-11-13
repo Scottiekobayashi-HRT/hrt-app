@@ -518,4 +518,45 @@ document.addEventListener("click", function (e) {
   e.preventDefault();
   if (typeof window.HRT_ASK_UPDATE === "function") window.HRT_ASK_UPDATE(b.getAttribute("data-upd"));
 });
+/* Howzit line question (Scottie approved, Nov 13): a different question each visit, by level.
+   Subscribers get the ʻOhana set, ʻOhana Members the HRT PRO set (Atmos Rewards seats only),
+   HRT PRO members the redeem question. Only these approved lines can show. */
+(function () {
+  var REDEEM = { q: "Want to know the best ways to redeem your points?", href: "#coaching", route: "coaching" };
+  var TO_OHANA = [
+    "Want to know which card to get next, and exactly when to apply?",
+    "Are you leaving a welcome bonus on the table by applying at the wrong time?",
+    "Want Scottie to plan your next card with you, one on one?",
+    "Is your wallet working as hard as it could? Want Scottie to keep it up to date for you?",
+    "Have a points question only Scottie can answer? Want your own AI coach trained on his tips?",
+    "Want to see points deals on 10 routes from Honolulu instead of 4?",
+    "Know which card to downgrade, and when, before the annual fee hits?",
+    "Want to know the best ways to redeem your points?"
+  ];
+  var TO_PRO = [
+    "Want to see Atmos Rewards award seats up to about 270 days out, not just 30?",
+    "Ready to fly business or first class on Atmos Rewards points? Want to see the dates that are open?",
+    "Want to search every Atmos Rewards saver date on your route in seconds?",
+    "Wondering everywhere your Atmos Rewards points could take you from Honolulu?",
+    "Want Atmos Rewards points deals on the 15 routes you pick, with business class?",
+    "Planning a big family trip? Want to find the Atmos Rewards dates with enough seats for everyone?",
+    "Want to track up to 15 cards in your wallet?"
+  ];
+  var pick = {}, shown = "";
+  function lvl() { var c = document.documentElement.classList; return c.contains("ms-pro") ? "pro" : c.contains("ms-client") ? "ohana" : "sub"; }
+  function draw() {
+    var host = document.querySelector(".hero-howzit .hw-ask"); if (!host) return;
+    var l = lvl(); if (l === shown) return; shown = l;
+    if (!pick[l]) {
+      var list = l === "sub" ? TO_OHANA : l === "ohana" ? TO_PRO : null;
+      var q = list ? list[Math.floor(Math.random() * list.length)] : REDEEM.q;
+      pick[l] = q === REDEEM.q ? REDEEM : { q: q, href: l === "sub" ? "#plans" : "#atmos", route: l === "sub" ? "plans" : "atmos" };
+    }
+    host.textContent = pick[l].q + " ";
+    var a = document.createElement("a"); a.href = pick[l].href; a.setAttribute("data-route", pick[l].route); a.textContent = "Click here.";
+    host.appendChild(a);
+  }
+  try { new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", draw); else draw();
+})();
 
