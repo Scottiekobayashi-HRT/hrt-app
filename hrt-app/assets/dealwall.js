@@ -494,7 +494,7 @@
     var c = el("div", "dw-card dw-t dw-protile");
     var ph = photo("dw-ph dw-pblur", t.image);
     c.appendChild(ph);
-    var lab = el("span", "dw-kind dw-kpro", "\u2605 HRT PRO"); c.appendChild(lab);
+    var lab = el("span", "dw-kind dw-kpts", "Points deal"); c.appendChild(lab); /* Nov 12: the button already says Unlock with HRT PRO */
     var body = el("div", "dw-body");
     body.appendChild(el("b", "dw-tt", (t.city || t.dest || "") + " in " + (/first/i.test(t.cabin || "") ? "first class" : "business class")));
     body.appendChild(el("span", "dw-tsub", (t.origin || "HNL") + " \u2192 " + (t.dest || "") + ". PRO members see the dates and the points."));
