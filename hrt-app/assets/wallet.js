@@ -1212,6 +1212,10 @@
      The bold line is one of three: "By <date>", "On <date>" or "Due today". */
   /* Sheet-fed tile data (Nov 13): when HRT has filled "ops" from the Master Client Sheet,
      every box reads its own sheet field. Otherwise the boxes work it out from the wallet. */
+  /* Only wording Scottie has approved can show under the bold line (Nov 13: "no rogue
+     sentence"). Anything else is hidden. Filled in once he approves the list. */
+  var APPROVED_ACTION_TEXT = [];
+  function approvedText(t) { return APPROVED_ACTION_TEXT.indexOf(String(t || "").trim()) > -1 ? String(t).trim() : ""; }
   function opsData() { var w = state.wallet; return w && !state.demo && w.ops && typeof w.ops === "object" ? w.ops : null; }
   function isoParts(x) { var p = String(x || "").split("-"); return p.length === 3 ? { y: +p[0], m: +p[1], d: +p[2] } : null; }
   function longDate(p) { return SHORT_MONTHS[p.m - 1] + " " + p.d + ", " + p.y; }
@@ -1223,10 +1227,13 @@
     var who0 = firstName ? "Next action for " + firstName : "Your next action", ops = opsData();
     if (ops && ops.action) {
       var oa = ops.action, od = isoParts(oa.date), t0 = todayParts();
-      var late = od && dayNum(od.y, od.m, od.d) <= dayNum(t0.y, t0.m, t0.d);
-      var w0 = oa.type === "all_set" ? "You're all set" : oa.type === "due_today" || late ? "Due today" : od ? (oa.type === "on" ? "On " : "By ") + longDate(od) : "You're all set";
+      var dd = od ? dayNum(od.y, od.m, od.d) - dayNum(t0.y, t0.m, t0.d) : null;
+      /* bold line, one of five: By <date>, On <date>, Due today, OVERDUE (date passed), You're all set */
+      var w0 = oa.type === "all_set" || (!od && oa.type !== "due_today") ? "You're all set" : dd !== null && dd < 0 ? "OVERDUE" :
+        oa.type === "due_today" || dd === 0 ? "Due today" : (oa.type === "on" ? "On " : "By ") + longDate(od);
+      var txt = approvedText(oa.text);
       return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who0) + '</span><b class="hw-v">' + esc(w0) + '</b>' +
-        '<span class="hw-s">' + (oa.text ? "<b>" + esc(oa.text) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
+        '<span class="hw-s">' + (txt ? "<b>" + esc(txt) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
     }
     /* Subscribers (Nov 13, Scottie picked option C): the box markets ʻOhana */
     if (!client) {
@@ -1251,12 +1258,11 @@
     }
     acts.sort(function (a, b) { return a.days - b.days; });
     var a = acts[0];
-    if (!client && (!a || a.days > 30)) a = { days: 0, how: "on", what: "Apply for your next card", sub: "Learn how ʻOhana Members time it" };
-    if (!a) a = { days: 9999, how: "", what: "You are all caught up", sub: "Scottie will text you when it is time" };
-    var when = a.days <= 0 ? "Due today" : a.how === "by" ? "By " + longDate(a.date) : a.how === "on" ? "On " + longDate(a.date) : "Nothing due";
+    if (!a) a = { days: 9999, how: "set", what: "" };
+    var when = a.how === "set" ? "You're all set" : a.days < 0 ? "OVERDUE" : a.days === 0 ? "Due today" : a.how === "by" ? "By " + longDate(a.date) : "On " + longDate(a.date);
     var who = firstName ? "Next action for " + firstName : "Your next action";
     return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who) + '</span><b class="hw-v">' + esc(when) + '</b>' +
-      '<span class="hw-s"><b>' + esc(a.what) + "</b><br>" + esc(a.sub) + updBtn(client, "Next action") + "</span></div>";
+      '<span class="hw-s">' + (approvedText(a.what) ? "<b>" + esc(approvedText(a.what)) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
   }
   function nextCardBox(V, client) {
     var nx = nextEntry(V), ops = opsData();
