@@ -1273,7 +1273,7 @@
       return '<li><button class="hw-row ' + a.level + '" ' + (a.id ? 'data-wl="go-card" data-id="' + esc(a.id) + '"' : 'data-wl="go-wallet"') + '>' +
         '<span class="hw-dot" aria-hidden="true"></span><span class="hw-t"><b>' + esc(a.text.replace(/ fee posts around .*$/, " fee")) + '</b></span><span class="hw-go" aria-hidden="true">&rsaquo;</span></button></li>';
     }));
-    if (rows.length) html += '<h3 class="hw-sub">Up next</h3><ul class="hw-list">' + rows.join("") + "</ul>";
+    /* Nov 12: the "Up next" credits list is off the Dashboard tile (credits live on My Wallet) */
     if (state.msg) html += '<p class="hw-msg" role="alert">' + esc(state.msg) + "</p>";
     return html;
   }

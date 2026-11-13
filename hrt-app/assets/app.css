@@ -36,7 +36,7 @@
 .content{padding:22px 26px 40px;max-width:1680px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 
 /* ---------- hero + spotlight ---------- */
-.toprow{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.toprow{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .hero{position:relative;isolation:isolate;overflow:hidden;border-radius:var(--radius);color:#eaf2f8;background:radial-gradient(1100px 320px at 88% -50%,rgba(159,193,212,.42),transparent 60%),linear-gradient(120deg,#141b24,#1b2430 52%,#1d3350);border:1px solid #21354f;padding:26px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:center;min-height:206px}
 .hero::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--hero-img,none) center/cover no-repeat;opacity:var(--hero-op,.4);pointer-events:none}
 .hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(20,27,36,.55) 0%,rgba(20,27,36,.2) 60%,rgba(20,27,36,.05) 100%);pointer-events:none}
