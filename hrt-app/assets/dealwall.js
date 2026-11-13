@@ -250,8 +250,10 @@
         hold = false; tick(true);
       });
       paint();
-      nav.insertBefore(speed, nav.firstChild);
-      nav.insertBefore(play, nav.firstChild);
+      /* order: ‹  pause  speed  › (Scottie, Nov 12) */
+      var left = nav.querySelector(".dw-arrow"), after = left ? left.nextSibling : nav.firstChild;
+      nav.insertBefore(play, after);
+      nav.insertBefore(speed, after);
     }
     var timer = null;
     function step() {

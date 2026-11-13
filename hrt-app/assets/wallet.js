@@ -1169,6 +1169,40 @@
   /* Layout B (Oct 26): the member's wallet inside the big Aloha tile on the Dashboard.
      Four equal boxes (cards, fees, credits to use, next renewal), what they have used
      this year, then Up next. The greeting and date above it stay in index.html. */
+  /* "Your next card" box on the Dashboard wallet tile (Scottie and Eddie, Nov 12): replaces
+     Annual fees and Credits to use, to nudge members toward their next card.
+     ʻOhana: the points come from the welcome bonus on the card HRT lined up for them
+     (status "next", bonus.reward). Everyone else sees the Sapphire Preferred example. */
+  var NEXT_DEFAULT = { pts: 75000, name: "Chase Sapphire Preferred" };
+  function rewardPoints(r) {
+    var m = String(r || "").replace(/,/g, "").match(/(\d+(?:\.\d+)?)\s*(k)?/i);
+    if (!m) return 0;
+    var n = parseFloat(m[1]) * (m[2] ? 1000 : 1);
+    return n >= 1000 ? Math.round(n) : 0;
+  }
+  function nextCardBox(V, client) {
+    var idx = catIndex(), nx = null;
+    (V.cards || []).some(function (e) { if (e.status === "next") { nx = e; return true; } return false; });
+    var pts = 0, name = "";
+    if (client && nx) {
+      pts = rewardPoints(nx.bonus && nx.bonus.reward);
+      var c = cardFor(nx, idx);
+      name = c && c.name && nx.cardId !== "custom" ? shortName(c.name) : "";
+    }
+    var big, sub, go;
+    if (client && !pts) {
+      big = "Ask Scottie";
+      sub = nx ? "Text Scottie for the points on " + (name ? "your " + name : "your next card") : "Text Scottie and we will line up your next card";
+      go = '<a class="hw-nx-go" href="' + SCOTTIE_SMS + '">Text Scottie &rsaquo;</a>';
+    } else {
+      if (!client) { pts = NEXT_DEFAULT.pts; name = NEXT_DEFAULT.name; }
+      big = "+" + pts.toLocaleString("en-US") + " points";
+      sub = (client ? "will go in your piggy bank" : "could go in your piggy bank") + (name ? " with the " + name : "");
+      go = client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">See how ʻOhana Members get their next card &rsaquo;</a>';
+    }
+    return '<div class="hw-box hw-next"><span class="hw-l">' + (client ? "Your next card" : "Your next card could add") + '</span><b class="hw-v">' + esc(big) + '</b>' +
+      '<span class="hw-s">' + esc(sub) + "</span>" + go + "</div>";
+  }
   function miniHtml() {
     var cl = member().client;
     var tag = cl ? '<span class="hw-tag"><span class="hw-star">' + OH_STAR + "</span>ʻOhana Wallet · Managed by Scottie</span>" : "";
@@ -1196,10 +1230,8 @@
     var box = function (label, value, sub) {
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
-    var html = demo + acts() + tag + '<div class="hw-boxes">' +
+    var html = demo + acts() + tag + '<div class="hw-boxes">' + nextCardBox(V, cl) +
       box("Cards", String(s.count), "in your wallet") +
-      box("Annual fees", esc(money(s.yearly)), "a year") +
-      box("Credits to use", due ? esc(money(due)) : TICKS ? "All used" : "None", "next " + SOON_PERK_DAYS + " days") +
       box("Next renewal", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
