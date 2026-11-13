@@ -547,8 +547,10 @@
       builtFor = oh;
       closeExp();
       rail.innerHTML = "";
-      var mine = pointsTiles; /* every viewer gets every route (Nov 12) */
-      var tiles = rhythmOrder(mine, { pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
+      /* every viewer gets every route; the locked HRT PRO business and first deals count as
+         points deals too, so the 2-of-3 rhythm lasts the whole wall (Nov 12) */
+      var mine = pointsTiles.concat((feed._teasers || []).map(function (t) { return { kind: "pro", item: t }; }));
+      var tiles = rhythmOrder(mine, { pro: [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
         news: feed._news || [], kama: feed._kama || [] }, MIX_MAX);
       tiles.forEach(addTile);
       rail.scrollLeft = 0;
