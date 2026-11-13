@@ -1177,3 +1177,9 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hw-next .hw-nx-rows{font-size:22px;line-height:1.2;gap:4px}
 .hw-next .hw-nx-rows span:last-child{font-size:16px}
 .hw-boxes .hw-s{line-height:1.4}
+/* Nov 13 try: tiles 1 and 2 plain like tiles 3 and 4 (no red pulse, no gold box). Only the links stay gold. */
+.hw-boxes .hw-act,.hw-boxes .hw-next{background:rgba(255,255,255,.07);border:0;animation:none}
+.hw-boxes .hw-act .hw-act-t,.hw-boxes .hw-next .hw-nx-t{color:#9fb4c8}
+.hw-boxes .hw-next .hw-v,.hw-boxes .hw-next .hw-nx-rows,.hw-boxes .hw-next .hw-nx-rows em{color:#fff}
+.hw-boxes .hw-next .hw-nx-rows small{color:#b9cbdc}
+.hw-boxes .hw-box .hw-nx-go{color:#f5c75a}
