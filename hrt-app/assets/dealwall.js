@@ -521,9 +521,24 @@
     var openKey = null;
     var g = dealGroups((feed.economy || []).filter(function (d) { return !OHANA_SKIP[String(d.dest || "").toUpperCase()]; }));
     var pointsTiles = mixOrder({ japan: g.japan, other: g.other }, { japan: 1, other: 1 }, 1000);
-    var tiles = rhythmOrder(pointsTiles, { pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
-      news: feed._news || [], kama: feed._kama || [] }, MIX_MAX);
-    tiles.forEach(function (tile) {
+    /* Subscribers only see their 4 routes, so the 2-then-1 rhythm is worked out from the
+       points tiles this viewer can see, and redone if the level arrives late. */
+    function isOhana() { return document.documentElement.classList.contains("ms-client"); }
+    var builtFor = null;
+    function buildTiles() {
+      var oh = isOhana();
+      if (builtFor === oh) return;
+      builtFor = oh;
+      closeExp();
+      rail.innerHTML = "";
+      var mine = pointsTiles.filter(function (t) { return oh || subRoute(t.item); });
+      var tiles = rhythmOrder(mine, { pro: feed._teasers || [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
+        news: feed._news || [], kama: feed._kama || [] }, MIX_MAX);
+      tiles.forEach(addTile);
+      rail.scrollLeft = 0;
+    }
+    try { new MutationObserver(buildTiles).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
+    function addTile(tile) {
       if (tile.kind === "news") return rail.appendChild(newsTile(tile.item));
       if (tile.kind === "kama") return rail.appendChild(kamaTile(tile.item));
       if (tile.kind === "bonus") return rail.appendChild(bonusTile(tile.item));
@@ -567,7 +582,8 @@
       card.appendChild(body);
       card.appendChild(el("span", "dw-calbtn", "Scottie’s Atmos Points Calendar"));
       rail.appendChild(card);
-    });
+    }
+    buildTiles();
     wrap.appendChild(rail);
 
     /* ---- the expanded panel ---- */
