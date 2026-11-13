@@ -1204,6 +1204,38 @@
     var date = SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) : " " + p[0]);
     return (days === 1 ? "Tomorrow" : "In " + days + " days") + " (" + date + ")";
   }
+  /* "Next action for <first name>" (Scottie and Eddie, Nov 13): the one thing to do next,
+     with a flashing thin red border. Never names a card (Scottie's secrecy rule: naming
+     the next card invites members to apply on their own). Picks the soonest of:
+     finish a welcome bonus spend (By date), decide on a card before its fee posts
+     (By date), apply for the next card (On date, ʻOhana date from Eddie's "Apply by").
+     The bold line is one of three: "By <date>", "On <date>" or "Due today". */
+  function longDate(p) { return SHORT_MONTHS[p.m - 1] + " " + p.d + ", " + p.y; }
+  function nextActionBox(V, client, s, firstName) {
+    var t = todayParts(), acts = [];
+    (V.cards || []).forEach(function (e) {
+      if (e.status === "next" || e.status === "closed") return;
+      var bs = bonusState(e, t);
+      if (bs && !bs.met && !bs.missed) acts.push({ days: bs.days, how: "by", date: bs.by, what: "Finish your welcome bonus spend", sub: money(bs.left) + " to go" });
+    });
+    if (s.next && s.next.renewal && s.next.renewal.days <= 60) {
+      var r = s.next.renewal;
+      acts.push({ days: r.days, how: "by", date: { y: r.y, m: r.m, d: r.d || 1 }, what: "Decide to keep, downgrade or cancel a card", sub: "before the annual fee posts" });
+    }
+    var nx = nextEntry(V);
+    if (client && nx && nx.eligible) {
+      var p = nx.eligible.split("-"), d = { y: +p[0], m: +p[1], d: p[2] ? +p[2] : 1 };
+      acts.push({ days: dayNum(d.y, d.m, d.d) - dayNum(t.y, t.m, t.d), how: "on", date: d, what: "Apply for your next card", sub: "Text Scottie before you apply" });
+    }
+    acts.sort(function (a, b) { return a.days - b.days; });
+    var a = acts[0];
+    if (!client && (!a || a.days > 30)) a = { days: 0, how: "on", what: "Apply for your next card", sub: "Learn how ʻOhana Members time it" };
+    if (!a) a = { days: 9999, how: "", what: "You are all caught up", sub: "Scottie will text you when it is time" };
+    var when = a.days <= 0 ? "Due today" : a.how === "by" ? "By " + longDate(a.date) : a.how === "on" ? "On " + longDate(a.date) : "Nothing due";
+    var who = firstName ? "Next action for " + firstName : "Your next action";
+    return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who) + '</span><b class="hw-v">' + esc(when) + '</b>' +
+      '<span class="hw-s"><b>' + esc(a.what) + "</b><br>" + esc(a.sub) + "</span></div>";
+  }
   function nextCardBox(V, client) {
     var nx = nextEntry(V);
     var pts = client ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
@@ -1242,7 +1274,7 @@
     var box = function (label, value, sub) {
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
-    var html = demo + acts() + tag + '<div class="hw-boxes">' + nextCardBox(V, cl) +
+    var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
       box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") +
       box("My Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>') + "</div>";
     if (cap > 0) {
