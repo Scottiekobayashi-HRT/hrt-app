@@ -1250,7 +1250,7 @@
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + eligibleBox(V, cl) + nextCardBox(V, cl) +
-      box("Cards", String(s.count), "in your wallet") +
+      box("Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>') +
       box("Next annual fee", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
