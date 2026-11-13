@@ -1210,12 +1210,24 @@
      finish a welcome bonus spend (By date), decide on a card before its fee posts
      (By date), apply for the next card (On date, ʻOhana date from Eddie's "Apply by").
      The bold line is one of three: "By <date>", "On <date>" or "Due today". */
+  /* Sheet-fed tile data (Nov 13): when HRT has filled "ops" from the Master Client Sheet,
+     every box reads its own sheet field. Otherwise the boxes work it out from the wallet. */
+  function opsData() { var w = state.wallet; return w && !state.demo && w.ops && typeof w.ops === "object" ? w.ops : null; }
+  function isoParts(x) { var p = String(x || "").split("-"); return p.length === 3 ? { y: +p[0], m: +p[1], d: +p[2] } : null; }
   function longDate(p) { return SHORT_MONTHS[p.m - 1] + " " + p.d + ", " + p.y; }
   /* "Update Scottie" on each box for ʻOhana Members (Nov 13): opens Ask Scottie, which replies first */
   function updBtn(client, box) {
     return client ? '<button type="button" class="hw-upd" data-upd="' + esc(box) + '">Update Scottie</button>' : "";
   }
   function nextActionBox(V, client, s, firstName) {
+    var who0 = firstName ? "Next action for " + firstName : "Your next action", ops = opsData();
+    if (ops && ops.action) {
+      var oa = ops.action, od = isoParts(oa.date), t0 = todayParts();
+      var late = od && dayNum(od.y, od.m, od.d) <= dayNum(t0.y, t0.m, t0.d);
+      var w0 = oa.type === "all_set" ? "You're all set" : oa.type === "due_today" || late ? "Due today" : od ? (oa.type === "on" ? "On " : "By ") + longDate(od) : "You're all set";
+      return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who0) + '</span><b class="hw-v">' + esc(w0) + '</b>' +
+        '<span class="hw-s">' + (oa.text ? "<b>" + esc(oa.text) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
+    }
     var t = todayParts(), acts = [];
     (V.cards || []).forEach(function (e) {
       if (e.status === "next" || e.status === "closed") return;
@@ -1241,13 +1253,14 @@
       '<span class="hw-s"><b>' + esc(a.what) + "</b><br>" + esc(a.sub) + updBtn(client, "Next action") + "</span></div>";
   }
   function nextCardBox(V, client) {
-    var nx = nextEntry(V);
-    var pts = client ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
+    var nx = nextEntry(V), ops = opsData();
+    if (ops && ops.nextCard) nx = { eligible: ops.nextCard.date || "", bonus: { reward: ops.nextCard.bonusPts ? String(ops.nextCard.bonusPts) : "" } };
+    var pts = client || ops ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
     var bonus = pts ? pts.toLocaleString("en-US") + " points" : "Ask Scottie";
     var bottom = client ? updBtn(client, "Your next card")
       : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>';
     return '<div class="hw-box hw-next"><span class="hw-l hw-nx-t">Your next card</span>' +
-      '<div class="hw-v hw-nx-rows"><span><small>When to apply:</small> ' + esc(whenToApply(nx, client)) + "</span>" +
+      '<div class="hw-v hw-nx-rows"><span><small>When to apply:</small> ' + esc(whenToApply(nx, client || !!ops)) + "</span>" +
       '<span><small>Bonus:</small> <em>' + esc(bonus) + "</em></span></div>" +
       '<span class="hw-s">' + bottom + "</span></div>";
   }
@@ -1279,8 +1292,9 @@
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
-      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", updBtn(cl, "Downgrade or cancel") || "&nbsp;") + /* no card names in this box (Scottie's secrecy rule, Nov 13) */
-      box("My Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>' + updBtn(cl, "My Rewards Cards")) + "</div>";
+      (opsData() ? box("Next card to downgrade or cancel", (function (f) { return f ? esc((f.d ? dayText(f) : SHORT_MONTHS[f.m - 1]) + " " + f.y) : "None"; })(isoParts(opsData().feeDate)), updBtn(cl, "Downgrade or cancel") || "&nbsp;") :
+      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", updBtn(cl, "Downgrade or cancel") || "&nbsp;")) + /* no card names in this box (Scottie's secrecy rule, Nov 13) */
+      box("My Rewards Cards", String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>' + updBtn(cl, "My Rewards Cards")) + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +

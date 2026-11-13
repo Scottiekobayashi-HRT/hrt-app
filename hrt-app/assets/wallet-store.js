@@ -152,6 +152,23 @@
         progs[p.program] = 1;
       }
     });
+    /* ops: the dashboard wallet tile, filled from the Master Client Sheet by HRT (Nov 13).
+       { action: { type, date, text }, nextCard: { date, bonusPts }, feeDate, cardCount } */
+    if (w.ops != null) {
+      var o = w.ops, isDay = function (x) { return x == null || x === "" || (typeof x === "string" && DAY_RE.test(x)); };
+      if (typeof o !== "object" || Array.isArray(o)) throw fail("INVALID", "ops");
+      if (o.action != null) {
+        if (["by", "on", "due_today", "all_set"].indexOf(o.action.type) < 0) throw fail("INVALID", "ops action type");
+        if (!isDay(o.action.date)) throw fail("INVALID", "ops action date");
+        if (o.action.text != null && (typeof o.action.text !== "string" || o.action.text.length > 80)) throw fail("INVALID", "ops action text");
+      }
+      if (o.nextCard != null) {
+        if (!isDay(o.nextCard.date)) throw fail("INVALID", "ops next card date");
+        if (o.nextCard.bonusPts != null && !(typeof o.nextCard.bonusPts === "number" && o.nextCard.bonusPts >= 0 && o.nextCard.bonusPts < 1e7)) throw fail("INVALID", "ops next card bonus");
+      }
+      if (!isDay(o.feeDate)) throw fail("INVALID", "ops fee date");
+      if (o.cardCount != null && !(typeof o.cardCount === "number" && o.cardCount >= 0 && o.cardCount < 100)) throw fail("INVALID", "ops card count");
+    }
     return w;
   }
 

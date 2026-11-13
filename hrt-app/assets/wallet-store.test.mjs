@@ -177,5 +177,14 @@ ok('load returns a copy', f.stored.wallet.cards.length === 1);
   ok('plan: over 600 refused', !okC({ ...card('p2'), plan: 'x'.repeat(601) }));
   ok('plan: non-text refused', !okC({ ...card('p3'), plan: 5 }));
 }
+{
+  /* ops block from the Master Client Sheet (Nov 13) */
+  const okO = (ops) => { try { S._test.validate({ v: 1, cards: [], points: [], ops }); return true; } catch (e) { return false; } };
+  ok('ops: full block allowed', okO({ action: { type: 'by', date: '2027-01-05', text: '' }, nextCard: { date: '2027-02-01', bonusPts: 60000 }, feeDate: '2027-05-01', cardCount: 3 }));
+  ok('ops: all set with no date', okO({ action: { type: 'all_set', date: '', text: '' } }));
+  ok('ops: unknown action type refused', !okO({ action: { type: 'soon', date: '' } }));
+  ok('ops: bad date refused', !okO({ feeDate: 'May 2027' }));
+  ok('ops: text over 80 refused', !okO({ action: { type: 'on', date: '2027-01-01', text: 'x'.repeat(81) } }));
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
