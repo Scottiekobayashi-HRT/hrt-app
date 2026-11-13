@@ -1180,47 +1180,40 @@
     var n = parseFloat(m[1]) * (m[2] ? 1000 : 1);
     return n >= 1000 ? Math.round(n) : 0;
   }
-  /* "Eligible for your next card" (Nov 12): the date HRT set for the member's next
-     application (eligible on the status "next" card, from Eddie's "Apply by" column). */
-  function eligibleBox(V, client) {
+  /* "Your next card" box (Scottie and Eddie, Nov 12): one wide box with when to apply and
+     the bonus. ʻOhana: date from the "next" card's eligible field (Eddie's "Apply by"),
+     points from its welcome bonus. Everyone else: Now and the 75,000 Sapphire Preferred example. */
+  var NEXT_DEFAULT = { pts: 75000, name: "Chase Sapphire Preferred" };
+  function rewardPoints(r) {
+    var m = String(r || "").replace(/,/g, "").match(/(\d+(?:\.\d+)?)\s*(k)?/i);
+    if (!m) return 0;
+    var n = parseFloat(m[1]) * (m[2] ? 1000 : 1);
+    return n >= 1000 ? Math.round(n) : 0;
+  }
+  function nextEntry(V) {
     var nx = null;
     (V.cards || []).some(function (e) { if (e.status === "next") { nx = e; return true; } return false; });
-    var big, sub;
-    if (client && nx && nx.eligible) {
-      /* "Now", "In 10 days", "In 73 days" (Scottie, Nov 12). A month-only date counts from the 1st. */
-      var p = nx.eligible.split("-"), t = todayParts();
-      var days = Math.round((Date.UTC(+p[0], +p[1] - 1, p[2] ? +p[2] : 1) - Date.UTC(t.y, t.m - 1, t.d)) / 864e5);
-      big = days <= 0 ? "Now" : days === 1 ? "Tomorrow" : "In " + days + " days";
-      sub = days <= 0 ? "You can apply now" : SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) + ", " : " ") + p[0];
-    } else if (client) { big = "Ask Scottie"; sub = "for your next application date"; }
-    else { big = "Now"; sub = ""; }
-    /* Subscribers get Learn more; ʻOhana Members already have Scottie (Nov 12) */
-    /* three rows in every box (title, number, bottom line) so the four line up (Nov 12) */
-    return '<div class="hw-box hw-elig"><span class="hw-l">When to apply for your next card</span><b class="hw-v">' + esc(big) + '</b>' +
-      '<span class="hw-s">' + (client ? esc(sub) : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>') + "</span></div>";
+    return nx;
+  }
+  function whenToApply(nx, client) {
+    if (!client) return "Now";
+    if (!nx || !nx.eligible) return "Ask Scottie";
+    var p = nx.eligible.split("-"), t = todayParts();
+    var days = Math.round((Date.UTC(+p[0], +p[1] - 1, p[2] ? +p[2] : 1) - Date.UTC(t.y, t.m - 1, t.d)) / 864e5);
+    if (days <= 0) return "Now";
+    var date = SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) : " " + p[0]);
+    return (days === 1 ? "Tomorrow" : "In " + days + " days") + " (" + date + ")";
   }
   function nextCardBox(V, client) {
-    var idx = catIndex(), nx = null;
-    (V.cards || []).some(function (e) { if (e.status === "next") { nx = e; return true; } return false; });
-    var pts = 0, name = "";
-    if (client && nx) {
-      pts = rewardPoints(nx.bonus && nx.bonus.reward);
-      var c = cardFor(nx, idx);
-      name = c && c.name && nx.cardId !== "custom" ? shortName(c.name) : "";
-    }
-    var big, sub, go;
-    if (client && !pts) {
-      big = "Ask Scottie";
-      sub = nx ? "Text Scottie for the points on " + (name ? "your " + name : "your next card") : "Text Scottie and we will line up your next card";
-      go = '<a class="hw-nx-go" href="' + SCOTTIE_SMS + '">Text Scottie &rsaquo;</a>';
-    } else {
-      if (!client) { pts = NEXT_DEFAULT.pts; name = NEXT_DEFAULT.name; }
-      big = "+" + pts.toLocaleString("en-US") + " points";
-      go = client ? "" : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>';
-    }
-    var label = (client && !pts) ? "Your next card" : "Your next card will add to your Free Travel Rewards Piggy Bank";
-    var bottom = (client && !pts) ? esc(sub) + " " + go : go;
-    return '<div class="hw-box hw-next"><span class="hw-l">' + esc(label) + '</span><b class="hw-v">' + esc(big) + '</b><span class="hw-s">' + bottom + "</span></div>";
+    var nx = nextEntry(V);
+    var pts = client ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
+    var bonus = pts ? pts.toLocaleString("en-US") + " points" : "Ask Scottie";
+    var bottom = client ? (pts && nx && nx.eligible ? "" : '<a class="hw-nx-go" href="' + SCOTTIE_SMS + '">Text Scottie &rsaquo;</a>')
+      : '<a class="hw-nx-go" href="#coaching" data-route="coaching">Learn more &rsaquo;</a>';
+    return '<div class="hw-box hw-next"><span class="hw-l hw-nx-t">Your next card</span>' +
+      '<div class="hw-v hw-nx-rows"><span><small>When to apply:</small> ' + esc(whenToApply(nx, client)) + "</span>" +
+      '<span><small>Bonus:</small> <em>' + esc(bonus) + "</em></span></div>" +
+      '<span class="hw-s">' + bottom + "</span></div>";
   }
   function miniHtml() {
     var cl = member().client;
@@ -1249,7 +1242,7 @@
     var box = function (label, value, sub) {
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
-    var html = demo + acts() + tag + '<div class="hw-boxes">' + eligibleBox(V, cl) + nextCardBox(V, cl) +
+    var html = demo + acts() + tag + '<div class="hw-boxes">' + nextCardBox(V, cl) +
       box("Next card to downgrade or cancel", nx ? esc(nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) : "None", nx ? esc(shortName(nx.card.name)) : "&nbsp;") +
       box("Rewards Cards", String(s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">Open my wallet &rsaquo;</a>') + "</div>";
     if (cap > 0) {
