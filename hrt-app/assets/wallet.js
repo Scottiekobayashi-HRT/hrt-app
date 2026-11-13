@@ -1190,10 +1190,10 @@
       /* "Now", "In 10 days", "In 73 days" (Scottie, Nov 12). A month-only date counts from the 1st. */
       var p = nx.eligible.split("-"), t = todayParts();
       var days = Math.round((Date.UTC(+p[0], +p[1] - 1, p[2] ? +p[2] : 1) - Date.UTC(t.y, t.m - 1, t.d)) / 864e5);
-      big = days <= 0 ? "Do Today" : days === 1 ? "Tomorrow" : "In " + days + " days";
+      big = days <= 0 ? "Now" : days === 1 ? "Tomorrow" : "In " + days + " days";
       sub = days <= 0 ? "You can apply now" : SHORT_MONTHS[+p[1] - 1] + (p[2] ? " " + (+p[2]) + ", " : " ") + p[0];
     } else if (client) { big = "Ask Scottie"; sub = "for your next application date"; }
-    else { big = "Do Today"; sub = ""; }
+    else { big = "Now"; sub = ""; }
     /* Subscribers get Learn more; ʻOhana Members already have Scottie (Nov 12) */
     /* three rows in every box (title, number, bottom line) so the four line up (Nov 12) */
     return '<div class="hw-box hw-elig"><span class="hw-l">When to apply for your next card</span><b class="hw-v">' + esc(big) + '</b>' +
