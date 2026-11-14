@@ -1242,9 +1242,8 @@
     }
     /* Subscribers (Nov 13, Scottie picked option C): the box markets ʻOhana */
     if (!client) {
-      return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who0) + '</span><b class="hw-v">ʻOhana Members only</b>' +
-        '<span class="hw-s">Your personal next step, the date to apply, and texts from Scottie when it\'s time' +
-        '<a class="hw-nx-go" href="#plans" data-route="plans">See ʻOhana &rsaquo;</a></span></div>';
+      return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who0) + '</span><b class="hw-v hw-v-pitch">Use the free tools &amp; consider upgrading to ʻOhana Member level.</b>' +
+        '<span class="hw-s"><a class="hw-nx-go" href="#coaching" data-route="coaching">Watch video &rsaquo;</a></span></div>';
     }
     var t = todayParts(), acts = [];
     (V.cards || []).forEach(function (e) {

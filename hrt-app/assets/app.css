@@ -1186,3 +1186,6 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 /* Try ʻOhana button, left of Try HRT PRO, Subscribers only (Nov 13) */
 .topbar .tooh{background:linear-gradient(135deg,#14202e,#1b2f4a);border:1px solid rgba(242,184,75,.6);color:#f5c75a;display:inline-flex;align-items:center;gap:6px;margin-right:8px}
 .topbar .tooh:hover{background:#1b2f4a;color:#ffd77a}
+/* Member's Wall title (Nov 13): same size and font as the Scottie's Wall title */
+#v-home .toprow .hero .hw-wall-t{margin:0 0 4px;font-size:18px;color:#fff;position:relative;z-index:1}
+.hw-boxes .hw-v.hw-v-pitch{font-size:17px;line-height:1.3;white-space:normal}
