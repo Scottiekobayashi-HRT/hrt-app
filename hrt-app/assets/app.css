@@ -1183,3 +1183,6 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hw-boxes .hw-next .hw-v,.hw-boxes .hw-next .hw-nx-rows,.hw-boxes .hw-next .hw-nx-rows em{color:#fff}
 .hw-boxes .hw-next .hw-nx-rows small{color:#b9cbdc}
 .hw-boxes .hw-box .hw-nx-go{color:#f5c75a}
+/* Try ʻOhana button, left of Try HRT PRO, Subscribers only (Nov 13) */
+.topbar .tooh{background:rgba(245,199,90,.12);border:1px solid rgba(245,199,90,.7);color:#f5c75a;display:inline-flex;align-items:center;gap:6px;margin-right:8px}
+.topbar .tooh:hover{background:rgba(245,199,90,.22)}

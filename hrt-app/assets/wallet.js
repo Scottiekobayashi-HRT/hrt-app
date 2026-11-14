@@ -1220,6 +1220,8 @@
     "Text Scottie about your next step", "Reply to Scottie's last text", "Scottie will text you when it's time"];
   function approvedText(t) { return APPROVED_ACTION_TEXT.indexOf(String(t || "").trim()) > -1 ? String(t).trim() : ""; }
   function opsData() { var w = state.wallet; return w && !state.demo && w.ops && typeof w.ops === "object" ? w.ops : null; }
+  /* Tile 3 shows a countdown, not the date (Scottie, Nov 13) */
+  function inDays(n) { n = Math.round(+n); if (!isFinite(n)) return "None"; if (n < 0) return "OVERDUE"; if (n === 0) return "Today"; return "In " + n + (n === 1 ? " day" : " days"); }
   function isoParts(x) { var p = String(x || "").split("-"); return p.length === 3 ? { y: +p[0], m: +p[1], d: +p[2] } : null; }
   function longDate(p) { return SHORT_MONTHS[p.m - 1] + " " + p.d + ", " + p.y; }
   /* "Update Scottie" on each box for ʻOhana Members (Nov 13): opens Ask Scottie, which replies first */
@@ -1313,8 +1315,8 @@
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
-      (opsData() ? box("Next card to downgrade or cancel", (function (f) { return f ? esc((f.d ? dayText(f) : SHORT_MONTHS[f.m - 1]) + " " + f.y) : "None"; })(isoParts(opsData().feeDate)), (opsData().feeCard ? '<span class="hw-dc">' + esc(String(opsData().feeCard).slice(0, 40)) + "</span>" : "") + (updBtn(cl, "Downgrade or cancel") || (opsData().feeCard ? "" : "&nbsp;"))) :
-      box("Next card to downgrade or cancel", nx ? esc((nx.renewal.exact ? dayText(nx.renewal) : SHORT_MONTHS[nx.renewal.m - 1]) + " " + nx.renewal.y) : "None", (nx ? '<span class="hw-dc">' + esc(shortName(nx.card.name)) + "</span>" : "&nbsp;") + updBtn(cl, "Downgrade or cancel"))) + /* the member's own card, named again (Scottie, Nov 13) */
+      (opsData() ? box("Next card to downgrade or cancel", (function (f) { if (!f) return "None"; var t = new Date(); t.setHours(0, 0, 0, 0); return inDays(Math.round((new Date(f.y, f.m - 1, f.d || 1) - t) / 864e5)); })(isoParts(opsData().feeDate)), (opsData().feeCard ? '<span class="hw-dc">' + esc(String(opsData().feeCard).slice(0, 40)) + "</span>" : "") + (updBtn(cl, "Downgrade or cancel") || (opsData().feeCard ? "" : "&nbsp;"))) :
+      box("Next card to downgrade or cancel", nx ? inDays(nx.renewal.days) : "None", (nx ? '<span class="hw-dc">' + esc(shortName(nx.card.name)) + "</span>" : "&nbsp;") + updBtn(cl, "Downgrade or cancel"))) + /* the member's own card, named again (Scottie, Nov 13) */
       box(esc(poss(firstOf(), "My") + " Rewards Cards"), String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "my") + " Wallet") + ' &rsaquo;</a>' + updBtn(cl, "Rewards Cards")) + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
