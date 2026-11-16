@@ -2,7 +2,8 @@
    Field map (Scottie and Eddie, Nov 13):
      Next action for <first_name>  first_name, member_action_type, member_action_date, member_action_text
      Your next card                 next_card_pitch_date (When to apply), next_card_bonus_pts (Bonus)
-     Next card to downgrade/cancel  fee_date (or the date in fee_anniversary) + fee_card (the member's own card)
+     Save on annual fees            fee_date (or the date in fee_anniversary) + fee_card (the member's own card) + fee_action (downgrade or cancel)
+     Next card link                 next_card_apply_link (https only, shows on Today or overdue)
      My Rewards Cards               wallet (count of entries, not counting cxld)
    Secrecy rule: no card names ever leave this file. next_card_plan, mrs_terms, wallet text
    and fee_anniversary codes are read for dates and counts only.
@@ -27,9 +28,13 @@ export function toOps(r) {
     nextCard: { date: day(r.next_card_pitch_date), bonusPts: Number.isFinite(pts) ? pts : null },
     feeDate: day(r.fee_date || r.fee_anniversary),
     feeCard: String(r.fee_card || "").slice(0, 40), /* the member's own card to downgrade or cancel (Scottie, Nov 13) */
+    feeAction: ["downgrade", "cancel"].includes(String(r.fee_action || "").trim().toLowerCase()) ? String(r.fee_action).trim().toLowerCase() : "", /* Eddie, Nov 16 */
     cardCount: cardCount(r.wallet)
   };
   if (ops.nextCard.bonusPts == null) delete ops.nextCard.bonusPts;
+  const link = String(r.next_card_apply_link || "").trim(); /* Scottie's application link (Eddie, Nov 16) */
+  if (/^https:\/\/[^\s"<>]{1,490}$/.test(link)) ops.nextCard.applyUrl = link;
+  if (!ops.feeAction) delete ops.feeAction;
   return { firstName: r.first_name, ops };
 }
 if (process.argv[1] && process.argv[1].endsWith("master_to_ops.mjs") && process.argv[2]) {
