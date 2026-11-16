@@ -1,14 +1,14 @@
 /* ---------------------------------------------------------------------------
    coaching.js - Rewards Card Coaching page (#coaching), Nov 11 2026 (Eddie review)
 
-   For Subscribers (free): what ʻOhana coaching does, why the bank rules make it
+   For Subscribers (free): what Ohana coaching does, why the bank rules make it
    hard to do alone, the two "start here" videos, and a free preview of Scottie AI
    with topic starters. The starters are scripted (no AI call yet): two answer
-   with a video, the rest lead to ʻOhana coaching. When Ask Scottie (branch
+   with a video, the rest lead to Ohana coaching. When Ask Scottie (branch
    ask-scottie) comes to this dashboard, the starters can hand off to it.
 
-   ʻOhana Members (html.ms-client) see "Text Scottie" where free members see
-   "Join ʻOhana". Customer-facing text: no em dashes.
+   Ohana Members (html.ms-client) see "Text Scottie" where free members see
+   "Join Ohana". Customer-facing text: no em dashes.
 
    Edit the words in STARTERS, RULES and VIDEOS below. Bank rules were checked
    in November 2026; re-check them when a bank changes its terms.
@@ -21,7 +21,7 @@
   var SMS = "sms:+18083545216";
 
   var VIDEOS = [
-    { id: "vXP9bjDBsOs", title: "How we'd work together", sub: "Start here. How ʻOhana coaching works, step by step." },
+    { id: "vXP9bjDBsOs", title: "How we'd work together", sub: "Start here. How Ohana coaching works, step by step." },
     { id: "-iCwFTT400E", title: "Redeeming 101", sub: "Turn your points into free flights. Members only link." }
   ];
 
@@ -40,15 +40,15 @@
   ];
 
   /* Scottie AI free preview: 3 starter questions (Scottie, Nov 12). kind "video" answers
-     with a video; "join" is the dead end that leads to ʻOhana coaching. The same 3 show
-     in the Ask Scottie pop-up for everyone who is not an ʻOhana Member (ask-scottie.js). */
+     with a video; "join" is the dead end that leads to Ohana coaching. The same 3 show
+     in the Ask Scottie pop-up for everyone who is not an Ohana Member (ask-scottie.js). */
   var STARTERS = [
     { q: "How do I get started?", kind: "video", video: 0,
       a: "Hey, glad you're here! Start with this short video on how we'd work together. Then add your cards to My Wallet so you can see where you stand." },
     { q: "How do I redeem points for free travel?", kind: "video", video: 1,
       a: "Good one. Watch my Redeeming 101 first. The short version: check your bank's travel portal first, then look at moving points to an airline partner. Only move points once you've found the seat, because transfers can't be undone." },
     { q: "Which card should I get next?", kind: "join",
-      a: "That depends on every card you've opened, what you spend each month and where you want to go. It's exactly what I map out one-on-one with ʻOhana Members." }
+      a: "That depends on every card you've opened, what you spend each month and where you want to go. It's exactly what I map out one-on-one with Ohana Members." }
   ];
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -112,7 +112,7 @@
   }
 
   function joinActs() {
-    return '<div class="co-acts"><a class="co-btn gold co-free" href="' + JOIN_URL + '" target="_top">Join our ʻOhana</a>' +
+    return '<div class="co-acts"><a class="co-btn gold co-free" href="' + JOIN_URL + '" target="_top">Join our Ohana</a>' +
       '<a class="co-btn co-free" href="' + JOIN_URL + '" target="_top">Book a free call</a>' +
       '<a class="co-btn gold co-oh" href="' + SMS + '">Text Scottie</a></div>';
   }
@@ -127,19 +127,19 @@
 
   function html() {
     return '<div class="co-grid">' +
-      '<section class="co-card"><h2>What ʻOhana coaching <span>does for you</span></h2>' +
+      '<section class="co-card"><h2>What Ohana coaching <span>does for you</span></h2>' +
       '<p class="co-lede">You tell us your cards, your spending and where you want to go. We do the rest, and we text you when it is time to act.</p>' +
       '<ul class="co-list"><li>We map your next card: which bank, which card and when, based on every card you already have.</li>' +
       "<li>We time it around each bank's rules, so you get approved and actually earn the bonus.</li>" +
       "<li>We text you when it is time: your next card, your minimum spend and your fee renewals.</li>" +
-      "<li>We help you turn the points into trips from Hawaiʻi, like Japan, Vegas or the mainland.</li></ul>" +
-      '<div class="co-roi"><b>About 75,000 extra points</b><p>That is what one well-timed card can land. From Hawaiʻi, that is roughly $1,500 in airfare. Open the same card a few months too early and the bonus can be gone for good.</p></div>' +
-      '<div class="co-acts co-free"><a class="co-btn gold" href="' + JOIN_URL + '" target="_top">Join our ʻOhana</a></div>' +
+      "<li>We help you turn the points into trips from Hawaii, like Japan, Vegas or the mainland.</li></ul>" +
+      '<div class="co-roi"><b>About 75,000 extra points</b><p>That is what one well-timed card can land. From Hawaii, that is roughly $1,500 in airfare. Open the same card a few months too early and the bonus can be gone for good.</p></div>' +
+      '<div class="co-acts co-free"><a class="co-btn gold" href="' + JOIN_URL + '" target="_top">Join our Ohana</a></div>' +
       '<div class="co-acts co-oh"><a class="co-btn gold" href="' + SMS + '">Text Scottie</a></div></section>' +
       '<section class="co-card"><h2>Why it is hard <span>to do on your own</span></h2>' +
       '<p class="co-lede">Every bank has its own rules about how often you can open cards and when you can earn a bonus. A few of them:</p>' +
       '<div class="co-rules">' + RULES.map(function (r) { return '<div class="co-rule"><b>' + esc(r.bank) + "</b><p>" + esc(r.rule) + "</p><small>" + esc(r.why) + "</small></div>"; }).join("") + "</div>" +
-      '<p class="co-sum">Now add it all up: which bank first, which card second, how many months in between, and which bonuses you can still earn. That is the puzzle we solve for every ʻOhana Member.</p>' +
+      '<p class="co-sum">Now add it all up: which bank first, which card second, how many months in between, and which bonuses you can still earn. That is the puzzle we solve for every Ohana Member.</p>' +
       '<p class="co-fine">Bank rules change often. These were checked in November 2026. Your exact path depends on every card you have opened, which is why we always start with your whole wallet.</p></section>' +
       "</div>" +
       '<section class="co-card"><h2>Start <span>here</span></h2><p class="co-lede">Two short videos from Scottie. Watch these first.</p>' +
@@ -148,7 +148,7 @@
       '<p class="co-lede">Pick a question to start. This is my AI, not me live.</p>' +
       '<div class="co-qs" role="group" aria-label="Questions">' + STARTERS.map(function (s, i) { return '<button type="button" class="co-q" data-co-q="' + i + '" aria-pressed="false">' + esc(s.q) + "</button>"; }).join("") + "</div>" +
       '<div class="co-chat" id="coChat" aria-live="polite"></div>' +
-      '<p class="co-ainote">The free preview answers these 3 starter questions. You can also find them in the Ask Scottie button at the bottom of every page. ʻOhana Members get the full Scottie AI for their own questions.</p></section>';
+      '<p class="co-ainote">The free preview answers these 3 starter questions. You can also find them in the Ask Scottie button at the bottom of every page. Ohana Members get the full Scottie AI for their own questions.</p></section>';
   }
 
   var mounted = false;

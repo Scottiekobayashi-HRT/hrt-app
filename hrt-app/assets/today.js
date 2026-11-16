@@ -6,7 +6,7 @@
      2. a transfer bonus, for points they hold if any (Transfer Bonuses feed)
      3. the newest HRT article or travel deal         (/api/site-news)
    Layout B (Oct 26): this is now the tile on the right of the Aloha tile.
-   It shows Kamaʻāina Deals' Deal of the day, the bonus line and the site line.
+   It shows Kamaʻaina Deals' Deal of the day, the bonus line and the site line.
    The wallet credit and "used this year" moved into the wallet in the big tile.
 
    Scottie: keep it to a few big words. Older members read this.
@@ -103,14 +103,14 @@
   }
 
   /* Scottie's Deal Drop (a Travel Deals post tagged "drop", see functions/api/site-news.js).
-     for:pro shows to HRT PRO members only, for:ohana to ʻOhana Members only. */
+     for:pro shows to HRT PRO members only, for:ohana to Ohana Members only. */
   function dropFor(news, aud) {
     var d = news && news.drop;
     if (!d || !d.title) return null;
     if (!safeLink(d.url) && !d.own) return null;
     aud = aud || {};
     /* Not for this member: show a locked teaser that points to the next step instead
-       of hiding it, so every drop also shows what PRO or ʻOhana adds. */
+       of hiding it, so every drop also shows what PRO or Ohana adds. */
     var locked = (d.for === "pro" && !aud.pro) || (d.for === "ohana" && !aud.ohana);
     var out = {}; for (var k in d) if (Object.prototype.hasOwnProperty.call(d, k)) out[k] = d[k];
     out.locked = locked;
@@ -145,7 +145,7 @@
     return { date: dateLine(opt.now), lines: lines, captured: cap, dotd: dd, drop: drop };
   }
 
-  /* "Kamaʻāina Starting $299 - The Westin Hapuna" -> "Kamaʻāina Starting $299" (the name is already the title) */
+  /* "Kamaʻaina Starting $299 - The Westin Hapuna" -> "Kamaʻaina Starting $299" (the name is already the title) */
   function offerText(d) {
     var o = String(d.offer || ""), n = String(d.name || "");
     if (n && o.indexOf(n) > -1) o = o.split(n).join("");
@@ -158,7 +158,7 @@
       var dimg = /^https:\/\//.test(dr.image || "") ? ' style="background-image:url(\'' + esc(dr.image).replace(/'/g, "%27") + '\')"' : "";
       var meta = [dr.price, endsText(dr.ends)].filter(Boolean).join(" · ");
       var upd = dr.kind === "update";
-      var who = dr.for === "pro" ? "PRO " : dr.for === "ohana" ? "ʻOhana " : "";
+      var who = dr.for === "pro" ? "PRO " : dr.for === "ohana" ? "Ohana " : "";
       var badge = upd ? (who ? who + "Update" : "HRT Update") : (who ? who + "Deal Drop" : "Scottie\u2019s Deal Drop");
       var icon = upd ? '<path d="M4 10v4h3l5 4V6L7 10zM16 9a4 4 0 0 1 0 6"/>' : '<path d="M12 2l2.9 6.9L22 9.3l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.9L2 9.3l7.1-.4z"/>';
       var iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" ' + (upd ? 'fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"' : 'fill="currentColor"') + ' aria-hidden="true">' + icon + "</svg>";
@@ -167,8 +167,8 @@
         out += '<a class="tdy-drop locked" href="#plans" data-route="plans">' +
           '<span class="tdy-dbody"><span class="tdy-dbadge">' + LOCK + esc(badge) + "</span>" +
           "<b>" + esc(cut(dr.title, 70)) + "</b>" +
-          "<small>" + (pro ? "HRT PRO members got this one first." : "ʻOhana Members got this one first.") + "</small>" +
-          '<span class="tdy-dfoot"><span>' + esc(endsText(dr.ends)) + '</span><span class="tdy-dgo">' + (pro ? "Unlock with HRT PRO" : "Join the ʻOhana") + " &rsaquo;</span></span></span></a>";
+          "<small>" + (pro ? "HRT PRO members got this one first." : "Ohana Members got this one first.") + "</small>" +
+          '<span class="tdy-dfoot"><span>' + esc(endsText(dr.ends)) + '</span><span class="tdy-dgo">' + (pro ? "Unlock with HRT PRO" : "Join the Ohana") + " &rsaquo;</span></span></span></a>";
       } else {
         var lk = safeLink(dr.url), lattr = !lk ? "" : lk.charAt(0) === "#" ? 'href="' + esc(lk) + '" data-route="' + esc(lk.slice(1)) + '"' : 'href="' + esc(lk) + '" target="_top" rel="noopener"';
         out += (lk ? '<a class="tdy-drop' + (upd ? " upd" : "") + '" ' + lattr + ">" : '<div class="tdy-drop' + (upd ? " upd" : "") + '">') +
@@ -182,8 +182,8 @@
     var d = v.dotd;
     if (d) {
       var img = /^https:\/\//.test(d.image || "") ? ' style="background-image:url(\'' + esc(d.image).replace(/'/g, "%27") + '\')"' : "";
-      out += '<a class="tdy-deal" href="#kamaaina" data-route="kamaaina" data-kama-open="' + (+d.idx || 0) + '" aria-label="Kamaʻāina deal of the day: ' + esc(d.name) + '. A new pick every morning">' +
-        '<span class="tdy-ph"' + img + '><span class="tdy-badge">Kamaʻāina deal of the day</span>' + (d.where ? '<span class="tdy-where">' + esc(d.where) + "</span>" : "") + "</span>" +
+      out += '<a class="tdy-deal" href="#kamaaina" data-route="kamaaina" data-kama-open="' + (+d.idx || 0) + '" aria-label="Kamaʻaina deal of the day: ' + esc(d.name) + '. A new pick every morning">' +
+        '<span class="tdy-ph"' + img + '><span class="tdy-badge">Kamaʻaina deal of the day</span>' + (d.where ? '<span class="tdy-where">' + esc(d.where) + "</span>" : "") + "</span>" +
         '<span class="tdy-db"><span class="tdy-dt"><b>' + esc(cut(d.name, 44)) + "</b>" + (offerText(d) ? "<small>" + esc(cut(offerText(d), 60)) + "</small>" : "") + "</span>" +
         '<span class="tdy-big"><b>' + esc(d.big) + "</b>" + (d.small ? "<small>" + esc(d.small) + "</small>" : "") + "</span></span></a>";
     }
@@ -241,7 +241,7 @@
   root.addEventListener("hrt:bonuses", soon);
   root.addEventListener("hrt:member", soon);
   root.addEventListener("hrt:kama", soon);
-  /* Deal of the day opens on the Kamaʻāina Deals page (app.js routes the click) */
+  /* Deal of the day opens on the Kamaʻaina Deals page (app.js routes the click) */
   document.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("[data-kama-open]");
     if (!a) return;

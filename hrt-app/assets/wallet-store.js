@@ -164,10 +164,13 @@
       }
       if (o.nextCard != null) {
         if (!isDay(o.nextCard.date)) throw fail("INVALID", "ops next card date");
+        if (o.nextCard.applyUrl != null && !(typeof o.nextCard.applyUrl === "string" && o.nextCard.applyUrl.length <= 500 && /^https:\/\/[^\s"<>]+$/.test(o.nextCard.applyUrl))) throw fail("INVALID", "ops apply link");
         if (o.nextCard.bonusPts != null && !(typeof o.nextCard.bonusPts === "number" && o.nextCard.bonusPts >= 0 && o.nextCard.bonusPts < 1e7)) throw fail("INVALID", "ops next card bonus");
       }
       if (!isDay(o.feeDate)) throw fail("INVALID", "ops fee date");
       if (o.feeCard != null && (typeof o.feeCard !== "string" || o.feeCard.length > 40)) throw fail("INVALID", "ops fee card");
+      /* Nov 16 (Eddie): what to do with that card, and Scottie's application link for the next card */
+      if (o.feeAction != null && o.feeAction !== "downgrade" && o.feeAction !== "cancel") throw fail("INVALID", "ops fee action");
       if (o.cardCount != null && !(typeof o.cardCount === "number" && o.cardCount >= 0 && o.cardCount < 100)) throw fail("INVALID", "ops card count");
     }
     return w;

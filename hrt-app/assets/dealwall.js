@@ -105,7 +105,7 @@
     "@media (max-width:520px){.dw-unlock{margin-left:0}}",
     /* Deals, News, Flights tiles (Nov 11) */
     /* Nov 12: Subscribers now see every route's points deal (the main reason they came);
-       the dates for ʻOhana routes stay an ʻOhana perk, marked with a small tag */
+       the dates for Ohana routes stay an Ohana perk, marked with a small tag */
     "html.ms-client .dw-lv-sub,html:not(.ms-client) .dw-lv-oh{display:none}html.ms-client .dw-ohtag{display:none}",
     ".dw-chip.dw-ohtag{background:rgba(242,184,75,.18);color:#8a5a12;border-color:rgba(242,184,75,.5)}",
     ".dw-oklock{padding:14px 4px 6px;font-size:13.5px;line-height:1.5}.dw-oklock a{font-weight:800;color:var(--coral);text-decoration:none;margin-left:4px}",
@@ -143,7 +143,7 @@
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
+    if (text != null) n.textContent = String(text).replace(/Hawai[\u02bb\u02bc'\u2019]i/g, "Hawaii").replace(/[\u02bb\u02bc]([Oo])hana/g, "$1hana").replace(/O[\u02bb\u02bc'\u2019]ahu/g, "Oahu").replace(/([Kk])ama[\u02bb\u02bc'\u2019]\u0101ina/g, "$1ama\u02bbaina"); /* Eddie, Nov 16 spelling */
     return n;
   }
   function num(n) { return (n || 0).toLocaleString("en-US"); }
@@ -332,15 +332,15 @@
      "Deals, News, Flights" mix (Nov 11, Eddie review). One rail, many kinds
      of tile, in these shares (Eddie's plan):
        Japan points deals 25, other points deals 25, transfer bonuses 10,
-       testimonials 5, flights 10, news 15, kamaʻāina deals 10.
+       testimonials 5, flights 10, news 15, kamaʻaina deals 10.
      Flights are on hold (no live flight tiles yet) and testimonials start
      empty, so their share simply goes to the others.
      Sources: points deals = Scottie’s Atmos Points Calendar feed (FEED);
      transfer bonuses = the Transfer Bonuses page (window.HRT_TB_LIVE);
      news = hawaiirewardtravel.com/bloghome via /api/site-news;
-     kamaʻāina = the Kamaʻāina Deals tool (window.HRT_KAMA.top).
+     kamaʻaina = the Kamaʻaina Deals tool (window.HRT_KAMA.top).
      Levels: Subscriber sees 4 routes (SUB_ROUTES) and locked transfer bonus
-     tiles; ʻOhana (html.ms-client) sees every feed route except OHANA_SKIP and open
+     tiles; Ohana (html.ms-client) sees every feed route except OHANA_SKIP and open
      bonus tiles. Done with CSS classes so it is right even when Memberstack
      answers after the wall is drawn.
   ===================================================================== */
@@ -348,7 +348,7 @@
   var MIX_MAX = 21;
   var JAPAN = { HND: 1, NRT: 1, KIX: 1, ITM: 1, NGO: 1, FUK: 1, CTS: 1, OKA: 1 };
   var SUB_ROUTES = { HND: 1, LAS: 1, LAX: 1, JFK: 1 };
-  /* ʻOhana sees every route except these (Scottie, Nov 12): San Diego, the Philippines,
+  /* Ohana sees every route except these (Scottie, Nov 12): San Diego, the Philippines,
      Australia, Salt Lake City and Osaka. PRO members choose their own routes on their wall. */
   var OHANA_SKIP = { SAN: 1, MNL: 1, SYD: 1, BNE: 1, MEL: 1, SLC: 1, ITM: 1 }; /* KIX back in (Nov 12) */
   /* Points deal order (Scottie, Nov 12): mostly Japan (Tokyo Haneda and Osaka first), then
@@ -360,7 +360,7 @@
   /* Member photos and words, added by Scottie once members say yes.
      { quote: "...", name: "Leilani K.", trip: "HNL to Tokyo in business", image: "https://..." } */
   var TESTIMONIALS = [];
-  /* News, bonuses and kamaʻāina picks, filled once in mount() and shared with the PRO wall. */
+  /* News, bonuses and kamaʻaina picks, filled once in mount() and shared with the PRO wall. */
   var EXTRAS = { news: [], bonuses: [], kama: [] };
 
   /* Smooth weighted round robin: the order of tile kinds, so each kind shows up
@@ -379,7 +379,7 @@
     return out;
   }
   /* Wall rhythm (Scottie and Eddie, Nov 12): two points deals, then one other tile.
-     The other tile takes turns evenly: HRT news, transfer deal, kamaʻāina deal, HRT PRO,
+     The other tile takes turns evenly: HRT news, transfer deal, kamaʻaina deal, HRT PRO,
      testimonial (empty kinds are skipped). When one side runs out the other keeps going. */
   var EXTRA_CYCLE = ["news", "bonus", "kama", "pro", "testimonial"];
   function rhythmOrder(points, groups, max) {
@@ -432,7 +432,7 @@
   function newsTile(a) {
     var t = el("div", "dw-card dw-t dw-news");
     var ph = photo("dw-ph", a.image);
-    ph.appendChild(el("span", "dw-kind", "Hawaiʻi travel news"));
+    ph.appendChild(el("span", "dw-kind", "Hawaii travel news"));
     t.appendChild(ph);
     var body = el("div", "dw-body");
     body.appendChild(el("b", "dw-tt", a.title));
@@ -447,7 +447,7 @@
   function kamaTile(k) {
     var t = el("div", "dw-card dw-t dw-kama");
     var ph = photo("dw-ph", k.image);
-    ph.appendChild(el("span", "dw-kind", "Kamaʻāina deal"));
+    ph.appendChild(el("span", "dw-kind", "Kamaʻaina deal"));
     ph.appendChild(el("span", "dw-city", k.where || ""));
     t.appendChild(ph);
     var body = el("div", "dw-body");
@@ -480,7 +480,7 @@
     t.appendChild(body);
     var locked = el("div", "dw-body dw-block");
     locked.appendChild(el("b", "dw-tt", "A live transfer bonus"));
-    locked.appendChild(el("span", "dw-tsub", "ʻOhana Members see it weekly, HRT PRO members see it daily"));
+    locked.appendChild(el("span", "dw-tsub", "Ohana Members see it weekly, HRT PRO members see it daily"));
     t.appendChild(locked);
     var acts = el("div", "dw-tacts");
     var open = el("a", "dw-tbtn dw-bopen", "See more transfer bonuses"); open.href = "#transfers"; open.setAttribute("data-route", "transfers");
@@ -507,7 +507,7 @@
   function testimonialTile(q) {
     var t = el("div", "dw-card dw-t dw-quote");
     var ph = photo("dw-ph", q.image);
-    ph.appendChild(el("span", "dw-kind", "From our ʻohana"));
+    ph.appendChild(el("span", "dw-kind", "From our ohana"));
     t.appendChild(ph);
     var body = el("div", "dw-body");
     body.appendChild(el("p", "dw-q", "“" + q.quote + "”"));
@@ -526,6 +526,8 @@
     head.classList.add("dw-head-min");
     head.appendChild(el("h2", null, "Scottie's Wall"));
     head.appendChild(el("span", "dw-when dw-upd", feed.updated ? "updated " + shortDate(feed.updated) : ""));
+    /* The page title says "Eddie's Dashboard  updated Nov 12" with this same date (Eddie, Nov 16) */
+    if (feed.updated) { window.HRT_WALL_UPD = "updated " + shortDate(feed.updated); document.querySelectorAll(".dash-upd").forEach(function (n) { n.textContent = window.HRT_WALL_UPD; }); }
     var nav = el("div", "dw-nav");
     head.appendChild(nav);
     wrap.appendChild(head);
@@ -595,7 +597,7 @@
       if (d.deal_dates) meta.appendChild(el("span", "dw-chip ok", d.deal_dates + (d.deal_dates === 1 ? " date open" : " dates open")));
       if (d.soonest) meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
       if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
-      if (!subRoute(d)) meta.appendChild(el("span", "dw-chip dw-ohtag", "ʻOhana route"));
+      if (!subRoute(d)) meta.appendChild(el("span", "dw-chip dw-ohtag", "Ohana route"));
       body.appendChild(meta);
 
       card.appendChild(body);
@@ -644,8 +646,8 @@
         grid.appendChild(c);
       });
       if (!subRoute(d) && !isOhana()) {
-        /* Subscriber on an ʻOhana route: they see the deal, the dates are an ʻOhana perk */
-        grid = el("p", "dw-oklock", "The open dates on this route are for ʻOhana Members. Your free routes are Tokyo, Las Vegas, Los Angeles and New York.");
+        /* Subscriber on an Ohana route: they see the deal, the dates are an Ohana perk */
+        grid = el("p", "dw-oklock", "The open dates on this route are for Ohana Members. Your free routes are Tokyo, Las Vegas, Los Angeles and New York.");
         var lm = el("a", null, "Learn more \u2192"); lm.href = "#coaching"; lm.setAttribute("data-route", "coaching");
         grid.appendChild(lm);
       }
@@ -1027,7 +1029,7 @@
         rail.appendChild(card);
       });
       /* Nov 12: PRO members get the same Deals, News, Flights mix: their own deals
-         plus news, transfer bonuses (open for PRO) and kamaʻāina deals. */
+         plus news, transfer bonuses (open for PRO) and kamaʻaina deals. */
       var dealNodes = Array.prototype.slice.call(rail.children);
       if (dealNodes.length && (EXTRAS.news.length || EXTRAS.bonuses.length || EXTRAS.kama.length || TESTIMONIALS.length)) {
         var order = rhythmOrder(dealNodes.map(function (n) { return { kind: "deals", item: n }; }),

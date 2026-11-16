@@ -257,7 +257,7 @@ details.how p{margin:10px 0 0;color:var(--muted);font-size:13px;max-width:78ch}
  .lscore{grid-area:s;justify-self:end;font-size:10px;padding:2px 6px}
  .lend,.lgo{display:none}
 }
-/* ---------- how to get the kamaʻāina rate ---------- */
+/* ---------- how to get the kamaʻaina rate ---------- */
 .howto{border:1px solid color-mix(in srgb,var(--coral) 35%,var(--line));background:color-mix(in srgb,var(--coral) 7%,var(--surface));border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .howto h4{margin:0;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:var(--text)}
 .howto ol{margin:0;padding-left:18px;font-size:13px;color:var(--text);display:flex;flex-direction:column;gap:4px}
@@ -714,7 +714,7 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 #wl-mini .wlm-x{all:unset;cursor:pointer;font-weight:700;color:#f2b84b;min-height:32px;display:inline-flex;align-items:center}
 @media (max-width:560px){#wl-mini{padding:18px 16px 14px;border-radius:18px}#wl-mini .wlm-big{font-size:32px}}
 
-/* ʻOhana star on the profile photo (Oct 17): gold ring plus a small gold star, top bar and Account page */
+/* Ohana star on the profile photo (Oct 17): gold ring plus a small gold star, top bar and Account page */
 .ac-av.ac-oh{border:2px solid #f2b84b!important}
 .ac-oh-star{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#1b2430;color:#f2b84b;pointer-events:none}
 .tb-av{position:relative}
@@ -850,7 +850,7 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .hrt-app .rg-foot p{margin:3px 0 0;font-size:13.5px;color:var(--muted)}
 .hrt-app .rg-fine{margin:10px 2px 0;font-size:12px;line-height:1.5;color:var(--muted)}
 
-/* ===== Kamaʻāina: live "updated" line, Deal of the Day, latest changes ===== */
+/* ===== Kamaʻaina: live "updated" line, Deal of the Day, latest changes ===== */
 .hero.slim .kfresh{display:inline-flex;align-items:center;gap:9px;margin-top:10px;font-size:12.5px;font-weight:600;color:#cfe0ee}
 .kfresh .kdot{position:relative;flex:none;width:8px;height:8px;border-radius:50%;background:#3fce7f;box-shadow:0 0 0 3px rgba(63,206,127,.25)}
 .kfresh .kdot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid #3fce7f;opacity:0;animation:kPulse 2s ease-out infinite}
@@ -1137,7 +1137,7 @@ button.hw-row:hover{background:rgba(255,255,255,.14)}button.hw-row:focus-visible
 .hw-next .hw-nx-rows small{font-size:13px;font-weight:700;color:#d8c49a;font-family:'DM Sans',sans-serif}
 .hw-next .hw-nx-rows em{font-style:normal;color:#f5c75a}
 
-/* Your included tools (Nov 12): Subscribers see ʻOhana and PRO tools too, marked off limits */
+/* Your included tools (Nov 12): Subscribers see Ohana and PRO tools too, marked off limits */
 .oh-b{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.8px;padding:2px 7px;border-radius:6px;background:#14202e;color:#f5c75a;vertical-align:middle}
 .ttile .t-lockl{display:none;align-items:center;gap:5px;color:var(--muted)!important}
 html:not(.ms-client):not(.ms-pro) .ttile.t-oh .t-open,html:not(.ms-pro) .ttile.t-pro .t-open{display:none}
@@ -1153,7 +1153,7 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hw-act .hw-act-t{text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:#ffb3b3}
 .hw-act .hw-s b{color:#fff}
 
-/* Update Scottie button on the wallet tile boxes, ʻOhana Members (Nov 13) */
+/* Update Scottie button on the wallet tile boxes, Ohana Members (Nov 13) */
 .hw-box .hw-upd{display:block;margin-top:8px;padding:6px 12px;border-radius:999px;border:1px solid rgba(245,199,90,.7);background:rgba(245,199,90,.12);color:#f5c75a;font:800 12px 'DM Sans',sans-serif;cursor:pointer;width:max-content;max-width:100%}
 .hw-box .hw-upd:hover{background:rgba(245,199,90,.25)}
 
@@ -1164,7 +1164,7 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hw-next .hw-nx-rows{justify-content:center;align-self:center}
 .hw-box .hw-dc{display:block;color:#c9d6e3}
 .hero-howzit .hw-ask a{color:#f5c75a;font-weight:800;text-decoration:none}.hero-howzit .hw-ask a:hover{text-decoration:underline}
-/* Dashboard wallet tile (Nov 13): same navy as Scottie's Wall, no Hawaiʻi photo */
+/* Dashboard wallet tile (Nov 13): same navy as Scottie's Wall, no Hawaii photo */
 #v-home .toprow .hero{background:linear-gradient(135deg,#14202e 0%,#1b2f4a 100%);border:1px solid rgba(242,184,75,.32);box-shadow:var(--shadow)}
 #v-home .toprow .hero::before,#v-home .toprow .hero::after{display:none}
 #v-home .toprow .hero .fp,#v-home .toprow .hero .plane{display:none}
@@ -1183,9 +1183,45 @@ html:not(.ms-pro) .ttile.t-pro .ti,html:not(.ms-pro) .ttile.t-pro b,html:not(.ms
 .hw-boxes .hw-next .hw-v,.hw-boxes .hw-next .hw-nx-rows,.hw-boxes .hw-next .hw-nx-rows em{color:#fff}
 .hw-boxes .hw-next .hw-nx-rows small{color:#b9cbdc}
 .hw-boxes .hw-box .hw-nx-go{color:#f5c75a}
-/* Try ʻOhana button, left of Try HRT PRO, Subscribers only (Nov 13) */
+/* Try Ohana button, left of Try HRT PRO, Subscribers only (Nov 13) */
 .topbar .tooh{background:linear-gradient(135deg,#14202e,#1b2f4a);border:1px solid rgba(242,184,75,.6);color:#f5c75a;display:inline-flex;align-items:center;gap:6px;margin-right:8px}
 .topbar .tooh:hover{background:#1b2f4a;color:#ffd77a}
 /* Member's Wall title (Nov 13): same size and font as the Scottie's Wall title */
 #v-home .toprow .hero .hw-wall-t{margin:0 0 4px;font-size:18px;color:#fff;position:relative;z-index:1}
 .hw-boxes .hw-v.hw-v-pitch{font-size:17px;line-height:1.3;white-space:normal}
+/* Header (Eddie, Nov 16) */
+html:not(.ms-named) .crumb .dash-nm{display:none}
+.crumb .dash-nm{margin:0;color:inherit}
+.crumb .dash-nm b{font-weight:800}
+.crumb .dash-upd{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:var(--muted);margin-left:6px}
+.topbar .towf{background:#fff;border:1px solid #1b2f4a;color:#1b2f4a;display:inline-flex;align-items:center;gap:6px}
+.topbar .towf:hover{background:#eef3f8}
+[data-theme="dark"] .topbar .towf{background:transparent;border-color:#9fc1d4;color:#dbe7f2}
+.topbar .topro+.topro{margin-left:6px}
+html.ms-wayfinder .topbar .towf{display:none}
+/* Member's level next to the Wall title (Eddie, Nov 16) */
+#v-home .toprow .hero .hw-wall-t .hw-lvl{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#bccde0;margin-left:6px}
+html.ms-pro .lv-aloha,html.ms-pro .lv-ohana,html.ms-client .lv-aloha,html:not(.ms-client) .lv-ohana,html:not(.ms-pro) .lv-pro{display:none}
+html.ms-pro.ms-client .lv-ohana{display:none}
+/* Wall tiles (Eddie, Nov 16) */
+.hw-boxes .hw-fee .hw-s,.hw-boxes .hw-s .hw-wrap{white-space:normal}
+.hw-boxes .hw-s .hw-dc{display:block;color:#c9d6e3}
+.hw-boxes .hw-v.hw-v-pitch{font-size:16px;line-height:1.35}
+/* Your included tools (Eddie, Nov 16): two bar colors, access line last */
+.ttiles .ttile em{color:var(--muted)!important;font-weight:600}
+.ttiles .ttile .t-lockl,.ttiles .ttile .t-open,.ttiles .ttile.c6 em.free-only,.ttiles .ttile.c6 em.pro-only{display:none!important}
+.ttiles .ttile{border-color:var(--line)}
+.ttiles .ttile.t-avail::before{background:linear-gradient(90deg,#14202e,#2b4a70)}
+.ttiles .ttile.t-locked::before{background:#8b1f1f}
+.ttiles .ttile.t-locked{background:var(--surface-2);box-shadow:none}
+.ttiles .ttile.t-locked .ti,.ttiles .ttile.t-locked b,.ttiles .ttile.t-locked small,.ttiles .ttile.t-locked em{opacity:.6}
+.ttiles .ttile.t-avail .ti,.ttiles .ttile.t-avail b,.ttiles .ttile.t-avail small{opacity:1}
+.ttile .t-acc{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;margin-top:4px}
+.ttile.t-avail .t-acc{color:#d97040}
+.ttile.t-locked .t-acc{color:#9b2226}
+[data-theme="dark"] .ttile.t-locked .t-acc{color:#e07a7a}
+.ttile.t-wf .ti{color:#2b4a70;background:color-mix(in srgb,#2b4a70 16%,var(--surface))}
+#toolsSec{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px}
+.t-vids{display:flex;flex-wrap:wrap;gap:6px 14px;margin-left:auto}
+.t-vids a{font-size:12.5px;font-weight:700;color:#d97040;text-decoration:none}
+.t-vids a:hover{text-decoration:underline}

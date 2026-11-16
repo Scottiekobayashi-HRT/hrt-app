@@ -23,7 +23,7 @@
     { id: "wells", short: "Wells", name: "Wells Fargo Rewards", c: "#b3261e" },
     { id: "rove", short: "Rove", name: "Rove Miles", c: "#6a4fb3" }
   ];
-  /* hi: flies from HNL or is a go-to for Hawaiʻi trips. m: words used to match live bonuses. */
+  /* hi: flies from HNL or is a go-to for Hawaii trips. m: words used to match live bonuses. */
   var PROGRAMS = [
     { code: "AS", name: "Alaska / Hawaiian Atmos Rewards", type: "airline", hi: 1, m: /atmos|alaska|hawaiian/i, t: { bilt: "1:1" } },
     { code: "AA", name: "American Airlines AAdvantage", type: "airline", hi: 1, m: /american|aadvantage/i, t: { citi: "1:1" } },
@@ -166,7 +166,7 @@
         '<label class="srch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" class="q" placeholder="Search an airline or hotel" aria-label="Search programs" autocomplete="off"></label>' +
         '<button type="button" class="chip" data-type="airline" aria-pressed="true">Airlines</button>' +
         '<button type="button" class="chip" data-type="hotel" aria-pressed="false">Hotels</button>' +
-        '<button type="button" class="chip" data-hi aria-pressed="false">Hawaiʻi favorites</button>' +
+        '<button type="button" class="chip" data-hi aria-pressed="false">Hawaii favorites</button>' +
         '<button type="button" class="chip mine" data-mine aria-pressed="false" hidden>' + CHECK + 'My cards</button>' +
       '</div>' +
       '<div class="hint">Tap a bank to see only its partners. Tap a program to see every way in.</div>' +
@@ -212,7 +212,7 @@
       tbody.innerHTML = list.length ? list.map(function (p) {
         var direct = BANKS.filter(function (b) { return p.t[b.id] && p.t[b.id].charAt(0) !== "v"; }).length;
         return '<tr data-p="' + p.code + '" class="' + (S.open === p.code ? "on" : "") + '" tabindex="0"><td class="pn"><div class="pr"><span class="cd">' + esc(p.code) + '</span><div><b>' + esc(p.name) + '</b><small>' +
-          (direct ? direct + (direct === 1 ? " bank" : " banks") : "No direct transfers") + (p.hi ? ' · <span class="hi">Hawaiʻi favorite</span>' : '') + '</small></div></div></td>' +
+          (direct ? direct + (direct === 1 ? " bank" : " banks") : "No direct transfers") + (p.hi ? ' · <span class="hi">Hawaii favorite</span>' : '') + '</small></div></div></td>' +
           BANKS.map(function (b) { return cell(p, b, mb); }).join("") + '</tr>';
       }).join("") : '<tr><td colspan="' + (BANKS.length + 1) + '"><div class="empty">No programs match that. Clear the search or pick another bank.</div></td></tr>';
       renderDet();

@@ -42,7 +42,7 @@ ok(!C.bonusCards(bonuses[2], bk), "Freedom alone does not match chase bonus");
 let t = C.tips(w, earning, bonuses, lounges);
 ok(t.some(x => x.key === "tb-chase-cash"), "cash-only explainer for free members");
 t = C.tips({ ...w, client: true }, earning, bonuses, lounges);
-ok(!t.some(x => x.key === "tb-chase-cash"), "no card-pairing explainer for ʻOhana Members");
+ok(!t.some(x => x.key === "tb-chase-cash"), "no card-pairing explainer for Ohana Members");
 
 // tips
 w = { held: [H("amex-gold", "Amex Gold"), H("capone-venture-x", "Venture X"), H("atmos-summit", "Atmos Summit")],

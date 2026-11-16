@@ -48,7 +48,7 @@
     LHR: "London", MAD: "Madrid", HEL: "Helsinki", DOH: "Doha", AMM: "Amman", CMN: "Casablanca"
   };
   var REGIONS = [
-    ["Hawaiʻi", ["HNL", "OGG", "KOA", "ITO", "LIH", "LNY", "MKK"]],
+    ["Hawaii", ["HNL", "OGG", "KOA", "ITO", "LIH", "LNY", "MKK"]],
     ["West Coast and Vegas", ["LAX", "SFO", "SAN", "LGB", "SBA", "PSP", "FAT", "LAS", "PHX", "YVR"]],
     ["Mountains and Texas", ["DEN", "SLC", "BZN", "JAC", "FCA", "AUS", "IAH"]],
     ["East and Midwest", ["JFK", "DCA", "ATL", "MCO", "MIA", "FLL", "ORD", "CLE"]],
@@ -70,14 +70,14 @@
      from, for the fine print and the next check. */
   var COMMUNITIES = [
     { key: "huakai", name: "Huakaʻi by Hawaiian", short: "Huakaʻi", color: "#c8237f", res: "HI",
-      who: "Hawaiʻi residents only", tag: "Built for kamaʻāina who fly between the islands",
+      who: "Hawaii residents only", tag: "Built for kamaʻaina who fly between the islands",
       challenge: "Holoholo Gateways",
       dests: ["HNL", "ITO", "HND", "OGG", "LNY", "SYD", "LIH", "LAS", "MKK", "KOA"],
       perks: ["50% more points and status points on interisland flights, from Jan 1 2027, however you choose to earn",
               "Two free checked bags on Neighbor Island flights, surfboards and golf bags included",
               "A code every three months: 10% off one Neighbor Island booking, 20% with an Atmos Rewards Visa or Hawaiian World Elite Mastercard",
               "Redeem Foodland Maikaʻi points for 3x Atmos points",
-              "Upgrade certificates can clear as early as 3 days out on Hawaiʻi to Continent, Asia and Oceania flights",
+              "Upgrade certificates can clear as early as 3 days out on Hawaii to Continent, Asia and Oceania flights",
               "Monthly flight deals"],
       source: "hawaiianairlines.com/content/huakai, read Oct 13 2026" },
     { key: "families", name: "Families on the Go", short: "Families", color: "#d97040", res: null,
@@ -289,7 +289,7 @@
   var QS = {
     home: function () { return { title: "Where do you live?", hint: "Two of the six Communities are only for residents.",
       key: "home", options: [
-        { value: "HI", label: "Hawaiʻi", sub: "Huakaʻi is open to you", icon: ICO.home },
+        { value: "HI", label: "Hawaii", sub: "Huakaʻi is open to you", icon: ICO.home },
         { value: "AK", label: "Alaska", sub: "Club 49 is open to you", icon: ICO.mount },
         { value: "other", label: "Somewhere else", sub: "Four Communities are open to you", icon: ICO.globe }] }; },
     island: function () { return { title: "How often do you fly between the islands?", hint: "Count round trips, like Honolulu to Maui and back.",
@@ -324,7 +324,7 @@
     return Q.question({
       n: n, total: total, compact: true, multi: true, current: state.dests,
       title: "Where are you headed by the end of 2027?",
-      hint: "Tap every place you will fly to or connect through. Flying home counts, so keep HNL if you live on Oʻahu. Skip this if you are not sure.",
+      hint: "Tap every place you will fly to or connect through. Flying home counts, so keep HNL if you live on Oahu. Skip this if you are not sure.",
       options: codes.map(function (c) { return { value: c, label: c, sub: AIRPORTS[c] }; }),
       onPick: function (c) { if (state.dests[c]) delete state.dests[c]; else state.dests[c] = 1; state.ans.places = true; },
       extra: extra,

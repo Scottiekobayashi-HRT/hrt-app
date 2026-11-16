@@ -80,11 +80,11 @@ const lk = T.html(T.build({ now: NOW, news: { drop: Object.assign({}, drop, { fo
 ok('locked teaser points to Plans, not the post', lk.indexOf('data-route="plans"') > -1 && lk.indexOf(drop.url) < 0 && /Unlock with HRT PRO/.test(lk));
 ok('locked teaser hides the details', lk.indexOf('Book by Friday') < 0 && /got this one first/.test(lk));
 const oh = T.html(T.build({ now: NOW, news: { drop: Object.assign({}, drop, { for: 'ohana' }) }, audience: {} }));
-ok('ohana teaser says Join the ʻOhana', /Join the ʻOhana/.test(oh));
+ok('ohana teaser says Join the Ohana', /Join the Ohana/.test(oh));
 const up = T.html(T.build({ now: NOW, news: { drop: Object.assign({}, drop, { kind: 'update', title: 'New: My Wallet Cards page' }) }, audience: {} }));
 ok('update gets HRT Update badge', /HRT Update/.test(up) && /Read more/.test(up) && up.indexOf('tdy-drop upd') > -1);
 ok('drop must link to hawaiirewardtravel.com', T.dropFor({ drop: Object.assign({}, drop, { url: 'https://evil.example/' }) }, {}) === null);
-ok('deal of the day says Kamaaina and daily', hd.indexOf('Kamaʻāina deal of the day') > -1);
+ok('deal of the day says Kamaaina and daily', hd.indexOf('Kamaʻaina deal of the day') > -1);
 /* posts Scottie asks for in chat (data/drops.json) */
 const FD = [{ title: 'Black Friday: Ohana spots open', text: 'Book your onboarding call this week', start: '2026-10-24', ends: '2026-10-31', link: '#plans', button: 'Book a call', kind: 'update' },
   { title: 'Old one', start: '2026-10-01' }, { title: 'Future one', start: '2026-11-20' }];

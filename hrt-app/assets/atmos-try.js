@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
    atmos-try.js - "Try Scottie’s Atmos Points Calendar" (Nov 12, Scottie)
 
-   Free Subscribers and ʻOhana Members can touch the calendar before they buy:
+   Free Subscribers and Ohana Members can touch the calendar before they buy:
    one route (HNL to Tokyo Haneda), economy, the next 30 days, laid out like
    the real calendar (month grid, green / yellow days, tap a day for details).
    Every other route, the return, business and first, and the months past the
@@ -130,7 +130,7 @@
       '<p class="at-sub">The real Atmos award space from this morning, for one route, economy, the next ' + data.win + " days. Tap any colored day. HRT PRO opens all 15 routes from Honolulu, the trip back with the swap button, business class, and about 270 days out.</p>" +
       '<div class="at-ctrl">' +
       '<label class="at-f"><small>Depart from</small><select data-atlock="from"><option selected>HNL · Honolulu</option></select></label>' +
-      '<button type="button" class="at-swap" data-atswap title="Swap: flights back to Hawaiʻi" aria-label="Swap direction, flights back to Hawaiʻi">&#8646;</button>' +
+      '<button type="button" class="at-swap" data-atswap title="Swap: flights back to Hawaii" aria-label="Swap direction, flights back to Hawaii">&#8646;</button>' +
       '<label class="at-f"><small>To</small><select data-atlock="to">' + to + "</select></label>" +
       '<label class="at-f"><small>Cabin class</small><select data-atlock="cabin"><option selected>Economy</option><option>&#128274; Business</option></select></label>' +
       '<label class="at-f"><small>Flights</small><select data-atstops><option value="best" selected>Best deals</option><option value="nonstop">Nonstop</option><option value="conn">Connections</option></select></label>' +
@@ -138,7 +138,7 @@
       '<div class="at-legend"><span><i style="background:#9fd6b1"></i>Great &le; 30,000</span><span><i style="background:#efd27c"></i>Decent &le; 35,000</span><span><i style="background:#ec9c94"></i>High &gt; 35,000</span>' +
       '<span>priced in Atmos points · a dot means a connection (1 stop) · faded day means no saver space</span>' +
       "<span>" + data.count + " deal days in the next " + data.win + (upd ? " · updated " + upd : "") + "</span></div>" +
-      '<div class="at-lockmsg" id="atLockMsg"><span id="atLockTxt"><b>That one is for HRT PRO.</b> Unlock all 15 routes, the trip back to Hawaiʻi, business class, and about 270 days out.</span>' + unlockBtn() + "</div>" +
+      '<div class="at-lockmsg" id="atLockMsg"><span id="atLockTxt"><b>That one is for HRT PRO.</b> Unlock all 15 routes, the trip back to Hawaii, business class, and about 270 days out.</span>' + unlockBtn() + "</div>" +
       '<div class="at-months" id="atMonths">' + data.months.map(function (mm) { return monthHtml(data, mm[0], mm[1]); }).join("") + "</div>" +
       '<div class="at-detail" id="atDetail"></div>' +
       '<p class="at-foot">Award space changes all day. Always confirm on alaskaair.com before you book or transfer points.</p></div>';
@@ -151,7 +151,7 @@
       "<p>" + info.miles.toLocaleString("en-US") + " Atmos points one way in economy" + (info.nonstop ? ", nonstop" : ", with a connection (1 stop)") +
       (info.seats ? ", " + (info.seats >= 9 ? "9 or more seats" : info.seats + (info.seats === 1 ? " seat" : " seats")) : "") + ". " +
       (info.tier === "great" ? "That is a Great price for this route (30,000 or less)." : info.tier === "decent" ? "That is a Decent price for this route (35,000 or less)." : "") + "</p>" +
-      '<p>With HRT PRO you would also see the flights back to Honolulu, business class on this route and all 15 routes from Hawaiʻi.</p>' +
+      '<p>With HRT PRO you would also see the flights back to Honolulu, business class on this route and all 15 routes from Hawaii.</p>' +
       '<div class="at-acts"><a class="at-btn" href="https://www.alaskaair.com/" target="_blank" rel="noopener">Check it on alaskaair.com</a>' + unlockBtn("Unlock the full calendar") + "</div>";
     box.classList.add("on");
     Array.prototype.forEach.call(document.querySelectorAll("#atTry .at-d.on"), function (b) { b.classList.remove("on"); });
@@ -176,7 +176,7 @@
       }
       host.addEventListener("click", function (e) {
         var d = e.target.closest("[data-at]"); if (d) { detail(data, d.getAttribute("data-at")); return; }
-        if (e.target.closest("[data-atswap]")) lockMsg("<b>Flights back to Hawaiʻi are in HRT PRO.</b> Tap the swap button there to track Tokyo Haneda to Honolulu, and every other route home.");
+        if (e.target.closest("[data-atswap]")) lockMsg("<b>Flights back to Hawaii are in HRT PRO.</b> Tap the swap button there to track Tokyo Haneda to Honolulu, and every other route home.");
       });
       host.addEventListener("change", function (e) {
         var st = e.target.closest("[data-atstops]"); if (!st) return;
@@ -189,7 +189,7 @@
         var def = 0; Array.prototype.forEach.call(s.options, function (o, i) { if (o.defaultSelected) def = i; });
         if (s.selectedIndex !== def) {
           var m = document.getElementById("atLockMsg"), t = document.getElementById("atLockTxt");
-          if (t) t.innerHTML = "<b>That one is for HRT PRO.</b> Unlock all 15 routes, the trip back to Hawaiʻi, business class, and about 270 days out.";
+          if (t) t.innerHTML = "<b>That one is for HRT PRO.</b> Unlock all 15 routes, the trip back to Hawaii, business class, and about 270 days out.";
           if (m) { m.classList.add("on"); m.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
           s.selectedIndex = def;
         }

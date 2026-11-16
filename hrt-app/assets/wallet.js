@@ -27,7 +27,7 @@
   var MONTHS = ["January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December"];
   var COACH_URL = "https://www.hawaiirewardtravel.com/our-accelerated-program"; /* our 1:1 program */
-  /* Scottie's number for ʻOhana Members (Oct 25). Opens a text on phones; desktop Macs open Messages. */
+  /* Scottie's number for Ohana Members (Oct 25). Opens a text on phones; desktop Macs open Messages. */
   var SCOTTIE_SMS = "sms:+18083545216";
   var CHAT_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>';
   var SOON_DAYS = 45; /* renewals inside this window get a "coming up" flag */
@@ -903,7 +903,7 @@
     if (v.custom) c.custom = v.custom;
   }
 
-  /* "5 cards opened with HRT since July 2024": the work the ʻOhana team has done. */
+  /* "5 cards opened with HRT since July 2024": the work the Ohana team has done. */
   function hrtLine(w) {
     var mine = (w && w.cards || []).filter(function (e) { return e.withHrt && e.status !== "next"; });
     if (!mine.length) return "";
@@ -1017,7 +1017,7 @@
       artHtml(c, "md") + '<div class="wl-main"><b class="wl-name">' + esc(c.name) + "</b>" +
       '<span class="wl-sub">' + esc([e.holder ? e.holder + "\u2019s card" : "", c.issuer, e.nickname].filter(Boolean).join(" \u00b7 ")) + "</span>" +
       '<span class="wl-meta">' + renewLine + (r.hasFee && rn && opTxt ? ' <span class="wl-dot">&middot;</span> Opened ' + esc(opTxt) : "") + "</span>" +
-      statusHtml(e) + (e.withHrt ? '<span class="wl-withhrt">Opened with HRT</span>' : e.withHrt === false ? '<span class="wl-prehrt">Had before HRT</span>' : e.addedBy === "hrt" ? '<span class="wl-byhrt">Added by your ʻOhana team</span>' : "") +
+      statusHtml(e) + (e.withHrt ? '<span class="wl-withhrt">Opened with HRT</span>' : e.withHrt === false ? '<span class="wl-prehrt">Had before HRT</span>' : e.addedBy === "hrt" ? '<span class="wl-byhrt">Added by your Ohana team</span>' : "") +
       valueLine(credits, other) +
       "</div>" +
       '<div class="wl-side"><span class="wl-fee">' + esc(feeLine) + "</span>" +
@@ -1121,7 +1121,7 @@
       (p.activateBy ? "Activate by " : "Use by ") + esc(dayText(p.end)) + (p.approx ? " or earlier" : "") +
       ' <span class="wl-pk-days' + lvl + '">' + esc(daysLeft(p.days)) + "</span></div>" +
       (b.type === "activation" ? rotatingLine(b.card) : "") + partHtml(r) +
-      (b.id === "resy" ? '<a class="wl-pk-link" href="#resy" data-route="resy">Find a Hawaiʻi Resy spot &rarr;</a>' : "") +
+      (b.id === "resy" ? '<a class="wl-pk-link" href="#resy" data-route="resy">Find a Hawaii Resy spot &rarr;</a>' : "") +
       '<div class="wl-tags">' + perkTags(b, p) + "</div></div>" +
       (TICKS ? '<label class="wl-tick"><input type="checkbox" data-wl="use" data-id="' + esc(r.entry.id) + '" data-perk="' + esc(b.id) +
       '" data-key="' + esc(p.key) + '"' + (state.busy ? " disabled" : "") + "> " + (p.activateBy ? "Activated" : "Used") + "</label>" : "") + "</li>";
@@ -1171,7 +1171,7 @@
      this year, then Up next. The greeting and date above it stay in index.html. */
   /* "Your next card" box on the Dashboard wallet tile (Scottie and Eddie, Nov 12): replaces
      Annual fees and Credits to use, to nudge members toward their next card.
-     ʻOhana: the points come from the welcome bonus on the card HRT lined up for them
+     Ohana: the points come from the welcome bonus on the card HRT lined up for them
      (status "next", bonus.reward). Everyone else sees the Sapphire Preferred example. */
   var NEXT_DEFAULT = { pts: 75000, name: "Chase Sapphire Preferred" };
   function rewardPoints(r) {
@@ -1181,7 +1181,7 @@
     return n >= 1000 ? Math.round(n) : 0;
   }
   /* "Your next card" box (Scottie and Eddie, Nov 12): one wide box with when to apply and
-     the bonus. ʻOhana: date from the "next" card's eligible field (Eddie's "Apply by"),
+     the bonus. Ohana: date from the "next" card's eligible field (Eddie's "Apply by"),
      points from its welcome bonus. Everyone else: Now and the 75,000 Sapphire Preferred example. */
   var NEXT_DEFAULT = { pts: 75000, name: "Chase Sapphire Preferred" };
   function rewardPoints(r) {
@@ -1196,7 +1196,8 @@
     return nx;
   }
   function whenToApply(nx, client) {
-    if (!client) return "Now";
+    if (!client) return "Ready when you are"; /* Aloha Level (Eddie, Nov 16: upbeat, not Now) */
+    if (nx && nx.eligible) return inDays(daysTo(nx.eligible));
     if (!nx || !nx.eligible) return "Ask Scottie";
     var p = nx.eligible.split("-"), t = todayParts();
     var days = Math.round((Date.UTC(+p[0], +p[1] - 1, p[2] ? +p[2] : 1) - Date.UTC(t.y, t.m - 1, t.d)) / 864e5);
@@ -1208,7 +1209,7 @@
      with a flashing thin red border. Never names a card (Scottie's secrecy rule: naming
      the next card invites members to apply on their own). Picks the soonest of:
      finish a welcome bonus spend (By date), decide on a card before its fee posts
-     (By date), apply for the next card (On date, ʻOhana date from Eddie's "Apply by").
+     (By date), apply for the next card (On date, Ohana date from Eddie's "Apply by").
      The bold line is one of three: "By <date>", "On <date>" or "Due today". */
   /* Sheet-fed tile data (Nov 13): when HRT has filled "ops" from the Master Client Sheet,
      every box reads its own sheet field. Otherwise the boxes work it out from the wallet. */
@@ -1221,15 +1222,17 @@
   function approvedText(t) { return APPROVED_ACTION_TEXT.indexOf(String(t || "").trim()) > -1 ? String(t).trim() : ""; }
   function opsData() { var w = state.wallet; return w && !state.demo && w.ops && typeof w.ops === "object" ? w.ops : null; }
   /* Tile 3 shows a countdown, not the date (Scottie, Nov 13) */
-  function inDays(n) { n = Math.round(+n); if (!isFinite(n)) return "None"; if (n < 0) return "OVERDUE"; if (n === 0) return "Today"; return "In " + n + (n === 1 ? " day" : " days"); }
+  /* Eddie, Nov 16: "in XX days", "Today!" or "overdue XX days" */
+  function inDays(n) { n = Math.round(+n); if (!isFinite(n)) return "None"; if (n < 0) return "overdue " + (-n) + (n === -1 ? " day" : " days"); if (n === 0) return "Today!"; return "in " + n + (n === 1 ? " day" : " days"); }
+  function daysTo(iso) { var p = String(iso || "").split("-"); if (p.length < 2) return null; var t = todayParts(); return dayNum(+p[0], +p[1], p[2] ? +p[2] : 1) - dayNum(t.y, t.m, t.d); }
   function isoParts(x) { var p = String(x || "").split("-"); return p.length === 3 ? { y: +p[0], m: +p[1], d: +p[2] } : null; }
   function longDate(p) { return SHORT_MONTHS[p.m - 1] + " " + p.d + ", " + p.y; }
-  /* "Update Scottie" on each box for ʻOhana Members (Nov 13): opens Ask Scottie, which replies first */
+  /* "Update Scottie" on each box for Ohana Members (Nov 13): opens Ask Scottie, which replies first */
   function updBtn(client, box) {
     return client ? '<button type="button" class="hw-upd" data-upd="' + esc(box) + '">Update Scottie</button>' : "";
   }
   function nextActionBox(V, client, s, firstName) {
-    var who0 = firstName ? "Next action for " + firstName : "Your next action", ops = opsData();
+    var who0 = (firstName ? firstName + "’s" : "Your") + " Next action", ops = opsData();
     if (ops && ops.action) {
       var oa = ops.action, od = isoParts(oa.date), t0 = todayParts();
       var dd = od ? dayNum(od.y, od.m, od.d) - dayNum(t0.y, t0.m, t0.d) : null;
@@ -1240,10 +1243,10 @@
       return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who0) + '</span><b class="hw-v">' + esc(w0) + '</b>' +
         '<span class="hw-s">' + (txt ? "<b>" + esc(txt) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
     }
-    /* Subscribers (Nov 13, Scottie picked option C): the box markets ʻOhana */
-    if (!client) {
-      return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who0) + '</span><b class="hw-v hw-v-pitch">Use the free tools &amp; consider upgrading to ʻOhana Member level.</b>' +
-        '<span class="hw-s"><a class="hw-nx-go" href="#coaching" data-route="coaching">Watch video &rsaquo;</a></span></div>';
+    /* Aloha Level (Nov 13, Scottie picked option C; wording Eddie, Nov 16): the box markets Ohana */
+    if (level() === "subscriber") {
+      return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who0) + '</span><b class="hw-v hw-v-pitch">Use your free tools<br>Consider upgrading to Ohana Level</b>' +
+        '<span class="hw-s"><a class="hw-nx-go" href="#home" data-scrollto="toolsSec">Use free tools &rsaquo;</a></span></div>'; /* Eddie, Nov 16 */
     }
     var t = todayParts(), acts = [];
     (V.cards || []).forEach(function (e) {
@@ -1264,31 +1267,53 @@
     var a = acts[0];
     if (!a) a = { days: 9999, how: "set", what: "" }; /* nothing open: bold line only */
     var when = a.how === "set" ? "You're all set" : a.days < 0 ? "OVERDUE" : a.days === 0 ? "Due today" : a.how === "by" ? "By " + longDate(a.date) : "On " + longDate(a.date);
-    var who = firstName ? "Next action for " + firstName : "Your next action";
+    var who = who0;
     return '<div class="hw-box hw-act"><span class="hw-l hw-act-t">' + esc(who) + '</span><b class="hw-v">' + esc(when) + '</b>' +
       '<span class="hw-s">' + (approvedText(a.what) ? "<b>" + esc(approvedText(a.what)) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
   }
   /* "Scott's" style possessive, written the way Scottie typed it (Nov 13) */
   function firstOf() { return String(member().firstName || "").trim().split(/\s+/)[0] || ""; }
-  function poss(n, fallback) { return n ? n + "ʻs" : fallback; }
+  function poss(n, fallback) { return n ? n + "’s" : fallback; }
   function nextCardBox(V, client) {
     var nx = nextEntry(V), ops = opsData();
     if (ops && ops.nextCard) nx = { eligible: ops.nextCard.date || "", bonus: { reward: ops.nextCard.bonusPts ? String(ops.nextCard.bonusPts) : "" } };
-    var pts = client || ops ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
+    var up = level() !== "subscriber" || !!ops; /* Ohana and Pro Levels (levels are cumulative) */
+    var pts = up ? rewardPoints(nx && nx.bonus && nx.bonus.reward) : NEXT_DEFAULT.pts;
     var bonus = pts ? pts.toLocaleString("en-US") + " points" : "Ask Scottie";
-    /* Learn more by level (Nov 13): Subscribers go to the ʻOhana pitch (Membership levels for now).
-       ʻOhana and Pro will get the link and info to apply; that form is still to be decided, so no
-       button for them yet (ʻOhana keep Update Scottie). */
+    /* Learn more by level (Nov 13): Subscribers go to the Ohana pitch (Membership levels for now).
+       Ohana and Pro will get the link and info to apply; that form is still to be decided, so no
+       button for them yet (Ohana keep Update Scottie). */
     var lvl = level();
-    var bottom = lvl === "subscriber" ? '<a class="hw-nx-go" href="#plans" data-route="plans">Learn more &rsaquo;</a>' : updBtn(client, "Next card");
+    var bottom;
+    if (lvl === "subscriber") bottom = '<a class="hw-nx-go" href="#plans" data-route="plans">Learn more &rsaquo;</a>';
+    else {
+      /* Eddie, Nov 16: Today or overdue shows the application link; later dates say no action needed */
+      var dn = nx && nx.eligible ? daysTo(nx.eligible) : null, url = ops && ops.nextCard && ops.nextCard.applyUrl;
+      bottom = dn !== null && dn > 0 ? '<span class="hw-dc">No action required now</span>' :
+        dn !== null && url ? '<a class="hw-nx-go" href="' + esc(url) + '" target="_blank" rel="noopener sponsored">Here’s your application link &rsaquo;</a>' : "";
+      bottom += updBtn(client, "Next card");
+    }
     return '<div class="hw-box hw-next"><span class="hw-l hw-nx-t">' + esc(poss(firstOf(), "Your") + " Next card") + '</span>' +
       '<div class="hw-v hw-nx-rows"><span><small>Bonus:</small> <em>' + esc(bonus) + "</em></span>" +
-      '<span><small>When to apply:</small> ' + esc(whenToApply(nx, client || !!ops)) + "</span></div>" +
+      '<span><small>When to apply:</small> ' + esc(whenToApply(nx, up)) + "</span></div>" +
       '<span class="hw-s">' + bottom + "</span></div>";
+  }
+  /* Tile 3, "Save on annual fees" (Eddie, Nov 16). Informational only, no button.
+     Aloha Level: a placeholder and what Ohana and Pro do. Ohana and Pro: days until the fee
+     from the sheet (or their wallet), then "Downgrade <card>" or "Cancel <card>". */
+  function feeBox(cl, nx) {
+    var t = "Save on annual fees", ops = opsData();
+    var b = function (v, sub) { return '<div class="hw-box hw-fee"><span class="hw-l">' + t + '</span><b class="hw-v">' + v + '</b><span class="hw-s">' + sub + "</span></div>"; };
+    if (level() === "subscriber" && !ops) return b("in __ days", '<span class="hw-dc hw-wrap">Ohana &amp; Pro Levels alert you on when to cancel or downgrade a card to save on unnecessary annual fees.</span>');
+    if (ops) {
+      var card = String(ops.feeCard || "").slice(0, 40), act = ops.feeAction === "cancel" ? "Cancel " : ops.feeAction === "downgrade" ? "Downgrade " : "";
+      return b(ops.feeDate ? esc(inDays(daysTo(ops.feeDate))) : "None", card ? '<span class="hw-dc">' + esc(act + card) + "</span>" : "&nbsp;");
+    }
+    return b(nx ? esc(inDays(nx.renewal.days)) : "None", nx ? '<span class="hw-dc">' + esc(shortName(nx.card.name)) + "</span>" : "&nbsp;");
   }
   function miniHtml() {
     var cl = member().client;
-    var tag = cl ? '<span class="hw-tag"><span class="hw-star">' + OH_STAR + "</span>ʻOhana Wallet · Managed by Scottie</span>" : "";
+    var tag = cl ? '<span class="hw-tag"><span class="hw-star">' + OH_STAR + "</span>Ohana Wallet · Managed by Scottie</span>" : "";
     var acts = function () {
       return '<div class="hw-acts">' + (cl ? '<a class="hw-btn ghost" href="' + SCOTTIE_SMS + '">Text Scottie</a>' : "") +
         '<a class="hw-btn gold" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "My") + " Wallet") + ' <span aria-hidden="true">&rsaquo;</span></a></div>';
@@ -1299,7 +1324,7 @@
     if (!state.wallet) return "";
     var V = view(), cat = catalog(), s = summarize(V, cat);
     var demo = state.demo ? '<div class="hw-demo"><span>Example wallet. Nothing is saved.</span><button class="hw-x" data-wl="demo-off">Use my own cards</button></div>' : "";
-    if (!s.count) {
+    if (!s.count && (member().client || opsData())) { /* Aloha Level always sees the four boxes (Eddie, Nov 16) */
       miniMode = "empty";
       return demo + tag + '<div class="hw-empty"><p class="hw-lede"><b>Never miss a card credit again.</b> Every fee, renewal and credit in one place.</p>' +
         '<div class="hw-acts2"><button class="wl-btn wl-gold" data-wl="go-add">Add your cards</button>' +
@@ -1314,9 +1339,8 @@
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
-      (opsData() ? box("Next card to downgrade or cancel", (function (f) { if (!f) return "None"; var t = new Date(); t.setHours(0, 0, 0, 0); return inDays(Math.round((new Date(f.y, f.m - 1, f.d || 1) - t) / 864e5)); })(isoParts(opsData().feeDate)), (opsData().feeCard ? '<span class="hw-dc">' + esc(String(opsData().feeCard).slice(0, 40)) + "</span>" : "") + (updBtn(cl, "Downgrade or cancel") || (opsData().feeCard ? "" : "&nbsp;"))) :
-      box("Next card to downgrade or cancel", nx ? inDays(nx.renewal.days) : "None", (nx ? '<span class="hw-dc">' + esc(shortName(nx.card.name)) + "</span>" : "&nbsp;") + updBtn(cl, "Downgrade or cancel"))) + /* the member's own card, named again (Scottie, Nov 13) */
-      box(esc(poss(firstOf(), "My") + " Rewards Cards"), String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "my") + " Wallet") + ' &rsaquo;</a>' + updBtn(cl, "Rewards Cards")) + "</div>";
+      feeBox(cl, nx) +
+      box(esc(poss(firstOf(), "My") + " Rewards Cards"), String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "my") + " Wallet") + ' &rsaquo;</a><span class="hw-dc">View, add, edit, or delete cards</span>' + updBtn(cl, "Rewards Cards")) + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +
@@ -1609,12 +1633,12 @@
      (custom field wants-card-help) so HRT can follow up. */
   var HELP_KEY = "hrtCardHelpHidden", HELP_DAYS = 60;
   function member() { return window.HRT_MEMBER || {}; }
-  /* ʻOhana Members: Scottie decides keep or cancel with them, so the self-serve box is hidden. */
+  /* Ohana Members: Scottie decides keep or cancel with them, so the self-serve box is hidden. */
   function isClient() { return document.documentElement.classList.contains("ms-client"); }
   function helpHidden() {
     try { var t = +localStorage.getItem(HELP_KEY); return t && Date.now() - t < HELP_DAYS * 864e5; } catch (e) { return false; }
   }
-  /* ʻOhana header (Oct 17): navy with a gold edge and star. "Member since", "Your strategy" and
+  /* Ohana header (Oct 17): navy with a gold edge and star. "Member since", "Your strategy" and
      "Last review" come from Member metaData that only HRT edits (see HRT_MEMBER.ohana in index.html);
      each line is left out when it is blank. Never name team members other than Scottie here. */
   var OH_STAR = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7.5-6.5-4-6.5 4 2-7.5L2 9.5 9 9z" fill="currentColor"/></svg>';
@@ -1629,7 +1653,7 @@
     var name = String(m.firstName || "").trim();
     return '<div class="wl-oh" role="note">' +
       '<div class="wl-oh-top"><span class="wl-oh-star">' + OH_STAR + '</span>' +
-      '<span class="wl-oh-eyebrow">ʻOhana Member' + (o.since ? " since " + esc(o.since) : "") + "</span></div>" +
+      '<span class="wl-oh-eyebrow">Ohana Member' + (o.since ? " since " + esc(o.since) : "") + "</span></div>" +
       '<p class="wl-oh-hi">' + (name ? "Aloha, " + esc(name) : "Aloha") + "</p>" +
       '<p class="wl-oh-txt">Your wallet is guided by Scottie and the HRT team. We help manage your cards and build your strategy with you. Opened a new card? Text Scottie and we will add it.</p>' +
       (o.strategy ? '<div class="wl-oh-box"><span>Your strategy</span><b>' + esc(o.strategy) + "</b></div>" : "") +
@@ -1640,16 +1664,16 @@
     var m = member();
     if (!m.signedIn || m.client || state.demo) return "";
     if (state.helpSent || m.wantsHelp) {
-      return where === "home" ? "" : '<div class="wl-card wl-help done"><b>Thanks, we will be in touch.</b><span>Scottie will reach out to welcome you to the ʻOhana program. ' +
+      return where === "home" ? "" : '<div class="wl-card wl-help done"><b>Thanks, we will be in touch.</b><span>Scottie will reach out to welcome you to the Ohana program. ' +
         '<a href="' + esc(COACH_URL) + '" target="_top">See how the program works &rarr;</a></span></div>';
     }
     if (helpHidden()) return "";
-    return '<div class="wl-card wl-help"><div><span class="wl-help-eyebrow">' + OH_STAR + ' The ʻOhana Wallet</span>' +
+    return '<div class="wl-card wl-help"><div><span class="wl-help-eyebrow">' + OH_STAR + ' The Ohana Wallet</span>' +
       '<b>Want Scottie to manage your wallet for you?</b>' +
-      '<ul class="wl-help-pts"><li>ʻOhana Members get the ʻOhana Wallet: we keep your cards up to date for you</li>' +
+      '<ul class="wl-help-pts"><li>Ohana Members get the Ohana Wallet: we keep your cards up to date for you</li>' +
       '<li>Your own card strategy, and help picking your next best card</li>' +
       '<li>Help hitting every welcome bonus, with a text from Scottie when it is time</li></ul></div>' +
-      '<div class="wl-help-acts"><button class="wl-btn wl-pri" data-wl="help-yes"' + (state.busy ? " disabled" : "") + '>Join the ʻOhana program</button>' +
+      '<div class="wl-help-acts"><button class="wl-btn wl-pri" data-wl="help-yes"' + (state.busy ? " disabled" : "") + '>Join the Ohana program</button>' +
       '<button class="wl-link" data-wl="help-no">Not now</button></div></div>';
   }
   function askForHelp() {
@@ -1746,15 +1770,15 @@
     var V = view(), m = member(), o = m.ohana || {}, name = String(m.firstName || "").trim();
     var due = expiringSoon(perks, SOON_PERK_DAYS).reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
     var nx = s.next;
-    /* ʻOhana Wallet (Oct 25): ʻOhana Members get their own premium wallet, managed by Scottie. */
-    var since = o.since ? "ʻOhana Member since " + esc(o.since) : "ʻOhana Member";
-    var oh = m.client ? '<div class="wl-ow-top"><span class="wl-ow-eyebrow"><span class="wl-sl-star">' + OH_STAR + "</span>ʻOhana Wallet</span>" +
+    /* Ohana Wallet (Oct 25): Ohana Members get their own premium wallet, managed by Scottie. */
+    var since = o.since ? "Ohana Member since " + esc(o.since) : "Ohana Member";
+    var oh = m.client ? '<div class="wl-ow-top"><span class="wl-ow-eyebrow"><span class="wl-sl-star">' + OH_STAR + "</span>Ohana Wallet</span>" +
       '<span class="wl-ow-managed">Managed by Scottie</span></div>' : "";
     var ohActs = '<div class="wl-ow-acts"><a class="wl-btn wl-ghost wl-ow-text" href="' + SCOTTIE_SMS + '">' + CHAT_ICON + "Text Scottie</a>" +
       '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div>';
     var ohSub = m.client ? '<p class="wl-ow-sub">' + since + (o.review ? " \u00b7 Last review " + esc(ohanaDate(o.review)) : "") + "</p>" +
       '<div class="wl-ow-row">' + (o.strategy ? '<div class="wl-ow-strat"><span>Your strategy</span><b>' + esc(o.strategy) + "</b></div>" : "") + ohActs + "</div>" : "";
-    return '<section class="wl-sum wl-slim' + (m.client ? " wl-sum-oh wl-ow" : "") + '" aria-label="' + (m.client ? "ʻOhana Wallet" : "My Wallet") + '">' + exampleBanner() + oh +
+    return '<section class="wl-sum wl-slim' + (m.client ? " wl-sum-oh wl-ow" : "") + '" aria-label="' + (m.client ? "Ohana Wallet" : "My Wallet") + '">' + exampleBanner() + oh +
       '<div class="wl-sum-top"><h2 class="wl-sum-title">' + (m.client ? (name ? "Aloha, " + esc(name) : "Aloha") : "My Wallet") + "</h2>" +
       (m.client ? "" : '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button>') + "</div>" + ohSub +
       famHtml() + hrtLine(V) +
@@ -1846,11 +1870,11 @@
   }
 
   /* ---------- Card limits per level (Nov 11, Eddie review) ----------
-     Subscriber (free) 2, ʻOhana 6, Pro 15. Closed cards and the sample card never
+     Subscriber (free) 2, Ohana 6, Pro 15. Closed cards and the sample card never
      count. Only blocks the member's own "Add a card"; HRT can still add cards from
      the back end, and nothing is ever removed when a wallet is over its limit. */
   var CARD_LIMITS = { subscriber: 2, ohana: 6, pro: 15 };
-  var LEVEL_NAMES = { subscriber: "free", ohana: "ʻOhana", pro: "Pro" };
+  var LEVEL_NAMES = { subscriber: "free", ohana: "Ohana", pro: "Pro" };
   function level() {
     var cl = document.documentElement && document.documentElement.classList;
     if (cl && cl.contains("ms-pro")) return "pro";
@@ -1861,7 +1885,7 @@
   function atLimit(w, lvl) { return activeCount(w) >= (CARD_LIMITS[lvl] || CARD_LIMITS.subscriber); }
   function limitHtml(lvl) {
     var n = CARD_LIMITS[lvl], have = activeCount(state.wallet);
-    var more = lvl === "subscriber" ? "ʻOhana Members can keep up to " + CARD_LIMITS.ohana + " cards, kept up to date for them by Scottie. Pro Members can keep up to " + CARD_LIMITS.pro + "." :
+    var more = lvl === "subscriber" ? "Ohana Members can keep up to " + CARD_LIMITS.ohana + " cards, kept up to date for them by Scottie. Pro Members can keep up to " + CARD_LIMITS.pro + "." :
       lvl === "ohana" ? "Pro Members can keep up to " + CARD_LIMITS.pro + " cards. Or text Scottie and we will sort out your wallet together." :
       "Text Scottie and we will help you make room.";
     return '<div class="wl-limit"><span class="wl-limit-n">' + have + " of " + n + "</span>" +
@@ -2161,7 +2185,7 @@
     var stats = mine.length ? '<dl class="wl-sum-stats wl-pg-stats"><div class="wl-sum-stat"><dt>Your points</dt><dd>' + mine.length + (mine.length === 1 ? " bank" : " banks") + "</dd></div>" +
       '<div class="wl-sum-stat"><dt>Airlines</dt><dd>' + nAir + "</dd></div>" + '<div class="wl-sum-stat"><dt>Hotels</dt><dd>' + nHot + "</dd></div>" +
       '<div class="wl-sum-stat"><dt>Live bonuses</dt><dd class="' + (nLive ? "wl-gold-t" : "") + '">' + nLive + "</dd></div></dl>" : "";
-    var lede = mine.length ? "Showing only the partners your cards can reach, based on the cards in your " + (member().client ? "ʻOhana Wallet" : "wallet") + "." :
+    var lede = mine.length ? "Showing only the partners your cards can reach, based on the cards in your " + (member().client ? "Ohana Wallet" : "wallet") + "." :
       "Once you add cards that earn transferable points, this page shows where they can go.";
     var out = headFor(stats, lede) + '<section class="wl-card wl-tp">' + explain;
     if (mine.length) {
@@ -2176,7 +2200,7 @@
         var air = direct.filter(function (p) { return p.type === "airline"; }), hot = direct.filter(function (p) { return p.type === "hotel"; });
         var row = function (p) {
           var v = p.t[b.id], bon = bonusOf(p);
-          return '<li><span class="wl-tp-cd">' + esc(p.code) + '</span><span class="wl-tp-nm">' + esc(p.name) + (p.hi ? '<small>Hawaiʻi favorite</small>' : "") + "</span>" +
+          return '<li><span class="wl-tp-cd">' + esc(p.code) + '</span><span class="wl-tp-nm">' + esc(p.name) + (p.hi ? '<small>Hawaii favorite</small>' : "") + "</span>" +
             (bon ? '<span class="wl-tp-bon">+' + esc(bon.bonusPct) + "%</span>" : "") + '<span class="wl-tp-r">' + esc(v) + "</span></li>";
         };
         return '<article class="wl-tp-bank" style="--c:' + b.c + '"><header><span class="wl-tp-dot" aria-hidden="true"></span><div><b>' + esc(b.name) + "</b>" +
@@ -2253,7 +2277,7 @@
       (b.type === "activation" ? rotatingLine(b.card) : "") +
       (perkTags(b, p) ? '<div class="wl-tags">' + perkTags(b, p) + "</div>" : "") +
       (b.note ? '<p class="wl-pk-note wl-clamp" data-wl="clamp">' + esc(b.note) + src + "</p>" : src ? '<p class="wl-pk-note">' + src + "</p>" : "") +
-      (b.id === "resy" ? '<a class="wl-pk-link" href="#resy" data-route="resy">Find a Hawaiʻi Resy spot &rarr;</a>' : "") +
+      (b.id === "resy" ? '<a class="wl-pk-link" href="#resy" data-route="resy">Find a Hawaii Resy spot &rarr;</a>' : "") +
       noteBox(e, b.id, b.label) + "</div></li>";
   }
   function otherBoxHtml(e, c) {
@@ -3000,7 +3024,7 @@
       "}",
       "@keyframes wlUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}",
       "@media (prefers-reduced-motion:reduce){.wl-sheet,.wl-sheet-bg{animation:none}}",
-      /* ----- ʻOhana Wallet (Oct 25): premium header for ʻOhana Members ----- */
+      /* ----- Ohana Wallet (Oct 25): premium header for Ohana Members ----- */
       ".wl-sum.wl-ow{border:0;padding-top:20px;background:radial-gradient(900px 260px at 92% -40%,rgba(242,199,102,.30),transparent 60%),radial-gradient(700px 220px at -10% 120%,rgba(217,112,64,.20),transparent 60%),linear-gradient(135deg,rgba(20,27,36,.93),rgba(27,36,48,.88) 55%,rgba(35,47,62,.84)),url('" + SUMMARY_PHOTO + "') center 60%/cover no-repeat,#1b2430;box-shadow:0 0 0 1.5px rgba(242,184,75,.75),0 0 0 5px rgba(242,184,75,.10),0 22px 46px -22px rgba(9,20,35,.85)}",
       ".wl-sum.wl-ow:before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#b98a2e,#f5d27a 30%,#f2b84b 60%,#d97040);pointer-events:none}",
       ".wl-ow-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}",

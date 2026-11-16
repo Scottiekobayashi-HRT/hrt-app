@@ -36,7 +36,7 @@
     "atmos reward calendar": { route: "atmos", label: "Search Scottie’s Atmos Points Calendar" }, "atmos points calendar": { route: "atmos", label: "Search Scottie’s Atmos Points Calendar" },
     "my wallet": { route: "wallet", label: "Open My Wallet" },
     "my wallet store search": { route: "wallet", label: "Which card should I use?" },
-    "kamaʻāina deals": { route: "kamaaina", label: "See Kamaʻāina Deals" },
+    "kamaʻaina deals": { route: "kamaaina", label: "See Kamaʻaina Deals" },
     "communities calculator": { route: "communities", label: "Try the Community Calculator" },
     "choose to earn calculator": { route: "status", label: "Try Choose to Earn" },
     "best credit cards": { href: SITE + "/best-credit-cards-hawaii", label: "See Best Credit Cards" }
@@ -153,7 +153,7 @@
     var stack = crew.slice(0, 5).map(function (c, i) { return avatar(c, i, "cp-stk"); }).join("");
     return '<header class="cp-hero"><div class="cp-photo" style="background-image:url(\'' + HERO_IMG + '\')"><div class="cp-in cp-hin">' +
       (rk.picksMonth ? '<div class="cp-live"><i aria-hidden="true"></i><span><b class="cp-num">' + fmt(rk.picksMonth) + "</b> picks in " + esc(monthName()) + "</span></div>" : '<div class="cp-live"><i aria-hidden="true"></i><span>Community Picks is open</span></div>') +
-      '<h1 class="cp-h1">What Hawaiʻi travelers rank #1</h1>' +
+      '<h1 class="cp-h1">What Hawaii travelers rank #1</h1>' +
       '<p class="cp-lede">Lounges, resorts, routes and cards, ranked by locals who have actually been there. Look before you spend your points.</p>' +
       (rk.travelers ? '<div class="cp-crowd">' + (stack ? '<span class="cp-stack" aria-hidden="true">' + stack + "</span>" : "") + '<small><b class="cp-num">' + fmt(rk.travelers) + "</b> " + (rk.travelers === 1 ? "traveler has" : "travelers have") + " shared picks so far</small></div>" : "") +
       '</div><a class="cp-credit" href="' + HERO_CREDIT + '" target="_blank" rel="noopener">Photo: Tim Mossholder, Unsplash</a></div>' +

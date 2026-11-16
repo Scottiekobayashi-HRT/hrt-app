@@ -199,7 +199,7 @@
     active:   { big: "20% off", line: "outdoor experiences you book with Atmos points",
                 more: ["Bonus points for national park gateways like Bozeman, Jackson Hole and Kona", "Partner offers, including AllTrails"] }
   };
-  /* Ranked for Hawaiʻi travelers (Scottie, Oct 26 2026): the top three first,
+  /* Ranked for Hawaii travelers (Scottie, Oct 26 2026): the top three first,
      Club 49 last because it needs an Alaska address. */
   var ORDER = ["huakai", "families", "global", "culinary", "active", "club49"];
 
@@ -213,7 +213,7 @@
     active:   "photo-1549221838-126dc3ebf29f",  /* Yosemite valley */
     club49:   "photo-1593326101816-dd0c165b3ef1"   /* Alaska lake and mountains */
   };
-  var RES_NOTE = { huakai: "Hawaiʻi residents only", club49: "Alaska residents only" };
+  var RES_NOTE = { huakai: "Hawaii residents only", club49: "Alaska residents only" };
   function photoUrl(k, w) { return "https://images.unsplash.com/" + PHOTO[k] + "?auto=format&fit=crop&w=" + w + "&q=70"; }
 
   function commGuide() {
@@ -278,7 +278,7 @@
       g.appendChild(grid);
       return g;
     }
-    sec.appendChild(group("Top picks for Hawaiʻi travelers", "Where most of our members get the most value", ORDER.slice(0, 3), true));
+    sec.appendChild(group("Top picks for Hawaii travelers", "Where most of our members get the most value", ORDER.slice(0, 3), true));
     sec.appendChild(group("The other three", "Worth it if your travel fits", ORDER.slice(3), false));
 
     var every = el("div", "ag-every");

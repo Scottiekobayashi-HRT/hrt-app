@@ -34,7 +34,7 @@
  };
  var HOTELS_PER_ISLAND_PREVIEW = 8;   /* hotels shown per island in the All islands view (tiles) */
  var HOTELS_PER_ISLAND_LIST = 15;     /* same, in list view */
- /* Kamaʻāina links. If a business's button should go to a better kamaʻāina page,
+ /* Kamaʻaina links. If a business's button should go to a better kamaʻaina page,
     add it here by business name exactly as shown on the card. This wins over the data. */
  var KAMAAINA_LINKS = {
   /* "Four Seasons Resort Oahu at Ko Olina": "https://...", */
@@ -112,13 +112,13 @@
 
  /* ---------- islands ---------- */
  var ISL = [
-  { k:"oahu",   name:"Oʻahu" },
+  { k:"oahu",   name:"Oahu" },
   { k:"maui",   name:"Maui" },
-  { k:"hawaii", name:"Hawaiʻi Island" },
+  { k:"hawaii", name:"Hawaii Island" },
   { k:"kauai",  name:"Kauaʻi" },
   { k:"lm",     name:"Lānaʻi & Molokaʻi" }
  ];
- var ISL_NAME = { oahu:"Oʻahu", maui:"Maui", hawaii:"Hawaiʻi Island", kauai:"Kauaʻi", lanai:"Lānaʻi", molokai:"Molokaʻi", lm:"Lānaʻi & Molokaʻi" };
+ var ISL_NAME = { oahu:"Oahu", maui:"Maui", hawaii:"Hawaii Island", kauai:"Kauaʻi", lanai:"Lānaʻi", molokai:"Molokaʻi", lm:"Lānaʻi & Molokaʻi" };
  var OAHU_AREAS = /Waik|Honolulu|Kapolei|Kahuku|Aiea|Haleiwa|Laie/i;
  function homeIsland(d){
   if(d.i.length === 1) return d.i[0] === "lanai" || d.i[0] === "molokai" ? "lm" : d.i[0];
@@ -161,7 +161,7 @@
   if(d.pu == null && d.p) d.pu = new RegExp("up to\\s*" + d.p + "\\s?%|\\d{1,2}\\s?%?\\s*(-|to)\\s*" + d.p + "\\s?%", "i").test(d.t + " " + d.d) ? 1 : 0;
  });
  window.HRT_DEAL_HEAD = function(d){ return headline(d); };
- /* booking link quality: does the button land on a kamaʻāina offer or rate? */
+ /* booking link quality: does the button land on a kamaʻaina offer or rate? */
  var KLINK = /kama|resident|local|love-?hawaii|staycation|special|offer|promo|rate(code)?=|srpcodes|spec_plan|cc=z43|offercode|[?&]rate=|kam\b|deal|discount|la-ohana|keikiday|huakai|gold-card|km-discount|welovekamaaina|affiliate|reservation-link|be\.synxis\.com/i;
  var CODE_RE = [
   /(?:promo(?:tion)?|offer|special offer|coupon|teller coupon|plan|rate)\s*code[s]?\s*(?:is|:)?\s*[\u201c"']?([A-Za-z0-9][A-Za-z0-9-]{2,})/gi,
@@ -222,6 +222,7 @@
  function svg(name, size){ return '<svg width="'+(size||16)+'" height="'+(size||16)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[name]+'</svg>'; }
  function esc(s){
   return String(s == null ? "" : s)
+   .replace(/Hawai[ʻʼ'’]i/g, "Hawaii").replace(/[ʻʼ]([Oo])hana/g, "$1hana").replace(/O[ʻʼ'’]ahu/g, "Oahu").replace(/([Kk])ama[ʻʼ'’]āina/g, "$1amaʻaina") /* Eddie, Nov 16: Hawaii, Ohana, Oahu, kamaʻaina */
    .replace(/\s*[\u2013\u2014]\s*/g, ", ")
    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
@@ -583,10 +584,10 @@
    + howTo(d)
    + (d.f ? '<p class="fine"><b>Fine print:</b> '+esc(d.f)+'</p>' : '')
    + (d.c
-      ? '<a class="btn coral" href="'+esc(d.c)+'" target="_blank" rel="noopener">See the kamaʻāina offer &rarr;</a>'
+      ? '<a class="btn coral" href="'+esc(d.c)+'" target="_blank" rel="noopener">See the kamaʻaina offer &rarr;</a>'
         + (d.u && d.u !== d.c ? '<p class="src"><a href="'+esc(d.u)+'" target="_blank" rel="noopener">Or go straight to '+esc(d.b)+' &rarr;</a></p>' : '')
-      : (d.u ? '<a class="btn coral" href="'+esc(d.u)+'" target="_blank" rel="noopener">'+(d._kl ? 'Book the kamaʻāina rate' : 'Go to '+esc(d.b))+' &rarr;</a>' : ''))
-   + '<p class="src">'+(d.c ? 'The offer page on HVCB shows the full terms, the coupon and how to book. ' : d._kl ? 'This link opens the business\'s kamaʻāina offer or rate. ' : '')+'Confirm the current rate and terms with the business before booking.</p>'
+      : (d.u ? '<a class="btn coral" href="'+esc(d.u)+'" target="_blank" rel="noopener">'+(d._kl ? 'Book the kamaʻaina rate' : 'Go to '+esc(d.b))+' &rarr;</a>' : ''))
+   + '<p class="src">'+(d.c ? 'The offer page on HVCB shows the full terms, the coupon and how to book. ' : d._kl ? 'This link opens the business\'s kamaʻaina offer or rate. ' : '')+'Confirm the current rate and terms with the business before booking.</p>'
    + '</div>';
   if(typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open","");
   placeDialog(dlg); dlg.scrollTop = 0;
@@ -595,12 +596,12 @@
  function howTo(d){
   var steps = [];
   var codes = d._codes.map(function(c){ return '<button type="button" class="codechip" data-copy="'+esc(c)+'">'+esc(c)+'<small>Copy</small></button>'; }).join(" ");
-  if(d._callOnly && d._ph) steps.push('Call <b>'+esc(d._ph)+'</b> and ask for the kamaʻāina rate.');
-  else if(d._kl) steps.push('Use the button below. It opens the kamaʻāina offer or rate directly.');
-  else steps.push('Open the business site with the button below and look for the kamaʻāina or resident offer.' + (d._ph ? ' Or call <b>'+esc(d._ph)+'</b>.' : ''));
+  if(d._callOnly && d._ph) steps.push('Call <b>'+esc(d._ph)+'</b> and ask for the kamaʻaina rate.');
+  else if(d._kl) steps.push('Use the button below. It opens the kamaʻaina offer or rate directly.');
+  else steps.push('Open the business site with the button below and look for the kamaʻaina or resident offer.' + (d._ph ? ' Or call <b>'+esc(d._ph)+'</b>.' : ''));
   if(codes) steps.push('Enter this code when you book: ' + codes);
-  steps.push('Bring a valid Hawaiʻi ID. Most offers check it at arrival.');
-  return '<div class="howto"><h4>How to get this kamaʻāina rate</h4><ol>'+steps.map(function(x){ return '<li>'+x+'</li>'; }).join("")+'</ol></div>';
+  steps.push('Bring a valid Hawaii ID. Most offers check it at arrival.');
+  return '<div class="howto"><h4>How to get this kamaʻaina rate</h4><ol>'+steps.map(function(x){ return '<li>'+x+'</li>'; }).join("")+'</ol></div>';
  }
  /* ========================================================
     DEALS MAP (MapLibre + OpenFreeMap: free, no API key, no limits)
@@ -609,7 +610,7 @@
  var MAP_STYLE_DARK  = "https://tiles.openfreemap.org/styles/dark";
  /* Pin locations by business name [latitude, longitude]. Fix or add any spot here. */
  var LOC = {
-  /* Oʻahu */
+  /* Oahu */
   "Waikiki Resort Hotel":[21.2753,-157.8238], "The Kahala Hotel & Resort":[21.2710,-157.7735],
   "Four Seasons Resort Oahu at Ko Olina":[21.3389,-158.1255], "Sheraton Waikiki Beach Resort":[21.2780,-157.8310],
   "ʻAlohilani Resort Waikiki Beach":[21.2745,-157.8242], "Hyatt Place Waikiki Beach":[21.2735,-157.8227],
@@ -627,7 +628,7 @@
   "The Laylow, Autograph Collection":[21.2799,-157.8272], "The Twin Fin":[21.2767,-157.8248],
   "DoubleTree by Hilton Alana, Waikiki Beach":[21.2843,-157.8353], "Aqua Palms Waikiki":[21.2842,-157.8374],
   "Embassy Suites by Hilton Oahu Kapolei":[21.3312,-158.0854], "Oasis Hotel Waikiki":[21.2830,-157.8290],
-  "The Ritz-Carlton Oʻahu, Turtle Bay":[21.7053,-157.9975], "Pagoda Hotel":[21.2958,-157.8403],
+  "The Ritz-Carlton Oahu, Turtle Bay":[21.7053,-157.9975], "Pagoda Hotel":[21.2958,-157.8403],
   "Ohia Waikiki Studio Suites":[21.2786,-157.8268], "Hilton Vacation Club The Modern Honolulu":[21.2853,-157.8382],
   "OUTRIGGER Waikīkī Beachcomber Hotel":[21.2775,-157.8265],
   "Airport Honolulu Hotel, Trademark Collection by Wyndham":[21.3354,-157.9135],
@@ -652,7 +653,7 @@
   "Andaz Maui at Wailea Resort, by Hyatt":[20.6900,-156.4428],
   "Old Lahaina Lūʻau":[20.8913,-156.6834], "Māla Ocean Tavern":[20.8837,-156.6840], "Pride of Maui":[20.7920,-156.5110],
   "Four Winds III Snorkel Tours":[20.7925,-156.5118], "Maui Pineapple Tour":[20.8686,-156.3391],
-  /* Hawaiʻi Island */
+  /* Hawaii Island */
   "The Westin Hapuna Beach Resort":[20.0077,-155.8237], "PACIFIC 19":[19.6390,-155.9930],
   "Aston Kona by the Sea":[19.6205,-155.9855], "Royal Kona Resort":[19.6340,-155.9920],
   "Waikoloa Beach Marriott Resort & Spa":[19.9170,-155.8880], "Holiday Inn Express Hotel & Suites Kailua-Kona":[19.6400,-155.9960],
@@ -874,7 +875,7 @@
   $("kSoon").textContent = DEALS.filter(function(d){ return d.x; }).length;
   $("kActs").textContent = ACTS.length;
   $("snapLine").textContent = "Last updated " + SNAPSHOT_LABEL + ".";
-  $("footSnap").textContent = "Kamaʻāina offers last updated " + SNAPSHOT_LABEL;
+  $("footSnap").textContent = "Kamaʻaina offers last updated " + SNAPSHOT_LABEL;
   renderTop(); renderFresh(); renderAll(); wire(); sizeFrame();
   /* New map (assets/deals-map.js): list on the left, real street map on the right, same system as the HNL Lounge Map.
      The older map and lists below it stay in the page, hidden (#kOld), until they are removed. */

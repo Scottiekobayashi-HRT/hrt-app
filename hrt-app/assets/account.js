@@ -24,11 +24,11 @@
  function isClient(){ return document.documentElement.classList.contains("ms-client"); }
 
  var OH_STAR = '<svg width="100%" height="100%" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7.5-6.5-4-6.5 4 2-7.5L2 9.5 9 9z" fill="currentColor"/></svg>';
- /* ʻOhana Members get a gold ring and a small gold star on their photo (like a verified mark) */
+ /* Ohana Members get a gold ring and a small gold star on their photo (like a verified mark) */
  function avatarHtml(cls){
   var p = photo(), oh = isClient();
   return '<span class="' + cls + (oh ? ' ac-oh' : '') + '">' + (p ? '<img src="' + esc(p) + '" alt="">' : '<span>' + esc(initials()) + '</span>') + '</span>'
-   + (oh ? '<span class="ac-oh-star" title="ʻOhana Member">' + OH_STAR + '</span>' : '');
+   + (oh ? '<span class="ac-oh-star" title="Ohana Member">' + OH_STAR + '</span>' : '');
  }
 
  /* the small avatar in the top bar */
@@ -38,7 +38,7 @@
   if(!member){ t.hidden = true; return; }
   t.hidden = false;
   t.innerHTML = avatarHtml("ac-av ac-av-sm");
-  t.setAttribute("aria-label", "My account" + (first() ? ", " + first() : "") + (isClient() ? ", ʻOhana Member" : ""));
+  t.setAttribute("aria-label", "My account" + (first() ? ", " + first() : "") + (isClient() ? ", Ohana Member" : ""));
  }
  /* the profile card at the bottom of the sidebar (Oct 25) */
  function paintSide(){
@@ -61,7 +61,7 @@
   if(!member){ host.innerHTML = '<div class="ac-card"><p class="ac-note">Log in to see your account.</p></div>'; return; }
   var name = (first() + " " + last()).trim();
   var badges = (isPro() ? '<span class="ac-badge ac-pro">' + ICON_STAR + 'HRT PRO</span>' : '')
-   + (isClient() ? '<span class="ac-badge ac-client"><span class="ac-bstar">' + OH_STAR + '</span>ʻOhana</span>' : '')
+   + (isClient() ? '<span class="ac-badge ac-client"><span class="ac-bstar">' + OH_STAR + '</span>Ohana</span>' : '')
    + (!isPro() && !isClient() ? '<span class="ac-badge ac-free">Free account</span>' : '');
 
   host.innerHTML =

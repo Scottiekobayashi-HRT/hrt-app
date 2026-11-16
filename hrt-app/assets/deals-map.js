@@ -1,4 +1,4 @@
-/* HRT Kamaʻāina Deals map (window.HRT_DEALS_MAP)
+/* HRT Kamaʻaina Deals map (window.HRT_DEALS_MAP)
    Same system as the HNL Lounge Map (lounge-map.js), on the real street map:
    list on the left that follows the map, map on the right, grouped pins when crowded,
    pins with labels that never overlap, island buttons, a slide-in deal card, and on
@@ -16,7 +16,7 @@
   var MAPLIBRE_CSS = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";
   var ISL = { all: [[-160.35, 18.85], [-154.75, 22.30]], oahu: [[-158.30, 21.24], [-157.64, 21.73]], maui: [[-156.72, 20.55], [-155.95, 21.05]],
     hawaii: [[-156.10, 18.90], [-154.80, 20.30]], kauai: [[-159.80, 21.85], [-159.28, 22.25]], lm: [[-157.35, 20.70], [-156.75, 21.25]] };
-  var ISLN = { oahu: "Oʻahu", maui: "Maui", hawaii: "Hawaiʻi Island", kauai: "Kauaʻi", lm: "Lānaʻi & Molokaʻi", all: "Several islands" };
+  var ISLN = { oahu: "Oahu", maui: "Maui", hawaii: "Hawaii Island", kauai: "Kauaʻi", lm: "Lānaʻi & Molokaʻi", all: "Several islands" };
   var KINDS = { stay: { label: "Hotels", one: "Hotel", c: "var(--c-stay)", icon: "bed" }, act: { label: "Things to do", one: "Thing to do", c: "var(--c-act)", icon: "star" }, more: { label: "Dining & more", one: "Dining & more", c: "var(--c-more)", icon: "fork" } };
   var ICONS = {
     bed: '<path d="M3 6h2v6h14a2 2 0 0 1 2 2v5h-2v-2H5v2H3zm5 1.5a2.3 2.3 0 1 1 0 4.6 2.3 2.3 0 0 1 0-4.6zM11 8h6a3 3 0 0 1 3 3H11z"/>',
@@ -31,7 +31,7 @@
   var FULL_IC = '<svg viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>';
   var X_IC = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   var MN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function esc(s) { return String(s == null ? "" : s).replace(/Hawai[ʻʼ'’]i/g, "Hawaii").replace(/[ʻʼ]([Oo])hana/g, "$1hana").replace(/O[ʻʼ'’]ahu/g, "Oahu").replace(/([Kk])ama[ʻʼ'’]āina/g, "$1amaʻaina").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function ic(n, cls) { return '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox="0 0 24 24" aria-hidden="true">' + ICONS[n] + '</svg>'; }
 
   /* Recolor the free street map to HRT colors and hide shop and house-number labels */
@@ -191,9 +191,9 @@
         '<div class="kinds" role="group" aria-label="Show"></div>' +
         '<label class="follow"><input type="checkbox" class="fol" checked> Only show deals on the map</label>' +
       '</div><div class="sl"></div></aside>' +
-      '<div class="mapcol"><div class="w" role="region" aria-label="Kamaʻāina Deals map">' +
+      '<div class="mapcol"><div class="w" role="region" aria-label="Kamaʻaina Deals map">' +
         '<div class="top"><div class="ttl"><b>Find a deal</b><span>Tap a pin or a deal in the list</span></div><div class="chips" role="toolbar" aria-label="Show"></div></div>' +
-        '<div class="map"><div class="mapgl" aria-label="Map of kamaʻāina deals"></div><div class="mapmsg">Loading the map…</div><div class="pins"></div><div class="quick" role="group" aria-label="Islands"></div>' +
+        '<div class="map"><div class="mapgl" aria-label="Map of kamaʻaina deals"></div><div class="mapmsg">Loading the map…</div><div class="pins"></div><div class="quick" role="group" aria-label="Islands"></div>' +
           '<div class="ctl">' +
             '<button type="button" class="btn" data-a="in" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>' +
             '<button type="button" class="btn" data-a="out" aria-label="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>' +
@@ -228,7 +228,7 @@
       s2.innerHTML = (c[0] === "all" ? "" : "<i></i>") + esc(c[0] === "more" ? "Dining & more" : c[1]) + (c[0] === "all" ? " <em>" + n + "</em>" : "");
       s2.onclick = function () { setKind(c[0]); }; $(".kinds").appendChild(s2);
     });
-    [["oahu", "Oʻahu"], ["maui", "Maui"], ["hawaii", "Hawaiʻi"], ["kauai", "Kauaʻi"], ["lm", "Lānaʻi & Molokaʻi"]].forEach(function (x) {
+    [["oahu", "Oahu"], ["maui", "Maui"], ["hawaii", "Hawaii"], ["kauai", "Kauaʻi"], ["lm", "Lānaʻi & Molokaʻi"]].forEach(function (x) {
       var b = document.createElement("button"); b.type = "button"; b.className = "q"; b.dataset.isl = x[0]; b.setAttribute("aria-pressed", "false"); b.textContent = x[1];
       b.onclick = function () { flyIsland(island === x[0] ? null : x[0]); }; quick.appendChild(b);
     });
@@ -346,7 +346,7 @@
         '<span class="cat"><i></i>' + esc(KINDS[d.k].one) + (d.r === "Top pick" ? " · Top pick" : "") + (d.fr ? " · " + (d.fr === "new" ? "New this week" : "Updated this week") : "") + '</span><h3>' + esc(d.b) + '</h3><div class="meta">' + esc(d.place) + (d.m ? " · " + esc(d.m) : "") + '</div>' +
         '<div class="big"><b>' + esc(d.head) + '</b><span class="' + (d.days <= 30 ? "soon" : "") + '">' + (d.ends ? "Ends " + d.ends + " · " + (d.days === 0 ? "last day" : d.days + (d.days === 1 ? " day" : " days") + " left") : "") + '</span></div>' +
         (d.kk.length ? '<div class="perks">' + d.kk.map(function (k) { return "<span>" + esc(k) + "</span>"; }).join("") + "</div>" : "") +
-        (d.d ? "<p>" + esc(d.d) + "</p>" : "") + '<div class="id">Bring your Hawaiʻi ID. Rates and dates are set by the business.</div>' +
+        (d.d ? "<p>" + esc(d.d) + "</p>" : "") + '<div class="id">Bring your Hawaii ID. Rates and dates are set by the business.</div>' +
         '<div class="rowb">' + (d.u ? '<a class="a" href="' + esc(d.u) + '" target="_blank" rel="noopener">See the deal ' + ic("ext") + "</a>" : "") +
         (opts.details ? '<button type="button" class="a alt" data-det>' + ic("info") + "Full details</button>" : "") +
         (near.length ? '<button type="button" class="a alt" data-near>' + ic("near") + near.length + " more nearby</button>" : "") + "</div>";

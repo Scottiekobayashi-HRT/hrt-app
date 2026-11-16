@@ -447,7 +447,7 @@ ok('Which card ignores planned and other cards', !T.whichCard(hh, CAT, 'dining')
   ok('limits: two cards hit the free limit', T.atLimit({ cards: [c('a'), c('b')] }, 'subscriber'));
   ok('limits: closed cards do not count', !T.atLimit({ cards: [c('a'), c('b', 'closed')] }, 'subscriber'));
   ok('limits: next cards count', T.atLimit({ cards: [c('a'), c('b', 'next')] }, 'subscriber'));
-  ok('limits: two cards fine for ʻOhana', !T.atLimit({ cards: [c('a'), c('b')] }, 'ohana'));
+  ok('limits: two cards fine for Ohana', !T.atLimit({ cards: [c('a'), c('b')] }, 'ohana'));
   ok('limits: unknown level falls back to free', T.atLimit({ cards: [c('a'), c('b')] }, 'x'));
 }
 

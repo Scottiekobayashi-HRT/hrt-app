@@ -127,7 +127,7 @@
     /* 2. a Resy credit not used yet */
     resyPerks(w).filter(function (p) { return !p.used; }).forEach(function (p) {
       out.push({ key: "resy-" + p.cardId, kind: "resy", title: "Your " + money(p.amount) + " Resy credit ends " + p.endText,
-        text: "It comes with your " + p.cardShort + " and does not roll over. Find a Hawaiʻi restaurant on Resy that counts.",
+        text: "It comes with your " + p.cardShort + " and does not roll over. Find a Hawaii restaurant on Resy that counts.",
         action: { label: "Open the Resy map", route: "resy" } });
     });
 

@@ -1,4 +1,4 @@
-/* Ask Scottie pop-up chat. Premium ʻOhana look: navy, cream, gold, coral.
+/* Ask Scottie pop-up chat. Premium Ohana look: navy, cream, gold, coral.
    Everything is prefixed .asc- so it never touches the rest of the dashboard. */
 .asc-fab,.asc-pop{--asc-navy:#1B2840;--asc-ink:#0e1b2c;--asc-cream:#F4F1EC;--asc-gold:#f2b84b;--asc-gold-t:#f5c75a;--asc-coral:#D97040;
  --asc-slate:#9bb7c4;--asc-text:#1a1a1a;--asc-body:#3d4551;--asc-muted:#5a6472;--asc-bubble:#fff;--asc-hair:rgba(27,40,64,.12);--asc-chip:#fff;

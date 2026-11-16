@@ -19,7 +19,7 @@
      ALERT_EVERY_HOURS      variable optional, hours between seat alert checks (default 6)
 
    Who gets what (see the rulebook):
-     ʻOhana (HRT Client plan)  coaching on redeeming points, My Wallet, live transfer bonuses
+     Ohana (HRT Client plan)  coaching on redeeming points, My Wallet, live transfer bonuses
      HRT PRO only              not built yet (Atmos Reward Seat Finder comes next)
      Free                      nothing
 --------------------------------------------------------------------------- */
@@ -595,7 +595,7 @@ async function planTrip(env, q, ctx, takeSearch) {
 }
 
 /* ---------------------------- seat alerts ----------------------------
-   ʻOhana only. A member's alerts live in KV under "alerts:<memberId>".
+   Ohana only. A member's alerts live in KV under "alerts:<memberId>".
    There is no timer yet: alerts are checked when the member opens the
    dashboard, at most once every ALERT_EVERY_HOURS (default 6) per alert.
    The first check of a new alert only records what is already there, so
@@ -878,7 +878,7 @@ function coachContext(m, walletText, held, partners, bonuses, historyText) {
     "MEMBER CONTEXT (from the HRT dashboard, not from the member):",
     "- Today in Hawaii: " + hawaiiDate(),
     "- First name: " + (m.firstName || "unknown"),
-    "- Plans: " + [m.client ? "ʻOhana Member" : null, m.pro ? "HRT PRO" : null].filter(Boolean).join(" and "),
+    "- Plans: " + [m.client ? "Ohana Member" : null, m.pro ? "HRT PRO" : null].filter(Boolean).join(" and "),
     "",
     "Their cards in My Wallet:",
     walletText,
@@ -898,7 +898,7 @@ function coachContext(m, walletText, held, partners, bonuses, historyText) {
     "- A greeting or vague message (\"hi\", \"I need help redeeming my points\") gets a short, friendly question back about what they want to do, not a list of ideas.",
     "",
     "WHAT ASK SCOTTIE IS (this overrides anything in the rulebook about award searches):",
-    "- You are my points coach for ʻOhana Members. You teach them HOW to redeem their points: the best way to pay, which programs to use, and the steps and rules. You do NOT look up live award seats, dates or prices, and you have no search tool.",
+    "- You are my points coach for Ohana Members. You teach them HOW to redeem their points: the best way to pay, which programs to use, and the steps and rules. You do NOT look up live award seats, dates or prices, and you have no search tool.",
     "- You are an AI, not Scottie live. If anyone seems to think they're talking to the real Scottie (\"is this really you?\", or they write as if a person will follow up), say kindly: \"This is my AI, trained on my tips. For the real me, tap Text Scottie.\"",
     "- Never overpromise. Never say you'll search, check availability, watch a route, book, hold, follow up or get back to them: you can't. Only the real me, by text, can follow up.",
     "- The goal is to save members a text: answer completely enough that they don't need to message me. Hand off only for card picks, personal situations, or when you're truly not sure.",
@@ -950,7 +950,7 @@ function memberContext(m, walletText, opts, partnerText) {
     "MEMBER CONTEXT (from the HRT dashboard, not from the member):",
     "- Today in Hawaii: " + hawaiiDate(),
     "- First name: " + (m.firstName || "unknown"),
-    "- Plans: " + [m.client ? "ʻOhana Member" : null, m.pro ? "HRT PRO" : null].filter(Boolean).join(" and "),
+    "- Plans: " + [m.client ? "Ohana Member" : null, m.pro ? "HRT PRO" : null].filter(Boolean).join(" and "),
     "- Mode: Coach Mode (Part 3 of the rulebook)." + (m.pro ? " This member also has HRT PRO, but the Atmos Reward Seat Finder is not switched on yet, so for Atmos calendar data point them to Scottie’s Atmos Points Calendar in the sidebar." : ""),
     "- Award search: " + (opts.searchesLeft > 0 ? "available through search_award_seats, only if they ask (" + opts.searchesLeft + " searches left today)." : "used up for today. Say so kindly if they ask."),
     "",
@@ -971,7 +971,7 @@ function memberContext(m, walletText, opts, partnerText) {
       ? "- This member has HRT PRO, so searches include Atmos Rewards seats on Alaska and Hawaiian flights. For browsing Atmos dates, Scottie’s Atmos Points Calendar in the sidebar is the best tool."
       : "- This member does not have HRT PRO. Searches leave out Atmos Rewards award seats on Alaska and Hawaiian flights (Atmos partner awards like JAL still show). " +
         "If they ask about Atmos award seats, Alaska or Hawaiian award flights, or booking with Atmos points on Alaska or Hawaiian, do not search for them. " +
-        "Tell them warmly, in your own words, that this is exactly what Scottie’s Atmos Points Calendar is for: every Atmos saver date from Hawaiʻi, updated every morning, part of HRT PRO for $9.99 a month. " +
+        "Tell them warmly, in your own words, that this is exactly what Scottie’s Atmos Points Calendar is for: every Atmos saver date from Hawaii, updated every morning, part of HRT PRO for $9.99 a month. " +
         "Then add " + ATMOS_PITCH + " on its own line; the app shows an Unlock button. If a search result says atmosHidden, mention it the same way. Do not pitch it otherwise, and never more than once in a chat.",
     "",
     "TRAVEL PORTAL FIRST (Scottie's rule):",

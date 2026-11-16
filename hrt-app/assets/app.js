@@ -33,19 +33,19 @@
 
  /* ============================== ROUTER ============================== */
  var ROUTES = {
-  home:{ title:"Dashboard", hint:"Free tools for Hawaiʻi points travelers" },
-  kamaaina:{ title:"Kamaʻāina Deals", hint:"Resident staycation rates by island" },
+  home:{ title:"Dashboard", hint:"Free tools for Hawaii-based points travelers" },
+  kamaaina:{ title:"Kamaʻaina Deals", hint:"Resident staycation rates by island" },
   atmos:{ title:"Scottie’s Atmos Points Calendar", hint:"HRT PRO \u00b7 $9.99/mo" },
   lounges:{ title:"HNL Lounge Map", hint:"Where's the lounge & how do I get in?" },
   transfers:{ title:"Transfer Bonuses", hint:"Checked daily" },
   welcome:{ title:"Welcome Bonuses", hint:"Coming soon" },
-  resy:{ title:"Resy Hawaiʻi Map", hint:"Amex Resy credits in Hawaiʻi" },
+  resy:{ title:"Resy Hawaii Map", hint:"Amex Resy credits in Hawaii" },
   status:{ title:"Atmos Choose to Earn Calculator", hint:"Distance, price or segments" },
   communities:{ title:"Atmos Community Calculator", hint:"Which Community pays most" },
   wallet:{ title:"My Wallet", hint:"Your cards, fees and credits" },
   account:{ title:"My account", hint:"Photo, name, login and billing" },
-  plans:{ title:"Membership levels", hint:"Subscriber, ʻOhana and HRT PRO" },
-  picks:{ title:"Community Picks", hint:"Ranked by Hawaiʻi travelers" },
+  plans:{ title:"Membership levels", hint:"Subscriber, Ohana and HRT PRO" },
+  picks:{ title:"Community Picks", hint:"Ranked by Hawaii travelers" },
   coaching:{ title:"Rewards Card Coaching", hint:"Videos and Scottie AI" }
  };
  var shown = {}, current = null;
@@ -65,10 +65,11 @@
    var on = a.getAttribute("data-route") === full;
    a.classList.toggle("on", on); a.setAttribute("aria-current", on ? "page" : "false");
   });
-  /* ʻOhana Members see their wallet as the ʻOhana Wallet; the html.ms-client class picks the right words */
-  var crumbTitle = name === "wallet" ? '<span class="client-hide">My Wallet</span><span class="client-only">ʻOhana Wallet</span>' : esc(ROUTES[name].title);
+  /* Ohana Members see their wallet as the Ohana Wallet; the html.ms-client class picks the right words */
+  var crumbTitle = name === "wallet" ? '<span class="client-hide">My Wallet</span><span class="client-only">Ohana Wallet</span>' : esc(ROUTES[name].title);
   if(sub) crumbTitle = '<a href="#' + name + '" data-route="' + name + '">' + crumbTitle + '</a> <span aria-hidden="true">/</span> ' + esc(SUBS[name][sub]);
-  $("crumb").innerHTML = name === "home" ? "Dashboard" : '<a href="#home" data-route="home">Dashboard</a> <span aria-hidden="true">/</span> ' + crumbTitle;
+  /* Eddie, Nov 16: "Eddie's Dashboard  updated Nov 12" on the home page */
+  $("crumb").innerHTML = name === "home" ? '<span class="dash-nm"><b class="ms-first-name">' + esc((window.HRT_MEMBER || {}).firstName || "") + '</b>’s </span>Dashboard <small class="dash-upd">' + esc(window.HRT_WALL_UPD || "") + '</small>' : '<a href="#home" data-route="home">Dashboard</a> <span aria-hidden="true">/</span> ' + crumbTitle;
   if (name === "wallet") $("tbHint").innerHTML = '<span class="client-hide">' + esc(ROUTES[name].hint) + '</span><span class="client-only">Managed for you by Scottie</span>';
   else $("tbHint").textContent = ROUTES[name].hint;
   try{ history.replaceState(null, "", "#" + full); }catch(e){}
@@ -216,7 +217,7 @@
   $("tcCount").textContent = list.length + " partner" + (list.length === 1 ? "" : "s");
   $("tcResults").innerHTML = list.map(function(p){
    var base = Math.floor(pts * p[3] / p[2]), tot = Math.floor(miles(p)), has = bonus > 0 && pts > 0;
-   return '<div class="cg"><span class="tb-ic">'+(p[1] === "hotel" ? "&#127976;" : "&#9992;&#65039;")+'</span><div class="cg-i"><b>'+esc(p[0])+'</b><small>Ratio '+(p[2] === 1 && p[3] === 1 ? "1:1" : p[2] + ":" + p[3])+(p[4] ? '<span class="hi">Hawaiʻi pick</span>' : '')+'</small></div>'
+   return '<div class="cg"><span class="tb-ic">'+(p[1] === "hotel" ? "&#127976;" : "&#9992;&#65039;")+'</span><div class="cg-i"><b>'+esc(p[0])+'</b><small>Ratio '+(p[2] === 1 && p[3] === 1 ? "1:1" : p[2] + ":" + p[3])+(p[4] ? '<span class="hi">Hawaii pick</span>' : '')+'</small></div>'
     + '<div class="cg-m"><b class="'+(has ? "bn" : "")+'">'+(pts ? tot.toLocaleString() : "&ndash;")+'</b><small>'+(has ? "+" + (tot - base).toLocaleString() + " bonus" : (p[1] === "hotel" ? "points" : "miles"))+'</small></div></div>';
   }).join("");
  }
@@ -267,42 +268,42 @@
 
  /* ========================== RESY MAP ========================== */
  var V = [
-  {n:"@SUSHI",i:"Oʻahu",a:"Restaurant Row",ad:"500 Ala Moana Blvd",c:"Japanese",s:"eligible",lat:21.3021,lng:-157.8617,u:"https://resy.com/cities/honolulu-hi/venues/sushi"},
-  {n:"Brix and Stones",i:"Oʻahu",a:"Kakaʻako",ad:"999 Waimanu St",c:"Lounge and cigar bar",s:"eligible",lat:21.2954,lng:-157.8571,u:"https://resy.com/cities/honolulu-hi/venues/brix-and-stones"},
-  {n:"DOMODOMO Hawaii",i:"Oʻahu",a:"ʻEwa Beach",ad:"91-050 Fort Weaver Rd",c:"Japanese, hand rolls, sushi",s:"eligible",lat:21.3199,lng:-158.0131,u:"https://resy.com/cities/ewa-beach-hi-hi/venues/domodomo-hawaii"},
-  {n:"Empire Steakhouse Hawaii",i:"Oʻahu",a:"Waikīkī, Ilikai",ad:"1777 Ala Moana Blvd",c:"Steakhouse",s:"eligible",lat:21.2846,lng:-157.8376,u:"https://resy.com/cities/honolulu-hi/venues/empire-steakhouse-hawaii"},
-  {n:"Lava Lounge Waikiki",i:"Oʻahu",a:"Waikīkī, Twin Fin",ad:"2570 Kalākaua Ave",c:"Cocktail bar",s:"eligible",lat:21.2719,lng:-157.8241,u:"https://resy.com/cities/honolulu-hi/venues/lava-lounge-waikiki"},
-  {n:"Nanzan Giro Giro",i:"Oʻahu",a:"Ala Moana",ad:"560 Pensacola St",c:"Japanese",s:"eligible",lat:21.2986,lng:-157.8481,u:"https://resy.com/cities/honolulu-hi/venues/nanzan-giro-giro"},
-  {n:"OKDONGSIK Hawaii",i:"Oʻahu",a:"Ala Moana",ad:"1388 Kapiolani Blvd #3",c:"Korean",s:"eligible",lat:21.2931,lng:-157.8421,u:"https://resy.com/cities/honolulu-hi/venues/okdongsik-hawaii"},
-  {n:"Olay's Thai Lao Cuisine",i:"Oʻahu",a:"Chinatown",ad:"66 N Hotel St",c:"Thai and Lao",s:"eligible",lat:21.3129,lng:-157.8609,u:"https://resy.com/cities/honolulu-hi/venues/olays-thai-lao-cuisine"},
-  {n:"Pigeonhole",i:"Oʻahu",a:"Chinatown",ad:"Chinatown, Honolulu",c:"Cocktail bar",s:"eligible",lat:21.3122,lng:-157.8631,u:"https://resy.com/cities/honolulu-hi/venues/pigeonhole"},
-  {n:"Rinka",i:"Oʻahu",a:"Kakaʻako, AEʻO",ad:"1001 Queen St #105",c:"Japanese",s:"eligible",lat:21.2948,lng:-157.8549,u:"https://resy.com/cities/honolulu-hi/venues/rink"},
-  {n:"Silver Lining Wine Bar",i:"Oʻahu",a:"Kakaʻako",ad:"999 Waimanu St",c:"Natural wine",s:"eligible",lat:21.2952,lng:-157.8569,u:"https://resy.com/cities/honolulu-hi/venues/silver-lining-wine-bar"},
-  {n:"Skull & Crown Trading Co.",i:"Oʻahu",a:"Chinatown",ad:"62 N Hotel St",c:"Tiki and cocktail bar",s:"eligible",lat:21.3127,lng:-157.8607,u:"https://resy.com/cities/honolulu-hi/venues/skull-and-crown-trading-co"},
-  {n:"Tanaka Ramen & Izakaya",i:"Oʻahu",a:"Ala Moana Center",ad:"1450 Ala Moana Blvd #2054",c:"Ramen and izakaya",s:"eligible",lat:21.2912,lng:-157.8435,u:"https://resy.com/cities/honolulu-hi/venues/tanaka-ramen-and-izakaya"},
-  {n:"Torishin Hawaii",i:"Oʻahu",a:"Kakaʻako, AEʻO",ad:"1001 Queen St",c:"Japanese",s:"eligible",lat:21.2946,lng:-157.8551,u:"https://resy.com/cities/honolulu-hi/venues/torishin-hawaii"},
-  {n:"Toro",i:"Oʻahu",a:"Iwilei",ad:"1130 N Nimitz Hwy C130",c:"Sushi",s:"eligible",lat:21.3161,lng:-157.8721,u:"https://resy.com/cities/honolulu-hi/venues/toro"},
-  {n:"Vein At Kakaʻako",i:"Oʻahu",a:"Kakaʻako",ad:"685 Auahi St Bldg 2 Ste 121",c:"Japanese-Italian",s:"eligible",lat:21.2939,lng:-157.8525,u:"https://resy.com/cities/honolulu-hi/venues/vein-at-kakaako"},
-  {n:"Mina's Fish House",i:"Oʻahu",a:"Kapolei, Ko Olina",ad:"Four Seasons Resort Oahu",c:"Seafood",s:"pending",lat:21.3352,lng:-158.1228,u:"https://www.exploretock.com/minasfishhouse/"},
-  {n:"Noe",i:"Oʻahu",a:"Kapolei, Ko Olina",ad:"Four Seasons Resort Oahu",c:"Southern Italian",s:"pending",lat:21.3349,lng:-158.1232,u:"https://www.exploretock.com/noe/"},
-  {n:"Sushi Sho",i:"Oʻahu",a:"Waikīkī",ad:"The Ritz-Carlton Residences",c:"Edomae omakase",s:"pending",lat:21.2795,lng:-157.8290,u:"https://www.exploretock.com/sushisho/"},
-  {n:"Dragon Upstairs",i:"Oʻahu",a:"Chinatown",ad:"1038 Nuʻuanu Ave",c:"Jazz bar and lounge",s:"unconfirmed",lat:21.3140,lng:-157.8621,u:"https://resy.com/cities/honolulu-hi/venues/dragon-upstairs"},
-  {n:"Lady Elaine",i:"Oʻahu",a:"Honolulu",ad:"Address not confirmed",c:"Restaurant and bar",s:"unconfirmed",lat:21.3069,lng:-157.8583,u:"https://resy.com/cities/honolulu-hi/venues/lady-elaine-hi"},
-  {n:"The Boardroom",i:"Oʻahu",a:"Kailua",ad:"Kailua",c:"Fusion",s:"unconfirmed",lat:21.3926,lng:-157.7396,u:"https://resy.com/cities/kailua-hi/venues/the-boardroom-hi"},
+  {n:"@SUSHI",i:"Oahu",a:"Restaurant Row",ad:"500 Ala Moana Blvd",c:"Japanese",s:"eligible",lat:21.3021,lng:-157.8617,u:"https://resy.com/cities/honolulu-hi/venues/sushi"},
+  {n:"Brix and Stones",i:"Oahu",a:"Kakaʻako",ad:"999 Waimanu St",c:"Lounge and cigar bar",s:"eligible",lat:21.2954,lng:-157.8571,u:"https://resy.com/cities/honolulu-hi/venues/brix-and-stones"},
+  {n:"DOMODOMO Hawaii",i:"Oahu",a:"ʻEwa Beach",ad:"91-050 Fort Weaver Rd",c:"Japanese, hand rolls, sushi",s:"eligible",lat:21.3199,lng:-158.0131,u:"https://resy.com/cities/ewa-beach-hi-hi/venues/domodomo-hawaii"},
+  {n:"Empire Steakhouse Hawaii",i:"Oahu",a:"Waikīkī, Ilikai",ad:"1777 Ala Moana Blvd",c:"Steakhouse",s:"eligible",lat:21.2846,lng:-157.8376,u:"https://resy.com/cities/honolulu-hi/venues/empire-steakhouse-hawaii"},
+  {n:"Lava Lounge Waikiki",i:"Oahu",a:"Waikīkī, Twin Fin",ad:"2570 Kalākaua Ave",c:"Cocktail bar",s:"eligible",lat:21.2719,lng:-157.8241,u:"https://resy.com/cities/honolulu-hi/venues/lava-lounge-waikiki"},
+  {n:"Nanzan Giro Giro",i:"Oahu",a:"Ala Moana",ad:"560 Pensacola St",c:"Japanese",s:"eligible",lat:21.2986,lng:-157.8481,u:"https://resy.com/cities/honolulu-hi/venues/nanzan-giro-giro"},
+  {n:"OKDONGSIK Hawaii",i:"Oahu",a:"Ala Moana",ad:"1388 Kapiolani Blvd #3",c:"Korean",s:"eligible",lat:21.2931,lng:-157.8421,u:"https://resy.com/cities/honolulu-hi/venues/okdongsik-hawaii"},
+  {n:"Olay's Thai Lao Cuisine",i:"Oahu",a:"Chinatown",ad:"66 N Hotel St",c:"Thai and Lao",s:"eligible",lat:21.3129,lng:-157.8609,u:"https://resy.com/cities/honolulu-hi/venues/olays-thai-lao-cuisine"},
+  {n:"Pigeonhole",i:"Oahu",a:"Chinatown",ad:"Chinatown, Honolulu",c:"Cocktail bar",s:"eligible",lat:21.3122,lng:-157.8631,u:"https://resy.com/cities/honolulu-hi/venues/pigeonhole"},
+  {n:"Rinka",i:"Oahu",a:"Kakaʻako, AEʻO",ad:"1001 Queen St #105",c:"Japanese",s:"eligible",lat:21.2948,lng:-157.8549,u:"https://resy.com/cities/honolulu-hi/venues/rink"},
+  {n:"Silver Lining Wine Bar",i:"Oahu",a:"Kakaʻako",ad:"999 Waimanu St",c:"Natural wine",s:"eligible",lat:21.2952,lng:-157.8569,u:"https://resy.com/cities/honolulu-hi/venues/silver-lining-wine-bar"},
+  {n:"Skull & Crown Trading Co.",i:"Oahu",a:"Chinatown",ad:"62 N Hotel St",c:"Tiki and cocktail bar",s:"eligible",lat:21.3127,lng:-157.8607,u:"https://resy.com/cities/honolulu-hi/venues/skull-and-crown-trading-co"},
+  {n:"Tanaka Ramen & Izakaya",i:"Oahu",a:"Ala Moana Center",ad:"1450 Ala Moana Blvd #2054",c:"Ramen and izakaya",s:"eligible",lat:21.2912,lng:-157.8435,u:"https://resy.com/cities/honolulu-hi/venues/tanaka-ramen-and-izakaya"},
+  {n:"Torishin Hawaii",i:"Oahu",a:"Kakaʻako, AEʻO",ad:"1001 Queen St",c:"Japanese",s:"eligible",lat:21.2946,lng:-157.8551,u:"https://resy.com/cities/honolulu-hi/venues/torishin-hawaii"},
+  {n:"Toro",i:"Oahu",a:"Iwilei",ad:"1130 N Nimitz Hwy C130",c:"Sushi",s:"eligible",lat:21.3161,lng:-157.8721,u:"https://resy.com/cities/honolulu-hi/venues/toro"},
+  {n:"Vein At Kakaʻako",i:"Oahu",a:"Kakaʻako",ad:"685 Auahi St Bldg 2 Ste 121",c:"Japanese-Italian",s:"eligible",lat:21.2939,lng:-157.8525,u:"https://resy.com/cities/honolulu-hi/venues/vein-at-kakaako"},
+  {n:"Mina's Fish House",i:"Oahu",a:"Kapolei, Ko Olina",ad:"Four Seasons Resort Oahu",c:"Seafood",s:"pending",lat:21.3352,lng:-158.1228,u:"https://www.exploretock.com/minasfishhouse/"},
+  {n:"Noe",i:"Oahu",a:"Kapolei, Ko Olina",ad:"Four Seasons Resort Oahu",c:"Southern Italian",s:"pending",lat:21.3349,lng:-158.1232,u:"https://www.exploretock.com/noe/"},
+  {n:"Sushi Sho",i:"Oahu",a:"Waikīkī",ad:"The Ritz-Carlton Residences",c:"Edomae omakase",s:"pending",lat:21.2795,lng:-157.8290,u:"https://www.exploretock.com/sushisho/"},
+  {n:"Dragon Upstairs",i:"Oahu",a:"Chinatown",ad:"1038 Nuʻuanu Ave",c:"Jazz bar and lounge",s:"unconfirmed",lat:21.3140,lng:-157.8621,u:"https://resy.com/cities/honolulu-hi/venues/dragon-upstairs"},
+  {n:"Lady Elaine",i:"Oahu",a:"Honolulu",ad:"Address not confirmed",c:"Restaurant and bar",s:"unconfirmed",lat:21.3069,lng:-157.8583,u:"https://resy.com/cities/honolulu-hi/venues/lady-elaine-hi"},
+  {n:"The Boardroom",i:"Oahu",a:"Kailua",ad:"Kailua",c:"Fusion",s:"unconfirmed",lat:21.3926,lng:-157.7396,u:"https://resy.com/cities/kailua-hi/venues/the-boardroom-hi"},
   {n:"Banyan Tree at The Ritz-Carlton Maui",i:"Maui",a:"Kapalua",ad:"Ritz-Carlton Maui",c:"Pacific Rim",s:"unconfirmed",lat:20.9990,lng:-156.6432,u:"https://resy.com/cities/lahaina-hi/venues/banyan-tree-restaurant-ritz-carlton-maui"},
-  {n:"Humuhumunukunukuāpuaʻa",i:"Maui",a:"Wailea",ad:"Grand Wailea",c:"Seafood, Hawaiʻi regional",s:"unconfirmed",lat:20.6889,lng:-156.4432,u:"https://resy.com/cities/wailea-makena-hi-hi/venues/humuhumunukunukuapuaa"},
+  {n:"Humuhumunukunukuāpuaʻa",i:"Maui",a:"Wailea",ad:"Grand Wailea",c:"Seafood, Hawaii regional",s:"unconfirmed",lat:20.6889,lng:-156.4432,u:"https://resy.com/cities/wailea-makena-hi-hi/venues/humuhumunukunukuapuaa"},
   {n:"Isana",i:"Maui",a:"Kīhei",ad:"515 S Kīhei Rd",c:"Korean barbecue and sushi",s:"unconfirmed",lat:20.7279,lng:-156.4535,u:"https://resy.com/cities/kihei-hi/venues/isana"},
   {n:"MauiWine",i:"Maui",a:"Kula",ad:"Ulupalakua",c:"Winery tasting room",s:"unconfirmed",lat:20.6440,lng:-156.3962,u:"https://resy.com/cities/kula-hi/venues/mauiwine"},
   {n:"Nobu Grand Wailea",i:"Maui",a:"Wailea",ad:"Grand Wailea",c:"Japanese",s:"unconfirmed",lat:20.6893,lng:-156.4427,u:"https://resy.com/cities/wailea-makena-hi-hi/venues/nobu-grand-wailea"},
   {n:"Pita Paradise",i:"Maui",a:"Kīhei",ad:"Wailea Gateway",c:"Mediterranean",s:"unconfirmed",lat:20.6972,lng:-156.4421,u:"https://resy.com/cities/kihei-hi/venues/pita-paradise"},
   {n:"Sale Pepe",i:"Maui",a:"Lahaina",ad:"Lahaina",c:"Italian",s:"unconfirmed",lat:20.8788,lng:-156.6791,u:"https://resy.com/cities/lahaina-hi/venues/sale-pepe"},
-  {n:"Lehua at ʻImiloa",i:"Hawaiʻi Island",a:"Hilo",ad:"600 ʻImiloa Pl",c:"Modern Hawaiian",s:"unconfirmed",lat:19.7016,lng:-155.0959,u:"https://resy.com/cities/hilo-hi-united-states/venues/lehua-at-lmiloa"},
-  {n:"Jackie Rey's Ohana Grill",i:"Hawaiʻi Island",a:"Hilo",ad:"64 Keawe St",c:"Seafood and grill",s:"unconfirmed",lat:19.7208,lng:-155.0885,u:"https://resy.com/cities/hilo-hi/venues/jackie-reys-ohana-grill-hilo"},
+  {n:"Lehua at ʻImiloa",i:"Hawaii Island",a:"Hilo",ad:"600 ʻImiloa Pl",c:"Modern Hawaiian",s:"unconfirmed",lat:19.7016,lng:-155.0959,u:"https://resy.com/cities/hilo-hi-united-states/venues/lehua-at-lmiloa"},
+  {n:"Jackie Rey's Ohana Grill",i:"Hawaii Island",a:"Hilo",ad:"64 Keawe St",c:"Seafood and grill",s:"unconfirmed",lat:19.7208,lng:-155.0885,u:"https://resy.com/cities/hilo-hi/venues/jackie-reys-ohana-grill-hilo"},
   {n:"Bar Acuda",i:"Kauaʻi",a:"Hanalei",ad:"Hanalei",c:"Tapas",s:"unconfirmed",lat:22.2039,lng:-159.4993,u:"https://resy.com/cities/hanalei-hi-hi/venues/bar-acuda"}
  ];
  var RS = { isl:"all", st:"all", q:"", all:false, active:-1, map:null, markers:[] };
  var RS_LABEL = { eligible:"Credit eligible", pending:"Not yet eligible", unconfirmed:"Verify in app" };
- var RS_ISL = ["Oʻahu","Maui","Hawaiʻi Island","Kauaʻi"];
+ var RS_ISL = ["Oahu","Maui","Hawaii Island","Kauaʻi"];
  var RS_BOUNDS = { oahu:[[-158.17,21.25],[-157.72,21.42]], maui:[[-156.72,20.60],[-156.35,21.03]], hawaii:[[-155.25,19.55],[-154.95,19.85]], kauai:[[-159.65,21.85],[-159.30,22.25]], all:[[-160.0,19.5],[-154.9,22.3]] };
  function rsMatch(v){ if(RS.isl !== "all" && v.i !== RS.isl) return false; if(RS.st !== "all" && v.s !== RS.st) return false; if(RS.q && (v.n+" "+v.a+" "+v.ad+" "+v.c+" "+v.i).toLowerCase().indexOf(RS.q) < 0) return false; return true; }
  function rsList(){ var rank = { eligible:0, pending:1, unconfirmed:2 }; return V.map(function(v,i){ return { v:v, i:i }; }).filter(function(o){ return rsMatch(o.v); }).sort(function(a,b){ return rank[a.v.s] - rank[b.v.s] || a.v.n.localeCompare(b.v.n); }); }
@@ -453,7 +454,7 @@
   var hotels = D.filter(function(d){ return d.g === "Stays"; });
   $("hmKama").textContent = hotels.length; $("navKama").textContent = D.length; $("ttKama").textContent = hotels.length + " hotel deals, " + (D.length - hotels.length) + " activities";
   var seen = {}, top = hotels.slice().sort(function(a,b){ return b.s - a.s; }).filter(function(d){ if(seen[d.b]) return false; seen[d.b] = 1; return true; }).slice(0,5);
-  var isl = { oahu:"Oʻahu", maui:"Maui", hawaii:"Hawaiʻi Island", kauai:"Kauaʻi", lanai:"Lānaʻi", molokai:"Molokaʻi" };
+  var isl = { oahu:"Oahu", maui:"Maui", hawaii:"Hawaii Island", kauai:"Kauaʻi", lanai:"Lānaʻi", molokai:"Molokaʻi" };
   var kl = $("hmKamaList"); if(!kl) return;
   kl.innerHTML = top.map(function(d){
    var head = window.HRT_DEAL_HEAD ? window.HRT_DEAL_HEAD(d).big : (d.p ? (d.pu ? "Up to " : "") + d.p + "% off" : (d.v ? "From $" + d.v : "Resident rate"));
@@ -484,7 +485,7 @@
  (function(prev){ onShow.home = function(first){ if(prev) prev(first); if(window.HRT_WALLET) window.HRT_WALLET.home(); }; })(onShow.home);
 
  /* ============================== BOOT ============================== */
- /* First class deals from Hawaiʻi: read from the calendar's public feed once
+ /* First class deals from Hawaii: read from the calendar's public feed once
     the generator publishes a first_class_deals count. Until then the stat stays hidden. */
  function homeFirst(){
   var FEED = "https://hrt-calendar-pro.pages.dev/marketing_deals.json";
@@ -501,7 +502,7 @@
  route(ROUTES[start.split("/")[0]] ? start : "home", true);
 })();
 
-/* Your included tools (Nov 12): a locked ʻOhana or PRO tile opens Membership levels instead */
+/* Your included tools (Nov 12): a locked Ohana or PRO tile opens Membership levels instead */
 document.addEventListener("click", function (e) {
   var t = e.target.closest && e.target.closest(".ttile.t-oh, .ttile.t-pro");
   if (!t) return;
@@ -518,45 +519,75 @@ document.addEventListener("click", function (e) {
   e.preventDefault();
   if (typeof window.HRT_ASK_UPDATE === "function") window.HRT_ASK_UPDATE(b.getAttribute("data-upd"));
 });
-/* Howzit line question (Scottie approved, Nov 13): a different question each visit, by level.
-   Subscribers get the ʻOhana set, ʻOhana Members the HRT PRO set (Atmos Rewards seats only),
-   HRT PRO members the redeem question. Only these approved lines can show. */
+/* Howzit line (Eddie, Nov 16): one fixed line per level, each pitching the next step up.
+   No video yet, so "Watch video" opens the Membership levels page for now. */
 (function () {
-  var REDEEM = { q: "Want to know the best ways to redeem your points?", href: "#coaching", route: "coaching" };
-  var TO_OHANA = [
-    "Want to know which card to get next, and exactly when to apply?",
-    "Are you leaving a welcome bonus on the table by applying at the wrong time?",
-    "Want Scottie to plan your next card with you, one on one?",
-    "Is your wallet working as hard as it could? Want Scottie to keep it up to date for you?",
-    "Have a points question only Scottie can answer? Want your own AI coach trained on his tips?",
-    "Want to see points deals on 10 routes from Honolulu instead of 4?",
-    "Know which card to downgrade, and when, before the annual fee hits?",
-    "Want to know the best ways to redeem your points?"
-  ];
-  var TO_PRO = [
-    "Want to see Atmos Rewards award seats up to about 270 days out, not just 30?",
-    "Ready to fly business or first class on Atmos Rewards points? Want to see the dates that are open?",
-    "Want to search every Atmos Rewards saver date on your route in seconds?",
-    "Wondering everywhere your Atmos Rewards points could take you from Honolulu?",
-    "Want Atmos Rewards points deals on the 15 routes you pick, with business class?",
-    "Planning a big family trip? Want to find the Atmos Rewards dates with enough seats for everyone?",
-    "Want to track up to 15 cards in your wallet?"
-  ];
+  var LINES = {
+    sub: "Want to try Ohana Level? Includes free coaching, welcome bonus text alerts, & more.",
+    ohana: "Want to try Pro Level? Includes Scottie’s Atmos Points Calendar, Atmos Deals Search, & more.",
+    pro: "Want to try Wayfinder? Finds your exact flights with a how-to-book step by step guide."
+  };
   var pick = {}, shown = "";
   function lvl() { var c = document.documentElement.classList; return c.contains("ms-pro") ? "pro" : c.contains("ms-client") ? "ohana" : "sub"; }
   function draw() {
     var host = document.querySelector(".hero-howzit .hw-ask"); if (!host) return;
     var l = lvl(); if (l === shown) return; shown = l;
-    if (!pick[l]) {
-      var list = l === "sub" ? TO_OHANA : l === "ohana" ? TO_PRO : null;
-      var q = list ? list[Math.floor(Math.random() * list.length)] : REDEEM.q;
-      pick[l] = q === REDEEM.q ? REDEEM : { q: q, href: l === "sub" ? "#plans" : "#atmos", route: l === "sub" ? "plans" : "atmos" };
-    }
-    host.textContent = pick[l].q + " ";
-    var a = document.createElement("a"); a.href = pick[l].href; a.setAttribute("data-route", pick[l].route); a.textContent = "Click here.";
+    host.textContent = LINES[l] + " ";
+    var a = document.createElement("a"); a.href = "#plans"; a.setAttribute("data-route", "plans"); a.textContent = "Watch video.";
     host.appendChild(a);
   }
   try { new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", draw); else draw();
 })();
 
+/* "Use free tools" on the Wall scrolls down to Your included tools (Eddie, Nov 16) */
+document.addEventListener("click", function (e) {
+  var a = e.target.closest && e.target.closest("[data-scrollto]");
+  if (!a) return;
+  var t = document.getElementById(a.getAttribute("data-scrollto"));
+  if (!t) return;
+  e.preventDefault();
+  t.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+/* Your included tools (Eddie, Nov 16): every tile ends with who it is for.
+   Available to you: dark blue bar, orange "Available to <Level> Level members".
+   Locked: dark red bar, grayed, lock and dark red "Available to ... only".
+   Wayfinder is a separate add-on for Pro Level members. Video links by level, up top. */
+(function () {
+  var LOCK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  var NAME = { aloha: "Aloha", ohana: "Ohana", pro: "Pro" };
+  function lv() { var c = document.documentElement.classList; return c.contains("ms-pro") ? "pro" : c.contains("ms-client") ? "ohana" : "aloha"; }
+  function tier(t) {
+    if (t.classList.contains("t-wf")) return "wf";
+    if (t.classList.contains("t-pro") || t.querySelector(".pro-b")) return "pro";
+    if (t.classList.contains("t-oh")) return "ohana";
+    return "aloha";
+  }
+  var RANK = { aloha: 0, ohana: 1, pro: 2 };
+  var last = "";
+  function draw() {
+    var l = lv(), wf = document.documentElement.classList.contains("ms-wayfinder"), key = l + wf;
+    if (key === last) return; last = key;
+    document.querySelectorAll(".ttiles .ttile").forEach(function (t) {
+      var tr = tier(t), open, txt;
+      if (tr === "wf") {
+        open = l === "pro" && wf;
+        txt = open ? "Added to your Pro Level" : l === "pro" ? "Add to your Pro Level for $50/mo" : "Add-on for Pro Level members only";
+      } else {
+        open = RANK[l] >= RANK[tr];
+        txt = open ? "Available to " + NAME[l] + " Level members" : tr === "ohana" ? "Available to Ohana & Pro Level members only" : "Available to Pro Level members only";
+      }
+      t.classList.toggle("t-avail", open); t.classList.toggle("t-locked", !open);
+      var a = t.querySelector(".t-acc");
+      if (!a) { a = document.createElement("span"); a.className = "t-acc"; t.querySelector(".tt").appendChild(a); }
+      a.innerHTML = (open ? "" : LOCK) + txt.replace(/&/g, "&amp;");
+    });
+    var v = document.getElementById("toolVids");
+    if (v) {
+      var list = l === "aloha" ? [["Ohana Level", ""], ["Pro Level", ""], ["Wayfinder", ""]] : l === "ohana" ? [["Pro Level", ""], ["Wayfinder", ""]] : wf ? [] : [["Wayfinder", ""]];
+      v.innerHTML = list.map(function (x) { return '<a href="#plans" data-route="plans">Watch ' + x[0] + " video &rsaquo;</a>"; }).join("");
+    }
+  }
+  try { new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", draw); else draw();
+})();

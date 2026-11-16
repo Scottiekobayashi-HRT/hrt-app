@@ -184,6 +184,10 @@ ok('load returns a copy', f.stored.wallet.cards.length === 1);
   ok('ops: all set with no date', okO({ action: { type: 'all_set', date: '', text: '' } }));
   ok('ops: unknown action type refused', !okO({ action: { type: 'soon', date: '' } }));
   ok('ops: bad date refused', !okO({ feeDate: 'May 2027' }));
+  ok('ops: fee action downgrade or cancel', okO({ feeAction: 'downgrade' }) && okO({ feeAction: 'cancel' }));
+  ok('ops: other fee action refused', !okO({ feeAction: 'keep it' }));
+  ok('ops: https apply link allowed', okO({ nextCard: { date: '2027-02-01', applyUrl: 'https://example.com/apply?x=1' } }));
+  ok('ops: non-https apply link refused', !okO({ nextCard: { date: '2027-02-01', applyUrl: 'javascript:alert(1)' } }));
   ok('ops: text over 80 refused', !okO({ action: { type: 'on', date: '2027-01-01', text: 'x'.repeat(81) } }));
 }
 console.log(`\n${pass} passed, ${fail} failed`);
