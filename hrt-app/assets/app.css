@@ -1225,3 +1225,4 @@ html.ms-pro.ms-client .lv-ohana{display:none}
 .t-vids{display:flex;flex-wrap:wrap;gap:6px 14px;margin-left:auto}
 .t-vids a{font-size:12.5px;font-weight:700;color:#d97040;text-decoration:none}
 .t-vids a:hover{text-decoration:underline}
+.ptshint{max-width:300px}
