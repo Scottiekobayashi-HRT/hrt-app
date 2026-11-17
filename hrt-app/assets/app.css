@@ -1237,3 +1237,25 @@ html.ms-pro.ms-client .lv-ohana{display:none}
 .hw-vid .hw-vid-s{font-size:12px;color:#bccde0;font-weight:600}
 @media (max-width:760px){.hw-boxes .hw-vid{grid-column:1/-1;grid-row:auto}}
 .hs-text .kama-sub{margin:4px 0 0;color:#f5c75a;font-weight:700;font-size:14px;position:relative;z-index:2} /* Nov 16 */
+/* ===== Header samples (Nov 16), shown only with ?hdr=N ===== */
+/* shared: light text on navy for samples 1, 2 and 5 */
+html.hdr-1 .topbar .crumb,html.hdr-2 .topbar .crumb,html.hdr-5 .topbar .crumb{color:#fff}
+html.hdr-1 .topbar .dash-upd,html.hdr-2 .topbar .dash-upd,html.hdr-5 .topbar .dash-upd{color:#f5c75a}
+html.hdr-1 .topbar .ms-auth button,html.hdr-2 .topbar .ms-auth button,html.hdr-5 .topbar .ms-auth button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45)}
+html.hdr-1 .topbar .ac-av-sm,html.hdr-2 .topbar .ac-av-sm,html.hdr-5 .topbar .ac-av-sm{background:#f2b84b;color:#14202e;border-color:#f2b84b}
+/* 1. Solid navy, gold rule underneath */
+html.hdr-1 .topbar{background:#14202e;border-bottom:3px solid #f2b84b;box-shadow:0 8px 18px -10px rgba(16,32,54,.6)}
+/* 2. Navy like the Walls, inside a gold-edged frame around the whole dashboard */
+html.hdr-2 .topbar{background:linear-gradient(135deg,#14202e 0%,#1b2f4a 100%);border-bottom:1px solid rgba(242,184,75,.55);box-shadow:none}
+html.hdr-2 .hrt-main{border:5px solid #1b2f4a;border-top:0;box-shadow:inset 0 0 0 1px rgba(242,184,75,.35)}
+/* 3. Warm sand, navy text, coral stripe */
+html.hdr-3 .topbar{background:#fbf3e4;border-bottom:4px solid #d97040;box-shadow:0 8px 18px -12px rgba(217,112,64,.45)}
+html.hdr-3 .topbar .crumb{color:#14202e}
+html.hdr-3 .topbar .dash-upd{color:#d97040}
+/* 4. Ocean blue tint, navy rule */
+html.hdr-4 .topbar{background:linear-gradient(90deg,#e3eef6,#f1f6fa);border-bottom:3px solid #1b2f4a}
+html.hdr-4 .topbar .crumb{color:#14202e}
+html.hdr-4 .topbar .dash-upd{color:#2b5c86}
+/* 5. Navy with the coral-to-gold sunset bar from the tool tiles */
+html.hdr-5 .topbar{background:#1b2f4a;border-bottom:0;box-shadow:0 8px 18px -10px rgba(16,32,54,.6)}
+html.hdr-5 .topbar::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,#d97040,#f2b84b)}

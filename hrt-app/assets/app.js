@@ -591,3 +591,12 @@ document.addEventListener("click", function (e) {
   try { new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", draw); else draw();
 })();
+/* Header samples for Scottie (Nov 16): add ?hdr=1 to ?hdr=5 to the address to try one.
+   Sample only; nothing changes for members until one is picked. ?hdr=0 goes back. */
+(function () {
+  try {
+    var m = /[?&]hdr=(\d)/.exec(location.search), n = m ? m[1] : sessionStorage.getItem("hrtHdr");
+    if (m) sessionStorage.setItem("hrtHdr", m[1]);
+    if (n && n !== "0") document.documentElement.classList.add("hdr-" + n);
+  } catch (e) {}
+})();
