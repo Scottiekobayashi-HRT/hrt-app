@@ -137,7 +137,7 @@
     /* video tiles (Nov 16): navy picture area with a gold play button */
     ".dw-vidph{background:radial-gradient(circle at 50% 45%,#2b4a70,#14202e 75%);display:grid;place-items:center}",
     ".dw-play{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#f2b84b;color:#14202e;box-shadow:0 4px 14px rgba(0,0,0,.4)}.dw-play svg{margin-left:3px}",
-    ".dw-vidtile .dw-vidline{font-size:14px;line-height:1.35}",
+    ".dw-vidtile .dw-vidline{font-size:13.5px;line-height:1.35;display:block!important;-webkit-line-clamp:unset!important;overflow:visible!important;white-space:normal!important}",
     ".dw a.dw-tbtn.dw-tgold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;border-color:transparent}",
     ".dw-q{margin:0;font-size:13.5px;line-height:1.45;color:var(--text);font-style:italic}"
   ].join("");
