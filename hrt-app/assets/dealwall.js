@@ -436,7 +436,7 @@
   function newsTile(a) {
     var t = el("div", "dw-card dw-t dw-news");
     var ph = photo("dw-ph", a.image);
-    ph.appendChild(el("span", "dw-kind", "Hawaii travel news"));
+    ph.appendChild(el("span", "dw-kind", "News"));
     t.appendChild(ph);
     var body = el("div", "dw-body");
     body.appendChild(el("b", "dw-tt", a.title));
