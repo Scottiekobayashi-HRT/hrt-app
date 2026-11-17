@@ -625,13 +625,13 @@
 
       var body = el("div", "dw-body");
       var pts = el("div", "dw-pts", num(d.miles) + " pts");
-      pts.appendChild(el("small", null, "one way, economy"));
+      pts.appendChild(el("small", null, "one way, economy, " + (d.nonstop ? "nonstop" : "1-stop"))); /* Nov 16 (Scottie): stops on this line */
       body.appendChild(pts);
 
       var meta = el("div", "dw-meta");
       if (d.deal_dates) meta.appendChild(el("span", "dw-chip ok", d.deal_dates + (d.deal_dates === 1 ? " date open" : " dates open")));
       /* Nov 16 (Scottie): no "from" date chip */ //      if (d.soonest) meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
-      if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
+      /* Nov 16: nonstop moved up to the one way, economy line */
       /* Nov 16 (Scottie): no Ohana route tag */ //      if (!subRoute(d)) meta.appendChild(el("span", "dw-chip dw-ohtag", "Ohana route"));
       body.appendChild(meta);
 
@@ -1050,13 +1050,13 @@
           body.appendChild(el("div", "dwp-none-s", "We check every morning. It shows up here when space opens."));
         } else {
           var pts = el("div", "dw-pts", num(d.miles) + " pts");
-          pts.appendChild(el("small", null, "one way, lowest"));
+          pts.appendChild(el("small", null, "one way, lowest, " + (d.nonstop || d.nonstopOnly ? "nonstop" : "1-stop"))); /* Nov 16 */
           body.appendChild(pts);
           var meta = el("div", "dw-meta");
           meta.appendChild(el("span", "dw-chip ok", d.count + (d.count === 1 ? " date" : " dates")));
           // Nov 16 (Scottie): no "from" date chip            meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
           if (d.nonstopOnly) meta.appendChild(el("span", "dw-chip ns", "nonstop only"));
-          else if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
+          /* Nov 16: nonstop moved up to the one way line */
           body.appendChild(meta);
         }
         card.appendChild(body);
