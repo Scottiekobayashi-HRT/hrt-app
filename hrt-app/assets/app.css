@@ -1291,3 +1291,21 @@ html.hdr-11 .topbar .crumb,html.hdr-12 .topbar .crumb,html.hdr-13 .topbar .crumb
 html.hdr-11 .topbar .dash-upd,html.hdr-12 .topbar .dash-upd,html.hdr-13 .topbar .dash-upd{color:#f5c75a}
 html.hdr-11 .topbar .ms-auth button,html.hdr-12 .topbar .ms-auth button,html.hdr-13 .topbar .ms-auth button{background:rgba(20,32,46,.55);color:#fff;border:1px solid rgba(255,255,255,.5)}
 html.hdr-11 .topbar .ac-av-sm,html.hdr-12 .topbar .ac-av-sm,html.hdr-13 .topbar .ac-av-sm{background:#f2b84b;color:#14202e;border-color:#f2b84b}
+
+/* Nov 16 v2 for samples 11-13: the four photos melt into each other (soft edges, overlapping),
+   better Vegas Strip photo, and the line underneath is the sidebar's dark navy */
+html.hdr-11 .topbar,html.hdr-12 .topbar,html.hdr-13 .topbar{background:#141b24!important;border-bottom:4px solid #141b24!important;overflow:hidden}
+html.hdr-13 .topbar::after{display:none}
+.topbar .hdr-photos{display:none}
+html.hdr-11 .topbar .hdr-photos,html.hdr-12 .topbar .hdr-photos,html.hdr-13 .topbar .hdr-photos{display:block;position:absolute;inset:0;z-index:0;pointer-events:none}
+.hdr-photos span{position:absolute;top:0;bottom:0;width:32%;background-size:cover;background-position:center;
+ -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 78%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 78%,transparent 100%)}
+.hdr-photos span:nth-child(1){left:-2%;background-image:url("https://images.pexels.com/photos/161251/senso-ji-temple-japan-kyoto-landmark-161251.jpeg?auto=compress&w=900");-webkit-mask-image:linear-gradient(90deg,#000 0,#000 78%,transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 78%,transparent 100%)}
+.hdr-photos span:nth-child(2){left:23%;background-image:url("https://images.pexels.com/photos/3909430/pexels-photo-3909430.jpeg?auto=compress&w=900")}
+.hdr-photos span:nth-child(3){left:47%;background-image:url("https://images.pexels.com/photos/2861981/pexels-photo-2861981.jpeg?auto=compress&w=900");background-position:center 35%}
+.hdr-photos span:nth-child(4){left:70%;width:31%;background-image:url("https://images.pexels.com/photos/21956575/pexels-photo-21956575/free-photo-of-sydney-opera-house-in-harbor.jpeg?auto=compress&w=900");-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 100%)}
+.hdr-photos::after{content:"";position:absolute;inset:0}
+html.hdr-11 .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.82) 0%,rgba(20,32,46,.42) 35%,rgba(20,32,46,.32) 100%)}
+html.hdr-12 .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.7) 40%,rgba(20,32,46,.6) 100%)}
+html.hdr-13 .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.85) 0%,rgba(27,47,74,.5) 45%,rgba(217,112,64,.35) 100%)}
+html.hdr-11 .topbar .tbin,html.hdr-12 .topbar .tbin,html.hdr-13 .topbar .tbin{position:relative;z-index:1}

@@ -603,3 +603,11 @@ document.addEventListener("click", function (e) {
     if (vn && vn !== "0") document.documentElement.classList.add("vid-" + vn); /* video tile samples */
   } catch (e) {}
 })();
+/* Photo strip behind the header samples 11-13 (Nov 16) */
+(function () {
+  var tb = document.querySelector(".topbar");
+  if (!tb || tb.querySelector(".hdr-photos")) return;
+  var d = document.createElement("div"); d.className = "hdr-photos"; d.setAttribute("aria-hidden", "true");
+  d.innerHTML = "<span></span><span></span><span></span><span></span>";
+  tb.insertBefore(d, tb.firstChild);
+})();
