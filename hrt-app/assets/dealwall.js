@@ -498,7 +498,7 @@
     var c = el("div", "dw-card dw-t dw-protile");
     var ph = photo("dw-ph dw-pblur", t.image);
     c.appendChild(ph);
-    var lab = el("span", "dw-kind dw-kpts", "Points deal"); c.appendChild(lab); /* Nov 12: the button already says Unlock with HRT PRO */
+    var lab = el("span", "dw-kind dw-kpts", "Deal"); c.appendChild(lab); /* Nov 12: the button already says Unlock with HRT PRO */
     var body = el("div", "dw-body");
     body.appendChild(el("b", "dw-tt", (t.city || t.dest || "") + " in " + (/first/i.test(t.cabin || "") ? "first class" : "business class")));
     body.appendChild(el("span", "dw-tsub", (t.origin || "HNL") + " \u2192 " + (t.dest || "") + ". PRO members see the dates and the points."));
@@ -617,7 +617,7 @@
       var ph = el("div", "dw-ph");
       if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
       /* top label says what kind of tile it is; the calendar name is the button (Nov 12) */
-      ph.appendChild(el("span", "dw-kind dw-kpts", "Points deal"));
+      ph.appendChild(el("span", "dw-kind dw-kpts", "Deal"));
       var cityEl = el("span", "dw-city", d.city || d.dest || "");
       cityEl.appendChild(el("small", "dw-cityrt", (d.origin || "") + " → " + (d.dest || "")));
       ph.appendChild(cityEl);
