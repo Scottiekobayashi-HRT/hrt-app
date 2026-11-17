@@ -1311,3 +1311,7 @@ html.hdr-13 .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.8
 html.hdr-11 .topbar .tbin,html.hdr-12 .topbar .tbin,html.hdr-13 .topbar .tbin{position:relative;z-index:1}
 html.hdr-11 .topbar,html.hdr-12 .topbar,html.hdr-13 .topbar{border-bottom-width:2px!important} /* thinner line, Nov 16 */
 .hdr-photos span:nth-child(2){background-position:center 50%}
+/* Header 11 on inner pages: breadcrumb and hint readable on the photos (Nov 16) */
+html.hdr-11 .topbar .crumb,html.hdr-11 .topbar .crumb a,html.hdr-11 .topbar .crumb b,html.hdr-11 .topbar .crumb span{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.55)}
+html.hdr-11 .topbar .crumb a{opacity:.85}
+html.hdr-11 .topbar .ptshint{color:#e6eef6;text-shadow:0 1px 6px rgba(0,0,0,.6)}
