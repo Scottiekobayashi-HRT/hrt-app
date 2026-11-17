@@ -137,6 +137,12 @@
     /* video tiles (Nov 16): navy picture area with a gold play button */
     ".dw-vidph{background:radial-gradient(circle at 50% 45%,#2b4a70,#14202e 75%);display:grid;place-items:center}",
     ".dw-play{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#f2b84b;color:#14202e;box-shadow:0 4px 14px rgba(0,0,0,.4)}.dw-play svg{margin-left:3px}",
+    /* video tile design samples (Nov 16), only with ?vid=N */
+    "html.vid-1 .dw-vidph{background:linear-gradient(160deg,#0d1622,#14202e 60%,#1b2f4a)}html.vid-1 .dw-vidtile{background:#14202e;border-color:#2b4a70}html.vid-1 .dw-vidtile .dw-vidline{color:#fff}",
+    "html.vid-2 .dw-vidph{background:linear-gradient(180deg,rgba(20,32,46,.35),rgba(20,32,46,.85)),url('https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=700&q=70&auto=format') center/cover}",
+    "html.vid-3 .dw-vidph{background:linear-gradient(180deg,rgba(20,32,46,.35),rgba(20,32,46,.85)),url('https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/6a6fffa2-d2f7-456f-bfcf-c92232c98f1a/524f980d-83f5-4e88-9401-95c8c24e57a9.png?format=750w') center/cover}",
+    "html.vid-4 .dw-vidph{background:linear-gradient(180deg,rgba(20,32,46,.35),rgba(20,32,46,.85)),url('https://images.unsplash.com/photo-1719469243598-0191cfae6f83?w=700&q=70&auto=format') center/cover}",
+    "html.vid-5 .dw-vidph{background:linear-gradient(135deg,rgba(20,32,46,.9),rgba(27,47,74,.55) 55%,rgba(217,112,64,.45)),url('https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=700&q=70&auto=format') center/cover}",
     ".dw-vidtile .dw-vidline{font-size:13.5px;line-height:1.35;display:block!important;-webkit-line-clamp:unset!important;overflow:visible!important;white-space:normal!important}",
     ".dw a.dw-tbtn.dw-tgold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;border-color:transparent}",
     ".dw-q{margin:0;font-size:13.5px;line-height:1.45;color:var(--text);font-style:italic}"
@@ -385,7 +391,9 @@
   /* Wall rhythm (Scottie and Eddie, Nov 12): two points deals, then one other tile.
      The other tile takes turns evenly: HRT news, transfer deal, kamaʻaina deal, HRT PRO,
      testimonial (empty kinds are skipped). When one side runs out the other keeps going. */
-  var EXTRA_CYCLE = ["news", "video", "bonus", "kama", "pro", "testimonial"]; /* video added Nov 16 */
+  /* Nov 16 (Scottie): half the rotating tiles are videos (1 of every 6 tiles); the rest
+     take turns: news, transfer bonus, kamaʻaina deal, HRT PRO, testimonial */
+  var EXTRA_CYCLE = ["video", "news", "video", "bonus", "video", "kama", "video", "pro", "video", "testimonial"];
   function rhythmOrder(points, groups, max) {
     var pts = points.slice(), left = {}, out = [], turn = 0;
     EXTRA_CYCLE.forEach(function (k) { left[k] = (groups[k] || []).slice(); });
@@ -515,7 +523,28 @@
     aloha: [
       "Applying at the wrong time can cost you a welcome bonus. See how Ohana members time it right.",
       "What if Scottie texted you the exact day to apply for your next card?",
-      "Paying an annual fee you don't need? Ohana members get a heads-up first."
+      "Paying an annual fee you don't need? Ohana members get a heads-up first.",
+      /* 20 more, Nov 16 */
+      "Your next card could be worth a trip to Japan. Do you know which one it is?",
+      "Most people pick their next card from an ad. Ohana members get Scottie's pick instead.",
+      "One application at the wrong time can keep you from the best bonuses for years. Here's how to avoid it.",
+      "Holding cards you never use? See how Ohana members keep only the ones that pay.",
+      "Missed a minimum spend deadline? Ohana members get a reminder before it's too late.",
+      "Your points are worth more than you think. See what Ohana members do with theirs.",
+      "What's the one card every Hawaii family should open first? Watch and find out.",
+      "Stop guessing which card comes next. Let Scottie map it out for you.",
+      "Ever wonder how locals fly to Tokyo on points? It starts with the right card order.",
+      "Welcome bonuses don't wait. Ohana members know exactly when to apply.",
+      "Is your wallet working as hard as you do? See what a coached wallet looks like.",
+      "The order you open cards matters more than which cards you open.",
+      "Two cardholders, one household, two welcome bonuses. See how Ohana families do it.",
+      "Downgrade or cancel? Getting it wrong can cost you points. Ohana members get a plan.",
+      "Free coaching and real texts from Scottie. See what Ohana Level includes.",
+      "Want a family trip on points this year? Watch how Ohana members plan it.",
+      "Not sure if you're ready for a new card? Ohana members get an honest answer.",
+      "Points sitting in your account don't take you anywhere. See how Ohana members turn them into trips.",
+      "One text from Scottie can save you an annual fee. See how.",
+      "What would 300,000 points mean for your next vacation?"
     ],
     ohana: [
       "What would you book if you could see every Atmos saver date at once?",
@@ -525,6 +554,11 @@
       "Found the dates? Wayfinder walks you through booking them, step by step."
     ]
   };
+  function videoLines(lv) {
+    var src = VIDEO_PITCHES[lv] || VIDEO_PITCHES.aloha, start = Math.floor(Math.random() * src.length), out = [];
+    for (var i = 0; i < 20; i++) out.push(src[(start + i) % src.length]);
+    return out;
+  }
   function viewerLevel() { var c = document.documentElement.classList; return c.contains("ms-pro") ? "pro" : c.contains("ms-client") ? "ohana" : "aloha"; }
   function videoTile(line) {
     var c = el("div", "dw-card dw-t dw-vidtile");
@@ -587,7 +621,7 @@
          points deals too, so the 2-of-3 rhythm lasts the whole wall (Nov 12) */
       var mine = pointsTiles.concat((feed._teasers || []).map(function (t) { return { kind: "pro", item: t }; }));
       var tiles = rhythmOrder(mine, { pro: [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
-        news: feed._news || [], kama: feed._kama || [], video: (VIDEO_PITCHES[oh] || []).slice() }, MIX_MAX);
+        news: feed._news || [], kama: feed._kama || [], video: videoLines(oh) }, MIX_MAX);
       tiles.forEach(addTile);
       rail.scrollLeft = 0;
     }
@@ -636,7 +670,7 @@
       body.appendChild(meta);
 
       card.appendChild(body);
-      card.appendChild(el("span", "dw-calbtn", "Scottie’s Atmos Points Calendar"));
+      card.appendChild(el("span", "dw-calbtn", "See Calendar")); /* Nov 16 (Scottie) */
       rail.appendChild(card);
     }
     buildTiles();
@@ -1068,7 +1102,7 @@
       var dealNodes = Array.prototype.slice.call(rail.children);
       if (dealNodes.length && (EXTRAS.news.length || EXTRAS.bonuses.length || EXTRAS.kama.length || TESTIMONIALS.length)) {
         var order = rhythmOrder(dealNodes.map(function (n) { return { kind: "deals", item: n }; }),
-          { bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama, video: VIDEO_PITCHES.pro.slice() },
+          { bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama, video: videoLines("pro") },
           dealNodes.length + Math.ceil(dealNodes.length / 2)); /* every deal shows, one other tile after each two */
         rail.innerHTML = "";
         order.forEach(function (t) {

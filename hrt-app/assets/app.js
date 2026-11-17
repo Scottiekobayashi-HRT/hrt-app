@@ -598,5 +598,8 @@ document.addEventListener("click", function (e) {
     var m = /[?&]hdr=(\d)/.exec(location.search), n = m ? m[1] : sessionStorage.getItem("hrtHdr");
     if (m) sessionStorage.setItem("hrtHdr", m[1]);
     if (n && n !== "0") document.documentElement.classList.add("hdr-" + n);
+    var v = /[?&]vid=(\d)/.exec(location.search), vn = v ? v[1] : sessionStorage.getItem("hrtVid");
+    if (v) sessionStorage.setItem("hrtVid", v[1]);
+    if (vn && vn !== "0") document.documentElement.classList.add("vid-" + vn); /* video tile samples */
   } catch (e) {}
 })();
