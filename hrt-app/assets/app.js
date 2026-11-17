@@ -595,9 +595,10 @@ document.addEventListener("click", function (e) {
    Sample only; nothing changes for members until one is picked. ?hdr=0 goes back. */
 (function () {
   try {
-    var m = /[?&]hdr=(\d+)/.exec(location.search), n = m ? m[1] : sessionStorage.getItem("hrtHdr");
-    if (m) sessionStorage.setItem("hrtHdr", m[1]);
-    if (n && n !== "0") document.documentElement.classList.add("hdr-" + n);
+    /* Header 11 is now the real header (Scottie, Nov 16). ?hdr=N still previews another sample on this visit only. */
+    var m = /[?&]hdr=(\d+)/.exec(location.search);
+    try { sessionStorage.removeItem("hrtHdr"); } catch (e) {}
+    if (m) { document.documentElement.classList.remove("hdr-11"); if (m[1] !== "0") document.documentElement.classList.add("hdr-" + m[1]); }
     var v = /[?&]vid=(\d)/.exec(location.search), vn = v ? v[1] : sessionStorage.getItem("hrtVid");
     if (v) sessionStorage.setItem("hrtVid", v[1]);
     if (vn && vn !== "0") document.documentElement.classList.add("vid-" + vn); /* video tile samples */
