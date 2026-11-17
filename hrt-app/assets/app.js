@@ -602,9 +602,10 @@ document.addEventListener("click", function (e) {
     var v = /[?&]vid=(\d)/.exec(location.search), vn = v ? v[1] : sessionStorage.getItem("hrtVid");
     if (v) sessionStorage.setItem("hrtVid", v[1]);
     if (vn && vn !== "0") document.documentElement.classList.add("vid-" + vn); /* video tile samples */
-    var tx = /[?&]tex=(\d)/.exec(location.search), tn = tx ? tx[1] : sessionStorage.getItem("hrtTex");
-    if (tx) sessionStorage.setItem("hrtTex", tx[1]);
-    if (tn && tn !== "0") document.documentElement.classList.add("tex-" + tn); /* wall texture samples (Nov 17) */
+    var tx = /[?&]tex=(\d)/.exec(location.search);
+    /* Linen (tex-2) is the real Wall texture (Scottie, Nov 17). ?tex=N previews another on this visit only. */
+    try { sessionStorage.removeItem("hrtTex"); } catch (e) {}
+    if (tx) { document.documentElement.classList.remove("tex-2"); if (tx[1] !== "0") document.documentElement.classList.add("tex-" + tx[1]); }
   } catch (e) {}
 })();
 /* Photo strip behind the header samples 11-13 (Nov 16) */
