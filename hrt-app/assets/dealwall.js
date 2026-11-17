@@ -630,9 +630,9 @@
 
       var meta = el("div", "dw-meta");
       if (d.deal_dates) meta.appendChild(el("span", "dw-chip ok", d.deal_dates + (d.deal_dates === 1 ? " date open" : " dates open")));
-      if (d.soonest) meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
+      /* Nov 16 (Scottie): no "from" date chip */ //      if (d.soonest) meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
       if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
-      if (!subRoute(d)) meta.appendChild(el("span", "dw-chip dw-ohtag", "Ohana route"));
+      /* Nov 16 (Scottie): no Ohana route tag */ //      if (!subRoute(d)) meta.appendChild(el("span", "dw-chip dw-ohtag", "Ohana route"));
       body.appendChild(meta);
 
       card.appendChild(body);
@@ -1054,7 +1054,7 @@
           body.appendChild(pts);
           var meta = el("div", "dw-meta");
           meta.appendChild(el("span", "dw-chip ok", d.count + (d.count === 1 ? " date" : " dates")));
-          meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
+          // Nov 16 (Scottie): no "from" date chip            meta.appendChild(el("span", "dw-chip", "from " + shortDate(d.soonest)));
           if (d.nonstopOnly) meta.appendChild(el("span", "dw-chip ns", "nonstop only"));
           else if (d.nonstop) meta.appendChild(el("span", "dw-chip", "nonstop"));
           body.appendChild(meta);
