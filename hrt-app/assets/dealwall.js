@@ -703,7 +703,7 @@
 
     /* Nov 11 (Scottie): the separate HRT PRO business class box is gone. Its locked
        tiles now sit inside the wall (proTile), and the wall carries the HRT PRO mark. */
-    if (feed.note) wrap.appendChild(el("p", "dw-note", feed.note));
+    if (feed.note) wrap.appendChild(el("p", "dw-note", String(feed.note).replace(/Public preview shows/i, "Aloha Level shows"))); /* Nov 16 (Scottie) */
     return wrap;
   }
 
