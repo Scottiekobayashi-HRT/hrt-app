@@ -1302,7 +1302,7 @@ html.hdr-11 .topbar .hdr-photos,html.hdr-12 .topbar .hdr-photos,html.hdr-13 .top
  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 78%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 78%,transparent 100%)}
 .hdr-photos span:nth-child(1){left:-2%;background-image:url("https://images.pexels.com/photos/161251/senso-ji-temple-japan-kyoto-landmark-161251.jpeg?auto=compress&w=900");-webkit-mask-image:linear-gradient(90deg,#000 0,#000 78%,transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 78%,transparent 100%)}
 .hdr-photos span:nth-child(2){left:23%;background-image:url("https://images.pexels.com/photos/3909430/pexels-photo-3909430.jpeg?auto=compress&w=900")}
-.hdr-photos span:nth-child(3){left:47%;background-image:url("https://images.pexels.com/photos/2861981/pexels-photo-2861981.jpeg?auto=compress&w=900");background-position:center 35%}
+.hdr-photos span:nth-child(3){left:47%;background-image:url("https://images.pexels.com/photos/2861981/pexels-photo-2861981.jpeg?auto=compress&w=900");background-position:center 62%}
 .hdr-photos span:nth-child(4){left:70%;width:31%;background-image:url("https://images.pexels.com/photos/21956575/pexels-photo-21956575/free-photo-of-sydney-opera-house-in-harbor.jpeg?auto=compress&w=900");-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22%,#000 100%)}
 .hdr-photos::after{content:"";position:absolute;inset:0}
 html.hdr-11 .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.82) 0%,rgba(20,32,46,.42) 35%,rgba(20,32,46,.32) 100%)}
