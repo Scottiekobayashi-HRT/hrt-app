@@ -1313,17 +1313,43 @@
   }
   /* Fifth box (Scottie, Nov 16): a video ready to play, pitching the next level up.
      No video yet, so it opens Membership levels for now. */
-  var VIDEO_PITCH = {
-    subscriber: ["See what Ohana Level can do for you", "Watch the video"],
-    ohana: ["See what Pro Level unlocks", "Watch the video"],
-    pro: ["Meet Wayfinder", "Watch the video"]
+  /* Fifth box: the promo video for the member's level (Eddie, Nov 17). Which video, its words
+     and its link live in data/videos.json so Scottie can change them without code. */
+  var VIDEO_DEFAULT = {
+    aloha: { title: "See what Ohana Level can do for you", line: "Watch the video" },
+    ohana: { title: "See what Pro Level unlocks", line: "Watch the video" },
+    pro: { title: "Meet Wayfinder", line: "Watch the video" }
   };
-  function videoBox() {
-    var v = VIDEO_PITCH[level()] || VIDEO_PITCH.subscriber;
-    return '<a class="hw-box hw-vid" href="#plans" data-route="plans" aria-label="' + esc(v[0]) + '">' +
-      '<span class="hw-vid-play" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>' +
-      '<b class="hw-vid-t">' + esc(v[0]) + '</b><span class="hw-vid-s">' + esc(v[1]) + "</span></a>";
+  function lvlKey() { var l = level(); return l === "subscriber" ? "aloha" : l; }
+  function videoLink(url) {
+    url = String(url || "").trim();
+    return /^https:\/\/[^\s"<>]+$/.test(url) ? 'href="' + esc(url) + '" target="_blank" rel="noopener"' : 'href="#plans" data-route="plans"';
   }
+  function videoBox() {
+    var V = (window.HRT_VIDEOS && window.HRT_VIDEOS.promo) || {}, d = VIDEO_DEFAULT[lvlKey()], v = V[lvlKey()] || {};
+    var t = String(v.title || d.title).slice(0, 60), ln = String(v.line || d.line).slice(0, 40);
+    return '<a class="hw-box hw-vid" ' + videoLink(v.url) + ' aria-label="' + esc(t) + '">' +
+      '<span class="hw-vid-play" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>' +
+      '<b class="hw-vid-t">' + esc(t) + '</b><span class="hw-vid-s">' + esc(ln) + "</span></a>";
+  }
+  /* "Your Aloha Level tools" link next to the level name: the level's tour video */
+  function drawTourLink() {
+    var host = document.getElementById("hwTour"); if (!host) return;
+    var T = (window.HRT_VIDEOS && window.HRT_VIDEOS.tour) || {}, k = lvlKey(), v = T[k] || {};
+    var label = String(v.label || ("Your " + k.charAt(0).toUpperCase() + k.slice(1) + " Level tools")).slice(0, 40);
+    var url = String(v.url || "").trim();
+    host.textContent = label + " \u203a";
+    if (/^https:\/\/[^\s"<>]+$/.test(url)) { host.href = url; host.target = "_blank"; host.rel = "noopener"; host.removeAttribute("data-scrollto"); }
+    else { host.href = "#home"; host.removeAttribute("target"); host.setAttribute("data-scrollto", "toolsSec"); }
+  }
+  try {
+    fetch("data/videos.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) return; window.HRT_VIDEOS = j; drawTourLink();
+      document.querySelectorAll(".hw-vid").forEach(function (n) { n.outerHTML = videoBox(); });
+    }).catch(function () {});
+  } catch (e) {}
+  try { new MutationObserver(drawTourLink).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", drawTourLink); else setTimeout(drawTourLink, 0);
   function miniHtml() {
     var cl = member().client;
     var tag = cl ? '<span class="hw-tag"><span class="hw-star">' + OH_STAR + "</span>Ohana Wallet · Managed by Scottie</span>" : "";

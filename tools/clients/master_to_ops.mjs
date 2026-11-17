@@ -4,7 +4,7 @@
      Your next card                 next_card_pitch_date (When to apply), next_card_bonus_pts (Bonus)
      Save on annual fees            fee_date (or the date in fee_anniversary) + fee_card (the member's own card) + fee_action (downgrade or cancel)
      Next card link                 next_card_apply_link (https only, shows on Today or overdue)
-     My Rewards Cards               wallet (count of entries, not counting cxld)
+     My Rewards Cards               card_count (open cards in this member's own name); wallet text only as a fallback
    Secrecy rule: no card names ever leave this file. next_card_plan, mrs_terms, wallet text
    and fee_anniversary codes are read for dates and counts only.
    Usage: node tools/clients/master_to_ops.mjs <sheet.tsv>  (prints JSON per member; nothing is sent)
@@ -29,7 +29,9 @@ export function toOps(r) {
     feeDate: day(r.fee_date || r.fee_anniversary),
     feeCard: String(r.fee_card || "").slice(0, 40), /* the member's own card to downgrade or cancel (Scottie, Nov 13) */
     feeAction: ["downgrade", "cancel"].includes(String(r.fee_action || "").trim().toLowerCase()) ? String(r.fee_action).trim().toLowerCase() : "", /* Eddie, Nov 16 */
-    cardCount: cardCount(r.wallet)
+    /* Nov 17 (Eddie): card_count is the clean number from ops. The wallet text mixes household
+       members, denials and notes, so it is only a fallback. */
+    cardCount: /^\d{1,2}$/.test(String(r.card_count || "").trim()) ? parseInt(r.card_count, 10) : cardCount(r.wallet)
   };
   if (ops.nextCard.bonusPts == null) delete ops.nextCard.bonusPts;
   const link = String(r.next_card_apply_link || "").trim(); /* Scottie's application link (Eddie, Nov 16) */

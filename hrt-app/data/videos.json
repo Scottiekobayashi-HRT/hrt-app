@@ -1,0 +1,64 @@
+{
+ "_how_to": [
+  "Scottie and Eddie: this file decides which video each member sees on their Wall.",
+  "promo = the 5th box on the member's Wall. It always pitches what comes next.",
+  "tour = the 'Your ... Level tools' link next to the level name. It reminds members what they already have.",
+  "Paste a YouTube or Vimeo link into url when a video is ready. While url is empty, the box opens the Membership levels page.",
+  "title and line are what the box says. Keep title under 45 characters. No em dashes.",
+  "covers is a checklist for the script writer: what the video must walk through."
+ ],
+ "promo": {
+  "aloha": {
+   "title": "See what Ohana Level can do for you",
+   "line": "Watch the video",
+   "url": "",
+   "covers": [
+    "Ohana Level tools and privileges",
+    "Pro Level",
+    "Wayfinder",
+    "Scottie's Atmos Points Calendar"
+   ]
+  },
+  "ohana": {
+   "title": "See what Pro Level unlocks",
+   "line": "Watch the video",
+   "url": "",
+   "covers": [
+    "Pro Level",
+    "Wayfinder",
+    "Scottie's Atmos Points Calendar"
+   ]
+  },
+  "pro": {
+   "title": "Meet Wayfinder",
+   "line": "Watch the video",
+   "url": "",
+   "covers": [
+    "Wayfinder"
+   ]
+  }
+ },
+ "tour": {
+  "aloha": {
+   "label": "Your Aloha Level tools",
+   "url": "",
+   "covers": [
+    "Every Aloha Level tool, one by one"
+   ]
+  },
+  "ohana": {
+   "label": "Your Ohana Level tools",
+   "url": "",
+   "covers": [
+    "Every Ohana Level tool and privilege, including all Aloha Level tools"
+   ]
+  },
+  "pro": {
+   "label": "Your Pro Level tools",
+   "url": "",
+   "covers": [
+    "Every Pro Level tool, including Scottie's Atmos Points Calendar and all Ohana Level tools"
+   ]
+  }
+ }
+}
