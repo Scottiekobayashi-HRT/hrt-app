@@ -1259,3 +1259,22 @@ html.hdr-4 .topbar .dash-upd{color:#2b5c86}
 /* 5. Navy with the coral-to-gold sunset bar from the tool tiles */
 html.hdr-5 .topbar{background:#1b2f4a;border-bottom:0;box-shadow:0 8px 18px -10px rgba(16,32,54,.6)}
 html.hdr-5 .topbar::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,#d97040,#f2b84b)}
+
+/* Header samples 6-10 (Nov 16): navy gradient over Hawaii photos, ?hdr=6 to ?hdr=10 */
+html.hdr-6 .topbar,html.hdr-7 .topbar,html.hdr-8 .topbar,html.hdr-9 .topbar{border-bottom:3px solid #f2b84b;box-shadow:0 8px 18px -10px rgba(16,32,54,.6)}
+html.hdr-6 .topbar .tbin,html.hdr-7 .topbar .tbin,html.hdr-8 .topbar .tbin,html.hdr-9 .topbar .tbin{padding-top:20px;padding-bottom:20px}
+html.hdr-6 .topbar{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 55%,rgba(20,32,46,.25) 100%),url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1800&q=70&auto=format") center 60%/cover}
+html.hdr-7 .topbar{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 55%,rgba(20,32,46,.25) 100%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/6a6fffa2-d2f7-456f-bfcf-c92232c98f1a/524f980d-83f5-4e88-9401-95c8c24e57a9.png?format=1500w") center 45%/cover}
+html.hdr-8 .topbar{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 55%,rgba(20,32,46,.25) 100%),url("https://images.unsplash.com/photo-1719469243598-0191cfae6f83?w=1800&q=70&auto=format") center 40%/cover}
+html.hdr-9 .topbar{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(27,47,74,.6) 50%,rgba(217,112,64,.45) 100%),url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1800&q=70&auto=format") center 60%/cover;border-bottom:0}
+html.hdr-9 .topbar::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,#d97040,#f2b84b)}
+html.hdr-6 .topbar .crumb,html.hdr-7 .topbar .crumb,html.hdr-8 .topbar .crumb,html.hdr-9 .topbar .crumb{color:#fff;font-size:21px;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+html.hdr-6 .topbar .dash-upd,html.hdr-7 .topbar .dash-upd,html.hdr-8 .topbar .dash-upd,html.hdr-9 .topbar .dash-upd{color:#f5c75a}
+html.hdr-6 .topbar .ms-auth button,html.hdr-7 .topbar .ms-auth button,html.hdr-8 .topbar .ms-auth button,html.hdr-9 .topbar .ms-auth button{background:rgba(20,32,46,.5);color:#fff;border:1px solid rgba(255,255,255,.5)}
+html.hdr-6 .topbar .ac-av-sm,html.hdr-7 .topbar .ac-av-sm,html.hdr-8 .topbar .ac-av-sm,html.hdr-9 .topbar .ac-av-sm{background:#f2b84b;color:#14202e;border-color:#f2b84b}
+/* 10: the Waikiki header plus the navy frame around the whole dashboard */
+html.hdr-10 .topbar{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 55%,rgba(20,32,46,.25) 100%),url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1800&q=70&auto=format") center 60%/cover;border-bottom:3px solid #f2b84b}
+html.hdr-10 .topbar .tbin{padding-top:20px;padding-bottom:20px}
+html.hdr-10 .topbar .crumb{color:#fff;font-size:21px;text-shadow:0 1px 6px rgba(0,0,0,.4)}html.hdr-10 .topbar .dash-upd{color:#f5c75a}
+html.hdr-10 .topbar .ms-auth button{background:rgba(20,32,46,.5);color:#fff;border:1px solid rgba(255,255,255,.5)}html.hdr-10 .topbar .ac-av-sm{background:#f2b84b;color:#14202e;border-color:#f2b84b}
+html.hdr-10 .hrt-main{border:5px solid #1b2f4a;border-top:0}

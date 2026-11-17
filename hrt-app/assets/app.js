@@ -595,7 +595,7 @@ document.addEventListener("click", function (e) {
    Sample only; nothing changes for members until one is picked. ?hdr=0 goes back. */
 (function () {
   try {
-    var m = /[?&]hdr=(\d)/.exec(location.search), n = m ? m[1] : sessionStorage.getItem("hrtHdr");
+    var m = /[?&]hdr=(\d+)/.exec(location.search), n = m ? m[1] : sessionStorage.getItem("hrtHdr");
     if (m) sessionStorage.setItem("hrtHdr", m[1]);
     if (n && n !== "0") document.documentElement.classList.add("hdr-" + n);
     var v = /[?&]vid=(\d)/.exec(location.search), vn = v ? v[1] : sessionStorage.getItem("hrtVid");

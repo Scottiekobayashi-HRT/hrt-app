@@ -393,7 +393,7 @@
      testimonial (empty kinds are skipped). When one side runs out the other keeps going. */
   /* Nov 16 (Scottie): half the rotating tiles are videos (1 of every 6 tiles); the rest
      take turns: news, transfer bonus, kamaʻaina deal, HRT PRO, testimonial */
-  var EXTRA_CYCLE = ["video", "news", "video", "bonus", "video", "kama", "video", "pro", "video", "testimonial"];
+  var EXTRA_CYCLE = ["video", "news", "video", "bonus", "video", "kama"]; /* Nov 16 (Scottie): videos half, then News, Transfer Deal and Staycation Deal in equal turns */
   function rhythmOrder(points, groups, max) {
     var pts = points.slice(), left = {}, out = [], turn = 0;
     EXTRA_CYCLE.forEach(function (k) { left[k] = (groups[k] || []).slice(); });
