@@ -33,7 +33,7 @@
 
  /* ============================== ROUTER ============================== */
  var ROUTES = {
-  home:{ title:"Dashboard", hint:"Free tools for Hawaii-based points travelers" },
+  home:{ title:"Dashboard", hint:"" },
   kamaaina:{ title:"Kamaʻaina Deals", hint:"Resident staycation rates by island" },
   atmos:{ title:"Scottie’s Atmos Points Calendar", hint:"HRT PRO \u00b7 $9.99/mo" },
   lounges:{ title:"HNL Lounge Map", hint:"Where's the lounge & how do I get in?" },
