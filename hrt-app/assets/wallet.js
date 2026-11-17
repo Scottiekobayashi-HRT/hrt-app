@@ -1311,6 +1311,19 @@
     }
     return b(nx ? esc(inDays(nx.renewal.days)) : "None", nx ? '<span class="hw-dc">' + esc(shortName(nx.card.name)) + "</span>" : "&nbsp;");
   }
+  /* Fifth box (Scottie, Nov 16): a video ready to play, pitching the next level up.
+     No video yet, so it opens Membership levels for now. */
+  var VIDEO_PITCH = {
+    subscriber: ["See what Ohana Level can do for you", "Watch the 2 minute tour"],
+    ohana: ["See what Pro Level unlocks", "Watch the 2 minute tour"],
+    pro: ["Meet Wayfinder", "Watch the 2 minute tour"]
+  };
+  function videoBox() {
+    var v = VIDEO_PITCH[level()] || VIDEO_PITCH.subscriber;
+    return '<a class="hw-box hw-vid" href="#plans" data-route="plans" aria-label="' + esc(v[0]) + '">' +
+      '<span class="hw-vid-play" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>' +
+      '<b class="hw-vid-t">' + esc(v[0]) + '</b><span class="hw-vid-s">' + esc(v[1]) + "</span></a>";
+  }
   function miniHtml() {
     var cl = member().client;
     var tag = cl ? '<span class="hw-tag"><span class="hw-star">' + OH_STAR + "</span>Ohana Wallet · Managed by Scottie</span>" : "";
@@ -1340,7 +1353,7 @@
     };
     var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
       feeBox(cl, nx) +
-      box(esc(poss(firstOf(), "My") + " Rewards Cards"), String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "my") + " Wallet") + ' &rsaquo;</a><span class="hw-dc">View, add, edit, or delete cards</span>' + updBtn(cl, "Rewards Cards")) + "</div>";
+      box(esc(poss(firstOf(), "My") + " Rewards Cards"), String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "my") + " Wallet") + ' &rsaquo;</a><span class="hw-dc">View, add, edit, or delete cards</span>' + updBtn(cl, "Rewards Cards")) + videoBox() + "</div>";
     if (cap > 0) {
       var pct = s.yearly > 0 ? Math.min(100, Math.round(cap / s.yearly * 100)) : null;
       html += '<div class="hw-cap"><div class="hw-cap-top"><span><b>' + esc(money(cap)) + "</b> used this year</span>" +
