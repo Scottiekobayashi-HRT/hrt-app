@@ -156,7 +156,10 @@ ok('nonstop only with no nonstop dates shows the empty card', nsC[0].none === tr
   const pts = many("p", 10).map((x) => ({ kind: "points", item: x }));
   const r = X.rhythmOrder(pts, { news: many("n", 5), bonus: many("b", 5), kama: many("k", 5), pro: many("t", 5), testimonial: [] }, 15);
   ok("rhythm: 2 of every 3 are points deals", r.every((t, i) => (i % 3 < 2) === (t.kind === "points")));
-  ok("rhythm: others take turns, empty skipped", r.filter((t, i) => i % 3 === 2).map((t) => t.kind).join() === "news,bonus,kama,pro,news");
+  ok("rhythm: others take turns, empty skipped", r.filter((t, i) => i % 3 === 2).map((t) => t.kind).join() === "news,bonus,kama,news,bonus");
+  /* Nov 16 (Scottie): half the non-deal tiles are videos, then News, Transfer and Staycation take equal turns */
+  const rv = X.rhythmOrder(pts, { video: many("v", 9), news: many("n", 5), bonus: many("b", 5), kama: many("k", 5) }, 15);
+  ok("rhythm: video every other non-deal tile", rv.filter((t, i) => i % 3 === 2).map((t) => t.kind).join() === "video,news,video,bonus,video");
   const r2 = X.rhythmOrder(pts.slice(0, 2), { news: ["n"], bonus: [], kama: [], pro: [], testimonial: [] }, 21);
   ok("rhythm: runs out gracefully", r2.length === 3);
   const g = X.dealGroups([{ dest: "HND" }, { dest: "LAX" }, { dest: "kix" }, { dest: "LAS" }]);
