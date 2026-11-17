@@ -1310,3 +1310,4 @@ html.hdr-12 .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.9
 html.hdr-13 .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.85) 0%,rgba(27,47,74,.5) 45%,rgba(217,112,64,.35) 100%)}
 html.hdr-11 .topbar .tbin,html.hdr-12 .topbar .tbin,html.hdr-13 .topbar .tbin{position:relative;z-index:1}
 html.hdr-11 .topbar,html.hdr-12 .topbar,html.hdr-13 .topbar{border-bottom-width:2px!important} /* thinner line, Nov 16 */
+.hdr-photos span:nth-child(2){background-position:center 30%}
