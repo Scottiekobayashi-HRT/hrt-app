@@ -134,6 +134,10 @@
     ".dw .dw-kind.dw-kpts{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;box-shadow:0 2px 8px rgba(217,112,64,.45)}",
     ".dw-head-min{margin-bottom:10px}.dw-navy .dw-head-min .dw-upd{color:#bccde0;font-size:12.5px;font-weight:700}",
     ".dw-pblur{filter:blur(5px) grayscale(.5);transform:scale(1.1);background-color:#24354d!important}.dw-protile .dw-tt{color:var(--text)}",
+    /* video tiles (Nov 16): navy picture area with a gold play button */
+    ".dw-vidph{background:radial-gradient(circle at 50% 45%,#2b4a70,#14202e 75%);display:grid;place-items:center}",
+    ".dw-play{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#f2b84b;color:#14202e;box-shadow:0 4px 14px rgba(0,0,0,.4)}.dw-play svg{margin-left:3px}",
+    ".dw-vidtile .dw-vidline{font-size:14px;line-height:1.35}",
     ".dw a.dw-tbtn.dw-tgold{background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204;border-color:transparent}",
     ".dw-q{margin:0;font-size:13.5px;line-height:1.45;color:var(--text);font-style:italic}"
   ].join("");
@@ -381,7 +385,7 @@
   /* Wall rhythm (Scottie and Eddie, Nov 12): two points deals, then one other tile.
      The other tile takes turns evenly: HRT news, transfer deal, kamaʻaina deal, HRT PRO,
      testimonial (empty kinds are skipped). When one side runs out the other keeps going. */
-  var EXTRA_CYCLE = ["news", "bonus", "kama", "pro", "testimonial"];
+  var EXTRA_CYCLE = ["news", "video", "bonus", "kama", "pro", "testimonial"]; /* video added Nov 16 */
   function rhythmOrder(points, groups, max) {
     var pts = points.slice(), left = {}, out = [], turn = 0;
     EXTRA_CYCLE.forEach(function (k) { left[k] = (groups[k] || []).slice(); });
@@ -504,6 +508,36 @@
     acts.appendChild(go); c.appendChild(acts);
     return c;
   }
+  /* Video tiles (Scottie, Nov 16): a short, provocative line pitching the viewer's next
+     level up, with a play button where the photo goes. No videos yet: they open
+     Membership levels for now. Lines are drafts for Scottie to pick from. */
+  var VIDEO_PITCHES = {
+    aloha: [
+      "Applying at the wrong time can cost you a welcome bonus. See how Ohana members time it right.",
+      "What if Scottie texted you the exact day to apply for your next card?",
+      "Paying an annual fee you don't need? Ohana members get a heads-up first."
+    ],
+    ohana: [
+      "What would you book if you could see every Atmos saver date at once?",
+      "Stop refreshing the Alaska app. Let Pro find the saver dates for you."
+    ],
+    pro: [
+      "Found the dates? Wayfinder walks you through booking them, step by step."
+    ]
+  };
+  function viewerLevel() { var c = document.documentElement.classList; return c.contains("ms-pro") ? "pro" : c.contains("ms-client") ? "ohana" : "aloha"; }
+  function videoTile(line) {
+    var c = el("div", "dw-card dw-t dw-vidtile");
+    var ph = el("div", "dw-ph dw-vidph");
+    var play = el("span", "dw-play"); play.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+    ph.appendChild(play); ph.appendChild(el("span", "dw-kind", "Video"));
+    c.appendChild(ph);
+    var body = el("div", "dw-body"); body.appendChild(el("b", "dw-tt dw-vidline", line)); c.appendChild(body);
+    var acts = el("div", "dw-tacts");
+    var go = el("a", "dw-tbtn dw-tgold", "Watch video ›"); go.href = "#plans"; go.setAttribute("data-route", "plans");
+    acts.appendChild(go); c.appendChild(acts);
+    return c;
+  }
   function testimonialTile(q) {
     var t = el("div", "dw-card dw-t dw-quote");
     var ph = photo("dw-ph", q.image);
@@ -541,7 +575,7 @@
     var pointsTiles = mixOrder({ japan: g.japan, other: g.other }, { japan: 2, other: 1 }, 1000); /* two Japan deals for every other one */
     /* Subscribers only see their 4 routes, so the 2-then-1 rhythm is worked out from the
        points tiles this viewer can see, and redone if the level arrives late. */
-    function isOhana() { return document.documentElement.classList.contains("ms-client"); }
+    function isOhana() { return viewerLevel(); } /* rebuilds when the level arrives or changes */
     var builtFor = null;
     function buildTiles() {
       var oh = isOhana();
@@ -553,7 +587,7 @@
          points deals too, so the 2-of-3 rhythm lasts the whole wall (Nov 12) */
       var mine = pointsTiles.concat((feed._teasers || []).map(function (t) { return { kind: "pro", item: t }; }));
       var tiles = rhythmOrder(mine, { pro: [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
-        news: feed._news || [], kama: feed._kama || [] }, MIX_MAX);
+        news: feed._news || [], kama: feed._kama || [], video: (VIDEO_PITCHES[oh] || []).slice() }, MIX_MAX);
       tiles.forEach(addTile);
       rail.scrollLeft = 0;
     }
@@ -563,6 +597,7 @@
       if (tile.kind === "kama") return rail.appendChild(kamaTile(tile.item));
       if (tile.kind === "bonus") return rail.appendChild(bonusTile(tile.item));
       if (tile.kind === "testimonial") return rail.appendChild(testimonialTile(tile.item));
+      if (tile.kind === "video") return rail.appendChild(videoTile(tile.item));
       if (tile.kind === "pro") return rail.appendChild(proTile(tile.item));
       var d = tile.item;
       var card = el("button", "dw-card" + (subRoute(d) ? "" : " dw-oh"));
@@ -1033,12 +1068,12 @@
       var dealNodes = Array.prototype.slice.call(rail.children);
       if (dealNodes.length && (EXTRAS.news.length || EXTRAS.bonuses.length || EXTRAS.kama.length || TESTIMONIALS.length)) {
         var order = rhythmOrder(dealNodes.map(function (n) { return { kind: "deals", item: n }; }),
-          { bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama },
+          { bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama, video: VIDEO_PITCHES.pro.slice() },
           dealNodes.length + Math.ceil(dealNodes.length / 2)); /* every deal shows, one other tile after each two */
         rail.innerHTML = "";
         order.forEach(function (t) {
           rail.appendChild(t.kind === "deals" ? t.item : t.kind === "news" ? newsTile(t.item) : t.kind === "kama" ? kamaTile(t.item) :
-            t.kind === "bonus" ? bonusTile(t.item) : testimonialTile(t.item));
+            t.kind === "bonus" ? bonusTile(t.item) : t.kind === "video" ? videoTile(t.item) : testimonialTile(t.item));
         });
       }
       rail.hidden = !list.length;

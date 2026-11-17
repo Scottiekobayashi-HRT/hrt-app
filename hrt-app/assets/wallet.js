@@ -1314,9 +1314,9 @@
   /* Fifth box (Scottie, Nov 16): a video ready to play, pitching the next level up.
      No video yet, so it opens Membership levels for now. */
   var VIDEO_PITCH = {
-    subscriber: ["See what Ohana Level can do for you", "Watch the 2 minute tour"],
-    ohana: ["See what Pro Level unlocks", "Watch the 2 minute tour"],
-    pro: ["Meet Wayfinder", "Watch the 2 minute tour"]
+    subscriber: ["See what Ohana Level can do for you", "Watch the video"],
+    ohana: ["See what Pro Level unlocks", "Watch the video"],
+    pro: ["Meet Wayfinder", "Watch the video"]
   };
   function videoBox() {
     var v = VIDEO_PITCH[level()] || VIDEO_PITCH.subscriber;
