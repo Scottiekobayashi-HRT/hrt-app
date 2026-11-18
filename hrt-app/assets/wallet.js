@@ -1220,7 +1220,17 @@
     "Tell Scottie when your bonus points post", "Apply for your next card", "Decide to keep, downgrade or cancel a card",
     "Text Scottie about your next step", "Reply to Scottie's last text", "Scottie will text you when it's time"];
   function approvedText(t) { return APPROVED_ACTION_TEXT.indexOf(String(t || "").trim()) > -1 ? String(t).trim() : ""; }
-  function opsData() { var w = state.wallet; return w && !state.demo && w.ops && typeof w.ops === "object" ? w.ops : null; }
+  /* Households (Scottie's ruling, Nov 17): one login per household; a switcher shows each linked
+     member's own Wall. window.HRT_HOUSEHOLD = { members: [{ firstName, level, ops }], active: 0 }
+     comes from the member feed. Nothing is merged: the Wall shows only the active member's data. */
+  function hhMember() {
+    var h = window.HRT_HOUSEHOLD;
+    return h && h.members && h.members.length > 1 ? h.members[Math.min(h.active || 0, h.members.length - 1)] : null;
+  }
+  function opsData() {
+    var hm = hhMember(); if (hm) return hm.ops && typeof hm.ops === "object" ? hm.ops : null;
+    var w = state.wallet; return w && !state.demo && w.ops && typeof w.ops === "object" ? w.ops : null;
+  }
   /* Tile 3 shows a countdown, not the date (Scottie, Nov 13) */
   /* Eddie, Nov 16: "in XX days", "Today!" or "overdue XX days" */
   function inDays(n) { n = Math.round(+n); if (!isFinite(n)) return "None"; if (n < 0) return "overdue " + (-n) + (n === -1 ? " day" : " days"); if (n === 0) return "Today!"; return "in " + n + (n === 1 ? " day" : " days"); }
@@ -1272,7 +1282,7 @@
       '<span class="hw-s">' + (approvedText(a.what) ? "<b>" + esc(approvedText(a.what)) + "</b>" : "") + updBtn(client, "Next action") + "</span></div>";
   }
   /* "Scott's" style possessive, written the way Scottie typed it (Nov 13) */
-  function firstOf() { return String(member().firstName || "").trim().split(/\s+/)[0] || ""; }
+  function firstOf() { var hm = hhMember(); return String((hm ? hm.firstName : member().firstName) || "").trim().split(/\s+/)[0] || ""; }
   function poss(n, fallback) { return n ? n + "’s" : fallback; }
   function nextCardBox(V, client) {
     var nx = nextEntry(V), ops = opsData();
@@ -1405,8 +1415,39 @@
     if (state.msg) html += '<p class="hw-msg" role="alert">' + esc(state.msg) + "</p>";
     return html;
   }
+  function paintHousehold() {
+    var hero = miniHost && miniHost.closest(".hero"), t = hero && hero.querySelector(".hw-wall-t");
+    if (!t) return;
+    var h = window.HRT_HOUSEHOLD, sw = hero.querySelector(".hw-hh"), hm = hhMember();
+    if (!hm) { if (sw) sw.remove(); t.classList.remove("hh-on"); return; }
+    if (!sw) { sw = document.createElement("div"); sw.className = "hw-hh"; sw.setAttribute("role", "tablist"); t.parentNode.insertBefore(sw, t); }
+    sw.innerHTML = h.members.map(function (m, i) {
+      var nm = String(m.firstName || "Member").trim().split(/\s+/)[0];
+      return '<button type="button" role="tab" data-hh="' + i + '" aria-selected="' + (i === (h.active || 0)) + '">' + esc(nm) + "</button>";
+    }).join("");
+    var lv = level() === "pro" ? "Pro" : level() === "ohana" ? "Ohana" : "Aloha";
+    var own = t.querySelector(".hh-title");
+    if (!own) { own = document.createElement("span"); own.className = "hh-title"; t.insertBefore(own, t.firstChild); }
+    own.innerHTML = esc(firstOf()) + "’s Wall <small class=\"hw-lvl\">" + lv + " Level member</small>";
+    t.classList.add("hh-on");
+  }
+  if (typeof document !== "undefined" && document.addEventListener) document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-hh]");
+    if (!b || !window.HRT_HOUSEHOLD) return;
+    window.HRT_HOUSEHOLD.active = +b.getAttribute("data-hh");
+    paintMini();
+  });
+  /* Preview only: ?hh=demo shows a made-up 3-person household so Scottie and Eddie can try the switcher */
+  try {
+    if (typeof location !== "undefined" && /[?&]hh=demo\b/.test(location.search)) window.HRT_HOUSEHOLD = { active: 0, members: [
+      { firstName: "Kai", level: "pro", ops: { action: { type: "all_set", text: "Scottie will text you when it's time" }, nextCard: { date: "2026-12-01", bonusPts: 60000 }, feeDate: "2027-01-15", feeCard: "Amex Gold", feeAction: "downgrade", cardCount: 5 } },
+      { firstName: "Leilani", level: "ohana", ops: { action: { type: "by", date: "2026-11-30", text: "Finish your minimum spend" }, nextCard: { date: "2027-02-10", bonusPts: 75000 }, feeDate: "2026-12-04", feeCard: "Sapphire Preferred", feeAction: "cancel", cardCount: 3 } },
+      { firstName: "Noa", level: "ohana", ops: { action: { type: "on", date: "2026-11-20", text: "Apply for your next card" }, nextCard: { date: "2026-11-20", bonusPts: 100000 }, cardCount: 1 } }
+    ] };
+  } catch (e) {}
   function paintMini() {
     if (!miniHost) return;
+    paintHousehold();
     miniHost.innerHTML = miniHtml();
     var hero = miniHost.closest(".hero");
     if (hero) { hero.classList.toggle("has-wallet", miniMode === "full"); hero.classList.toggle("wallet-empty", miniMode === "empty"); }
@@ -1915,6 +1956,7 @@
   var CARD_LIMITS = { subscriber: 2, ohana: 6, pro: 15 };
   var LEVEL_NAMES = { subscriber: "free", ohana: "Ohana", pro: "Pro" };
   function level() {
+    var hm = hhMember(); if (hm && /^(ohana|pro)$/.test(hm.level)) return hm.level;
     var cl = document.documentElement && document.documentElement.classList;
     if (cl && cl.contains("ms-pro")) return "pro";
     if (member().client || (cl && cl.contains("ms-client"))) return "ohana";

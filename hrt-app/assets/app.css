@@ -1331,3 +1331,10 @@ html.tex-5 #v-home .toprow .hero,html.tex-5 .dw-navy{background:url("data:image/
 /* "Your Aloha Level tools" link next to the level name (Eddie, Nov 17) */
 #v-home .toprow .hero .hw-wall-t .hw-tour{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#f5c75a;text-decoration:none;margin-left:8px}
 #v-home .toprow .hero .hw-wall-t .hw-tour:hover{text-decoration:underline}
+/* Household switcher (Nov 17): one login, each member's own Wall */
+#v-home .toprow .hero .hw-hh{display:flex;gap:6px;margin:0 0 10px;position:relative;z-index:1}
+.hw-hh button{font:700 13px 'DM Sans',sans-serif;color:#cfdbe7;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:5px 14px;cursor:pointer}
+.hw-hh button:hover{border-color:rgba(242,184,75,.6)}
+.hw-hh button[aria-selected="true"]{background:#f2b84b;color:#14202e;border-color:#f2b84b}
+.hw-wall-t.hh-on>.named,.hw-wall-t.hh-on>.unnamed,.hw-wall-t.hh-on>small.hw-lvl:not(.hh-title small){display:none!important}
+.hw-wall-t .hh-title .hw-lvl{display:inline!important}
