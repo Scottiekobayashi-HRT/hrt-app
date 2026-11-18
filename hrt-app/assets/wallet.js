@@ -1387,7 +1387,7 @@
     var box = function (label, value, sub) {
       return '<div class="hw-box"><span class="hw-l">' + label + '</span><b class="hw-v">' + value + '</b><span class="hw-s">' + sub + "</span></div>";
     };
-    var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, String(member().firstName || "").trim().split(/\s+/)[0]) + nextCardBox(V, cl) +
+    var html = demo + acts() + tag + '<div class="hw-boxes">' + nextActionBox(V, cl, s, firstOf()) + nextCardBox(V, cl) +
       feeBox(cl, nx) +
       box(esc(poss(firstOf(), "My") + " Rewards Cards"), String(opsData() && typeof opsData().cardCount === "number" ? opsData().cardCount : s.count), '<a class="hw-nx-go" href="#wallet" data-route="wallet">' + esc("Manage " + poss(firstOf(), "my") + " Wallet") + ' &rsaquo;</a><span class="hw-dc">View, add, edit, or delete cards</span>' + updBtn(cl, "Rewards Cards")) + videoBox() + "</div>";
     if (cap > 0) {
@@ -1449,6 +1449,7 @@
     if (!miniHost) return;
     paintHousehold();
     miniHost.innerHTML = miniHtml();
+    try { drawTourLink(); } catch (e) {}
     var hero = miniHost.closest(".hero");
     if (hero) { hero.classList.toggle("has-wallet", miniMode === "full"); hero.classList.toggle("wallet-empty", miniMode === "empty"); }
   }
