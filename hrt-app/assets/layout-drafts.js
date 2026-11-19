@@ -17,6 +17,7 @@
   if (!n || n === "0") return;
   var root = document.documentElement;
   root.classList.add("lay", "lay-" + n);
+  try { var w = /[?&]wall=(\d)/.exec(location.search); if (w) sessionStorage.setItem("hrtWallDraft", w[1]); var wn = w ? w[1] : sessionStorage.getItem("hrtWallDraft"); if (wn && wn !== "0") root.classList.add("wall-" + wn); } catch (e) {}
   if (n === "4" || n === "5") root.classList.add("lay-1", "lay-sm");
   if (n === "5" || n === "6") root.classList.add("lay-nosub");
   if (n === "6") root.classList.add("lay-2"); /* Nov 18: big photo banner again (Scottie) */
@@ -128,7 +129,10 @@
           var a = s && s.querySelector("a.hw-nx-go"), sub = s ? txt(s.textContent.replace(a ? a.textContent : "", "")) : "";
           var btn = a ? '<a class="lay-pill" href="' + esc(a.getAttribute("href")) + '"' + (a.getAttribute("data-route") ? ' data-route="' + esc(a.getAttribute("data-route")) + '"' : "") +
             (a.getAttribute("data-scrollto") ? ' data-scrollto="' + esc(a.getAttribute("data-scrollto")) + '"' : "") + (a.target ? ' target="_blank" rel="noopener"' : "") + ">" + esc(txt(a.textContent).replace(/\s*›$/, "")) + "</a>" : "";
-          return '<div class="lay-row"><span class="lay-ic">' + (i + 1) + '</span><span class="lay-rt"><small>' + esc(txt(l && l.textContent)) + "</small><b>" +
+          /* Nov 18 (Scottie): Aloha Level gets an upgrade button on the annual fees line */
+          if (!btn && i === 2 && !root.classList.contains("ms-client") && !root.classList.contains("ms-pro") && !hero.querySelector(".hh-title"))
+            btn = '<a class="lay-pill" href="#plans" data-route="plans">Upgrade to Ohana Level</a>';
+          return '<div class="lay-row lay-r' + (i + 1) + '"><span class="lay-ic">' + (i + 1) + '</span><span class="lay-rt"><small>' + esc(txt(l && l.textContent)) + "</small><b>" +
             (v ? String(v.innerText || v.textContent || "").split(/\n+/).map(txt).filter(Boolean).map(esc).join("<br>") : "") + "</b>" + (sub ? "<em>" + esc(sub) + "</em>" : "") + "</span>" + btn + "</div>";
         }).join("");
     }

@@ -1432,3 +1432,35 @@ html.lay .topbar .tbin{padding-top:8px!important;padding-bottom:8px!important;mi
 .lay-band.lay-montage .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.88) 0%,rgba(20,32,46,.5) 45%,rgba(20,32,46,.2) 100%),linear-gradient(180deg,rgba(20,32,46,0) 40%,rgba(20,32,46,.75) 100%)}
 .lay-band.lay-montage>*:not(.hdr-photos){position:relative;z-index:1}
 .lay-band.lay-montage .lay-pick,.lay-band.lay-montage .lay-pick-menu{position:absolute;z-index:6}
+/* ===== Wall row redesign drafts (Nov 18), ?wall=1..5 on top of ?lay=6 ===== */
+/* 1. Tiles: a 2 x 2 grid of cards */
+html.wall-1 .lay-rows{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+html.wall-1 .lay-rh{grid-column:1/-1}
+html.wall-1 .lay-row{flex-direction:column;align-items:flex-start;gap:8px;background:#fff;border:1px solid #efe4cf;border-radius:14px;padding:16px;border-bottom:1px solid #efe4cf!important}
+html.wall-1 .lay-ic{display:none}
+html.wall-1 .lay-rt b{font-size:18px;line-height:1.35}
+html.wall-1 .lay-pill{margin-top:auto}
+/* 2. Table: labels in a fixed left column, answers lined up */
+html.wall-2 .lay-ic{display:none}
+html.wall-2 .lay-rt{display:grid;grid-template-columns:170px 1fr;column-gap:16px;align-items:start}
+html.wall-2 .lay-rt small{grid-row:1/span 2;padding-top:3px;font-size:12px;color:#d97040}
+html.wall-2 .lay-rt em{grid-column:2}
+html.wall-2 .lay-row{padding:14px 4px}
+html.wall-2 .lay-row:nth-child(odd){background:#fbf6ec}
+/* 3. Big and roomy: larger answers, more space, quieter labels */
+html.wall-3 .lay-row{padding:18px 0;gap:18px}
+html.wall-3 .lay-ic{flex-basis:44px;height:44px;font-size:17px}
+html.wall-3 .lay-rt small{font-size:12px;margin-bottom:3px}
+html.wall-3 .lay-rt b{font-size:20px;line-height:1.3}
+html.wall-3 .lay-rt em{font-size:13.5px;margin-top:3px}
+html.wall-3 .lay-pill{padding:10px 20px;font-size:14px}
+/* 4. Timeline: numbered steps joined by a line */
+html.wall-4 .lay-row{position:relative;border-bottom:0!important;align-items:flex-start;padding:10px 0 16px}
+html.wall-4 .lay-row:not(:last-child)::before{content:"";position:absolute;left:17px;top:46px;bottom:-10px;width:2px;background:#f1d5c0}
+html.wall-4 .lay-ic{background:#e8894f;color:#fff;position:relative;z-index:1}
+html.wall-4 .lay-pill{margin-top:4px}
+/* 5. Color bars: each line gets its own color stripe and a soft card */
+html.wall-5 .lay-row{background:#fff;border:1px solid #f1ece2!important;border-left:5px solid var(--bar)!important;border-radius:12px;padding:14px 16px;margin:10px 0}
+html.wall-5 .lay-ic{display:none}
+html.wall-5 .lay-r1{--bar:#d97040}html.wall-5 .lay-r2{--bar:#f2b84b}html.wall-5 .lay-r3{--bar:#2b5c86}html.wall-5 .lay-r4{--bar:#3fae7f}
+html.wall-5 .lay-rt small{color:var(--bar)}
