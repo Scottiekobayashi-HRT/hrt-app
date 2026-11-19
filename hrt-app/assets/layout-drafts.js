@@ -143,3 +143,38 @@
   function go() { if (!build()) setTimeout(go, 200); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
 })();
+/* "Pop" drafts (Nov 18), ideas from Scottie's prayer app. Only with ?pop=1, 2 or 3; ?pop=0 turns off.
+   1 = orange beta strip on top + white header bar with "Aloha, Eddie · date" and chips
+   2 = white header bar with greeting and chips + thin orange line under it (no strip)
+   3 = draft 1 plus overall polish: softer cards, orange eyebrow titles, calmer sidebar */
+(function () {
+  var p;
+  try { var m = /[?&]pop=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtPop", m[1]); p = m ? m[1] : sessionStorage.getItem("hrtPop"); } catch (e) { return; }
+  if (!p || p === "0") return;
+  var root = document.documentElement;
+  root.classList.add("pop", "pop-" + p);
+  if (p === "3") root.classList.add("pop-1");
+  function go() {
+    var tb = document.querySelector(".topbar"), tbin = tb && tb.querySelector(".tbin");
+    if (!tbin) return setTimeout(go, 200);
+    if (tbin.querySelector(".pop-greet")) return;
+    if (p !== "2" && !document.querySelector(".pop-strip")) {
+      var st = document.createElement("div"); st.className = "pop-strip";
+      st.innerHTML = '<b>HRT BETA</b> Aloha! This is a beta version. Please <a href="sms:+18083545216">text Scottie your feedback</a>. Mahalo for building this with us.';
+      tb.parentNode.insertBefore(st, tb);
+    }
+    var g = document.createElement("span"); g.className = "pop-greet";
+    var d = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    g.innerHTML = '<b>Aloha, <span class="ms-first-name">' + ((window.HRT_MEMBER && window.HRT_MEMBER.firstName) || "friend").split(" ")[0] + '</span></b><i>·</i><span>' + d + "</span>";
+    tbin.insertBefore(g, tbin.firstChild);
+    var chips = document.createElement("span"); chips.className = "pop-chips";
+    chips.innerHTML = '<a class="pop-chip pop-chip-hot" href="#transfers" data-route="transfers">✈️ <b id="popTb">–</b> transfer bonuses live</a><span class="pop-chip" id="popLvl">Aloha Level</span>';
+    var sp = tbin.querySelector(".spacer"); if (sp) sp.parentNode.insertBefore(chips, sp.nextSibling); else tbin.appendChild(chips);
+    function fill() {
+      var a = document.getElementById("hmTb"); if (a) document.getElementById("popTb").textContent = a.textContent.trim();
+      var c = root.classList; document.getElementById("popLvl").textContent = c.contains("ms-pro") ? "Pro Level" : c.contains("ms-client") ? "Ohana Level" : "Aloha Level";
+    }
+    fill(); setInterval(fill, 3000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+})();

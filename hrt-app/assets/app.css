@@ -1464,3 +1464,28 @@ html.wall-5 .lay-row{background:#fff;border:1px solid #f1ece2!important;border-l
 html.wall-5 .lay-ic{display:none}
 html.wall-5 .lay-r1{--bar:#d97040}html.wall-5 .lay-r2{--bar:#f2b84b}html.wall-5 .lay-r3{--bar:#2b5c86}html.wall-5 .lay-r4{--bar:#3fae7f}
 html.wall-5 .lay-rt small{color:var(--bar)}
+/* ===== "Pop" drafts (Nov 18), ?pop=1..3 ===== */
+.pop-strip{background:#f2b84b;color:#14202e;text-align:center;font:600 13px 'DM Sans',sans-serif;padding:7px 14px;position:sticky;top:0;z-index:31}
+.pop-strip b{letter-spacing:.06em;margin-right:6px}.pop-strip a{color:#14202e;font-weight:700}
+html.pop .topbar{background:#fff!important;border-bottom:1px solid #e6ebf0!important;box-shadow:none!important}
+html.pop .topbar .hdr-photos,html.pop .topbar .crumb,html.pop .topbar .ptshint{display:none!important}
+html.pop .topbar .tbin{padding-top:14px!important;padding-bottom:14px!important}
+html.pop.pop-2 .topbar{border-bottom:3px solid #e8894f!important}
+.pop-greet{display:flex;align-items:baseline;gap:10px;font-family:'DM Sans',sans-serif}
+.pop-greet b{font:800 21px 'Montserrat',sans-serif;color:#14202e}.pop-greet i{color:#9aa7b4;font-style:normal}.pop-greet span:last-child{color:#5b6b7b;font-weight:600;font-size:15px}
+.pop-chips{display:flex;gap:8px;margin-right:10px}
+.pop-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 12px;font:600 13px 'DM Sans',sans-serif;background:#e9eff4;color:#14202e;text-decoration:none}
+.pop-chip-hot{background:#fdf0dc}.pop-chip b{font-weight:800}
+html.pop .topbar .ms-auth button{background:#14202e!important;color:#fff!important;border:0!important}
+html.pop .topbar .ac-av-sm{background:#14202e;color:#f5c75a}
+[data-theme="dark"] html.pop .topbar{background:#14202e!important}
+@media (max-width:760px){.pop-chips{display:none}.pop-greet span:last-child,.pop-greet i{display:none}}
+/* Draft 3: overall polish */
+html.pop-3 body{background:#eef2f5}
+html.pop-3 .lay-card,html.pop-3 #v-home .toprow .hero,html.pop-3 .dw-navy{border-radius:18px!important;box-shadow:0 6px 24px rgba(16,32,54,.08)!important}
+html.pop-3 .lay-card h3,html.pop-3 .lay-rh b,html.pop-3 #toolsSec h2{font-family:'Montserrat',sans-serif}
+html.pop-3 .lay-rh b{font:800 12px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#d97040}
+html.pop-3 #toolsSec h2{font:800 13px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#d97040}
+html.pop-3 .hrt-sb{background:#14202e}
+html.pop-3 .hrt-nav a,html.pop-3 .hrt-nav button{border-radius:10px}
+html.pop-3 .lay-stat{box-shadow:0 10px 30px rgba(217,112,64,.25)!important}
