@@ -1535,3 +1535,16 @@ html.lay-2 .lay-band{min-height:190px}
 .lay-lvl.lvl-pro::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent);animation:lvlShine 3.2s ease-in-out infinite}
 @keyframes lvlShine{0%,55%{left:-60%}100%{left:130%}}
 @media (prefers-reduced-motion:reduce){.lay-lvl.lvl-pro::after{animation:none;display:none}}
+
+/* ===== Scottie's Wall banner samples (Nov 19), ?swh=1..4. A slim photo strip behind the title row ===== */
+html.swh .dw-navy{overflow:hidden}
+html.swh .dw-navy>.dw-head{margin:-18px -16px 14px;padding:16px 16px 14px;min-height:66px;border-bottom:1px solid rgba(242,184,75,.35)}
+html.swh .dw-navy>.dw-head h2{text-shadow:0 1px 6px rgba(0,0,0,.5)}
+/* 1. Tokyo at night */
+html.swh-1 .dw-navy>.dw-head{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 45%,rgba(20,32,46,.35) 100%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/9d0b0acf-ede1-4ce9-bce6-7ee1a798b12f/Tokyo.png?format=1500w") center 80%/cover}
+/* 2. Las Vegas lights */
+html.swh-2 .dw-navy>.dw-head{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 45%,rgba(20,32,46,.35) 100%),url("https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?q=80&w=1400&auto=format&fit=crop") center 45%/cover}
+/* 3. Four destinations, same as the member Wall */
+html.swh-3 .dw-navy>.dw-head{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 45%,rgba(20,32,46,.35) 100%),url("https://images.pexels.com/photos/161251/senso-ji-temple-japan-kyoto-landmark-161251.jpeg?auto=compress&w=1400") 0% 30%/25.2% auto no-repeat,url("https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?q=80&w=1400&auto=format&fit=crop") 33.3% 50%/25.2% auto no-repeat,url("https://images.pexels.com/photos/2861981/pexels-photo-2861981.jpeg?auto=compress&w=900") 66.6% 60%/25.2% auto no-repeat,url("https://images.pexels.com/photos/21956575/pexels-photo-21956575/free-photo-of-sydney-opera-house-in-harbor.jpeg?auto=compress&w=900") 100% 50%/25.2% auto no-repeat,#141b24}
+/* 4. No photo: navy with a warm sunset glow and a gold line */
+html.swh-4 .dw-navy>.dw-head{background:radial-gradient(ellipse 60% 160% at 100% 50%,rgba(217,112,64,.45),transparent 70%),linear-gradient(90deg,#0f1823,#1b2f4a);border-bottom:2px solid #f2b84b}

@@ -165,6 +165,7 @@
   root.classList.add("pop", "pop-" + p);
   if (p === "3") root.classList.add("pop-1");
   if (p === "2") root.classList.add("pop-3");
+  try { var sw = /[?&]swh=(\d)/.exec(location.search); if (sw) sessionStorage.setItem("hrtSwh", sw[1]); var swn = sw ? sw[1] : sessionStorage.getItem("hrtSwh"); if (swn && swn !== "0") root.classList.add("swh", "swh-" + swn); } catch (e) {} /* Nov 19: Scottie's Wall banner samples */
   try { var bm = /[?&]bar=(\d)/.exec(location.search); if (bm) sessionStorage.setItem("hrtBar", bm[1]); if ((bm ? bm[1] : sessionStorage.getItem("hrtBar")) === "1") root.classList.add("pop-bar"); } catch (e) {} /* Nov 19: thin dark orange top border preview */ /* Nov 18: draft 3's polish, without the gold strip (kept for future announcements: ?pop=3) */
   function go() {
     var tb = document.querySelector(".topbar"), tbin = tb && tb.querySelector(".tbin");
