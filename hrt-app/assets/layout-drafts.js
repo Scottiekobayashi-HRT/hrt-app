@@ -6,7 +6,7 @@
    3 = draft 2 with deep teal instead of navy
    4 = draft 1 with a small photo banner behind the Wall title
    5 = draft 4, and the sidebar without the small gray lines under each link
-   6 = draft 2's simple rows with the small banner, and the sidebar without the gray lines */
+   6 = draft 2 (big photo banner, simple rows) with the sidebar without the gray lines */
 (function () {
   var n;
   try {
@@ -19,7 +19,7 @@
   root.classList.add("lay", "lay-" + n);
   if (n === "4" || n === "5") root.classList.add("lay-1", "lay-sm");
   if (n === "5" || n === "6") root.classList.add("lay-nosub");
-  if (n === "6") root.classList.add("lay-2", "lay-sm");
+  if (n === "6") root.classList.add("lay-2"); /* Nov 18: big photo banner again (Scottie) */
   var useRows = n === "2" || n === "3" || n === "6";
 
   function $(s, el) { return (el || document).querySelector(s); }
