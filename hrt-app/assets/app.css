@@ -1350,3 +1350,56 @@ html.grad-3 #v-home .toprow .hero,html.grad-3 .dw-navy{background:linear-gradien
 html.grad-4 #v-home .toprow .hero,html.grad-4 .dw-navy{background:radial-gradient(ellipse 45% 80% at 0% 0%,rgba(242,184,75,.16) 0%,rgba(242,184,75,0) 70%),radial-gradient(ellipse 55% 90% at 100% 100%,rgba(217,112,64,.32) 0%,rgba(217,112,64,0) 70%),linear-gradient(135deg,#14202e 0%,#1b2f4a 100%)!important}
 /* 5. Ember: very dark navy with a faint orange warmth through the middle */
 html.grad-5 #v-home .toprow .hero,html.grad-5 .dw-navy{background:radial-gradient(ellipse 90% 140% at 60% 120%,rgba(217,112,64,.22) 0%,rgba(217,112,64,0) 65%),linear-gradient(160deg,#0f1823 0%,#14202e 50%,#1b2f4a 100%)!important}
+/* ===== Home layout DRAFTS (Nov 18), only with ?lay=1..3 ===== */
+html.lay #v-home .lay-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:20px;align-items:start}
+html.lay #v-home .lay-main{display:flex;flex-direction:column;gap:20px;min-width:0}
+html.lay #v-home .lay-side{display:flex;flex-direction:column;gap:16px;position:sticky;top:96px}
+@media (max-width:1100px){html.lay #v-home .lay-grid{grid-template-columns:1fr}html.lay #v-home .lay-side{position:static}}
+.lay-card{border-radius:16px;padding:18px 18px;background:#fff;border:1px solid var(--line);box-shadow:0 2px 10px rgba(16,32,54,.06)}
+.lay-card h3{margin:0 0 6px;font:800 17px 'Montserrat',sans-serif;color:var(--text)}
+.lay-card p{margin:0 0 12px;font-size:13.5px;line-height:1.45;color:var(--muted)}
+.lay-stat{background:radial-gradient(ellipse 70% 120% at 100% 100%,rgba(217,112,64,.4),transparent 60%),linear-gradient(135deg,#14202e,#1b2f4a);border:0;text-align:center;color:#fff}
+.lay-live{display:block;text-align:left;font:700 11px 'DM Sans',sans-serif;letter-spacing:.08em;color:#9fb4c8}
+.lay-live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#3fce7f;margin-right:6px}
+.lay-big{display:block;font:800 54px/1.05 'Montserrat',sans-serif;color:#f5c75a;margin-top:2px}
+.lay-statl{display:block;font-weight:700;font-size:14px;color:#fff;margin-top:4px}
+.lay-stats2{display:block;font-size:12.5px;color:#c9d6e3;margin-top:4px}
+.lay-cream{background:#fbf3e4;border-color:#f1e2c6}
+.lay-btn{display:inline-flex;align-items:center;gap:6px;background:#14202e;color:#fff;font-weight:700;font-size:14px;border-radius:999px;padding:10px 18px;text-decoration:none}
+.lay-btn:hover{background:#1b2f4a}
+.lay-eyebrow{font:800 12px 'DM Sans',sans-serif!important;letter-spacing:.08em;text-transform:uppercase;color:#d97040!important}
+.lay-qgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lay-qgrid a{background:var(--surface-2);border-radius:12px;padding:12px 10px;font-weight:700;font-size:13px;color:var(--text);text-decoration:none;text-align:center}
+.lay-qgrid a:hover{background:#fbf3e4}
+.lay-vidcard{padding:0;overflow:hidden;border:0;background:transparent;box-shadow:none}
+.lay-vidcard .lay-vid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:170px;padding:18px;border-radius:16px;text-decoration:none;text-align:center;
+ background:linear-gradient(180deg,rgba(20,32,46,.35),rgba(20,32,46,.9)),url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=700&q=70&auto=format") center/cover}
+.lay-vidcard .hw-vid-t{color:#fff;font:800 16px 'Montserrat',sans-serif}.lay-vidcard .hw-vid-s{color:#dbe6f0;font-size:12.5px;font-weight:600}
+/* the 5th box moves to the side column in every draft */
+html.lay .hw-boxes>.hw-vid{display:none!important}
+html.lay .hw-boxes:has(.hw-next),html.lay .hw-boxes{grid-template-columns:repeat(4,minmax(0,1fr))}
+/* Drafts 2 and 3: the Wall becomes a light card with a photo band and simple rows */
+html.lay-2 #v-home .toprow .hero,html.lay-3 #v-home .toprow .hero{background:#fffdf8!important;border:1px solid #efe4cf!important;padding:0!important;overflow:hidden;color:var(--text)}
+html.lay-2 #v-home .toprow .hero>*:not(.lay-band):not(.lay-rows),html.lay-3 #v-home .toprow .hero>*:not(.lay-band):not(.lay-rows){display:none!important}
+html.lay-2 #v-home .toprow .hero #wl-hero,html.lay-3 #v-home .toprow .hero #wl-hero{display:block!important;position:absolute;left:-9999px;width:900px}
+.lay-band{display:flex;flex-direction:column;justify-content:flex-end;min-height:170px;padding:20px 24px;color:#fff;
+ background:linear-gradient(180deg,rgba(20,32,46,.05) 20%,rgba(20,32,46,.85)),url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1400&q=70&auto=format") center 60%/cover}
+.lay-date{font:800 12px 'DM Sans',sans-serif;letter-spacing:.1em;color:#f5c75a}
+.lay-wt{font:800 30px 'Montserrat',sans-serif;line-height:1.15}
+.lay-rows{padding:16px 22px 18px}
+.lay-rh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #eef0f2;padding-bottom:10px;margin-bottom:4px}
+.lay-rh b{font:800 17px 'Montserrat',sans-serif}.lay-rh span{font-size:13px;font-weight:700;color:#d97040}
+.lay-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f1ece2}
+.lay-row:last-child{border-bottom:0}
+.lay-ic{flex:0 0 36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fbe9dc;color:#d97040;font-weight:800}
+.lay-rt{flex:1;min-width:0;display:flex;flex-direction:column}
+.lay-rt small{font:700 11px 'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lay-rt b{font:800 16px 'Montserrat',sans-serif;color:var(--text)}
+.lay-rt em{font-style:normal;font-size:12.5px;color:var(--muted)}
+.lay-pill{flex:0 0 auto;background:#e8894f;color:#fff;font-weight:700;font-size:13px;border-radius:999px;padding:8px 16px;text-decoration:none;white-space:nowrap}
+.lay-pill:hover{background:#d97040}
+/* Draft 3: deep teal instead of navy */
+html.lay-3 .lay-stat,html.lay-3 .dw-navy{background:linear-gradient(135deg,#123540,#1d4a55)!important}
+html.lay-3 .lay-btn{background:#123540}
+html.lay-3 .lay-band{background:linear-gradient(180deg,rgba(18,53,64,.05) 20%,rgba(18,53,64,.88)),url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1400&q=70&auto=format") center 60%/cover}
+html.lay-3 .hrt-sb{background:#123540}
