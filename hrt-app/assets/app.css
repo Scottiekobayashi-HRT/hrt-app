@@ -1490,3 +1490,20 @@ html.pop-3 .hrt-sb{background:#14202e}
 html.pop-3 .hrt-nav a,html.pop-3 .hrt-nav button{border-radius:10px}
 html.pop-3 .lay-stat{box-shadow:0 10px 30px rgba(217,112,64,.25)!important}
 .pop-greet b .ms-first-name{font:inherit!important;color:inherit!important;letter-spacing:inherit!important;text-transform:none!important}
+/* Nov 19 (Scottie) */
+/* Fixed reading width, like the prayer app: content stays centered instead of stretching */
+html.lay .content{max-width:1360px!important}
+html.lay .topbar .tbin{max-width:1360px;margin:0 auto;width:100%}
+/* Sidebar: slightly bigger text, no counts */
+html.lay .hrt-navi{font-size:14.5px}
+html.lay .hrt-navi.sub,html.lay .hrt-navi.minor{font-size:14px}
+html.lay .hrt-grph{font-size:11.5px}
+html.lay .hrt-sb .cnt{display:none!important}
+/* Header: date only */
+.pop-greet>span{font:700 16px 'DM Sans',sans-serif!important;color:#14202e!important}
+/* Photo picker as a gear */
+.lay-pick{width:34px;height:34px;padding:0!important;display:grid;place-items:center;border-radius:50%!important}
+.lay-pick-menu{top:52px}
+/* Thin dark orange border across the very top (preview ?bar=1) */
+html.pop-bar body::before{content:"";position:fixed;left:0;right:0;top:0;height:4px;background:#c2562b;z-index:60}
+html.pop-bar .hrt-app{padding-top:4px}
