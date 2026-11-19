@@ -20,7 +20,7 @@
   if (n === "4" || n === "5") root.classList.add("lay-1", "lay-sm");
   if (n === "5" || n === "6") root.classList.add("lay-nosub");
   if (n === "6") root.classList.add("lay-2", "lay-sm");
-  var rows = n === "2" || n === "3" || n === "6";
+  var useRows = n === "2" || n === "3" || n === "6";
 
   function $(s, el) { return (el || document).querySelector(s); }
   function mk(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
@@ -74,7 +74,7 @@
     function wall() {
       var v = host && host.querySelector(".hw-vid");
       if (v) { vid.innerHTML = ""; var c = v.cloneNode(true); c.className = "lay-vid"; vid.appendChild(c); }
-      if (!rows || !host) return;
+      if (!useRows || !host) return;
       var hero = host.closest(".hero"), rows = hero.querySelector(".lay-rows");
       if (!rows) {
         rows = mk("div", "lay-rows");

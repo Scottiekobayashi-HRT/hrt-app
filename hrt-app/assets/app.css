@@ -1407,7 +1407,7 @@ html.lay-3 .hrt-sb{background:#123540}
 html.lay-sm.lay-1 #v-home .toprow .hero{padding-top:0!important;overflow:hidden}
 html.lay-sm.lay-1 #v-home .toprow .hero .hw-wall-t{margin:0 -28px 4px;padding:18px 28px 16px;
  background:linear-gradient(90deg,rgba(20,32,46,.9) 0%,rgba(20,32,46,.55) 55%,rgba(20,32,46,.3) 100%),url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1400&q=70&auto=format") center 62%/cover}
-html.lay-sm.lay-1 #v-home .toprow .hero .hw-acts{top:12px}
+html.lay-sm.lay-1 #v-home .toprow .hero .hw-acts{top:-56px}
 html.lay-sm .lay-band{min-height:84px;padding:14px 22px}
 html.lay-sm .lay-wt{font-size:24px}
 html.lay-nosub .hrt-sb .nm small{display:none!important}
