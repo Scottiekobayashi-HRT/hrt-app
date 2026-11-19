@@ -1489,3 +1489,4 @@ html.pop-3 #toolsSec h2{font:800 13px 'DM Sans',sans-serif;letter-spacing:.1em;t
 html.pop-3 .hrt-sb{background:#14202e}
 html.pop-3 .hrt-nav a,html.pop-3 .hrt-nav button{border-radius:10px}
 html.pop-3 .lay-stat{box-shadow:0 10px 30px rgba(217,112,64,.25)!important}
+.pop-greet b .ms-first-name{font:inherit!important;color:inherit!important;letter-spacing:inherit!important;text-transform:none!important}
