@@ -22,6 +22,24 @@
   if (n === "6") root.classList.add("lay-2"); /* Nov 18: big photo banner again (Scottie) */
   var useRows = n === "2" || n === "3" || n === "6";
 
+  /* Banner photo picker (Nov 18): the member picks the photo behind their Wall title; saved in this browser */
+  var SQ = "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/";
+  var PICS = [
+    ["Waikiki", "https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1400&q=70&auto=format", "center 60%"],
+    ["Honolulu", SQ + "6a6fffa2-d2f7-456f-bfcf-c92232c98f1a/524f980d-83f5-4e88-9401-95c8c24e57a9.png?format=1500w", "center 45%"],
+    ["Sunset", "https://images.unsplash.com/photo-1719469243598-0191cfae6f83?w=1400&q=70&auto=format", "center 40%"],
+    ["Tokyo", SQ + "9d0b0acf-ede1-4ce9-bce6-7ee1a798b12f/Tokyo.png?format=1500w", "center"],
+    ["Osaka", SQ + "eab99c1e-cdfc-4718-b852-391d5f44bb30/Osaka.jpg?format=1500w", "center"],
+    ["Las Vegas", "https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?q=80&w=1400&auto=format&fit=crop", "center"],
+    ["San Francisco", SQ + "11c361af-1226-4181-898d-c49a240893c3/San+Francisco.jpg?format=1500w", "center"]
+  ];
+  function picIndex() { try { var i = +localStorage.getItem("hrtWallPic"); return i >= 0 && i < PICS.length ? i : 0; } catch (e) { return 0; } }
+  function setPic(band, i) {
+    var p = PICS[i] || PICS[0];
+    band.style.setProperty("--band-img", 'url("' + p[1] + '")');
+    band.style.setProperty("--band-pos", p[2]);
+    band.querySelectorAll(".lay-pick-menu button").forEach(function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-pic") === i); });
+  }
   function $(s, el) { return (el || document).querySelector(s); }
   function mk(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function txt(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
@@ -78,7 +96,18 @@
       var hero = host.closest(".hero"), rows = hero.querySelector(".lay-rows");
       if (!rows) {
         rows = mk("div", "lay-rows");
-        var band = mk("div", "lay-band", '<span class="lay-date"></span><b class="lay-wt"></b>');
+        var band = mk("div", "lay-band", '<button type="button" class="lay-pick" aria-haspopup="true" aria-expanded="false">Change photo</button>' +
+          '<div class="lay-pick-menu" hidden>' + PICS.map(function (p, i) { return '<button type="button" data-pic="' + i + '">' + p[0] + "</button>"; }).join("") + "</div>" +
+          '<span class="lay-date"></span><b class="lay-wt"></b>');
+        setPic(band, picIndex());
+        band.addEventListener("click", function (e) {
+          var menu = band.querySelector(".lay-pick-menu"), t = e.target.closest("button");
+          if (!t) return;
+          if (t.classList.contains("lay-pick")) { menu.hidden = !menu.hidden; t.setAttribute("aria-expanded", !menu.hidden); return; }
+          var i = +t.getAttribute("data-pic");
+          try { localStorage.setItem("hrtWallPic", i); } catch (er) {}
+          setPic(band, i); menu.hidden = true; band.querySelector(".lay-pick").setAttribute("aria-expanded", "false");
+        });
         hero.insertBefore(band, hero.firstChild);
         hero.appendChild(rows);
       }

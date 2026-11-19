@@ -1411,3 +1411,13 @@ html.lay-sm.lay-1 #v-home .toprow .hero .hw-acts{top:-56px}
 html.lay-sm .lay-band{min-height:84px;padding:14px 22px}
 html.lay-sm .lay-wt{font-size:24px}
 html.lay-nosub .hrt-sb .nm small{display:none!important}
+/* Wall banner (Nov 18): navy gradient over the photo, and a photo picker */
+.lay-band{position:relative;background:linear-gradient(90deg,rgba(20,32,46,.88) 0%,rgba(20,32,46,.55) 45%,rgba(20,32,46,.15) 100%),linear-gradient(180deg,rgba(20,32,46,0) 40%,rgba(20,32,46,.75) 100%),var(--band-img,url("https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1400&q=70&auto=format")) var(--band-pos,center 60%)/cover!important}
+html.lay-3 .lay-band{background:linear-gradient(90deg,rgba(18,53,64,.9) 0%,rgba(18,53,64,.55) 45%,rgba(18,53,64,.15) 100%),linear-gradient(180deg,rgba(18,53,64,0) 40%,rgba(18,53,64,.75) 100%),var(--band-img) var(--band-pos,center)/cover!important}
+.lay-pick{position:absolute;top:12px;right:12px;font:700 12px 'DM Sans',sans-serif;color:#fff;background:rgba(20,32,46,.55);border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:5px 12px;cursor:pointer;backdrop-filter:blur(4px)}
+.lay-pick:hover{background:rgba(20,32,46,.8)}
+.lay-pick-menu{position:absolute;top:44px;right:12px;z-index:5;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:6px;display:flex;flex-direction:column;min-width:150px}
+.lay-pick-menu[hidden]{display:none}
+.lay-pick-menu button{text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;font:600 13.5px 'DM Sans',sans-serif;color:#14202e;cursor:pointer}
+.lay-pick-menu button:hover{background:#fbf3e4}
+.lay-pick-menu button[aria-pressed="true"]{color:#d97040;font-weight:800}
