@@ -1508,3 +1508,10 @@ html.lay .hrt-sb .cnt{display:none!important}
 html.pop-bar body::before{content:"";position:fixed;left:0;right:0;top:0;height:4px;background:#c2562b;z-index:60}
 html.pop-bar .hrt-app{padding-top:4px}
 html.lay .hrt-navi.sub[href^="#wallet/"]{display:none!important} /* Nov 19 (Scottie): wallet sub-links live on My Wallet */
+/* Nov 19 (Scottie): content sits on the left like the prayer app; welcome strip in orange */
+html.lay .content{margin-left:0!important;margin-right:auto!important}
+html.lay .topbar .tbin{margin-left:0!important;margin-right:auto!important}
+.pop-strip-or{background:#d97040;color:#fff}
+.pop-strip-or a{color:#fff;text-decoration:underline}
+html.pop.pop-2 .topbar{border-bottom:1px solid #e6ebf0!important}
+.pop-greet>span{font:600 15px 'DM Sans',sans-serif!important;color:#5b6b7b!important}

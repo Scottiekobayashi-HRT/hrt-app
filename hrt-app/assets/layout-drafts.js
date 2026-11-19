@@ -160,14 +160,16 @@
     var tb = document.querySelector(".topbar"), tbin = tb && tb.querySelector(".tbin");
     if (!tbin) return setTimeout(go, 200);
     if (tbin.querySelector(".pop-greet")) return;
-    if (p !== "2" && !document.querySelector(".pop-strip")) {
-      var st = document.createElement("div"); st.className = "pop-strip";
-      st.innerHTML = '<b>HRT BETA</b> Aloha! This is a beta version. Please <a href="sms:+18083545216">text Scottie your feedback</a>. Mahalo for building this with us.';
+    if (!document.querySelector(".pop-strip")) {
+      var st = document.createElement("div"); st.className = "pop-strip" + (p === "2" ? " pop-strip-or" : "");
+      /* Nov 19 (Scottie): an orange welcome strip on the default; the gold beta one stays on ?pop=3 */
+      st.innerHTML = p === "2" ? 'Aloha and welcome to your new Hawaii Reward Travel dashboard! Questions or ideas? <a href="sms:+18083545216">Text Scottie</a> anytime.'
+        : '<b>HRT BETA</b> Aloha! This is a beta version. Please <a href="sms:+18083545216">text Scottie your feedback</a>. Mahalo for building this with us.';
       tb.parentNode.insertBefore(st, tb);
     }
     var g = document.createElement("span"); g.className = "pop-greet";
     var d = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-    g.innerHTML = "<span>" + d + "</span>"; /* Nov 19 (Scottie): just the date */
+    g.innerHTML = '<b>Aloha, <span class="ms-first-name">' + ((window.HRT_MEMBER && window.HRT_MEMBER.firstName) || "friend").split(" ")[0] + '</span></b><i>\u00b7</i><span>' + d + "</span>"; /* Nov 19: greeting back (Scottie) */
     tbin.insertBefore(g, tbin.firstChild);
     var chips = document.createElement("span"); chips.className = "pop-chips";
     chips.innerHTML = '<a class="pop-chip pop-chip-hot" href="#transfers" data-route="transfers">✈️ <b id="popTb">–</b> transfer bonuses live</a><span class="pop-chip" id="popLvl">Aloha Level</span>';
