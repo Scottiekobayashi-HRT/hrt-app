@@ -26,7 +26,6 @@
   /* Banner photo picker (Nov 18): the member picks the photo behind their Wall title; saved in this browser */
   var SQ = "https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/";
   var PICS = [
-    ["Waikiki", "https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1400&q=70&auto=format", "center 60%"],
     ["Honolulu", SQ + "6a6fffa2-d2f7-456f-bfcf-c92232c98f1a/524f980d-83f5-4e88-9401-95c8c24e57a9.png?format=1500w", "center 45%"],
     ["Sunset", "https://images.unsplash.com/photo-1719469243598-0191cfae6f83?w=1400&q=70&auto=format", "center 40%"],
     ["Tokyo", SQ + "9d0b0acf-ede1-4ce9-bce6-7ee1a798b12f/Tokyo.png?format=1500w", "center 85%"],
@@ -35,9 +34,10 @@
     ["San Francisco", SQ + "11c361af-1226-4181-898d-c49a240893c3/San+Francisco.jpg?format=1500w", "center"],
     ["Four destinations", "montage", ""]
   ];
-  function picIndex() { try { var i = +localStorage.getItem("hrtWallPic"); return i >= 0 && i < PICS.length ? i : 0; } catch (e) { return 0; } }
+  var PIC_DEFAULT = PICS.length - 1; /* Nov 19: Waikiki removed; Four destinations is the default */
+  function picIndex() { try { var v = localStorage.getItem("hrtWallPic2"), i = v === null ? PIC_DEFAULT : +v; return i >= 0 && i < PICS.length ? i : PIC_DEFAULT; } catch (e) { return PIC_DEFAULT; } }
   function setPic(band, i) {
-    var p = PICS[i] || PICS[0];
+    var p = PICS[i] || PICS[PIC_DEFAULT];
     var mt = band.querySelector(".hdr-photos");
     if (p[1] === "montage") {
       if (!mt) { mt = mk("div", "hdr-photos", "<span></span><span></span><span></span><span></span>"); mt.setAttribute("aria-hidden", "true"); band.insertBefore(mt, band.firstChild); }
@@ -103,7 +103,7 @@
       var hero = host.closest(".hero"), rows = hero.querySelector(".lay-rows");
       if (!rows) {
         rows = mk("div", "lay-rows");
-        var band = mk("div", "lay-band", '<button type="button" class="lay-pick" aria-haspopup="true" aria-expanded="false">Change photo</button>' +
+        var band = mk("div", "lay-band", '<button type="button" class="lay-pick" aria-haspopup="true" aria-expanded="false" aria-label="Change photo" title="Change photo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>' +
           '<div class="lay-pick-menu" hidden>' + PICS.map(function (p, i) { return '<button type="button" data-pic="' + i + '">' + p[0] + "</button>"; }).join("") + "</div>" +
           '<span class="lay-date"></span><b class="lay-wt"></b>');
         setPic(band, picIndex());
@@ -112,7 +112,7 @@
           if (!t) return;
           if (t.classList.contains("lay-pick")) { menu.hidden = !menu.hidden; t.setAttribute("aria-expanded", !menu.hidden); return; }
           var i = +t.getAttribute("data-pic");
-          try { localStorage.setItem("hrtWallPic", i); } catch (er) {}
+          try { localStorage.setItem("hrtWallPic2", i); } catch (er) {}
           setPic(band, i); menu.hidden = true; band.querySelector(".lay-pick").setAttribute("aria-expanded", "false");
         });
         hero.insertBefore(band, hero.firstChild);
@@ -154,7 +154,8 @@
   var root = document.documentElement;
   root.classList.add("pop", "pop-" + p);
   if (p === "3") root.classList.add("pop-1");
-  if (p === "2") root.classList.add("pop-3"); /* Nov 18: draft 3's polish, without the gold strip (kept for future announcements: ?pop=3) */
+  if (p === "2") root.classList.add("pop-3");
+  try { var bm = /[?&]bar=(\d)/.exec(location.search); if (bm) sessionStorage.setItem("hrtBar", bm[1]); if ((bm ? bm[1] : sessionStorage.getItem("hrtBar")) === "1") root.classList.add("pop-bar"); } catch (e) {} /* Nov 19: thin dark orange top border preview */ /* Nov 18: draft 3's polish, without the gold strip (kept for future announcements: ?pop=3) */
   function go() {
     var tb = document.querySelector(".topbar"), tbin = tb && tb.querySelector(".tbin");
     if (!tbin) return setTimeout(go, 200);
@@ -166,7 +167,7 @@
     }
     var g = document.createElement("span"); g.className = "pop-greet";
     var d = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-    g.innerHTML = '<b>Aloha, <span class="ms-first-name">' + ((window.HRT_MEMBER && window.HRT_MEMBER.firstName) || "friend").split(" ")[0] + '</span></b><i>·</i><span>' + d + "</span>";
+    g.innerHTML = "<span>" + d + "</span>"; /* Nov 19 (Scottie): just the date */
     tbin.insertBefore(g, tbin.firstChild);
     var chips = document.createElement("span"); chips.className = "pop-chips";
     chips.innerHTML = '<a class="pop-chip pop-chip-hot" href="#transfers" data-route="transfers">✈️ <b id="popTb">–</b> transfer bonuses live</a><span class="pop-chip" id="popLvl">Aloha Level</span>';

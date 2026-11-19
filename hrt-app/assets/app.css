@@ -1507,3 +1507,4 @@ html.lay .hrt-sb .cnt{display:none!important}
 /* Thin dark orange border across the very top (preview ?bar=1) */
 html.pop-bar body::before{content:"";position:fixed;left:0;right:0;top:0;height:4px;background:#c2562b;z-index:60}
 html.pop-bar .hrt-app{padding-top:4px}
+html.lay .hrt-navi.sub[href^="#wallet/"]{display:none!important} /* Nov 19 (Scottie): wallet sub-links live on My Wallet */
