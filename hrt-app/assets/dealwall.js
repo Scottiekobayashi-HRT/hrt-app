@@ -984,8 +984,9 @@
     var wrap = el("div", "dwp pro-only");
 
     var head = el("div", "dw-head");
-    head.appendChild(el("span", "dwp-pill", "★ HRT PRO"));
-    head.appendChild(el("h2", null, "Deals, News, Flights"));
+    /* Nov 19 (Scottie): same name as everyone else's wall; the Pro badge sits after the title */
+    head.appendChild(el("h2", null, "Scottie's Wall"));
+    head.appendChild(el("span", "dwp-pill", "★ PRO"));
     var subEl = el("span", "dw-sub", ""); head.appendChild(subEl);
     if (feed.updated) head.appendChild(el("span", "dw-when", "· updated " + shortDate(feed.updated)));
     var tune = el("button", "dwp-tune", "Customize");

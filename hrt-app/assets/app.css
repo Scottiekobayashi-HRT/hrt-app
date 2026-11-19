@@ -1548,3 +1548,9 @@ html.swh-2 .dw-navy>.dw-head{background:linear-gradient(90deg,rgba(20,32,46,.92)
 html.swh-3 .dw-navy>.dw-head{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 45%,rgba(20,32,46,.35) 100%),url("https://images.pexels.com/photos/161251/senso-ji-temple-japan-kyoto-landmark-161251.jpeg?auto=compress&w=1400") 0% 30%/25.2% auto no-repeat,url("https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?q=80&w=1400&auto=format&fit=crop") 33.3% 50%/25.2% auto no-repeat,url("https://images.pexels.com/photos/2861981/pexels-photo-2861981.jpeg?auto=compress&w=900") 66.6% 60%/25.2% auto no-repeat,url("https://images.pexels.com/photos/21956575/pexels-photo-21956575/free-photo-of-sydney-opera-house-in-harbor.jpeg?auto=compress&w=900") 100% 50%/25.2% auto no-repeat,#141b24}
 /* 4. No photo: navy with a warm sunset glow and a gold line */
 html.swh-4 .dw-navy>.dw-head{background:radial-gradient(ellipse 60% 160% at 100% 50%,rgba(217,112,64,.45),transparent 70%),linear-gradient(90deg,#0f1823,#1b2f4a);border-bottom:2px solid #f2b84b}
+
+/* Nov 19: Pro members' Scottie's Wall gets the same Tokyo banner */
+html.swh .dwp{overflow:hidden}
+html.swh .dwp>.dw-head{margin:-16px -18px 12px;padding:16px 18px 14px;min-height:66px;border-bottom:1px solid rgba(242,184,75,.35)}
+html.swh .dwp>.dw-head h2{text-shadow:0 1px 6px rgba(0,0,0,.5)}
+html.swh-1 .dwp>.dw-head{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 45%,rgba(20,32,46,.35) 100%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/9d0b0acf-ede1-4ce9-bce6-7ee1a798b12f/Tokyo.png?format=1500w") center 80%/cover}
