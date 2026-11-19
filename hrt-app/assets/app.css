@@ -1515,3 +1515,12 @@ html.lay .topbar .tbin{margin-left:0!important;margin-right:auto!important}
 .pop-strip-or a{color:#fff;text-decoration:underline}
 html.pop.pop-2 .topbar{border-bottom:1px solid #e6ebf0!important}
 .pop-greet>span{font:600 15px 'DM Sans',sans-serif!important;color:#5b6b7b!important}
+/* Nov 19 (Scottie): strip a touch darker and scrolls away; roomier banner; level bubble */
+.pop-strip{position:relative!important;top:auto!important}
+.pop-strip-or{background:#c65f30!important}
+.lay-band .lay-date{display:block;margin-bottom:8px;line-height:1.2}
+.lay-band .lay-wt{line-height:1.1}
+.lay-band{padding-bottom:22px!important}
+.lay-lvl{position:absolute;right:12px;bottom:14px;z-index:6;font:700 12px 'DM Sans',sans-serif;color:#fff;background:rgba(20,32,46,.55);border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:5px 12px;backdrop-filter:blur(4px)}
+.lay-rows .lay-rh{display:none!important}
+.lay-rows{padding-top:18px!important}
