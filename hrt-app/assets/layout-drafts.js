@@ -149,11 +149,12 @@
    3 = draft 1 plus overall polish: softer cards, orange eyebrow titles, calmer sidebar */
 (function () {
   var p;
-  try { var m = /[?&]pop=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtPop", m[1]); p = m ? m[1] : sessionStorage.getItem("hrtPop"); } catch (e) { return; }
+  try { var m = /[?&]pop=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtPop", m[1]); p = m ? m[1] : (sessionStorage.getItem("hrtPop") || "2"); } /* Nov 18 (Scottie): pop 2 is the sandbox default */ catch (e) { return; }
   if (!p || p === "0") return;
   var root = document.documentElement;
   root.classList.add("pop", "pop-" + p);
   if (p === "3") root.classList.add("pop-1");
+  if (p === "2") root.classList.add("pop-3"); /* Nov 18: draft 3's polish, without the gold strip (kept for future announcements: ?pop=3) */
   function go() {
     var tb = document.querySelector(".topbar"), tbin = tb && tb.querySelector(".tbin");
     if (!tbin) return setTimeout(go, 200);
