@@ -3,7 +3,10 @@
    Inspired by Scottie's other app: one big main column plus a narrow side column of simple cards.
    1 = two columns, our current colors
    2 = two columns, the member's Wall as a warm, light card with a photo band and simple rows
-   3 = draft 2 with deep teal instead of navy */
+   3 = draft 2 with deep teal instead of navy
+   4 = draft 1 with a small photo banner behind the Wall title
+   5 = draft 4, and the sidebar without the small gray lines under each link
+   6 = draft 2's simple rows with the small banner, and the sidebar without the gray lines */
 (function () {
   var n;
   try {
@@ -14,6 +17,10 @@
   if (!n || n === "0") return;
   var root = document.documentElement;
   root.classList.add("lay", "lay-" + n);
+  if (n === "4" || n === "5") root.classList.add("lay-1", "lay-sm");
+  if (n === "5" || n === "6") root.classList.add("lay-nosub");
+  if (n === "6") root.classList.add("lay-2", "lay-sm");
+  var rows = n === "2" || n === "3" || n === "6";
 
   function $(s, el) { return (el || document).querySelector(s); }
   function mk(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
@@ -67,7 +74,7 @@
     function wall() {
       var v = host && host.querySelector(".hw-vid");
       if (v) { vid.innerHTML = ""; var c = v.cloneNode(true); c.className = "lay-vid"; vid.appendChild(c); }
-      if (n === "1" || !host) return;
+      if (!rows || !host) return;
       var hero = host.closest(".hero"), rows = hero.querySelector(".lay-rows");
       if (!rows) {
         rows = mk("div", "lay-rows");
