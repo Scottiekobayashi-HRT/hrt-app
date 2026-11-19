@@ -12,12 +12,12 @@
   try {
     var m = /[?&]lay=(\d)/.exec(location.search);
     if (m) sessionStorage.setItem("hrtLay", m[1]);
-    n = m ? m[1] : sessionStorage.getItem("hrtLay");
+    n = m ? m[1] : (sessionStorage.getItem("hrtLay") || "6"); /* Nov 18 (Scottie): draft 6 is the sandbox default; ?lay=0 shows the old look */
   } catch (e) { return; }
   if (!n || n === "0") return;
   var root = document.documentElement;
   root.classList.add("lay", "lay-" + n);
-  try { var w = /[?&]wall=(\d)/.exec(location.search); if (w) sessionStorage.setItem("hrtWallDraft", w[1]); var wn = w ? w[1] : sessionStorage.getItem("hrtWallDraft"); if (wn && wn !== "0") root.classList.add("wall-" + wn); } catch (e) {}
+  try { var w = /[?&]wall=(\d)/.exec(location.search); if (w) sessionStorage.setItem("hrtWallDraft", w[1]); var wn = w ? w[1] : (sessionStorage.getItem("hrtWallDraft") || "1"); /* tiles are the default */ if (wn && wn !== "0") root.classList.add("wall-" + wn); } catch (e) {}
   if (n === "4" || n === "5") root.classList.add("lay-1", "lay-sm");
   if (n === "5" || n === "6") root.classList.add("lay-nosub");
   if (n === "6") root.classList.add("lay-2"); /* Nov 18: big photo banner again (Scottie) */
