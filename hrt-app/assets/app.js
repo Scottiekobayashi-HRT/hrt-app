@@ -603,9 +603,11 @@ document.addEventListener("click", function (e) {
     if (v) sessionStorage.setItem("hrtVid", v[1]);
     if (vn && vn !== "0") document.documentElement.classList.add("vid-" + vn); /* video tile samples */
     var tx = /[?&]tex=(\d)/.exec(location.search);
-    /* Linen (tex-2) is the real Wall texture (Scottie, Nov 17). ?tex=N previews another on this visit only. */
-    try { sessionStorage.removeItem("hrtTex"); } catch (e) {}
-    if (tx) { document.documentElement.classList.remove("tex-2"); if (tx[1] !== "0") document.documentElement.classList.add("tex-" + tx[1]); }
+    /* Nov 18: Scottie dropped the linen texture. ?tex=N still previews the old textures. */
+    if (tx && tx[1] !== "0") document.documentElement.classList.add("tex-" + tx[1]);
+    var gr = /[?&]grad=(\d)/.exec(location.search), gn = gr ? gr[1] : sessionStorage.getItem("hrtGrad");
+    if (gr) sessionStorage.setItem("hrtGrad", gr[1]);
+    if (gn && gn !== "0") document.documentElement.classList.add("grad-" + gn); /* Wall gradient samples (Nov 18) */
   } catch (e) {}
 })();
 /* Photo strip behind the header samples 11-13 (Nov 16) */

@@ -1338,3 +1338,15 @@ html.tex-5 #v-home .toprow .hero,html.tex-5 .dw-navy{background:url("data:image/
 .hw-hh button[aria-selected="true"]{background:#f2b84b;color:#14202e;border-color:#f2b84b}
 .hw-wall-t.hh-on>.named,.hw-wall-t.hh-on>.unnamed,.hw-wall-t.hh-on>small.hw-lvl:not(.hh-title small){display:none!important}
 .hw-wall-t .hh-title .hw-lvl{display:inline!important}
+
+/* ===== Wall gradient samples (Nov 18), ?grad=1 to ?grad=5. Linen texture removed. ===== */
+/* 1. Sunset corner: navy with a warm orange glow rising from the bottom right */
+html.grad-1 #v-home .toprow .hero,html.grad-1 .dw-navy{background:radial-gradient(ellipse 70% 120% at 100% 100%,rgba(217,112,64,.38) 0%,rgba(217,112,64,0) 60%),linear-gradient(135deg,#14202e 0%,#1b2f4a 100%)!important}
+/* 2. Horizon: deep navy on top fading to a soft orange band along the bottom edge */
+html.grad-2 #v-home .toprow .hero,html.grad-2 .dw-navy{background:linear-gradient(180deg,#14202e 0%,#1b2f4a 62%,#3a3446 84%,#7a4a3a 100%)!important}
+/* 3. Diagonal sweep: navy left to a muted coral in the far right corner */
+html.grad-3 #v-home .toprow .hero,html.grad-3 .dw-navy{background:linear-gradient(115deg,#14202e 0%,#1b2f4a 55%,#3b3a4f 78%,#8a5340 100%)!important}
+/* 4. Two glows: gold glow top left, orange glow bottom right, navy in between */
+html.grad-4 #v-home .toprow .hero,html.grad-4 .dw-navy{background:radial-gradient(ellipse 45% 80% at 0% 0%,rgba(242,184,75,.16) 0%,rgba(242,184,75,0) 70%),radial-gradient(ellipse 55% 90% at 100% 100%,rgba(217,112,64,.32) 0%,rgba(217,112,64,0) 70%),linear-gradient(135deg,#14202e 0%,#1b2f4a 100%)!important}
+/* 5. Ember: very dark navy with a faint orange warmth through the middle */
+html.grad-5 #v-home .toprow .hero,html.grad-5 .dw-navy{background:radial-gradient(ellipse 90% 140% at 60% 120%,rgba(217,112,64,.22) 0%,rgba(217,112,64,0) 65%),linear-gradient(160deg,#0f1823 0%,#14202e 50%,#1b2f4a 100%)!important}
