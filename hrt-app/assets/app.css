@@ -1421,3 +1421,14 @@ html.lay-3 .lay-band{background:linear-gradient(90deg,rgba(18,53,64,.9) 0%,rgba(
 .lay-pick-menu button{text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;font:600 13.5px 'DM Sans',sans-serif;color:#14202e;cursor:pointer}
 .lay-pick-menu button:hover{background:#fbf3e4}
 .lay-pick-menu button[aria-pressed="true"]{color:#d97040;font-weight:800}
+/* Drafts (Nov 18): slim navy top bar, no photos, no "Eddie's Dashboard" title */
+html.lay .topbar{background:linear-gradient(90deg,#14202e,#1b2f4a)!important;border-bottom:1px solid #141b24!important;box-shadow:none!important}
+html.lay .topbar .hdr-photos,html.lay .topbar .crumb,html.lay .topbar .ptshint{display:none!important}
+html.lay .topbar .tbin{padding-top:8px!important;padding-bottom:8px!important;min-height:0}
+/* "Four destinations" choice in the Wall photo picker */
+.lay-band .hdr-photos{display:none}
+.lay-band.lay-montage{background:#141b24!important}
+.lay-band.lay-montage .hdr-photos{display:block;position:absolute;inset:0;z-index:0;pointer-events:none}
+.lay-band.lay-montage .hdr-photos::after{background:linear-gradient(90deg,rgba(20,32,46,.88) 0%,rgba(20,32,46,.5) 45%,rgba(20,32,46,.2) 100%),linear-gradient(180deg,rgba(20,32,46,0) 40%,rgba(20,32,46,.75) 100%)}
+.lay-band.lay-montage>*:not(.hdr-photos){position:relative;z-index:1}
+.lay-band.lay-montage .lay-pick,.lay-band.lay-montage .lay-pick-menu{position:absolute;z-index:6}

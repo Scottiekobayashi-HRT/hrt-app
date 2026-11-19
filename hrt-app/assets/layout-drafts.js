@@ -31,11 +31,17 @@
     ["Tokyo", SQ + "9d0b0acf-ede1-4ce9-bce6-7ee1a798b12f/Tokyo.png?format=1500w", "center 85%"],
     ["Osaka", SQ + "eab99c1e-cdfc-4718-b852-391d5f44bb30/Osaka.jpg?format=1500w", "center"],
     ["Las Vegas", "https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?q=80&w=1400&auto=format&fit=crop", "center"],
-    ["San Francisco", SQ + "11c361af-1226-4181-898d-c49a240893c3/San+Francisco.jpg?format=1500w", "center"]
+    ["San Francisco", SQ + "11c361af-1226-4181-898d-c49a240893c3/San+Francisco.jpg?format=1500w", "center"],
+    ["Four destinations", "montage", ""]
   ];
   function picIndex() { try { var i = +localStorage.getItem("hrtWallPic"); return i >= 0 && i < PICS.length ? i : 0; } catch (e) { return 0; } }
   function setPic(band, i) {
     var p = PICS[i] || PICS[0];
+    var mt = band.querySelector(".hdr-photos");
+    if (p[1] === "montage") {
+      if (!mt) { mt = mk("div", "hdr-photos", "<span></span><span></span><span></span><span></span>"); mt.setAttribute("aria-hidden", "true"); band.insertBefore(mt, band.firstChild); }
+      band.classList.add("lay-montage");
+    } else { band.classList.remove("lay-montage"); }
     band.style.setProperty("--band-img", 'url("' + p[1] + '")');
     band.style.setProperty("--band-pos", p[2]);
     band.querySelectorAll(".lay-pick-menu button").forEach(function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-pic") === i); });
@@ -123,7 +129,7 @@
           var btn = a ? '<a class="lay-pill" href="' + esc(a.getAttribute("href")) + '"' + (a.getAttribute("data-route") ? ' data-route="' + esc(a.getAttribute("data-route")) + '"' : "") +
             (a.getAttribute("data-scrollto") ? ' data-scrollto="' + esc(a.getAttribute("data-scrollto")) + '"' : "") + (a.target ? ' target="_blank" rel="noopener"' : "") + ">" + esc(txt(a.textContent).replace(/\s*›$/, "")) + "</a>" : "";
           return '<div class="lay-row"><span class="lay-ic">' + (i + 1) + '</span><span class="lay-rt"><small>' + esc(txt(l && l.textContent)) + "</small><b>" +
-            esc(lines(v)) + "</b>" + (sub ? "<em>" + esc(sub) + "</em>" : "") + "</span>" + btn + "</div>";
+            (v ? String(v.innerText || v.textContent || "").split(/\n+/).map(txt).filter(Boolean).map(esc).join("<br>") : "") + "</b>" + (sub ? "<em>" + esc(sub) + "</em>" : "") + "</span>" + btn + "</div>";
         }).join("");
     }
     if (host) { new MutationObserver(wall).observe(host, { childList: true, subtree: true }); wall(); }
