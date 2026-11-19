@@ -123,7 +123,15 @@
       var t = hero.querySelector(".hw-wall-t");
       hero.querySelector(".lay-wt").textContent = t ? txt((t.querySelector(".hh-title") || t.querySelector(".named") || t).textContent).replace(/(Aloha|Ohana|Pro) Level member.*$/, "") : "Your Wall";
       /* Nov 19 (Scottie): level shown as a bubble on the banner; "Your next steps" title removed */
-      hero.querySelector(".lay-lvl").textContent = hero.querySelector(".hh-title .hw-lvl") ? txt(hero.querySelector(".hh-title .hw-lvl").textContent) : lvlName();
+      /* Nov 19 (Scottie): the bubble gets fancier with each level. ?as=ohana or ?as=pro previews the bubble only */
+      var lvT = hero.querySelector(".hh-title .hw-lvl") ? txt(hero.querySelector(".hh-title .hw-lvl").textContent) : lvlName();
+      var asM = /[?&]as=(aloha|ohana|pro)\b/i.exec(location.search);
+      if (asM) lvT = asM[1].charAt(0).toUpperCase() + asM[1].slice(1).toLowerCase() + " Level member";
+      var lvK = /^Pro/.test(lvT) ? "pro" : /^Ohana/.test(lvT) ? "ohana" : "aloha", lvEl = hero.querySelector(".lay-lvl");
+      var STAR = '<svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7.5-6.5-4-6.5 4 2-7.5L2 9.5 9 9z" fill="currentColor"/></svg>';
+      var CROWN = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>';
+      lvEl.className = "lay-lvl lvl-" + lvK;
+      lvEl.innerHTML = (lvK === "pro" ? CROWN : lvK === "ohana" ? STAR : "") + "<span>" + esc(lvT) + "</span>";
       var boxes = Array.prototype.slice.call(host.querySelectorAll(".hw-boxes > .hw-box:not(.hw-vid)"));
       if (boxes.length === 4) boxes = [boxes[0], boxes[1], boxes[3], boxes[2]]; /* Nov 18 (Scottie): Rewards Cards before Save on annual fees */
       rows.innerHTML = '<div class="lay-rh"><b>Your next steps</b><span>' + esc(hero.querySelector(".hh-title .hw-lvl") ? txt(hero.querySelector(".hh-title .hw-lvl").textContent) : lvlName()) + "</span></div>" +

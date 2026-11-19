@@ -1526,3 +1526,12 @@ html.pop.pop-2 .topbar{border-bottom:1px solid #e6ebf0!important}
 .lay-rows{padding-top:18px!important}
 .lay-band.lay-montage .lay-lvl,.lay-band .lay-lvl{position:absolute!important;right:12px;bottom:14px;left:auto;width:auto}
 html.lay-2 .lay-band{min-height:190px}
+/* Level bubbles (Nov 19): each level a step fancier */
+.lay-lvl{display:inline-flex;align-items:center;gap:6px}
+.lay-lvl.lvl-ohana{color:#f5c75a!important;background:rgba(20,32,46,.7)!important;border:1px solid #f2b84b!important;box-shadow:0 0 0 3px rgba(242,184,75,.15)}
+.lay-lvl.lvl-pro{color:#14202e!important;font-weight:800!important;letter-spacing:.02em;background:linear-gradient(135deg,#ffe29a 0%,#f2b84b 45%,#d97040 100%)!important;border:1px solid #ffe7b0!important;
+ box-shadow:0 0 0 3px rgba(242,184,75,.25),0 6px 18px rgba(217,112,64,.45);padding:6px 14px!important}
+.lay-lvl.lvl-pro{position:absolute!important;overflow:hidden}
+.lay-lvl.lvl-pro::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent);animation:lvlShine 3.2s ease-in-out infinite}
+@keyframes lvlShine{0%,55%{left:-60%}100%{left:130%}}
+@media (prefers-reduced-motion:reduce){.lay-lvl.lvl-pro::after{animation:none;display:none}}
