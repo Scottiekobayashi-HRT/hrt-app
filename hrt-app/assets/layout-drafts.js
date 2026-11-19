@@ -123,6 +123,7 @@
       var t = hero.querySelector(".hw-wall-t");
       hero.querySelector(".lay-wt").textContent = t ? txt((t.querySelector(".hh-title") || t.querySelector(".named") || t).textContent).replace(/(Aloha|Ohana|Pro) Level member.*$/, "") : "Your Wall";
       var boxes = Array.prototype.slice.call(host.querySelectorAll(".hw-boxes > .hw-box:not(.hw-vid)"));
+      if (boxes.length === 4) boxes = [boxes[0], boxes[1], boxes[3], boxes[2]]; /* Nov 18 (Scottie): Rewards Cards before Save on annual fees */
       rows.innerHTML = '<div class="lay-rh"><b>Your next steps</b><span>' + esc(hero.querySelector(".hh-title .hw-lvl") ? txt(hero.querySelector(".hh-title .hw-lvl").textContent) : lvlName()) + "</span></div>" +
         boxes.map(function (b, i) {
           var l = b.querySelector(".hw-l, .hw-nx-t, .hw-act-t"), v = b.querySelector(".hw-v, .hw-nx-rows"), s = b.querySelector(".hw-s");
@@ -130,10 +131,10 @@
           var btn = a ? '<a class="lay-pill" href="' + esc(a.getAttribute("href")) + '"' + (a.getAttribute("data-route") ? ' data-route="' + esc(a.getAttribute("data-route")) + '"' : "") +
             (a.getAttribute("data-scrollto") ? ' data-scrollto="' + esc(a.getAttribute("data-scrollto")) + '"' : "") + (a.target ? ' target="_blank" rel="noopener"' : "") + ">" + esc(txt(a.textContent).replace(/\s*›$/, "")) + "</a>" : "";
           /* Nov 18 (Scottie): Aloha Level gets an upgrade button on the annual fees line */
-          if (!btn && i === 2 && !root.classList.contains("ms-client") && !root.classList.contains("ms-pro") && !hero.querySelector(".hh-title"))
+          if (!btn && b.classList.contains("hw-fee") && !root.classList.contains("ms-client") && !root.classList.contains("ms-pro") && !hero.querySelector(".hh-title"))
             btn = '<a class="lay-pill" href="#plans" data-route="plans">Upgrade to Ohana Level</a>';
           return '<div class="lay-row lay-r' + (i + 1) + '"><span class="lay-ic">' + (i + 1) + '</span><span class="lay-rt"><small>' + esc(txt(l && l.textContent)) + "</small><b>" +
-            (v ? String(v.innerText || v.textContent || "").split(/\n+/).map(txt).filter(Boolean).map(esc).join("<br>") : "") + "</b>" + (sub ? "<em>" + esc(sub) + "</em>" : "") + "</span>" + btn + "</div>";
+            (/^\d+$/.test(txt(v && v.textContent)) && /REWARDS CARDS/i.test(txt(l && l.textContent)) ? esc("Your Wallet has " + txt(v.textContent) + (txt(v.textContent) === "1" ? " card" : " cards")) : v ? String(v.innerText || v.textContent || "").split(/\n+/).map(txt).filter(Boolean).map(esc).join("<br>") : "") + "</b>" + (sub ? "<em>" + esc(sub) + "</em>" : "") + "</span>" + btn + "</div>";
         }).join("");
     }
     if (host) { new MutationObserver(wall).observe(host, { childList: true, subtree: true }); wall(); }
