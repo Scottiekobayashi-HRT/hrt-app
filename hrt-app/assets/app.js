@@ -53,6 +53,7 @@
  function parentHash(){ try{ if(window.parent !== window) return window.parent.location.hash; }catch(e){} return ""; }
  /* Sub pages: "wallet/cards" and "wallet/credits" are pages inside My Wallet. */
  var SUBS = { wallet: { cards: "Cards", credits: "Credits", points: "Points & Miles", transfers: "Transfer Partners" } };
+ var routed = false;
  function route(name, noScroll){
   var parts = String(name || "").split("/"), sub = parts[1] || "";
   name = parts[0];
@@ -72,7 +73,10 @@
   $("crumb").innerHTML = name === "home" ? '<span class="dash-nm"><b class="ms-first-name">' + esc((window.HRT_MEMBER || {}).firstName || "") + '</b>’s </span>Dashboard <small class="dash-upd">' + esc(window.HRT_WALL_UPD || "") + '</small>' : '<a href="#home" data-route="home">Dashboard</a> <span aria-hidden="true">/</span> ' + crumbTitle;
   if (name === "wallet") $("tbHint").innerHTML = '<span class="client-hide">' + esc(ROUTES[name].hint) + '</span><span class="client-only">Managed for you by Scottie</span>';
   else $("tbHint").textContent = ROUTES[name].hint;
-  try{ history.replaceState(null, "", "#" + full); }catch(e){}
+  /* Nov 19 (Scottie): add a history entry for each page change so the browser Back button works.
+     First load and Back/Forward only update the address bar (replace), so they never add extra entries. */
+  try{ if(location.hash !== "#" + full){ if(routed) history.pushState(null, "", "#" + full); else history.replaceState(null, "", "#" + full); } }catch(e){}
+  routed = true;
   try{ if(window.parent !== window) window.parent.history.replaceState(null, "", "#" + full); }catch(e){}
   if(onShow[name]) onShow[name](!shown[name], sub);
   shown[name] = true;
@@ -88,7 +92,9 @@
   ev.preventDefault();
   route(a.getAttribute("data-route"));
  });
- window.addEventListener("hashchange", function(){ var h = location.hash.replace("#",""); if(h && h !== current) route(h); });
+ function fromUrl(){ var h = location.hash.replace("#",""); if(h && h !== current) route(h); }
+ window.addEventListener("hashchange", fromUrl);
+ window.addEventListener("popstate", fromUrl);
 
  /* ============================ SHARED MAP ============================ */
  function mapStyle(){ return document.documentElement.getAttribute("data-theme") === "dark" ? MAP_STYLE_DARK : MAP_STYLE_LIGHT; }
