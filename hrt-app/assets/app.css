@@ -1554,3 +1554,32 @@ html.swh .dwp{overflow:hidden}
 html.swh .dwp>.dw-head{margin:-16px -18px 12px;padding:16px 18px 14px;min-height:66px;border-bottom:1px solid rgba(242,184,75,.35)}
 html.swh .dwp>.dw-head h2{text-shadow:0 1px 6px rgba(0,0,0,.5)}
 html.swh-1 .dwp>.dw-head{background:linear-gradient(90deg,rgba(20,32,46,.92) 0%,rgba(20,32,46,.6) 45%,rgba(20,32,46,.35) 100%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/9d0b0acf-ede1-4ce9-bce6-7ee1a798b12f/Tokyo.png?format=1500w") center 80%/cover}
+/* ===== Tool tile + video samples (Nov 19), ?tt=1..3 ===== */
+.tt-vid{display:none}
+html.tt .ttiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+html.tt .ttile .tt small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.tt .tt-vid{display:flex;align-items:center;justify-content:center;position:relative;color:#fff;
+ background:radial-gradient(ellipse at 70% 30%,rgba(217,112,64,.35),transparent 60%),linear-gradient(135deg,#14202e,#1b2f4a)}
+.tt-play{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#f2b84b;color:#14202e;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.tt-play svg{margin-left:2px}
+html.tt .tt-vid em{font-style:normal;font:700 11px 'DM Sans',sans-serif;color:#dbe6f0}
+/* 1. Video on top */
+html.tt-1 .ttile{flex-direction:column;gap:10px;padding:0 0 14px}
+html.tt-1 .ttile>.ti{display:none}
+html.tt-1 .ttile .tt{padding:0 14px}
+html.tt-1 .tt-vid{width:100%;aspect-ratio:16/8}
+html.tt-1 .tt-vid em{position:absolute;right:8px;bottom:6px;background:rgba(0,0,0,.45);padding:1px 6px;border-radius:6px}
+/* 2. Video bar on the bottom */
+html.tt-2 .ttile{flex-wrap:wrap;padding:14px 14px 0;gap:10px 12px}
+html.tt-2 .ttile>.ti{width:34px;height:34px}
+html.tt-2 .ttile .tt{flex:1}
+html.tt-2 .tt-vid{flex:0 0 calc(100% + 28px);margin:4px -14px 0;justify-content:flex-start;gap:10px;padding:9px 14px;font:700 12.5px 'DM Sans',sans-serif}
+html.tt-2 .tt-vid .tt-play{width:28px;height:28px}
+html.tt-2 .tt-vid em{margin-left:auto}
+/* 3. Small video beside the text */
+html.tt-3 .ttiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+html.tt-3 .ttile{padding:12px;gap:12px;align-items:center}
+html.tt-3 .ttile>.ti{display:none}
+html.tt-3 .tt-vid{flex:0 0 96px;height:72px;border-radius:12px}
+@media (max-width:1100px){html.tt .ttiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){html.tt .ttiles{grid-template-columns:1fr}}
