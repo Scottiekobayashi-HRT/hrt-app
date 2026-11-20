@@ -84,7 +84,8 @@
     var tools = mk("div", "lay-card lay-tools", '<h3 class="lay-eyebrow">Quick links</h3><div class="lay-qgrid">' +
       [["#atmos", "atmos", "Points Calendar"], ["#transfers", "transfers", "Transfer bonuses"], ["#kamaaina", "kamaaina", "Staycation Deals"], ["#lounges", "lounges", "HNL lounges"]]
         .map(function (q) { return '<a href="' + q[0] + '" data-route="' + q[1] + '">' + q[2] + "</a>"; }).join("") + "</div>");
-    side.appendChild(stat); side.appendChild(vid); side.appendChild(ask); side.appendChild(tools);
+    /* Nov 19 (Scottie + Eddie): transfer bonus stat card removed; the video leads the side column */
+    side.appendChild(vid); side.appendChild(ask); side.appendChild(tools);
 
     function fillStats() {
       var a = $("#hmTb"), b = $("#hmKama"), c = $("#hmTbBest");
@@ -183,13 +184,34 @@
     g.innerHTML = '<b>Aloha, <span class="ms-first-name">' + ((window.HRT_MEMBER && window.HRT_MEMBER.firstName) || "friend").split(" ")[0] + '</span></b><i>\u00b7</i><span>' + d + "</span>"; /* Nov 19: greeting back (Scottie) */
     tbin.insertBefore(g, tbin.firstChild);
     var chips = document.createElement("span"); chips.className = "pop-chips";
-    chips.innerHTML = '<a class="pop-chip pop-chip-hot" href="#transfers" data-route="transfers">✈️ <b id="popTb">–</b> transfer bonuses live</a><span class="pop-chip" id="popLvl">Aloha Level</span>';
+    chips.innerHTML = '<span class="pop-chip" id="popLvl">Aloha Level</span>'; /* Nov 19: transfer bonus chip removed */
     var sp = tbin.querySelector(".spacer"); if (sp) sp.parentNode.insertBefore(chips, sp.nextSibling); else tbin.appendChild(chips);
     function fill() {
-      var a = document.getElementById("hmTb"); if (a) document.getElementById("popTb").textContent = a.textContent.trim();
       var c = root.classList; document.getElementById("popLvl").textContent = c.contains("ms-pro") ? "Pro Level" : c.contains("ms-client") ? "Ohana Level" : "Aloha Level";
     }
     fill(); setInterval(fill, 3000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+})();
+
+/* Tool tile + video samples (Nov 19, Eddie's idea). ?tt=1 video on top, 2 video bar on the bottom,
+   3 small video beside the text. No videos yet: the play area opens the tool for now. */
+(function () {
+  var t;
+  try { var m = /[?&]tt=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtTt", m[1]); t = m ? m[1] : sessionStorage.getItem("hrtTt"); } catch (e) { return; }
+  if (!t || t === "0") return;
+  document.documentElement.classList.add("tt", "tt-" + t);
+  var PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+  function go() {
+    var tiles = document.querySelectorAll(".ttiles .ttile");
+    if (!tiles.length) return setTimeout(go, 200);
+    tiles.forEach(function (tile) {
+      if (tile.querySelector(".tt-vid")) return;
+      var name = (tile.querySelector(".tt b") || {}).textContent || "this tool";
+      var v = document.createElement("span"); v.className = "tt-vid";
+      v.innerHTML = '<span class="tt-play">' + PLAY + "</span>" + (t === "2" ? "<span>Watch how " + name.replace(/</g, "&lt;") + " works</span><em>1 min</em>" : t === "1" ? "<em>1 min</em>" : "");
+      if (t === "2") tile.appendChild(v); else tile.insertBefore(v, tile.firstChild);
+    });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
 })();
