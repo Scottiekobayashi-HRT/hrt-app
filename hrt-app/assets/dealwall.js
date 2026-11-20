@@ -313,6 +313,7 @@
       c.soonest = dates.map(function (t) { return t.date; }).sort()[0];
       c.miles = Math.min.apply(null, dates.map(function (t) { return t.miles || Infinity; }));
       if (!isFinite(c.miles)) c.miles = d.miles;
+      c.nonstop = lowestIsNonstop(dates, c.miles); /* Nov 20: the feed's flag follows the soonest date, not the lowest price */
       return c;
     }).filter(Boolean);
     return out;
@@ -820,7 +821,7 @@
       var miles = Math.min.apply(null, dates.map(function (t) { return t.miles || Infinity; }));
       return { origin: e.origin, dest: e.dest, city: e.city, cabin: e.cabin, image: e.image, dates: dates, i: i,
         miles: isFinite(miles) ? miles : 0, count: dates.length, soonest: dates.map(function (t) { return t.date; }).sort()[0],
-        nonstop: dates.some(function (t) { return t.nonstop; }) };
+        nonstop: lowestIsNonstop(dates, miles) };
     }).filter(Boolean);
     out.sort(function (a, b) {
       var ia = pick.indexOf(a.dest), ib = pick.indexOf(b.dest);
@@ -893,6 +894,14 @@
     });
     return out.slice(0, 24);
   }
+  /* Nov 20 (Scottie): the card shows the LOWEST price, so its nonstop/1-stop
+     label must describe a date at that lowest price. Before, any nonstop date
+     made the card say nonstop (HNL to JFK showed 25k nonstop, but every 25k
+     date was a connection; nonstops were 30k). Pure. */
+  function lowestIsNonstop(dates, miles) {
+    return dates.some(function (t) { return t.nonstop && (t.miles || Infinity) === miles; });
+  }
+
   /* One card per tracked route and cabin, in the member's order. A tracked
      route with no deal dates today still gets a card, so it never vanishes. Pure. */
   function applyRoutes(entries, routes, today) {
@@ -907,7 +916,7 @@
           image: e ? e.image : (entries.filter(function (x) { return x.dest === r.d && x.image; })[0] || {}).image || "",
           dates: dates, count: dates.length, none: !dates.length, nonstopOnly: !!r.nonstop,
           miles: isFinite(miles) ? miles : 0, soonest: dates.map(function (t) { return t.date; }).sort()[0],
-          nonstop: dates.some(function (t) { return t.nonstop; }) });
+          nonstop: lowestIsNonstop(dates, miles) });
       });
     });
     return out;
@@ -1323,7 +1332,7 @@
       });
   }
 
-  window.HRT_DEALWALL = { _test: { mixOrder: mixOrder, rhythmOrder: rhythmOrder, dealGroups: dealGroups, subRoute: subRoute, MIX: MIX, freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs, routeChoices: routeChoices, cleanRoutes: cleanRoutes, applyRoutes: applyRoutes, migratePrefs: migratePrefs } };
+  window.HRT_DEALWALL = { _test: { mixOrder: mixOrder, rhythmOrder: rhythmOrder, dealGroups: dealGroups, subRoute: subRoute, MIX: MIX, freshen: freshen, teasersFor: teasersFor, hawaiiToday: hawaiiToday, entriesFrom: entriesFrom, applyPrefs: applyPrefs, choicesFor: choicesFor, cleanPrefs: cleanPrefs, routeChoices: routeChoices, cleanRoutes: cleanRoutes, applyRoutes: applyRoutes, migratePrefs: migratePrefs, lowestIsNonstop: lowestIsNonstop } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();

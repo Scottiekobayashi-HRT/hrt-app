@@ -167,5 +167,32 @@ ok('nonstop only with no nonstop dates shows the empty card', nsC[0].none === tr
   ok("mix: subscriber routes", X.subRoute({ dest: "HND" }) && X.subRoute({ dest: "JFK" }) && !X.subRoute({ dest: "SEA" }));
 }
 
+/* Nov 20: nonstop label must match the LOWEST price (real Nov 20 feed data) */
+{
+  console.log('\nNonstop label at the lowest price');
+  const L = T.lowestIsNonstop;
+  const jfkDates = [{ date: '2026-11-21', miles: 30000, nonstop: true }, { date: '2026-11-23', miles: 25000, nonstop: false }, { date: '2026-12-05', miles: 25000, nonstop: false }, { date: '2026-12-15', miles: 30000, nonstop: true }];
+  const lasDates = [{ date: '2026-11-21', miles: 17500, nonstop: false }, { date: '2026-11-30', miles: 17500, nonstop: true }];
+  const ancDates = [{ date: '2026-11-22', miles: 17500, nonstop: false }, { date: '2026-11-23', miles: 15000, nonstop: true }, { date: '2026-12-20', miles: 17500, nonstop: true }];
+  const seaDates = [{ date: '2026-11-23', miles: 15000, nonstop: false }];
+  ok('JFK 25k is not nonstop (only 30k dates are)', L(jfkDates, 25000) === false);
+  ok('LAS 17.5k is nonstop on some dates', L(lasDates, 17500) === true);
+  ok('ANC 15k nonstop on Nov 23', L(ancDates, 15000) === true);
+  ok('SEA connection stays 1-stop', L(seaDates, 15000) === false);
+  const fr = T.freshen({ economy: [
+    { dest: 'JFK', miles: 25000, nonstop: true, dates: jfkDates },
+    { dest: 'LAS', miles: 17500, nonstop: false, dates: lasDates }
+  ] }, '2026-11-20');
+  ok('freshen: JFK card says 1-stop at 25k (feed said nonstop)', fr.economy[0].miles === 25000 && fr.economy[0].nonstop === false, JSON.stringify(fr.economy[0].nonstop));
+  ok('freshen: LAS card says nonstop at 17.5k (feed said 1-stop)', fr.economy[1].nonstop === true);
+  const ent = [{ origin: 'HNL', dest: 'JFK', city: 'New York', cabin: 'economy', dates: jfkDates }];
+  const all = T.applyRoutes(ent, [{ o: 'HNL', d: 'JFK', cabins: ['economy'] }], '2026-11-20')[0];
+  ok('tracked route: 25k lowest labelled 1-stop', all.miles === 25000 && all.nonstop === false);
+  const ns = T.applyRoutes(ent, [{ o: 'HNL', d: 'JFK', cabins: ['economy'], nonstop: true }], '2026-11-20')[0];
+  ok('nonstop only: 30k nonstop', ns.miles === 30000 && ns.nonstop === true && ns.count === 2);
+  const ap = T.applyPrefs(ent, { cabin: 'economy', dests: [], origins: [], months: [] }, '2026-11-20');
+  ok('applyPrefs: 25k lowest labelled 1-stop', ap[0].miles === 25000 && ap[0].nonstop === false, JSON.stringify(ap[0] && [ap[0].miles, ap[0].nonstop]));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
