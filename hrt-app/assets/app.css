@@ -1626,3 +1626,4 @@ html.tone-4 .pop-strip-or{background:linear-gradient(90deg,#123540,#1d4a55)!impo
 html.tone-4 .pop-strip-or a{color:#fff!important}
 /* Nov 19 (Scottie): tone-4 strip in navy #1B2F4A */
 html.tone-4 .pop-strip-or{background:#1b2f4a!important;color:#fff!important}
+.lay-band .lay-date{color:#e8894f!important} /* Nov 19 (Scottie): Wall date in the orange of the buttons, not gold */
