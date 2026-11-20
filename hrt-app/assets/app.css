@@ -1624,3 +1624,5 @@ html.tone-4 .pop-strip-or a{color:#14202e!important}
 /* Nov 19: tone-4 strip in the deep teal from layout draft 3 instead of light blue */
 html.tone-4 .pop-strip-or{background:linear-gradient(90deg,#123540,#1d4a55)!important;color:#fff!important;border-bottom:0}
 html.tone-4 .pop-strip-or a{color:#fff!important}
+/* Nov 19 (Scottie): tone-4 strip in navy #1B2F4A */
+html.tone-4 .pop-strip-or{background:#1b2f4a!important;color:#fff!important}
