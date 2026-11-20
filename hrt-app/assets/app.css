@@ -1618,3 +1618,6 @@ html.tone-3 .lay-qi{background:#fdf3d9;color:#a8781a}
 html.tone-3 .lay-eyebrow,html.tone-3 #toolsSec h2{color:#a8781a!important}
 html.tone-3 .ttile.t-avail .t-acc{color:#a8781a}
 html.tone-3 .t-vids a{color:#a8781a}
+/* 4. (Nov 19) Original orange buttons, but the welcome strip in the light blue from sample 2 */
+html.tone-4 .pop-strip-or{background:#e3ecf4!important;color:#14202e!important;border-bottom:1px solid #d5dee7}
+html.tone-4 .pop-strip-or a{color:#14202e!important}
