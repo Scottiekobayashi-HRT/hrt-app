@@ -1678,3 +1678,10 @@ html.ew-4.wall-1 .lay-row{border-color:#d3dde7!important}
 /* 5. Light gray body, white tiles with an orange top edge and deeper shadow */
 html.ew-5 #v-home .toprow .hero .lay-rows{background:#eef1f4}
 html.ew-5.wall-1 .lay-row{border:0!important;border-top:4px solid #e8894f!important;box-shadow:0 8px 20px rgba(16,32,54,.14)}
+/* Nov 19: blues between draft 3 (navy) and draft 4 (light blue), darkest to lightest */
+html.ew-6 #v-home .toprow .hero .lay-rows{background:#2c4566}
+html.ew-7 #v-home .toprow .hero .lay-rows{background:#44628a}
+html.ew-8 #v-home .toprow .hero .lay-rows{background:#7593b3}
+html.ew-9 #v-home .toprow .hero .lay-rows{background:#a9bdd2}
+html.ew-6.wall-1 .lay-row,html.ew-7.wall-1 .lay-row{border-color:transparent!important;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+html.ew-8.wall-1 .lay-row,html.ew-9.wall-1 .lay-row{border-color:transparent!important;box-shadow:0 5px 14px rgba(16,32,54,.16)}
