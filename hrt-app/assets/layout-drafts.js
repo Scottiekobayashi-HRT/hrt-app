@@ -63,7 +63,13 @@
     /* ?side=1 draft (Nov 19): only the Wall sits beside the side column; Scottie's Wall and the tools run full width below */
     var wide = false; try { var sd = /[?&]side=(\d)/.exec(location.search); if (sd) sessionStorage.setItem("hrtSide", sd[1]); wide = (sd ? sd[1] : sessionStorage.getItem("hrtSide")) === "1"; } catch (e) {}
     var below = mk("div", "lay-below");
-    if (wide) { root.classList.add("lay-wide"); grid.appendChild(below); }
+    if (wide) {
+      root.classList.add("lay-wide"); grid.appendChild(below);
+      /* Scottie's Wall is inserted right after the member Wall; move anything that lands in the main column below */
+      new MutationObserver(function () {
+        Array.prototype.slice.call(main.children).forEach(function (c) { if (!c.classList.contains("toprow")) below.insertBefore(c, below.firstChild); });
+      }).observe(main, { childList: true });
+    }
     function home(c) { (wide && !c.classList.contains("toprow") ? below : main).appendChild(c); }
     /* everything above the disclosure goes into the main column */
     Array.prototype.slice.call(content.children).forEach(function (c) {
