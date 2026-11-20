@@ -1621,3 +1621,6 @@ html.tone-3 .t-vids a{color:#a8781a}
 /* 4. (Nov 19) Original orange buttons, but the welcome strip in the light blue from sample 2 */
 html.tone-4 .pop-strip-or{background:#e3ecf4!important;color:#14202e!important;border-bottom:1px solid #d5dee7}
 html.tone-4 .pop-strip-or a{color:#14202e!important}
+/* Nov 19: tone-4 strip in the deep teal from layout draft 3 instead of light blue */
+html.tone-4 .pop-strip-or{background:linear-gradient(90deg,#123540,#1d4a55)!important;color:#fff!important;border-bottom:0}
+html.tone-4 .pop-strip-or a{color:#fff!important}
