@@ -1685,3 +1685,7 @@ html.ew-8 #v-home .toprow .hero .lay-rows{background:#7593b3}
 html.ew-9 #v-home .toprow .hero .lay-rows{background:#a9bdd2}
 html.ew-6.wall-1 .lay-row,html.ew-7.wall-1 .lay-row{border-color:transparent!important;box-shadow:0 6px 16px rgba(0,0,0,.22)}
 html.ew-8.wall-1 .lay-row,html.ew-9.wall-1 .lay-row{border-color:transparent!important;box-shadow:0 5px 14px rgba(16,32,54,.16)}
+/* Nov 20 (Scottie): Eddie's Wall banner a little shorter, Scottie's Wall banner taller, so the two look closer */
+#v-home .lay-band{min-height:150px!important}
+html.swh-1 .dw-navy>.dw-head,html.swh-1 .dwp>.dw-head{min-height:108px;align-items:flex-end;padding:20px 20px 16px!important}
+html.swh-1 .dw-navy>.dw-head h2,html.swh-1 .dwp>.dw-head h2{font-size:clamp(22px,2.2vw,28px)!important;line-height:1.1}
