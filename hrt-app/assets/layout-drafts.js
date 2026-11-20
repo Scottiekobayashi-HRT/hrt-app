@@ -60,16 +60,21 @@
     var grid = mk("div", "lay-grid"), main = mk("div", "lay-main"), side = mk("aside", "lay-side");
     grid.appendChild(main); grid.appendChild(side);
     content.insertBefore(grid, top);
+    /* ?side=1 draft (Nov 19): only the Wall sits beside the side column; Scottie's Wall and the tools run full width below */
+    var wide = false; try { var sd = /[?&]side=(\d)/.exec(location.search); if (sd) sessionStorage.setItem("hrtSide", sd[1]); wide = (sd ? sd[1] : sessionStorage.getItem("hrtSide")) === "1"; } catch (e) {}
+    var below = mk("div", "lay-below");
+    if (wide) { root.classList.add("lay-wide"); grid.appendChild(below); }
+    function home(c) { (wide && !c.classList.contains("toprow") ? below : main).appendChild(c); }
     /* everything above the disclosure goes into the main column */
     Array.prototype.slice.call(content.children).forEach(function (c) {
       if (c === grid || c.classList.contains("srcnote") || c.classList.contains("foot")) return;
-      main.appendChild(c);
+      home(c);
     });
     /* later inserts (Scottie's Wall) land in .content or after .toprow: keep them in main */
     new MutationObserver(function () {
       Array.prototype.slice.call(content.children).forEach(function (c) {
         if (c === grid || c.classList.contains("srcnote") || c.classList.contains("foot")) return;
-        main.appendChild(c);
+        home(c);
       });
     }).observe(content, { childList: true });
 
