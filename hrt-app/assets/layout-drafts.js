@@ -81,9 +81,39 @@
     var ask = mk("div", "lay-card lay-cream",
       '<h3>Questions about your next card?</h3><p>Text Scottie anytime. Real answers from a real person, here in Hawaii.</p>' +
       '<a class="lay-btn" href="sms:+18083545216">Text Scottie</a>');
-    var tools = mk("div", "lay-card lay-tools", '<h3 class="lay-eyebrow">Quick links</h3><div class="lay-qgrid">' +
-      [["#atmos", "atmos", "Points Calendar"], ["#transfers", "transfers", "Transfer bonuses"], ["#kamaaina", "kamaaina", "Staycation Deals"], ["#lounges", "lounges", "HNL lounges"]]
-        .map(function (q) { return '<a href="' + q[0] + '" data-route="' + q[1] + '">' + q[2] + "</a>"; }).join("") + "</div>");
+    /* Quick links (Nov 19): icon tiles like the prayer app, and the member picks which four show (saved in this browser) */
+    var I = function (d) { return '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + "</svg>"; };
+    var QL = {
+      cal: ["#atmos", "atmos", "Points Calendar", I('<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/>')],
+      wallet: ["#wallet", "wallet", "My Wallet", I('<path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="16" cy="13.5" r="1.3"/>')],
+      stay: ["#kamaaina", "kamaaina", "Staycation Deals", I('<path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>')],
+      lounge: ["#lounges", "lounges", "HNL Lounges", I('<path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/><path d="M6 18v2M18 18v2"/>')],
+      coach: ["#coaching", "coaching", "Card Coaching", I('<path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.4 6.8 19.2l1-5.9-4.3-4.1 5.9-.8z"/>')],
+      resy: ["#resy", "resy", "Resy Map", I('<path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M16 3c-1.7 1.5-2 4-2 6s1 3 2 3v9"/>')],
+      bonus: ["#transfers", "transfers", "Transfer Bonuses", I('<path d="M4 8h13l-3-3M20 16H7l3 3"/>')],
+      earn: ["#status", "status", "Choose to Earn", I('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2"/>')],
+      ask: ["sms:+18083545216", "", "Text Scottie", I('<path d="M21 12a8 8 0 0 1-11.8 7L3 21l2-6A8 8 0 1 1 21 12z"/>')]
+    };
+    var QDEF = ["cal", "wallet", "stay", "lounge"];
+    function qPicked() { try { var v = JSON.parse(localStorage.getItem("hrtQuick") || "null"); if (Array.isArray(v) && v.length) return v.filter(function (k) { return QL[k]; }).slice(0, 4); } catch (e) {} return QDEF.slice(); }
+    var tools = mk("div", "lay-card lay-tools");
+    function drawQuick(editing) {
+      var picked = qPicked();
+      tools.innerHTML = '<div class="lay-qh"><h3 class="lay-eyebrow">Quick links</h3><button type="button" class="lay-qedit">' + (editing ? "Done" : "Edit") + "</button></div>" +
+        (editing
+          ? '<p class="lay-qtip">Pick up to 4</p><div class="lay-qpick">' + Object.keys(QL).map(function (k) { return '<button type="button" data-q="' + k + '" aria-pressed="' + (picked.indexOf(k) > -1) + '">' + QL[k][3] + "<span>" + QL[k][2] + "</span></button>"; }).join("") + "</div>"
+          : '<div class="lay-qgrid lay-qicons">' + picked.map(function (k) { var q = QL[k]; return '<a href="' + q[0] + '"' + (q[1] ? ' data-route="' + q[1] + '"' : "") + "><span class=\"lay-qi\">" + q[3] + "</span><span>" + q[2] + "</span></a>"; }).join("") + "</div>");
+    }
+    tools.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      if (b.classList.contains("lay-qedit")) { drawQuick(b.textContent === "Edit"); return; }
+      var k = b.getAttribute("data-q"); if (!k) return;
+      var picked = qPicked(), i = picked.indexOf(k);
+      if (i > -1) { if (picked.length > 1) picked.splice(i, 1); } else { if (picked.length >= 4) picked.shift(); picked.push(k); }
+      try { localStorage.setItem("hrtQuick", JSON.stringify(picked)); } catch (er) {}
+      drawQuick(true);
+    });
+    drawQuick(false);
     /* Nov 19 (Scottie + Eddie): transfer bonus stat card removed; the video leads the side column */
     side.appendChild(vid); side.appendChild(ask); side.appendChild(tools);
 
@@ -167,6 +197,7 @@
   root.classList.add("pop", "pop-" + p);
   if (p === "3") root.classList.add("pop-1");
   if (p === "2") root.classList.add("pop-3");
+  try { var tn = /[?&]tone=(\d)/.exec(location.search); if (tn) sessionStorage.setItem("hrtTone", tn[1]); var tv = tn ? tn[1] : sessionStorage.getItem("hrtTone"); if (tv && tv !== "0") root.classList.add("tone", "tone-" + tv); } catch (e) {} /* Nov 19: less-orange samples */
   try { var sw = /[?&]swh=(\d)/.exec(location.search); if (sw) sessionStorage.setItem("hrtSwh", sw[1]); var swn = sw ? sw[1] : (sessionStorage.getItem("hrtSwh") || "1"); /* Nov 19 (Scottie): Tokyo banner is the default */ if (swn && swn !== "0") root.classList.add("swh", "swh-" + swn); } catch (e) {} /* Nov 19: Scottie's Wall banner samples */
   try { var bm = /[?&]bar=(\d)/.exec(location.search); if (bm) sessionStorage.setItem("hrtBar", bm[1]); if ((bm ? bm[1] : sessionStorage.getItem("hrtBar")) === "1") root.classList.add("pop-bar"); } catch (e) {} /* Nov 19: thin dark orange top border preview */ /* Nov 18: draft 3's polish, without the gold strip (kept for future announcements: ?pop=3) */
   function go() {
