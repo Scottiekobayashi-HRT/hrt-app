@@ -88,6 +88,7 @@
     side.appendChild(vid); side.appendChild(ask); side.appendChild(tools);
 
     function fillStats() {
+      if (!document.getElementById("layBig")) return; /* stat card removed Nov 19 */
       var a = $("#hmTb"), b = $("#hmKama"), c = $("#hmTbBest");
       if (a) $("#layBig").textContent = txt(a.textContent) || "–";
       $("#layStat2").textContent = [b && txt(b.textContent) !== "–" ? txt(b.textContent) + " staycation deals" : "", c && txt(c.textContent) !== "–" ? "best bonus " + txt(c.textContent) : ""].filter(Boolean).join(" · ");
@@ -209,7 +210,7 @@
       if (tile.querySelector(".tt-vid")) return;
       var name = (tile.querySelector(".tt b") || {}).textContent || "this tool";
       var v = document.createElement("span"); v.className = "tt-vid";
-      v.innerHTML = '<span class="tt-play">' + PLAY + "</span>" + (t === "2" ? "<span>Watch how " + name.replace(/</g, "&lt;") + " works</span><em>1 min</em>" : t === "1" ? "<em>1 min</em>" : "");
+      v.innerHTML = '<span class="tt-play">' + PLAY + "</span>" + (t === "2" ? "<span>Watch video</span><em>1 min</em>" : t === "1" ? "<em>1 min</em>" : "");
       if (t === "2") tile.appendChild(v); else tile.insertBefore(v, tile.firstChild);
     });
   }
