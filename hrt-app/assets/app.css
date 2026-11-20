@@ -1657,3 +1657,24 @@ html.lay-wide .lay-tools .lay-qh{margin:0 -18px 12px;padding:10px 18px;backgroun
 html.lay-wide .lay-tools .lay-qh h3{color:#fff!important}
 html.lay-wide .lay-tools .lay-qedit{color:#dbe6f0;border-color:rgba(255,255,255,.35)}
 html.lay-wide .lay-tools .lay-qedit:hover{color:#fff;border-color:#fff}
+/* Nov 19 (Scottie): welcome strip is navy #1B2F4A by default (was orange) */
+.pop-strip-or{background:#1b2f4a!important;color:#fff!important}
+.pop-strip-or a{color:#fff!important}
+/* ===== Eddie's Wall background samples (Nov 19), ?ew=1..5: tiles sit on a tinted body so they pop ===== */
+html[class*="ew-"] #v-home .toprow .hero .lay-rows{border-radius:0 0 inherit inherit}
+html[class*="ew-"].wall-1 .lay-row{background:#fff!important;box-shadow:0 2px 8px rgba(16,32,54,.08)}
+/* 1. Soft blue-gray body, white tiles */
+html.ew-1 #v-home .toprow .hero .lay-rows{background:#eaf0f6}
+html.ew-1.wall-1 .lay-row{border-color:#dbe4ec!important}
+/* 2. Warm sand body, white tiles */
+html.ew-2 #v-home .toprow .hero .lay-rows{background:#f6ecdb}
+html.ew-2.wall-1 .lay-row{border-color:#ecdcbf!important}
+/* 3. Navy body, white tiles (strongest contrast) */
+html.ew-3 #v-home .toprow .hero .lay-rows{background:#1b2f4a}
+html.ew-3.wall-1 .lay-row{border-color:transparent!important;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+/* 4. Navy-to-sky gradient body, white tiles */
+html.ew-4 #v-home .toprow .hero .lay-rows{background:linear-gradient(180deg,#d6e2ee,#f1f5f9)}
+html.ew-4.wall-1 .lay-row{border-color:#d3dde7!important}
+/* 5. Light gray body, white tiles with an orange top edge and deeper shadow */
+html.ew-5 #v-home .toprow .hero .lay-rows{background:#eef1f4}
+html.ew-5.wall-1 .lay-row{border:0!important;border-top:4px solid #e8894f!important;box-shadow:0 8px 20px rgba(16,32,54,.14)}
