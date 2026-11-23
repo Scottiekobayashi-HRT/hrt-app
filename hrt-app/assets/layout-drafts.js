@@ -335,7 +335,8 @@
 (function () {
   var F = { "1": "outfit", "2": "urbanist", "3": "plus-jakarta-sans", "4": "lexend" };
   var q;
-  try { var m = /[?&]tf=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtTf", m[1]); q = m ? m[1] : sessionStorage.getItem("hrtTf"); } catch (e) { return; }
+  try { var m = /[?&]tf=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtTf", m[1]); q = m ? m[1] : sessionStorage.getItem("hrtTf"); } catch (e) { q = null; }
+  if (q == null) q = "2"; /* Nov 23: Scottie picked Urbanist as the default title font; ?tf=0 goes back to Montserrat */
   var f = F[q]; if (!f) return;
   var base = "https://cdn.jsdelivr.net/npm/@fontsource/" + f + "@5/files/" + f + "-latin-";
   var css = [600, 700, 800].map(function (w) {
