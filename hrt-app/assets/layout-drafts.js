@@ -302,3 +302,24 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
 })();
+
+/* One banner frame for every page (Nov 23, Scottie, swap draft): every page header uses the
+   same frame as the Walls and My Wallet. Adds a small gold section name above each page title. */
+(function () {
+  try { if (sessionStorage.getItem("hrtSwap") !== "1" && !/[?&]swap=1/.test(location.search)) return; } catch (e) { return; }
+  var EYE = { coaching: "Cards & Points", transfers: "Cards & Points", welcome: "Cards & Points",
+    atmos: "Atmos Rewards", status: "Atmos Rewards", communities: "Atmos Rewards", picks: "Atmos Rewards",
+    kamaaina: "Hawaii Tools", lounges: "Hawaii Tools", resy: "Hawaii Tools", plans: "Membership" };
+  function go() {
+    var heroes = document.querySelectorAll(".view .hero.slim");
+    if (!heroes.length) return setTimeout(go, 200);
+    heroes.forEach(function (h) {
+      if (h.querySelector(".pb-eye")) return;
+      var v = h.closest(".view"), pg = v && v.getAttribute("data-page"), t = h.querySelector(".hs-text") || h;
+      if (!pg || !EYE[pg]) return;
+      var e = document.createElement("span"); e.className = "pb-eye"; e.textContent = EYE[pg];
+      t.insertBefore(e, t.firstChild);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+})();
