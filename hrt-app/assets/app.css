@@ -1757,7 +1757,7 @@ html.strip-full .hrt-app>.hrt-main{grid-row:2;grid-column:2;min-height:0}
 .wl-ov-band{position:relative;min-height:108px;padding:16px 20px 16px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;color:#fff;
  background:linear-gradient(90deg,rgba(20,32,46,.9) 0%,rgba(20,32,46,.55) 50%,rgba(20,32,46,.2) 100%),linear-gradient(180deg,rgba(20,32,46,0) 40%,rgba(20,32,46,.7) 100%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b3017d69-9c62-4d52-9714-0c39f1cadff7/michelle-spollen-dC2FsjoXsPQ-unsplash+%281%29.jpg?content-type=image%2Fjpeg") center 60%/cover no-repeat,#14202e}
 .wl-ov-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.wl-ov-eye{font:800 11.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#f5c75a}
+.wl-ov-eye{font:800 11.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#d97040}
 .wl-ov-bot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .wl-ov-title{margin:0!important;font:700 28px sofia-pro,Montserrat,sans-serif!important;font-size:clamp(22px,2.2vw,28px)!important;line-height:1.1;color:#fff!important}
 .wl-ov-lvl{display:inline-flex;align-items:center;gap:6px;font:700 12px 'DM Sans',sans-serif;color:#fff;background:rgba(20,32,46,.6);border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:5px 12px}
@@ -1786,9 +1786,9 @@ html.wall-swap .view .hero.slim{position:relative;overflow:hidden;min-height:108
  background:linear-gradient(90deg,rgba(20,32,46,.94) 0%,rgba(20,32,46,.75) 45%,rgba(20,32,46,.35) 100%),linear-gradient(180deg,rgba(20,32,46,0) 40%,rgba(20,32,46,.6) 100%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b3017d69-9c62-4d52-9714-0c39f1cadff7/michelle-spollen-dC2FsjoXsPQ-unsplash+%281%29.jpg?content-type=image%2Fjpeg") center 60%/cover no-repeat,#14202e!important;
  box-shadow:0 14px 36px rgba(16,32,54,.18)!important;align-items:end!important}
 html.wall-swap .view .hero.slim::before,html.wall-swap .view .hero.slim::after,html.wall-swap .view .hero.slim>.fp{display:none!important}
-html.wall-swap .view .hero.slim .pb-eye{display:block;margin-bottom:6px;font:800 11.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#f5c75a}
+html.wall-swap .view .hero.slim .pb-eye{display:block;margin-bottom:6px;font:800 11.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#d97040}
 html.wall-swap .view .hero.slim h1{font:700 28px sofia-pro,Montserrat,sans-serif!important;font-size:clamp(22px,2.2vw,28px)!important;line-height:1.1!important;color:#fff!important;letter-spacing:0!important}
-html.wall-swap .view .hero.slim h1 .wave,html.wall-swap .view .hero.slim h1 span{color:#f5c75a!important;-webkit-text-fill-color:#f5c75a!important;background:none!important}
+html.wall-swap .view .hero.slim h1 .wave,html.wall-swap .view .hero.slim h1 span{color:#d97040!important;-webkit-text-fill-color:#d97040!important;background:none!important}
 html.wall-swap .view .hero.slim p{font-size:13.5px!important;line-height:1.5;color:#c9d6e3!important;max-width:60ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 html.wall-swap .view .hero.slim .hstats{gap:8px!important;flex-wrap:wrap!important;justify-content:flex-end;border:0!important;padding:0!important}
 html.wall-swap .view .hero.slim .hstat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 12px;min-width:84px}
@@ -1800,4 +1800,5 @@ html.wall-swap .view .hero.slim .hstat span{font-size:10.5px!important;color:#c9
 html.wall-swap .wl-sum.wl-pghead{border-radius:var(--radius,16px)!important;border:0!important;box-shadow:0 14px 36px rgba(16,32,54,.18)!important;
  background:linear-gradient(90deg,rgba(20,32,46,.94) 0%,rgba(20,32,46,.75) 45%,rgba(20,32,46,.35) 100%),linear-gradient(180deg,rgba(20,32,46,0) 40%,rgba(20,32,46,.6) 100%),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/b3017d69-9c62-4d52-9714-0c39f1cadff7/michelle-spollen-dC2FsjoXsPQ-unsplash+%281%29.jpg?content-type=image%2Fjpeg") center 60%/cover no-repeat,#14202e!important}
 html.wall-swap .wl-sum.wl-pghead .wl-sum-title{font:700 28px sofia-pro,Montserrat,sans-serif!important;font-size:clamp(22px,2.2vw,28px)!important;color:#fff!important}
-html.wall-swap .wl-sum.wl-pghead .wl-sum-title::before{content:"My Wallet";display:block;margin-bottom:6px;font:800 11.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#f5c75a}
+html.wall-swap .wl-sum.wl-pghead .wl-sum-title::before{content:"My Wallet";display:block;margin-bottom:6px;font:800 11.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#d97040}
+/* Nov 23 (Scottie): HRT orange, not yellow, in the page banner frame */
