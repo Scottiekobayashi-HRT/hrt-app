@@ -1870,3 +1870,27 @@ html.atx-3 :is(#v-status,#v-communities) .ag-step:before{background:#d97040}
 .lay-band .lay-trow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
 .lay-band .lay-upd{font:700 12.5px 'DM Sans',sans-serif;color:#bccde0;white-space:nowrap}
 .lay-band .lay-upd:empty{display:none}
+
+/* ===== Nov 23 (Eddie): Scottie's Wall tile color schemes ===== */
+/* Deals: yellow/orange buttons, thin matching border */
+.dw .dw-rail>button.dw-card,.dw .dw-card.dw-protile{border:2px solid #f2b84b!important}
+.dw .dw-calbtn.dw-unl{display:none}
+html:not(.ms-client):not(.ms-pro) .dw .dw-card.dw-oh .dw-calbtn.dw-see{display:none}
+html:not(.ms-client):not(.ms-pro) .dw .dw-card.dw-oh .dw-calbtn.dw-unl{display:block}
+/* News, transfer deals, staycation deals: black and white, thin white border */
+.dw .dw-card.dw-news,.dw .dw-card.dw-bonus,.dw .dw-card.dw-kama{border:2px solid #fff!important}
+/* Videos (Skill): blue buttons, thin blue border */
+.dw .dw-card.dw-vidtile{border:2px solid #3b82f6!important}
+.dw .dw-card.dw-vidtile .dw-kind{background:#3b82f6!important;color:#fff!important}
+.dw a.dw-tbtn.dw-tblue{background:#2f6fde!important;color:#fff!important;border-color:transparent!important}
+.dw a.dw-tbtn.dw-tblue:hover{background:#1f5bc4!important}
+.dw .dw-vidtile .dw-play{background:#3b82f6!important;color:#fff!important}
+/* Genius: green */
+.dw .dw-card.dw-genius{border:2px solid #22a06b!important}
+.dw .dw-genius .dw-gph{background:linear-gradient(150deg,#0f3d2c,#14202e 70%);display:grid;place-items:center}
+.dw .dw-genius .dw-gph:after{display:none}
+.dw .dw-genius .dw-gicon{color:#4ade80;position:relative;z-index:1}
+.dw .dw-genius .dw-kind{background:#22a06b!important;color:#fff!important}
+.dw a.dw-tbtn.dw-tgreen{background:#1f9d63!important;color:#fff!important;border-color:transparent!important}
+.dw a.dw-tbtn.dw-tgreen:hover{background:#178452!important}
+.dw .dw-genius .dw-vidline{font-size:13.5px;line-height:1.35}

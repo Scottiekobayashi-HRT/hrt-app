@@ -394,7 +394,8 @@
      testimonial (empty kinds are skipped). When one side runs out the other keeps going. */
   /* Nov 16 (Scottie): half the rotating tiles are videos (1 of every 6 tiles); the rest
      take turns: news, transfer bonus, kamaʻaina deal, HRT PRO, testimonial */
-  var EXTRA_CYCLE = ["video", "news", "video", "bonus", "video", "kama"]; /* Nov 16 (Scottie): videos half, then News, Transfer Deal and Staycation Deal in equal turns */
+  var EXTRA_CYCLE = ["video", "news", "video", "bonus", "genius", "video", "kama"]; /* Nov 23 (Eddie): Genius tiles join the turns */
+  /* Nov 16 (Scottie): videos half, then News, Transfer Deal and Staycation Deal in equal turns */
   function rhythmOrder(points, groups, max) {
     var pts = points.slice(), left = {}, out = [], turn = 0;
     EXTRA_CYCLE.forEach(function (k) { left[k] = (groups[k] || []).slice(); });
@@ -507,13 +508,13 @@
     var c = el("div", "dw-card dw-t dw-protile");
     var ph = photo("dw-ph dw-pblur", t.image);
     c.appendChild(ph);
-    var lab = el("span", "dw-kind dw-kpts", "Deal"); c.appendChild(lab); /* Nov 12: the button already says Unlock with HRT PRO */
+    var lab = el("span", "dw-kind dw-kpts", "Deal"); c.appendChild(lab); /* Nov 12: the button says what unlocks it */
     var body = el("div", "dw-body");
     body.appendChild(el("b", "dw-tt", (t.city || t.dest || "") + " in " + (/first/i.test(t.cabin || "") ? "first class" : "business class")));
-    body.appendChild(el("span", "dw-tsub", (t.origin || "HNL") + " \u2192 " + (t.dest || "") + ". PRO members see the dates and the points."));
+    body.appendChild(el("span", "dw-tsub", (t.origin || "HNL") + " \u2192 " + (t.dest || "") + ". Pro Level members see the dates and the points."));
     c.appendChild(body);
     var acts = el("div", "dw-tacts");
-    var go = el("a", "dw-tbtn dw-tgold", "\uD83D\uDD12 Unlock with HRT PRO"); go.href = "#atmos"; go.setAttribute("data-route", "atmos");
+    var go = el("a", "dw-tbtn dw-tgold", "Unlock with Pro Level"); go.href = "#atmos"; go.setAttribute("data-route", "atmos"); /* Nov 23 (Eddie): level names on unlock buttons */
     acts.appendChild(go); c.appendChild(acts);
     return c;
   }
@@ -565,11 +566,28 @@
     var c = el("div", "dw-card dw-t dw-vidtile");
     var ph = el("div", "dw-ph dw-vidph");
     var play = el("span", "dw-play"); play.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
-    ph.appendChild(play); ph.appendChild(el("span", "dw-kind", "Video"));
+    ph.appendChild(play); ph.appendChild(el("span", "dw-kind", "Skill")); /* Nov 23 (Eddie): videos are labeled Skill (or Genius) */
     c.appendChild(ph);
     var body = el("div", "dw-body"); body.appendChild(el("b", "dw-tt dw-vidline", line)); c.appendChild(body);
     var acts = el("div", "dw-tacts");
-    var go = el("a", "dw-tbtn dw-tgold", "Watch video ›"); go.href = "#plans"; go.setAttribute("data-route", "plans");
+    var go = el("a", "dw-tbtn dw-tblue", "Watch video ›"); go.href = "#plans"; go.setAttribute("data-route", "plans");
+    acts.appendChild(go); c.appendChild(acts);
+    return c;
+  }
+  /* Genius tiles (Eddie, Nov 23): green, pitch a tool that does the work for you */
+  var GENIUS = [
+    { line: "Let Scottie find your actual award flights.", btn: "Unlock with Wayfinder", route: "plans" },
+    { line: "Find your best Atmos deals on Scottie's Atmos Points Calendar.", btn: "Unlock with Pro Level", route: "atmos" }
+  ];
+  function geniusTile(g) {
+    var c = el("div", "dw-card dw-t dw-genius");
+    var ph = el("div", "dw-ph dw-gph");
+    ph.innerHTML = '<svg class="dw-gicon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>';
+    ph.appendChild(el("span", "dw-kind", "Genius"));
+    c.appendChild(ph);
+    var body = el("div", "dw-body"); body.appendChild(el("b", "dw-tt dw-vidline", g.line)); c.appendChild(body);
+    var acts = el("div", "dw-tacts");
+    var go = el("a", "dw-tbtn dw-tgreen", g.btn + " \u203A"); go.href = "#" + g.route; go.setAttribute("data-route", g.route);
     acts.appendChild(go); c.appendChild(acts);
     return c;
   }
@@ -622,7 +640,7 @@
          points deals too, so the 2-of-3 rhythm lasts the whole wall (Nov 12) */
       var mine = pointsTiles.concat((feed._teasers || []).map(function (t) { return { kind: "pro", item: t }; }));
       var tiles = rhythmOrder(mine, { pro: [], bonus: feed._bonuses || [], testimonial: TESTIMONIALS,
-        news: feed._news || [], kama: feed._kama || [], video: videoLines(oh) }, MIX_MAX);
+        news: feed._news || [], kama: feed._kama || [], video: videoLines(oh), genius: GENIUS.slice() }, MIX_MAX);
       tiles.forEach(addTile);
       rail.scrollLeft = 0;
     }
@@ -633,6 +651,7 @@
       if (tile.kind === "bonus") return rail.appendChild(bonusTile(tile.item));
       if (tile.kind === "testimonial") return rail.appendChild(testimonialTile(tile.item));
       if (tile.kind === "video") return rail.appendChild(videoTile(tile.item));
+      if (tile.kind === "genius") return rail.appendChild(geniusTile(tile.item));
       if (tile.kind === "pro") return rail.appendChild(proTile(tile.item));
       var d = tile.item;
       var card = el("button", "dw-card" + (subRoute(d) ? "" : " dw-oh"));
@@ -671,7 +690,9 @@
       body.appendChild(meta);
 
       card.appendChild(body);
-      card.appendChild(el("span", "dw-calbtn", "See Calendar")); /* Nov 16 (Scottie) */
+      card.appendChild(el("span", "dw-calbtn dw-see", "See Calendar")); /* Nov 16 (Scottie) */
+      /* Nov 23 (Eddie): a deal the viewer's level doesn't include says what unlocks it, same colors */
+      if (!subRoute(d)) card.appendChild(el("span", "dw-calbtn dw-unl", "Unlock with Ohana Level"));
       rail.appendChild(card);
     }
     buildTiles();
@@ -1117,7 +1138,7 @@
         rail.innerHTML = "";
         order.forEach(function (t) {
           rail.appendChild(t.kind === "deals" ? t.item : t.kind === "news" ? newsTile(t.item) : t.kind === "kama" ? kamaTile(t.item) :
-            t.kind === "bonus" ? bonusTile(t.item) : t.kind === "video" ? videoTile(t.item) : testimonialTile(t.item));
+            t.kind === "bonus" ? bonusTile(t.item) : t.kind === "video" ? videoTile(t.item) : t.kind === "genius" ? geniusTile(t.item) : testimonialTile(t.item));
         });
       }
       rail.hidden = !list.length;
