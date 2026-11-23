@@ -21,8 +21,10 @@
      distance 1 status point per mile flown
      price    5 status points per dollar of fare, excluding taxes and fees
      segment  500 status points per segment
-     bonus    Silver 25%, Gold 50%, Platinum 100%, Titanium 150%; Alaska states
-              these apply across all three earn choices
+     bonus    Silver 25%, Gold 50%, Platinum 100%, Titanium 150%. These add
+              REDEEMABLE points on flights under all three earn choices. They do
+              NOT add status points (NerdWallet, Frequent Miler; checked Nov 23 2026),
+              so this tool never counts them toward a tier.
      award    all three earn STATUS points on award travel: distance by miles,
               segments at the full 500, price at 1 per 20 points redeemed
      zero     Saver and Basic Economy fares earn nothing on any choice
@@ -145,9 +147,10 @@
     var cardPts = (c.per ? (Math.max(0, +state.spend || 0) * 12) / c.per : 0) + c.anniversary;
 
     var methods = [
-      { key: "distance", name: "Distance", verb: "by distance", rule: "1 point per mile",      fly: miles * PER_MILE * b },
-      { key: "price",    name: "Price",    verb: "by price",    rule: "5 points per dollar",   fly: dollars * PER_DOLLAR * b },
-      { key: "segment",  name: "Segments", verb: "by segments",  rule: "500 points per flight", fly: segments * PER_SEGMENT * b }
+      /* status points: the elite bonus is left out on purpose (it adds redeemable points only; fixed Nov 23 2026) */
+      { key: "distance", name: "Distance", verb: "by distance", rule: "1 point per mile",      fly: miles * PER_MILE },
+      { key: "price",    name: "Price",    verb: "by price",    rule: "5 points per dollar",   fly: dollars * PER_DOLLAR },
+      { key: "segment",  name: "Segments", verb: "by segments",  rule: "500 points per flight", fly: segments * PER_SEGMENT }
     ];
     methods.forEach(function (m) { m.total = m.fly + cardPts; });
     var sorted = methods.slice().sort(function (a, z) { return z.total - a.total; });
@@ -285,7 +288,7 @@
     var o0 = document.createElement("option"); o0.value = "none"; o0.textContent = "None yet"; sel.appendChild(o0);
     TIERS.forEach(function (t) {
       var o = document.createElement("option"); o.value = t.key;
-      o.textContent = t.name + " (+" + Math.round(t.bonus * 100) + "% on flights)";
+      o.textContent = t.name + " (+" + Math.round(t.bonus * 100) + "% bonus points on flights)";
       if (t.key === state.current) o.selected = true; sel.appendChild(o);
     });
     sel.addEventListener("change", function () { state.current = sel.value; paint(); });
@@ -419,9 +422,6 @@
           ways.appendChild(li);
           hardSoFar = true;
         }
-        if (r.bonus === 0) {
-          ways.appendChild(el("li", null, "Reach a lower tier first. Status adds 25% to 150% to everything you earn on flights after that."));
-        }
         body.appendChild(ways);
         body.appendChild(el("p", "ap-note", reachable
           ? "Any mix of these works too. The gap is " + fmt(gap) + " points."
@@ -469,7 +469,7 @@
     var wrap = el("div", "ap-card");
     var ul = el("ul", "ap-list");
     if (r.cardPts > 0) ul.appendChild(el("li", null, "Your card adds " + fmt(r.cardPts) + " points, and that part is the same whichever option you pick."));
-    if (r.bonus > 0) ul.appendChild(el("li", null, "Your current status adds " + Math.round(r.bonus * 100) + "% on flights, already counted above."));
+    if (r.bonus > 0) ul.appendChild(el("li", null, "Your current status adds " + Math.round(r.bonus * 100) + "% bonus points you can spend on flights. Those do not count toward status, so they are not in the numbers above."));
     ul.appendChild(el("li", null, "You can change your choice once per calendar year. Members who do nothing stay on distance."));
     wrap.appendChild(ul);
     var fine = el("ul", "ap-list");

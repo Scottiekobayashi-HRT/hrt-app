@@ -28,12 +28,12 @@ r=T.compute();
 const expMiles = 10*0.6*220 + 10*0.3*5100 + 10*0.1*7700;
 ok('mix miles split correctly', Math.abs(r.miles-expMiles)<0.001, r.miles+' vs '+expMiles);
 
-// elite bonus applies to flights only, never to card points
+// elite bonus adds redeemable points only, never status points (fixed Nov 23 2026)
 S.preset='island'; S.trips=14; S.current='gold'; S.card='ascent'; S.spend=3000;
 r=T.compute();
-ok('gold bonus: 14,000 x 1.5 = 21,000', by(r,'segment').fly===21000, by(r,'segment').fly);
+ok('gold status does not add status points: still 14,000', by(r,'segment').fly===14000, by(r,'segment').fly);
 ok('card unaffected by bonus: 36,000/3 = 12,000', r.cardPts===12000, r.cardPts);
-ok('total = flights + card', by(r,'segment').total===21000+12000, by(r,'segment').total);
+ok('total = flights + card', by(r,'segment').total===14000+12000, by(r,'segment').total);
 
 // Summit anniversary bonus
 S.card='summit'; S.spend=1000;

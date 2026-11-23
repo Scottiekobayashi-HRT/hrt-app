@@ -326,5 +326,5 @@
 
 /* Atmos Choose to Earn + Communities look drafts (Nov 23, Scottie): ?atx=1..3, ?atx=0 off. Stays on for the tab. */
 (function () {
-  try { var m = /[?&]atx=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtAtx", m[1]); var q = m ? m[1] : sessionStorage.getItem("hrtAtx"); if (q && q !== "0") document.documentElement.classList.add("atx-" + q); } catch (e) {}
+  try { var m = /[?&]atx=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtAtx", m[1]); var q = m ? m[1] : sessionStorage.getItem("hrtAtx"); if (q == null) q = "3"; /* Nov 23: Scottie picked draft 3 (list view) as the default */ if (q && q !== "0") document.documentElement.classList.add("atx-" + q); } catch (e) {}
 })();
