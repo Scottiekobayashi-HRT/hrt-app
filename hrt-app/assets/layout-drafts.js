@@ -289,3 +289,16 @@
 (function () {
   try { var m = /[?&]ql=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtQl", m[1]); var q = m ? m[1] : sessionStorage.getItem("hrtQl"); if (q && q !== "0") document.documentElement.classList.add("ql-" + q); } catch (e) {}
 })();
+
+/* Full-width welcome strip (Nov 22, Scottie): with ?swap=1 on a computer, the orange welcome strip
+   runs across the whole top of the screen, above the sidebar too, like the prayer app */
+(function () {
+  try { if (sessionStorage.getItem("hrtSwap") !== "1" && !/[?&]swap=1/.test(location.search)) return; } catch (e) { return; }
+  if (!window.matchMedia || !window.matchMedia("(min-width:901px)").matches) return;
+  function go() {
+    var app = document.querySelector(".hrt-app"), st = document.querySelector(".pop-strip");
+    if (!app || !st) return setTimeout(go, 200);
+    if (st.parentNode !== app) { app.insertBefore(st, app.firstChild); document.documentElement.classList.add("strip-full"); }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+})();

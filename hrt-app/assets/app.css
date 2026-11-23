@@ -1744,3 +1744,10 @@ html.ql-1 .lay-tools .lay-qedit,html.ql-3 .lay-tools .lay-qedit,html.ql-5 .lay-t
 html.ql-2 .lay-tools .lay-qedit{color:#14202e;border-color:rgba(20,32,46,.4)}
 html.ql-1 .lay-tools .lay-qtip,html.ql-3 .lay-tools .lay-qtip{color:#dbe6f0!important}
 html.wall-swap #v-home .toprow .hero{min-height:0!important;justify-content:flex-start!important}
+/* Nov 22: full-width welcome strip (swap draft, computers only) */
+@media (min-width:901px){
+html.strip-full .hrt-app{grid-template-rows:auto minmax(0,1fr)}
+html.strip-full .hrt-app>.pop-strip{grid-column:1/-1;grid-row:1}
+html.strip-full .hrt-app>.hrt-sb{grid-row:2;grid-column:1;height:auto!important;min-height:0}
+html.strip-full .hrt-app>.hrt-main{grid-row:2;grid-column:2;min-height:0}
+}
