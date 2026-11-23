@@ -1199,13 +1199,19 @@ html.ms-client .pl.ohana .btn{display:none}
  if(ACC) root.classList.add("nav-acc");
  function counts(){ if(!ACC) return; groups().forEach(function(g){ var b=g.querySelector(".hrt-grph"), n=[].filter.call(g.querySelectorAll(".hrt-grpb .hrt-navi"), function(a){ return getComputedStyle(a).display!=="none"; }).length, c=b.querySelector(".hrt-cnt");
    if(!c){ c=document.createElement("i"); c.className="hrt-cnt"; b.insertBefore(c, b.querySelector(".hrt-chev")); } c.textContent=n||""; }); }
+ var pageChanged=true, lastHash=location.hash;
  function sync(){
+  if(location.hash!==lastHash){ lastHash=location.hash; pageChanged=true; }
   groups().forEach(function(g){
    var k=g.getAttribute("data-grp"), here=[].some.call(g.querySelectorAll(".hrt-navi.on"), function(a){ return getComputedStyle(a).display!=="none"; });
    g.classList.toggle("has-on", here);
    var member=root.classList.contains("ms-pro")||root.classList.contains("ms-client");
+   if(ACC){ /* never close a group by itself: the page's group opens once and then stays open until tapped closed */
+    if(here && pageChanged) { saved[k]=true; store(); }
+    set(g, k in saved ? saved[k] : (here || k==="pro" || (k==="start" && !member))); return; }
    set(g, here || (k in saved ? saved[k] : (k==="pro" || (k==="start" && !member))));
   });
+  pageChanged=false;
   counts();
  }
  document.addEventListener("click", function(e){

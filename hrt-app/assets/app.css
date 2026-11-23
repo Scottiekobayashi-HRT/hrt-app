@@ -743,7 +743,7 @@ html,body{height:100%;margin:0;overflow:hidden}.hrt-app{position:relative;displa
 .hrt-grpb{display:flex;flex-direction:column;gap:2px}
 .hrt-grpb[hidden]{display:none}
 .hrt-grp.has-on > .hrt-grph{color:#fff}
-.hrt-grp.has-on > .hrt-grph[aria-expanded="false"]::after{content:"";width:6px;height:6px;border-radius:50%;background:#d97040;margin-left:-2px}
+/* Nov 23: no dot on a closed group that holds the current page (Scottie) */
 .hrt-grp.gold > .hrt-grph{color:#f2b84b}
 .hrt-grp.gold > .hrt-grph:hover{background:rgba(242,184,75,.10)}
 .hrt-grp.gold{margin-top:6px;border:1px solid rgba(242,184,75,.32);border-radius:12px;padding:0 4px 4px;background:linear-gradient(135deg,rgba(217,112,64,.10),rgba(242,184,75,.04))}
