@@ -1877,13 +1877,16 @@
   function boxParts(html) {
     var d = document.createElement("div"); d.innerHTML = html;
     var l = d.querySelector(".hw-l"), v = d.querySelector(".hw-v"), sb = d.querySelector(".hw-s");
+    if (v) v.querySelectorAll("br").forEach(function (br) { br.replaceWith("\n"); });
     var a = sb && sb.querySelector("a.hw-nx-go"); if (sb) sb.querySelectorAll(".hw-upd").forEach(function (b) { b.remove(); });
     var sub = sb ? String(sb.textContent || "").replace(a ? a.textContent : "", "").replace(/\s+/g, " ").trim() : "";
-    var val = v ? String(v.innerText || v.textContent || "").split(/\n+/).map(function (x) { return x.replace(/\s+/g, " ").trim(); }).filter(Boolean) : [];
+    var val = v ? String(v.textContent || "").split(/\n+/).map(function (x) { return x.replace(/\s+/g, " ").trim(); }).filter(Boolean) : [];
     if (v && v.classList.contains("hw-nx-rows")) val = Array.prototype.map.call(v.children, function (x) { return String(x.textContent || "").replace(/\s+/g, " ").trim(); });
     return { label: l ? String(l.textContent || "").trim() : "", value: val, sub: sub, link: a ? { href: a.getAttribute("href"), route: a.getAttribute("data-route"), target: a.target, text: String(a.textContent || "").replace(/[›>]\s*$/, "").trim() } : null };
   }
   function ovRow(n, ic, p, pill) {
+    if (pill && pill.wl) return '<div class="wl-ov-tile wl-ov-t' + n + '"><small>' + esc(p.label) + "</small><b>" + p.value.map(esc).join("<br>") + "</b>" + (p.sub ? "<em>" + esc(p.sub) + "</em>" : "") +
+      '<button type="button" class="wl-ov-pill" data-wl="' + esc(pill.wl) + '">' + esc(pill.text) + " &rsaquo;</button></div>";
     var btn = pill ? '<a class="wl-ov-pill" href="' + esc(pill.href) + '"' + (pill.route ? ' data-route="' + esc(pill.route) + '"' : "") + (pill.target ? ' target="_blank" rel="noopener sponsored"' : "") + ">" + esc(pill.text) + " &rsaquo;</a>" : "";
     return '<div class="wl-ov-tile wl-ov-t' + n + '"><small>' + esc(p.label) + "</small><b>" +
       p.value.map(esc).join("<br>") + "</b>" + (p.sub ? "<em>" + esc(p.sub) + "</em>" : "") + btn + "</div>";
@@ -1902,7 +1905,8 @@
     var act = boxParts(nextActionBox(V, cl, s, firstOf()));
     var nc = boxParts(nextCardBox(V, cl));
     var fee = boxParts(feeBox(cl, nx));
-    var cards = { label: "Cards", value: [s.count + (s.count === 1 ? " card" : " cards") + " in your wallet"], sub: s.yearly ? money(s.yearly) + " a year in annual fees" : "", link: null };
+    var cards = s.count ? { label: "Cards", value: [s.count + (s.count === 1 ? " card" : " cards") + " in your wallet"], sub: s.yearly ? money(s.yearly) + " a year in annual fees" : "", link: null } :
+      { label: "Cards", value: ["No cards yet"], sub: "Add your cards to see every fee, renewal and credit", link: null };
     var cr = { label: "Credits", value: [due ? money(due) + " to use" : TICKS ? "All used" : "Nothing due"], sub: "in the next " + SOON_PERK_DAYS + " days", link: null };
     var lvT = lv === "pro" ? "Pro Level member" : lv === "ohana" ? "Ohana Level member" : "Aloha Level member";
     var badge = lv === "pro" ? '<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>' : lv === "ohana" ? '<span class="wl-ov-star">' + OH_STAR + "</span>" : "";
@@ -1915,8 +1919,8 @@
     var ptsP = { label: "Points & Miles", value: [pts ? pts.toLocaleString("en-US") + " points" : "Add your balances"], sub: np ? "across " + np + (np === 1 ? " program" : " programs") : "Chase, Amex, Atmos and more", link: null };
     var rows = '<div class="wl-ov-grid">' +
       ovRow(1, ICON.act, act, act.link) + ovRow(2, ICON.next, nc, nc.link) + ovRow(5, ICON.fee, fee, fee.link) +
-      ovRow(3, ICON.cards, cards, { href: "#wallet/cards", route: "wallet/cards", text: "See cards" }) +
-      ovRow(4, ICON.cr, cr, { href: "#wallet/credits", route: "wallet/credits", text: "See credits" }) +
+      ovRow(3, ICON.cards, cards, s.count ? { href: "#wallet/cards", route: "wallet/cards", text: "See cards" } : { wl: "add", text: "Add your cards" }) +
+      ovRow(4, ICON.cr, cr, s.count ? { href: "#wallet/credits", route: "wallet/credits", text: "See credits" } : null) +
       ovRow(6, "", ptsP, { href: "#wallet/points", route: "wallet/points", text: "See points" }) + "</div>";
     var foot = cl && (o.strategy || o.review) ? '<div class="wl-ov-foot">' + (o.strategy ? "<span><b>Your strategy:</b> " + esc(o.strategy) + "</span>" : "") +
       (o.review ? "<span>Last review " + esc(ohanaDate(o.review)) + "</span>" : "") + "</div>" : "";
@@ -2493,7 +2497,7 @@
     } else if (state.tab === "transfers" && !s.count) {
       html = transfersPageHtml();
     } else if (!s.count && !(s.upcoming || []).length) {
-      html = summaryHtml("page"); /* empty wallet: the summary card invites them to add cards */
+      html = swapOn() ? ovHtml(s, perks) : summaryHtml("page"); /* empty wallet: the summary card invites them to add cards (Nov 22: new Overview look in the swap draft) */
       if (!state.demo) html += '<section class="wl-card wl-smp-wrap"><h3 class="wl-h3">Start here: a sample card</h3>' + sampleHtml() + "</section>";
       if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
     } else {
