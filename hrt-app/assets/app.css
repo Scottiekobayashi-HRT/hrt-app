@@ -1894,3 +1894,9 @@ html:not(.ms-client):not(.ms-pro) .dw .dw-card.dw-oh .dw-calbtn.dw-unl{display:b
 .dw a.dw-tbtn.dw-tgreen{background:#1f9d63!important;color:#fff!important;border-color:transparent!important}
 .dw a.dw-tbtn.dw-tgreen:hover{background:#178452!important}
 .dw .dw-genius .dw-vidline{font-size:13.5px;line-height:1.35}
+/* Nov 23: "Soon" items in Start here (not built yet, not clickable) */
+.hrt-navi.soon{cursor:default;opacity:.62}
+.hrt-navi.soon:hover{background:none!important}
+.hrt-navi .cnt.soon-b{background:rgba(255,255,255,.12);color:#c7d4e2;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase}
+html .hrt-sb .hrt-navi.soon .cnt.soon-b{display:inline-block!important;margin-left:auto;flex:none}
+html.nav-acc .hrt-grpb{max-height:1200px}
