@@ -1695,3 +1695,4 @@ html.wall-swap #v-home .dw,html.wall-swap #v-home .dwp{margin-top:0}
 html.wall-swap #v-home .dw + .toprow,html.wall-swap #v-home .dwp + .toprow,html.wall-swap #v-home .dwp + .dw + .toprow{margin-top:22px}
 html.wall-swap #v-home .lay-band .lay-date{display:none!important} /* Nov 22 (Scottie): no date on the member Wall when Scottie's Wall sits on top */
 @media (max-width:640px){html.wall-swap #v-home .lay-band .lay-lvl{top:22px!important;bottom:auto!important;left:24px!important;right:auto!important}} /* Nov 22: on phones the level bubble takes the date's spot so it no longer covers the Wall title */
+html.wall-swap #v-home .lay-side .lay-cream{display:none!important} /* Nov 22 (Scottie): Text Scottie side card removed in the swap draft */
