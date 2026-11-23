@@ -1689,3 +1689,7 @@ html.ew-8.wall-1 .lay-row,html.ew-9.wall-1 .lay-row{border-color:transparent!imp
 #v-home .lay-band{min-height:150px!important}
 html.swh-1 .dw-navy>.dw-head,html.swh-1 .dwp>.dw-head{min-height:108px;align-items:flex-end;padding:20px 20px 16px!important}
 html.swh-1 .dw-navy>.dw-head h2,html.swh-1 .dwp>.dw-head h2{font-size:clamp(22px,2.2vw,28px)!important;line-height:1.1}
+
+/* Nov 22 wall swap draft (?swap=1): Scottie's Wall on top, member Wall under it */
+html.wall-swap #v-home .dw,html.wall-swap #v-home .dwp{margin-top:0}
+html.wall-swap #v-home .dw + .toprow,html.wall-swap #v-home .dwp + .toprow,html.wall-swap #v-home .dwp + .dw + .toprow{margin-top:22px}

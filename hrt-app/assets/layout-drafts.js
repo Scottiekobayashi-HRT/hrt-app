@@ -260,3 +260,27 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
 })();
+
+/* Wall swap draft (Nov 22, Scottie): ?swap=1 puts Scottie's Wall (deals: what members could get) above
+   the member's own Wall (what they already have). ?swap=0 turns it off. Stays on for the browser tab. */
+(function () {
+  var s;
+  try { var m = /[?&]swap=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtSwap", m[1]); s = m ? m[1] : sessionStorage.getItem("hrtSwap"); } catch (e) { return; }
+  if (s !== "1") return;
+  document.documentElement.classList.add("wall-swap");
+  function fix() {
+    var top = document.querySelector("#v-home .toprow");
+    if (!top || !top.parentNode) return;
+    /* free wall (.dw) and PRO wall (.dwp), kept in their own order */
+    Array.prototype.slice.call(top.parentNode.querySelectorAll(":scope > .dwp, :scope > .dw")).forEach(function (w) {
+      if (top.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_FOLLOWING) top.parentNode.insertBefore(w, top);
+    });
+  }
+  function go() {
+    var c = document.querySelector("#v-home .content");
+    if (!c) return setTimeout(go, 200);
+    new MutationObserver(fix).observe(c, { childList: true, subtree: true });
+    fix();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+})();
