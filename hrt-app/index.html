@@ -1191,17 +1191,31 @@ html.ms-client .pl.ohana .btn{display:none}
  function store(){ try{ localStorage.setItem(KEY, JSON.stringify(saved)); }catch(e){} }
  function groups(){ return document.querySelectorAll("#sideNav .hrt-grp"); }
  function set(g,open){ var b=g.querySelector(".hrt-grph"), body=g.querySelector(".hrt-grpb"); b.setAttribute("aria-expanded", open?"true":"false"); body.hidden=!open; }
+ /* Smoother sidebar draft (Nov 23, Scottie): with ?swap=1 or ?nav=1, one group open at a time,
+    the group for the page you are on opens by itself, groups slide open, closed groups show a count */
+ var ACC=(function(){ try{ var q=location.search, m=/[?&]nav=(\d)/.exec(q); if(m) sessionStorage.setItem("hrtNav",m[1]);
+   var n=m?m[1]:sessionStorage.getItem("hrtNav"); if(n==="0") return false;
+   return n==="1" || /[?&]swap=1/.test(q) || (sessionStorage.getItem("hrtSwap")==="1" && !/[?&]swap=0/.test(q)); }catch(e){ return false; } })();
+ var accKey=null, lastHash=location.hash;
+ if(ACC) root.classList.add("nav-acc");
+ function counts(){ if(!ACC) return; groups().forEach(function(g){ var b=g.querySelector(".hrt-grph"), n=[].filter.call(g.querySelectorAll(".hrt-grpb .hrt-navi"), function(a){ return getComputedStyle(a).display!=="none"; }).length, c=b.querySelector(".hrt-cnt");
+   if(!c){ c=document.createElement("i"); c.className="hrt-cnt"; b.insertBefore(c, b.querySelector(".hrt-chev")); } c.textContent=n||""; }); }
  function sync(){
+  if(ACC && location.hash!==lastHash){ lastHash=location.hash; accKey=null; }
   groups().forEach(function(g){
    var k=g.getAttribute("data-grp"), here=[].some.call(g.querySelectorAll(".hrt-navi.on"), function(a){ return getComputedStyle(a).display!=="none"; });
    g.classList.toggle("has-on", here);
    var member=root.classList.contains("ms-pro")||root.classList.contains("ms-client");
+   if(ACC){ var anyHere=[].some.call(document.querySelectorAll("#sideNav .hrt-grpb .hrt-navi.on"), function(a){ return getComputedStyle(a).display!=="none"; });
+    set(g, accKey!==null ? k===accKey : (here || (!anyHere && k==="start" && !member))); return; }
    set(g, here || (k in saved ? saved[k] : (k==="pro" || (k==="start" && !member))));
   });
+  counts();
  }
  document.addEventListener("click", function(e){
   var b=e.target.closest && e.target.closest("#sideNav .hrt-grph"); if(!b) return;
   var g=b.parentNode, open=b.getAttribute("aria-expanded")!=="true";
+  if(ACC){ accKey=open ? g.getAttribute("data-grp") : ""; sync(); return; }
   saved[g.getAttribute("data-grp")]=open; store(); set(g,open);
  });
  window.HRT_NAV={ sync: sync };

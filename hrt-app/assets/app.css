@@ -1802,3 +1802,13 @@ html.wall-swap .wl-sum.wl-pghead{border-radius:var(--radius,16px)!important;bord
 html.wall-swap .wl-sum.wl-pghead .wl-sum-title{font:700 28px sofia-pro,Montserrat,sans-serif!important;font-size:clamp(22px,2.2vw,28px)!important;color:#fff!important}
 html.wall-swap .wl-sum.wl-pghead .wl-sum-title::before{content:"My Wallet";display:block;margin-bottom:6px;font:800 11.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#d97040}
 /* Nov 23 (Scottie): HRT orange, not yellow, in the page banner frame */
+
+/* Nov 23 (Scottie): smoother sidebar draft (html.nav-acc, with ?swap=1 or ?nav=1) */
+html.nav-acc .hrt-grph{font-size:11.5px;padding:11px 12px;margin-top:4px;transition:background .15s,color .15s}
+html.nav-acc .hrt-grph[aria-expanded="true"]{background:#132339;color:#fff}
+html.nav-acc .hrt-grpb{display:flex!important;overflow:hidden;max-height:420px;opacity:1;transition:max-height .28s ease,opacity .2s ease,margin .2s ease;margin:2px 0 6px}
+html.nav-acc .hrt-grpb[hidden]{max-height:0;opacity:0;margin:0;pointer-events:none;visibility:hidden;transition:max-height .24s ease,opacity .15s ease,margin .2s ease,visibility 0s .24s}
+html.nav-acc .hrt-cnt{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:0;min-width:20px;height:20px;line-height:20px;text-align:center;border-radius:999px;background:rgba(255,255,255,.08);color:#c7d4e2;transition:opacity .15s}
+html.nav-acc .hrt-grph[aria-expanded="true"] .hrt-cnt{opacity:0}
+html.nav-acc .hrt-cnt:empty{display:none}
+@media (prefers-reduced-motion:reduce){html.nav-acc .hrt-grpb,html.nav-acc .hrt-grpb[hidden]{transition:none}}
