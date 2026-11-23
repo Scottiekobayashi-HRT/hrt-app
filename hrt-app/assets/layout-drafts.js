@@ -148,7 +148,7 @@
         rows = mk("div", "lay-rows");
         var band = mk("div", "lay-band", '<button type="button" class="lay-pick" aria-haspopup="true" aria-expanded="false" aria-label="Change photo" title="Change photo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>' +
           '<div class="lay-pick-menu" hidden>' + PICS.map(function (p, i) { return '<button type="button" data-pic="' + i + '">' + p[0] + "</button>"; }).join("") + "</div>" +
-          '<span class="lay-date"></span><b class="lay-wt"></b><span class="lay-lvl"></span>');
+          '<span class="lay-date"></span><span class="lay-trow"><b class="lay-wt"></b><span class="lay-upd dash-upd"></span></span><span class="lay-lvl"></span>');
         setPic(band, picIndex());
         band.addEventListener("click", function (e) {
           var menu = band.querySelector(".lay-pick-menu"), t = e.target.closest("button");
@@ -163,6 +163,8 @@
       }
       var d = new Date();
       hero.querySelector(".lay-date").textContent = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase();
+      /* Nov 23 (Scottie): small "updated Nov 22" next to the member Wall title, same date as Scottie's Wall */
+      var up = hero.querySelector(".lay-upd"); if (up) up.textContent = window.HRT_WALL_UPD || "";
       var t = hero.querySelector(".hw-wall-t");
       hero.querySelector(".lay-wt").textContent = t ? txt((t.querySelector(".hh-title") || t.querySelector(".named") || t).textContent).replace(/(Aloha|Ohana|Pro) Level member.*$/, "") : "Your Wall";
       /* Nov 19 (Scottie): level shown as a bubble on the banner; "Your next steps" title removed */
@@ -265,7 +267,7 @@
    the member's own Wall (what they already have). ?swap=0 turns it off. Stays on for the browser tab. */
 (function () {
   var s;
-  try { var m = /[?&]swap=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtSwap", m[1]); s = m ? m[1] : sessionStorage.getItem("hrtSwap"); } catch (e) { return; }
+  try { var m = /[?&]swap=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtSwap", m[1]); s = m ? m[1] : (sessionStorage.getItem("hrtSwap") || "1"); /* Nov 23: live for everyone (Scottie); ?swap=0 shows the old layout */ } catch (e) { s = "1"; }
   if (s !== "1") return;
   document.documentElement.classList.add("wall-swap");
   function fix() {
@@ -293,7 +295,7 @@
 /* Full-width welcome strip (Nov 22, Scottie): with ?swap=1 on a computer, the orange welcome strip
    runs across the whole top of the screen, above the sidebar too, like the prayer app */
 (function () {
-  try { if (sessionStorage.getItem("hrtSwap") !== "1" && !/[?&]swap=1/.test(location.search)) return; } catch (e) { return; }
+  try { if (/[?&]swap=0/.test(location.search) || (!/[?&]swap=1/.test(location.search) && sessionStorage.getItem("hrtSwap") === "0")) return; } catch (e) {}
   if (!window.matchMedia || !window.matchMedia("(min-width:901px)").matches) return;
   function go() {
     var app = document.querySelector(".hrt-app"), st = document.querySelector(".pop-strip");
@@ -306,7 +308,7 @@
 /* One banner frame for every page (Nov 23, Scottie, swap draft): every page header uses the
    same frame as the Walls and My Wallet. Adds a small gold section name above each page title. */
 (function () {
-  try { if (sessionStorage.getItem("hrtSwap") !== "1" && !/[?&]swap=1/.test(location.search)) return; } catch (e) { return; }
+  try { if (/[?&]swap=0/.test(location.search) || (!/[?&]swap=1/.test(location.search) && sessionStorage.getItem("hrtSwap") === "0")) return; } catch (e) {}
   var EYE = { coaching: "Cards & Points", transfers: "Cards & Points", welcome: "Cards & Points",
     atmos: "Atmos Rewards", status: "Atmos Rewards", communities: "Atmos Rewards", picks: "Atmos Rewards",
     kamaaina: "Hawaii Tools", lounges: "Hawaii Tools", resy: "Hawaii Tools", plans: "Membership" };

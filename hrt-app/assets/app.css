@@ -1866,3 +1866,7 @@ html.atx-3 :is(#v-status,#v-communities) .ag-step:before{background:#d97040}
 #v-home .lay-band .lay-pick{top:auto!important;bottom:11px!important;right:12px!important}
 #v-home .lay-band .lay-lvl{right:54px!important}
 @media (max-width:640px){html.wall-swap #v-home .lay-band .lay-lvl{right:auto!important}}
+/* Nov 23: "updated" date next to the member Wall title */
+.lay-band .lay-trow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+.lay-band .lay-upd{font:700 12.5px 'DM Sans',sans-serif;color:#bccde0;white-space:nowrap}
+.lay-band .lay-upd:empty{display:none}
