@@ -1873,30 +1873,34 @@ html.atx-3 :is(#v-status,#v-communities) .ag-step:before{background:#d97040}
 
 /* ===== Nov 23 (Eddie): Scottie's Wall tile color schemes ===== */
 /* Deals: yellow/orange buttons, thin matching border */
-.dw .dw-rail>button.dw-card,.dw .dw-card.dw-protile{border:2px solid #f2b84b!important}
-.dw .dw-calbtn.dw-unl{display:none}
-html:not(.ms-client):not(.ms-pro) .dw .dw-card.dw-oh .dw-calbtn.dw-see{display:none}
-html:not(.ms-client):not(.ms-pro) .dw .dw-card.dw-oh .dw-calbtn.dw-unl{display:block}
+:is(.dw,.dwp) .dw-rail>button.dw-card,:is(.dw,.dwp) .dw-card.dw-protile{border:2px solid #f2b84b!important}
+:is(.dw,.dwp) .dw-calbtn.dw-unl{display:none}
+html:not(.ms-client):not(.ms-pro) :is(.dw,.dwp) .dw-card.dw-oh .dw-calbtn.dw-see{display:none}
+html:not(.ms-client):not(.ms-pro) :is(.dw,.dwp) .dw-card.dw-oh .dw-calbtn.dw-unl{display:block}
 /* News, transfer deals, staycation deals: black and white, thin white border */
-.dw .dw-card.dw-news,.dw .dw-card.dw-bonus,.dw .dw-card.dw-kama{border:2px solid #fff!important}
+:is(.dw,.dwp) .dw-card.dw-news,:is(.dw,.dwp) .dw-card.dw-bonus,:is(.dw,.dwp) .dw-card.dw-kama{border:2px solid #fff!important}
 /* Videos (Skill): blue buttons, thin blue border */
-.dw .dw-card.dw-vidtile{border:2px solid #3b82f6!important}
-.dw .dw-card.dw-vidtile .dw-kind{background:#3b82f6!important;color:#fff!important}
-.dw a.dw-tbtn.dw-tblue{background:#2f6fde!important;color:#fff!important;border-color:transparent!important}
-.dw a.dw-tbtn.dw-tblue:hover{background:#1f5bc4!important}
-.dw .dw-vidtile .dw-play{background:#3b82f6!important;color:#fff!important}
+:is(.dw,.dwp) .dw-card.dw-vidtile{border:2px solid #3b82f6!important}
+:is(.dw,.dwp) .dw-card.dw-vidtile .dw-kind{background:#3b82f6!important;color:#fff!important}
+:is(.dw,.dwp) a.dw-tbtn.dw-tblue{background:#2f6fde!important;color:#fff!important;border-color:transparent!important}
+:is(.dw,.dwp) a.dw-tbtn.dw-tblue:hover{background:#1f5bc4!important}
+:is(.dw,.dwp) .dw-vidtile .dw-play{background:#3b82f6!important;color:#fff!important}
 /* Genius: green */
-.dw .dw-card.dw-genius{border:2px solid #22a06b!important}
-.dw .dw-genius .dw-gph{background:linear-gradient(150deg,#0f3d2c,#14202e 70%);display:grid;place-items:center}
-.dw .dw-genius .dw-gph:after{display:none}
-.dw .dw-genius .dw-gicon{color:#4ade80;position:relative;z-index:1}
-.dw .dw-genius .dw-kind{background:#22a06b!important;color:#fff!important}
-.dw a.dw-tbtn.dw-tgreen{background:#1f9d63!important;color:#fff!important;border-color:transparent!important}
-.dw a.dw-tbtn.dw-tgreen:hover{background:#178452!important}
-.dw .dw-genius .dw-vidline{font-size:13.5px;line-height:1.35}
+:is(.dw,.dwp) .dw-card.dw-genius{border:2px solid #22a06b!important}
+:is(.dw,.dwp) .dw-genius .dw-gph{background:linear-gradient(150deg,#0f3d2c,#14202e 70%);display:grid;place-items:center}
+:is(.dw,.dwp) .dw-genius .dw-gph:after{display:none}
+:is(.dw,.dwp) .dw-genius .dw-gicon{color:#4ade80;position:relative;z-index:1}
+:is(.dw,.dwp) .dw-genius .dw-kind{background:#22a06b!important;color:#fff!important}
+:is(.dw,.dwp) a.dw-tbtn.dw-tgreen{background:#1f9d63!important;color:#fff!important;border-color:transparent!important}
+:is(.dw,.dwp) a.dw-tbtn.dw-tgreen:hover{background:#178452!important}
+:is(.dw,.dwp) .dw-genius .dw-vidline{font-size:13.5px;line-height:1.35}
 /* Nov 23: "Soon" items in Start here (not built yet, not clickable) */
 .hrt-navi.soon{cursor:default;opacity:.62}
 .hrt-navi.soon:hover{background:none!important}
 .hrt-navi .cnt.soon-b{background:rgba(255,255,255,.12);color:#c7d4e2;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase}
 html .hrt-sb .hrt-navi.soon .cnt.soon-b{display:inline-block!important;margin-left:auto;flex:none}
 html.nav-acc .hrt-grpb{max-height:1200px}
+/* PRO wall: same pill buttons as the free wall; deal tiles get the orange button */
+.dwp .dw-tacts{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
+.dwp a.dw-tbtn{display:inline-block;font-size:12px;font-weight:800;border-radius:999px;padding:7px 11px;text-decoration:none;background:#14202e;color:#fff;border:1px solid #14202e}
+.dwp .dw-rail>button .dw-more{display:block;margin:auto 12px 11px;padding:7px 10px;border-radius:999px;background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204!important;font-size:11.5px;font-weight:800;text-align:center;text-decoration:none}

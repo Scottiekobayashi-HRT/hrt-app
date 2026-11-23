@@ -394,7 +394,7 @@
      testimonial (empty kinds are skipped). When one side runs out the other keeps going. */
   /* Nov 16 (Scottie): half the rotating tiles are videos (1 of every 6 tiles); the rest
      take turns: news, transfer bonus, kamaʻaina deal, HRT PRO, testimonial */
-  var EXTRA_CYCLE = ["video", "news", "video", "bonus", "genius", "video", "kama"]; /* Nov 23 (Eddie): Genius tiles join the turns */
+  var EXTRA_CYCLE = ["video", "genius", "news", "video", "bonus", "video", "kama"]; /* Nov 23 (Eddie): Genius tiles join the turns */
   /* Nov 16 (Scottie): videos half, then News, Transfer Deal and Staycation Deal in equal turns */
   function rhythmOrder(points, groups, max) {
     var pts = points.slice(), left = {}, out = [], turn = 0;
@@ -1026,7 +1026,7 @@
     var nav = el("div", "dw-nav"); head.appendChild(nav);
     var fold = el("button", "dwp-fold"); fold.type = "button";
     fold.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
-    head.appendChild(fold);
+    /* Nov 23 (Scottie): no fold arrow on Scottie's Wall; the wall always stays open */
     var sum = el("div", "dwp-sum"); head.appendChild(sum);
     wrap.appendChild(head);
     var body = el("div", "dwp-body");
@@ -1044,8 +1044,7 @@
       fold.title = f ? "Show" : "Hide";
       try { localStorage.setItem(PREF_KEY + "Fold", f ? "1" : "0"); } catch (e) {}
     }
-    var folded = false; try { folded = localStorage.getItem(PREF_KEY + "Fold") === "1"; } catch (e) {}
-    setFold(folded);
+    setFold(false);
     fold.addEventListener("click", function () { setFold(!wrap.classList.contains("folded")); });
     body.appendChild(el("p", "dw-note", full
       ? "From the HRT PRO calendar, refreshed every morning. Availability changes; confirm with the airline before booking."
@@ -1131,9 +1130,9 @@
       /* Nov 12: PRO members get the same Deals, News, Flights mix: their own deals
          plus news, transfer bonuses (open for PRO) and kamaʻaina deals. */
       var dealNodes = Array.prototype.slice.call(rail.children);
-      if (dealNodes.length && (EXTRAS.news.length || EXTRAS.bonuses.length || EXTRAS.kama.length || TESTIMONIALS.length)) {
+      if (dealNodes.length) { /* Nov 23: videos and Genius tiles are always there, so always mix */
         var order = rhythmOrder(dealNodes.map(function (n) { return { kind: "deals", item: n }; }),
-          { bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama, video: videoLines("pro") },
+          { bonus: EXTRAS.bonuses, testimonial: TESTIMONIALS, news: EXTRAS.news, kama: EXTRAS.kama, video: videoLines("pro"), genius: GENIUS.filter(function (g) { return g.route !== "atmos"; }) /* Pro already has the calendar */ },
           dealNodes.length + Math.ceil(dealNodes.length / 2)); /* every deal shows, one other tile after each two */
         rail.innerHTML = "";
         order.forEach(function (t) {
