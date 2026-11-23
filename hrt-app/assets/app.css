@@ -1696,3 +1696,51 @@ html.wall-swap #v-home .dw + .toprow,html.wall-swap #v-home .dwp + .toprow,html.
 html.wall-swap #v-home .lay-band .lay-date{display:none!important} /* Nov 22 (Scottie): no date on the member Wall when Scottie's Wall sits on top */
 @media (max-width:640px){html.wall-swap #v-home .lay-band .lay-lvl{top:22px!important;bottom:auto!important;left:24px!important;right:auto!important}} /* Nov 22: on phones the level bubble takes the date's spot so it no longer covers the Wall title */
 html.wall-swap #v-home .lay-side .lay-cream{display:none!important} /* Nov 22 (Scottie): Text Scottie side card removed in the swap draft */
+
+/* Nov 22 (Scottie): in the swap draft, the member Wall banner matches the Scottie's Wall header (same height, same title font) */
+html.wall-swap #v-home .lay-band{min-height:108px!important;padding:20px 20px 16px 24px!important}
+html.wall-swap #v-home .lay-band .lay-wt{font:700 28px sofia-pro,Montserrat,sans-serif!important;font-size:clamp(22px,2.2vw,28px)!important;line-height:1.1}
+html.wall-swap #v-home .lay-band .lay-lvl{bottom:16px!important}
+
+/* Quick links "pop" drafts (Nov 22): ?ql=1..5, ?ql=0 off. Base for all: lift on hover */
+html[class*="ql-"] .lay-tools .lay-qicons a{transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+html[class*="ql-"] .lay-tools .lay-qicons a:hover{transform:translateY(-2px)}
+html[class*="ql-"] .lay-tools .lay-qh h3{font-size:13px!important}
+/* 1 = navy card with a gold edge, like the Walls */
+html.ql-1 .lay-tools{background:linear-gradient(140deg,#141b24,#1b2430 55%,#1d3350)!important;border:1px solid rgba(242,184,75,.55)!important;box-shadow:inset 0 3px 0 #f2b84b,0 14px 30px rgba(16,32,54,.18)!important}
+html.ql-1 .lay-tools .lay-qh h3{color:#f5c75a!important}
+html.ql-1 .lay-tools .lay-qicons a{background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.1);color:#fff!important}
+html.ql-1 .lay-tools .lay-qicons a:hover{background:rgba(255,255,255,.12)!important;border-color:rgba(242,184,75,.6)}
+html.ql-1 .lay-tools .lay-qi{background:linear-gradient(135deg,#f2b84b,#d97040)!important;color:#14202e!important}
+/* 2 = orange header strip, warm tiles */
+html.ql-2 .lay-tools{padding-top:0!important;overflow:hidden;box-shadow:0 10px 26px rgba(217,112,64,.16)!important;border-color:#f3d2bb!important}
+html.ql-2 .lay-tools .lay-qh{margin:0 -18px 14px;padding:12px 18px;background:linear-gradient(135deg,#f2b84b,#d97040)}
+html.ql-2 .lay-tools .lay-qh h3{color:#14202e!important}
+html.ql-2 .lay-tools .lay-qicons a{background:#fdf3ea!important;border:1px solid #f6dcc8}
+html.ql-2 .lay-tools .lay-qicons a:hover{background:#fbe6d4!important;box-shadow:0 8px 18px rgba(217,112,64,.18)}
+html.ql-2 .lay-tools .lay-qi{background:#fff!important;color:#d97040!important;box-shadow:0 3px 10px rgba(217,112,64,.2)}
+/* 3 = Hawaii photo behind, frosted white tiles */
+html.ql-3 .lay-tools{background:linear-gradient(180deg,rgba(20,32,46,.55),rgba(20,32,46,.85)),url("https://images.squarespace-cdn.com/content/67cfe44f78d8ac79bcf6ec19/6a6fffa2-d2f7-456f-bfcf-c92232c98f1a/524f980d-83f5-4e88-9401-95c8c24e57a9.png?format=1000w") center 45%/cover!important;border:none!important;box-shadow:0 14px 30px rgba(16,32,54,.22)!important}
+html.ql-3 .lay-tools .lay-qh h3{color:#fff!important}
+html.ql-3 .lay-tools .lay-qicons a{background:rgba(255,255,255,.92)!important;color:#14202e!important}
+html.ql-3 .lay-tools .lay-qicons a:hover{background:#fff!important;box-shadow:0 8px 18px rgba(0,0,0,.25)}
+/* 4 = white card, orange border, solid orange icons */
+html.ql-4 .lay-tools{border:2px solid #e8894f!important;box-shadow:0 12px 28px rgba(217,112,64,.18)!important}
+html.ql-4 .lay-tools .lay-qicons a{background:#fff!important;border:1px solid #efe3d8}
+html.ql-4 .lay-tools .lay-qicons a:hover{border-color:#e8894f;box-shadow:0 8px 18px rgba(217,112,64,.18)}
+html.ql-4 .lay-tools .lay-qi{width:56px;height:56px;background:linear-gradient(135deg,#f2b84b,#d97040)!important;color:#fff!important;box-shadow:0 6px 14px rgba(217,112,64,.35)}
+/* 5 = list rows: navy header, one link per line with an arrow */
+html.ql-5 .lay-tools{padding-top:0!important;overflow:hidden;box-shadow:0 10px 26px rgba(16,32,54,.14)!important}
+html.ql-5 .lay-tools .lay-qh{margin:0 -18px 10px;padding:12px 18px;background:#1b2430;box-shadow:inset 0 -3px 0 #d97040}
+html.ql-5 .lay-tools .lay-qh h3{color:#fff!important}
+html.ql-5 .lay-tools .lay-qicons{grid-template-columns:1fr!important;gap:6px}
+html.ql-5 .lay-tools .lay-qicons a{flex-direction:row!important;justify-content:flex-start;gap:12px;padding:10px 12px!important;text-align:left;font-size:14px;background:#fdf6ee!important;position:relative}
+html.ql-5 .lay-tools .lay-qicons a::after{content:"\203A";margin-left:auto;font-size:22px;line-height:1;color:#d97040}
+html.ql-5 .lay-tools .lay-qicons a:hover{background:#fbe6d4!important;transform:translateX(2px)}
+html.ql-5 .lay-tools .lay-qi{width:38px;height:38px;flex:0 0 38px;background:#d97040!important;color:#fff!important}
+html.ql-5 .lay-tools .lay-qi svg{width:20px;height:20px}
+/* Edit button on the dark headers */
+html.ql-1 .lay-tools .lay-qedit,html.ql-3 .lay-tools .lay-qedit,html.ql-5 .lay-tools .lay-qedit{color:#dbe6f0;border-color:rgba(255,255,255,.4)}
+html.ql-2 .lay-tools .lay-qedit{color:#14202e;border-color:rgba(20,32,46,.4)}
+html.ql-1 .lay-tools .lay-qtip,html.ql-3 .lay-tools .lay-qtip{color:#dbe6f0!important}
+html.wall-swap #v-home .toprow .hero{min-height:0!important;justify-content:flex-start!important}

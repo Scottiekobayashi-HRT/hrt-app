@@ -284,3 +284,8 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
 })();
+
+/* Quick links "pop" drafts (Nov 22, Scottie): ?ql=1..5, ?ql=0 off. Stays on for the browser tab. */
+(function () {
+  try { var m = /[?&]ql=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtQl", m[1]); var q = m ? m[1] : sessionStorage.getItem("hrtQl"); if (q && q !== "0") document.documentElement.classList.add("ql-" + q); } catch (e) {}
+})();
