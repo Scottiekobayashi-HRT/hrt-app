@@ -1693,3 +1693,4 @@ html.swh-1 .dw-navy>.dw-head h2,html.swh-1 .dwp>.dw-head h2{font-size:clamp(22px
 /* Nov 22 wall swap draft (?swap=1): Scottie's Wall on top, member Wall under it */
 html.wall-swap #v-home .dw,html.wall-swap #v-home .dwp{margin-top:0}
 html.wall-swap #v-home .dw + .toprow,html.wall-swap #v-home .dwp + .toprow,html.wall-swap #v-home .dwp + .dw + .toprow{margin-top:22px}
+html.wall-swap #v-home .lay-band .lay-date{display:none!important} /* Nov 22 (Scottie): no date on the member Wall when Scottie's Wall sits on top */
