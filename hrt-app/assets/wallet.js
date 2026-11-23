@@ -1870,6 +1870,59 @@
       "</dl></section>";
   }
 
+  /* My Wallet overview draft (Nov 22, Scottie, ?swap=1): the Overview looks like the member's Wall,
+     on the islands photo, called My Wallet for everyone. One clear line each for Next action, Next card,
+     Cards, Credits and Save on annual fees. Cards and Credits link to their own pages. */
+  function swapOn() { var c = document.documentElement && document.documentElement.classList; return !!(c && c.contains("wall-swap")); }
+  function boxParts(html) {
+    var d = document.createElement("div"); d.innerHTML = html;
+    var l = d.querySelector(".hw-l"), v = d.querySelector(".hw-v"), sb = d.querySelector(".hw-s");
+    var a = sb && sb.querySelector("a.hw-nx-go"); if (sb) sb.querySelectorAll(".hw-upd").forEach(function (b) { b.remove(); });
+    var sub = sb ? String(sb.textContent || "").replace(a ? a.textContent : "", "").replace(/\s+/g, " ").trim() : "";
+    var val = v ? String(v.innerText || v.textContent || "").split(/\n+/).map(function (x) { return x.replace(/\s+/g, " ").trim(); }).filter(Boolean) : [];
+    if (v && v.classList.contains("hw-nx-rows")) val = Array.prototype.map.call(v.children, function (x) { return String(x.textContent || "").replace(/\s+/g, " ").trim(); });
+    return { label: l ? String(l.textContent || "").trim() : "", value: val, sub: sub, link: a ? { href: a.getAttribute("href"), route: a.getAttribute("data-route"), target: a.target, text: String(a.textContent || "").replace(/[›>]\s*$/, "").trim() } : null };
+  }
+  function ovRow(n, ic, p, pill) {
+    var btn = pill ? '<a class="wl-ov-pill" href="' + esc(pill.href) + '"' + (pill.route ? ' data-route="' + esc(pill.route) + '"' : "") + (pill.target ? ' target="_blank" rel="noopener sponsored"' : "") + ">" + esc(pill.text) + " &rsaquo;</a>" : "";
+    return '<div class="wl-ov-tile wl-ov-t' + n + '"><small>' + esc(p.label) + "</small><b>" +
+      p.value.map(esc).join("<br>") + "</b>" + (p.sub ? "<em>" + esc(p.sub) + "</em>" : "") + btn + "</div>";
+  }
+  function ovHtml(s, perks) {
+    var V = view(), m = member(), cl = m.client, lv = level(), nx = s.next;
+    var due = expiringSoon(perks, SOON_PERK_DAYS).reduce(function (t, r) { return t + (r.perk.unit === "usd" ? r.left : 0); }, 0);
+    var I = function (d) { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + "</svg>"; };
+    var ICON = {
+      act: I('<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>'),
+      next: I('<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2"/>'),
+      cards: I('<path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="16" cy="13.5" r="1.3"/>'),
+      cr: I('<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.6-1-1.7-1.5-3-1.5-1.7 0-3 .9-3 2.2 0 3 6 1.6 6 4.6 0 1.3-1.3 2.2-3 2.2-1.3 0-2.5-.6-3-1.6M12 6v2M12 16v2"/>'),
+      fee: I('<path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>')
+    };
+    var act = boxParts(nextActionBox(V, cl, s, firstOf()));
+    var nc = boxParts(nextCardBox(V, cl));
+    var fee = boxParts(feeBox(cl, nx));
+    var cards = { label: "Cards", value: [s.count + (s.count === 1 ? " card" : " cards") + " in your wallet"], sub: s.yearly ? money(s.yearly) + " a year in annual fees" : "", link: null };
+    var cr = { label: "Credits", value: [due ? money(due) + " to use" : TICKS ? "All used" : "Nothing due"], sub: "in the next " + SOON_PERK_DAYS + " days", link: null };
+    var lvT = lv === "pro" ? "Pro Level member" : lv === "ohana" ? "Ohana Level member" : "Aloha Level member";
+    var badge = lv === "pro" ? '<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>' : lv === "ohana" ? '<span class="wl-ov-star">' + OH_STAR + "</span>" : "";
+    var o = m.ohana || {};
+    var band = '<div class="wl-ov-band">' + exampleBanner() +
+      '<div class="wl-ov-top">' + (cl ? '<span class="wl-ov-eye">Managed by Scottie</span>' : "<span></span>") +
+      '<button class="wl-btn wl-gold" data-wl="add">+ Add a card</button></div>' +
+      '<div class="wl-ov-bot"><h2 class="wl-ov-title">My Wallet</h2><span class="wl-ov-lvl lvl-' + (lv === "subscriber" ? "aloha" : lv) + '">' + badge + "<span>" + lvT + "</span></span></div></div>";
+    var pts = (V.points || []).reduce(function (t, x) { return t + (+x.balance || 0); }, 0), np = (V.points || []).length;
+    var ptsP = { label: "Points & Miles", value: [pts ? pts.toLocaleString("en-US") + " points" : "Add your balances"], sub: np ? "across " + np + (np === 1 ? " program" : " programs") : "Chase, Amex, Atmos and more", link: null };
+    var rows = '<div class="wl-ov-grid">' +
+      ovRow(1, ICON.act, act, act.link) + ovRow(2, ICON.next, nc, nc.link) + ovRow(5, ICON.fee, fee, fee.link) +
+      ovRow(3, ICON.cards, cards, { href: "#wallet/cards", route: "wallet/cards", text: "See cards" }) +
+      ovRow(4, ICON.cr, cr, { href: "#wallet/credits", route: "wallet/credits", text: "See credits" }) +
+      ovRow(6, "", ptsP, { href: "#wallet/points", route: "wallet/points", text: "See points" }) + "</div>";
+    var foot = cl && (o.strategy || o.review) ? '<div class="wl-ov-foot">' + (o.strategy ? "<span><b>Your strategy:</b> " + esc(o.strategy) + "</span>" : "") +
+      (o.review ? "<span>Last review " + esc(ohanaDate(o.review)) + "</span>" : "") + "</div>" : "";
+    return '<section class="wl-ov" aria-label="My Wallet">' + band + rows + foot + "</section>" + famHtml() + hrtLine(V);
+  }
+
   function nudgeHtml() {
     if (state.demo || state.review) return "";
     var miss = missingDates(view());
@@ -2446,7 +2499,7 @@
     } else {
       var tab = s.count ? (state.tab || "overview") : "overview";
       html = s.count ? tabsHtml(s, perks) : "";
-      html += tab === "overview" ? (s.count ? slimHeadHtml(s, perks) : summaryHtml("page")) + helpHtml("page") : "";
+      html += tab === "overview" ? (s.count ? (swapOn() ? ovHtml(s, perks) : slimHeadHtml(s, perks)) : summaryHtml("page")) + helpHtml("page") : "";
       if (state.msg) html += '<p class="wl-banner" role="alert">' + esc(state.msg) + "</p>";
       if (state.review) html += reviewHtml();
       else if (tab === "cards") html += cardsPageHtml(s, perks);
