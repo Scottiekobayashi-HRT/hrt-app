@@ -328,3 +328,19 @@
 (function () {
   try { var m = /[?&]atx=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtAtx", m[1]); var q = m ? m[1] : sessionStorage.getItem("hrtAtx"); if (q == null) q = "3"; /* Nov 23: Scottie picked draft 3 (list view) as the default */ if (q && q !== "0") document.documentElement.classList.add("atx-" + q); } catch (e) {}
 })();
+
+/* Title font drafts (Nov 23, Scottie): Sofia Pro is not loaded, so titles fall back to Montserrat.
+   ?tf=1 Outfit, 2 Urbanist, 3 Plus Jakarta Sans, 4 Lexend (free fonts close to Sofia Pro); ?tf=0 off.
+   Each one is loaded under the name 'sofia-pro', so every title already set to Sofia Pro switches. */
+(function () {
+  var F = { "1": "outfit", "2": "urbanist", "3": "plus-jakarta-sans", "4": "lexend" };
+  var q;
+  try { var m = /[?&]tf=(\d)/.exec(location.search); if (m) sessionStorage.setItem("hrtTf", m[1]); q = m ? m[1] : sessionStorage.getItem("hrtTf"); } catch (e) { return; }
+  var f = F[q]; if (!f) return;
+  var base = "https://cdn.jsdelivr.net/npm/@fontsource/" + f + "@5/files/" + f + "-latin-";
+  var css = [600, 700, 800].map(function (w) {
+    return "@font-face{font-family:'sofia-pro';font-style:normal;font-weight:" + w + ";font-display:swap;src:url(" + base + w + "-normal.woff2) format('woff2')}";
+  }).join("");
+  var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+  document.documentElement.classList.add("tf-" + q);
+})();
