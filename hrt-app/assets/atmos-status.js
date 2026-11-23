@@ -213,8 +213,8 @@
     h.appendChild(el("p", "qz-sub", "About " + fmt(r.best.total) + " status points a year"));
     var dflt = r.methods[0];
     h.appendChild(el("p", "qz-line", r.best.key === "distance"
-      ? "Good news: distance is what you get if you do nothing, so there is nothing to change."
-      : "If you do nothing you stay on distance, which would cost you about " + fmt(r.best.total - dflt.total) + " status points a year."));
+      ? "Good news: if you joined before 2027, distance is what you already have, so there is nothing to change."
+      : "If you joined before 2027 and do nothing, you stay on distance, which would cost you about " + fmt(r.best.total - dflt.total) + " status points a year."));
     var reached = tierFor(r.best.total), nxt = nextTier(r.best.total);
     var why = [OPTIONS[r.best.key].rate + ". " + OPTIONS[r.best.key].bestFor];
     why.push(reached ? "That is enough for Atmos " + reached.name + (nxt ? ", and " + fmt(nxt.pts - r.best.total) + " short of " + nxt.name + "." : ", the top tier.")
@@ -441,7 +441,7 @@
     ["Can I change my mind later?",
      "Once per calendar year, for future travel. That is why it is worth getting right the first time."],
     ["What happens if I do nothing?",
-     "You keep earning by distance traveled. For a lot of Hawaii residents who fly short hops, that is the worst of the three."],
+     "If you joined before 2027, you keep earning by distance traveled. New members who join from Jan 1 2027 start on price paid. For a lot of Hawaii residents who fly short hops, distance is the worst of the three."],
     ["Do award flights earn status points?",
      "Yes, on all three choices, and only status points. By distance you earn on the miles flown. By segments you earn the full 500 per segment. By price you earn 1 status point for every 20 points you redeem."],
     ["Does credit card spend really count?",
@@ -470,7 +470,7 @@
     var ul = el("ul", "ap-list");
     if (r.cardPts > 0) ul.appendChild(el("li", null, "Your card adds " + fmt(r.cardPts) + " points, and that part is the same whichever option you pick."));
     if (r.bonus > 0) ul.appendChild(el("li", null, "Your current status adds " + Math.round(r.bonus * 100) + "% bonus points you can spend on flights. Those do not count toward status, so they are not in the numbers above."));
-    ul.appendChild(el("li", null, "You can change your choice once per calendar year. Members who do nothing stay on distance."));
+    ul.appendChild(el("li", null, "You can change your choice once per calendar year. Members who joined before 2027 and do nothing stay on distance. New members from Jan 1 2027 start on price."));
     wrap.appendChild(ul);
     var fine = el("ul", "ap-list");
     fine.appendChild(el("li", null, "Saver and Basic Economy fares earn no points and no status points on any of the three choices."));

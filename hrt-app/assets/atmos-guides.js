@@ -125,7 +125,7 @@
     head.appendChild(el("h2", "ag-h", "What is Choose to Earn?"));
     head.appendChild(el("p", "ag-lead", "Every flight on Alaska, Hawaiian and their partners earns two kinds of points: points you spend on award flights, and status points that decide your elite tier (Silver starts at 20,000). From Jan 1 2027, Atmos Rewards lets you choose how both are counted, in one of three ways."));
     var facts = el("ul", "ag-facts");
-    ["Pick one in your Atmos Rewards account", "Change it once a year", "Do nothing and you stay on distance"].forEach(function (f) { facts.appendChild(el("li", null, f)); });
+    ["Pick one in your Atmos Rewards account", "Change it once a year", "Joined before 2027? Do nothing and you stay on distance"].forEach(function (f) { facts.appendChild(el("li", null, f)); });
     head.appendChild(facts);
     head.appendChild(extLink("Read Choose how you earn on Atmos Rewards", LINKS.choose, "on-dark"));
     sec.appendChild(head);
