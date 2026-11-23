@@ -1862,3 +1862,7 @@ html.atx-3 #v-status .ag-waytop .ag-art svg{max-height:90px}
 html.atx-3 :is(#v-status,#v-communities) :is(.ag-tband,.ag-waytop)::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,32,46,0) 30%,rgba(20,32,46,.5) 100%);z-index:0}
 html.atx-3 :is(#v-status,#v-communities) .ag-step:before{background:#d97040}
 @media (max-width:900px){html.atx-3 #v-communities .ag-tile{grid-template-columns:1fr}html.atx-3 #v-communities .ag-tband{min-height:140px!important}html.atx-3 #v-communities .ag-tbody{grid-template-columns:1fr;grid-template-areas:"big" "line" "more" "link"}}
+/* Nov 23 (Scottie): the member Wall's gear sits on the same line as the level badge, at the bottom right */
+#v-home .lay-band .lay-pick{top:auto!important;bottom:11px!important;right:12px!important}
+#v-home .lay-band .lay-lvl{right:54px!important}
+@media (max-width:640px){html.wall-swap #v-home .lay-band .lay-lvl{right:auto!important}}
