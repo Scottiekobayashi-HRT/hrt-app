@@ -454,8 +454,8 @@
     t.appendChild(body);
     var acts = el("div", "dw-tacts");
     var read = el("a", "dw-tbtn", "Read it"); read.href = a.url; read.target = "_blank"; read.rel = "noopener";
-    var all = el("a", "dw-tbtn ghost", "All news"); all.href = NEWS_ALL; all.target = "_blank"; all.rel = "noopener";
-    acts.appendChild(read); acts.appendChild(all); t.appendChild(acts);
+    /* Nov 23 (Scottie): no "All news" button on news tiles */
+    acts.appendChild(read); t.appendChild(acts);
     return t;
   }
   function kamaTile(k) {
