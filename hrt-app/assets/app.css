@@ -1904,3 +1904,26 @@ html.nav-acc .hrt-grpb{max-height:1200px}
 .dwp .dw-tacts{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
 .dwp a.dw-tbtn{display:inline-block;font-size:12px;font-weight:800;border-radius:999px;padding:7px 11px;text-decoration:none;background:#14202e;color:#fff;border:1px solid #14202e}
 .dwp .dw-rail>button .dw-more{display:block;margin:auto 12px 11px;padding:7px 10px;border-radius:999px;background:linear-gradient(135deg,#f5c75a,#d97040);color:#1a1204!important;font-size:11.5px;font-weight:800;text-align:center;text-decoration:none}
+
+/* ===== Nov 23 (Scottie): dark mode fixes ===== */
+/* member Wall: the tiles sat on a cream card, so white text disappeared. Give the Wall a navy base in dark mode */
+html[data-theme=dark] #v-home .toprow .hero.has-wallet{background:#14202e!important;border-color:rgba(255,255,255,.12)!important}
+html[data-theme=dark] #v-home .hw-boxes>.hw-box{background:#1d2c40!important;border:1px solid rgba(255,255,255,.1)}
+/* Quick links (orange header): tile names were white on peach */
+html[data-theme=dark].ql-2 .lay-tools{background:#14202e!important;border-color:rgba(232,137,79,.45)!important}
+html[data-theme=dark].ql-2 .lay-tools .lay-qicons a{background:#1d2c40!important;border-color:rgba(255,255,255,.1)!important;color:#e9eff6!important}
+html[data-theme=dark].ql-2 .lay-tools .lay-qi{background:#14202e!important}
+/* deal tiles: the "dates open" chip was too faint */
+html[data-theme=dark] .dw-chip.ok{color:#6ee7a0!important;background:rgba(74,222,128,.12)!important;border-color:rgba(74,222,128,.35)!important}
+/* top bar stays dark in dark mode */
+html[data-theme=dark] .topbar{background:#111a26!important;border-color:rgba(255,255,255,.08)!important}
+html[data-theme=dark] .topbar .tb-title,html[data-theme=dark] .topbar h1{color:#fff!important}
+/* a little space before "Update Scottie" */
+.hw-s .hw-upd{margin-left:6px}
+html[data-theme=dark] .topbar .pop-greet b{color:#fff!important}
+/* the member Wall tiles in the new layout are .lay-row */
+html[data-theme=dark] #v-home .lay-row{background:#1d2c40!important;border-color:rgba(255,255,255,.1)!important;box-shadow:none!important}
+html[data-theme=dark] #v-home .lay-row .lay-rt small{color:#9fb4c8!important}
+html[data-theme=dark] #v-home .lay-row .lay-rt b{color:#fff!important}
+html[data-theme=dark] #v-home .lay-row .lay-rt em{color:#c9d6e3!important}
+.lay-rt .hw-upd,.lay-rt em button,.lay-rt em a{margin-left:8px}
