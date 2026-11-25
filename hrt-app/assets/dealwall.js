@@ -1153,7 +1153,7 @@
       subEl.textContent = tracking ? "Tracking " + n + (n === 1 ? " route" : " routes") : "Top deals today";
       sum.textContent = tracking
         ? prefs.routes.map(function (r) { return r.o + "→" + r.d + " " + r.cabins.map(function (c) { return CAB_NAME[c]; }).join("/") + (r.nonstop ? ", nonstop" : ""); }).join(" · ")
-        : "Showing today's best economy deals. Tap Customize to track your own routes.";
+        : "Showing today's best deals. Tap Customize to track your own routes.";
       if (rail.scrollLeft) rail.scrollLeft = 0;
     }
 
