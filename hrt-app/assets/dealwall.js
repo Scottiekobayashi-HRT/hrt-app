@@ -679,7 +679,7 @@
 
       var body = el("div", "dw-body");
       var pts = el("div", "dw-pts", num(d.miles) + " pts");
-      pts.appendChild(el("small", null, "one way, " + (d.nonstop ? "nonstop" : "1-stop"))); /* Nov 16 (Scottie): stops on this line. Nov 24: no "economy" */
+      pts.appendChild(el("small", null, "one way, economy, " + (d.nonstop ? "nonstop" : "1-stop"))); /* Nov 16 (Scottie): stops on this line */
       body.appendChild(pts);
 
       var meta = el("div", "dw-meta");
@@ -1057,7 +1057,7 @@
     function fillExp(d) {
       exp.innerHTML = ""; exp.classList.add("on");
       var h = el("div", "dw-exph"), ht = el("div");
-      ht.appendChild(el("b", null, d.origin + " → " + d.city + (d.cabin === "economy" ? "" : ", " + (CAB_NAME[d.cabin] || d.cabin))));
+      ht.appendChild(el("b", null, d.origin + " → " + d.city + ", " + (CAB_NAME[d.cabin] || d.cabin)));
       ht.appendChild(el("span", null, d.count + (d.count === 1 ? " deal date" : " deal dates") + (d.nonstopOnly ? " (nonstop only)" : "") + ", from " + num(d.miles) + " points one way"));
       h.appendChild(ht);
       var x = el("button", "dw-x", "×"); x.type = "button"; x.setAttribute("aria-label", "Close"); x.addEventListener("click", closeExp);
@@ -1105,7 +1105,7 @@
         var ph = el("div", "dw-ph");
         if (d.image) ph.style.backgroundImage = "url('" + String(d.image).replace(/'/g, "%27") + "')";
         ph.appendChild(el("span", "dw-rt", d.origin + " → " + d.dest));
-        if (d.cabin !== "economy") ph.appendChild(el("span", "dwp-cab " + d.cabin, CAB_NAME[d.cabin] || d.cabin)); /* Nov 24 (Scottie): no "Economy" label; Business and First keep theirs */
+        ph.appendChild(el("span", "dwp-cab " + d.cabin, CAB_NAME[d.cabin] || d.cabin));
         ph.appendChild(el("span", "dw-city", d.city));
         card.appendChild(ph);
         var body = el("div", "dw-body");
